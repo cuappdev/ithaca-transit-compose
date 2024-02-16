@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
@@ -56,9 +57,7 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = viewModel()
 ) {
 
-    /**
-     * Permissions dialog
-     */
+    // Permissions dialog
     val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
     val openDialog = remember { mutableStateOf(true) }
 
@@ -96,18 +95,12 @@ fun HomeScreen(
     }
 
 
-    /**
-     * Google Maps and Search
-     */
-
-    //Map state
-    val defaultIthaca = LatLng(42.44, -76.50)
+    //Map camera
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(defaultIthaca, 12f)
+        position = CameraPosition.fromLatLngZoom(homeViewModel.defaultIthaca, 12f)
     }
 
-    // Search state
-    var query by remember { mutableStateOf("") }
+    // Search bar active/inactive
     var searchActive by remember { mutableStateOf(false) }
 
     Box(
@@ -119,18 +112,22 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
             properties = MapProperties(isMyLocationEnabled = permissionState.status.isGranted),
-            onMapClick = { searchActive = false},
-            onMapLongClick = { searchActive = false}
-            ) {
+            onMapClick = { searchActive = false },
+            onMapLongClick = { searchActive = false }
+        ) {
 
         }
 
-        Column(modifier = Modifier.padding(top = 60.dp).fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier
+                .padding(top = 60.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             SearchBar(
-                query = query,
-                onQueryChange = { s -> query = s },
-                onSearch = { it -> searchActive = false },
+                query = homeViewModel.searchQuery.value,
+                onQueryChange = { s -> homeViewModel.onQueryChange(s) },
+                onSearch = { it -> searchActive = false; homeViewModel.onSearch(it) },
                 active = searchActive,
                 onActiveChange = { b -> searchActive = b },
                 shape = RoundedCornerShape(8.dp),
@@ -144,7 +141,11 @@ fun HomeScreen(
 
             ) {
                 LazyColumn() {
-                    //TODO
+                    items(homeViewModel.placeData) {
+                        if (!homeViewModel.searchQuery.value.isBlank() && it.contains(homeViewModel.searchQuery.value)) {
+                            Text(text = it)
+                        }
+                    }
                 }
             }
         }
