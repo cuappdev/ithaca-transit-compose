@@ -1,5 +1,8 @@
 package com.cornellappdev.transit.models
 
-class Route {
-    //TODO
-}
+/**
+ * Data class representing routes on the map
+ */
+data class Route (
+    val name: String
+)

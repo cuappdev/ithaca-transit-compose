@@ -10,6 +10,9 @@ import com.cornellappdev.transit.models.RouteRepository
 import com.google.android.gms.maps.model.LatLng
 
 
+/**
+ * ViewModel handling home screen UI state and search functionality
+ */
 class HomeViewModel(
 ) : ViewModel() {
 
