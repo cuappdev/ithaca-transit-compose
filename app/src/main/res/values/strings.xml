@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">transit</string>
+    <string name="permission_dialog_text">Ithaca Transit requires location permissions to provide the best experience.</string>
+    <string name="search_placeholder">Where to?</string>
 </resources>
