@@ -29,6 +29,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -51,6 +53,7 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.accompanist.permissions.rememberPermissionState
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.MenuItem
 
 
@@ -60,7 +63,7 @@ import com.cornellappdev.transit.ui.components.MenuItem
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    homeViewModel: HomeViewModel = viewModel()
+    homeViewModel: HomeViewModel = hiltViewModel()
 ) {
 
     // Permissions dialog
@@ -101,6 +104,10 @@ fun HomeScreen(
     }
 
 
+    // Collect flow of rides through API
+    val stopsApiResponse = homeViewModel.stopFlow.collectAsState().value
+
+
     //Map camera
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(homeViewModel.defaultIthaca, 12f)
@@ -121,6 +128,30 @@ fun HomeScreen(
             onMapClick = { searchActive = false },
             onMapLongClick = { searchActive = false }
         ) {
+            //TODO: Not actually any sort of functionality, just demonstrate connection to backend
+            when (stopsApiResponse) {
+                is ApiResponse.Error -> {
+                }
+
+                is ApiResponse.Pending -> {
+
+                }
+
+                is ApiResponse.Success -> {
+                    stopsApiResponse.data.stops.forEach { stop ->
+                        Marker(
+                            state = MarkerState(
+                                position = LatLng(
+                                    stop.latitude,
+                                    stop.longitude
+                                )
+                            ),
+                            title = stop.name
+                        )
+
+                    }
+                }
+            }
 
         }
 
@@ -151,7 +182,7 @@ fun HomeScreen(
                         if (!homeViewModel.searchQuery.value.isBlank() && it.lowercase()
                                 .contains(homeViewModel.searchQuery.value.lowercase())
                         ) {
-                            MenuItem(label=it, sublabel=it)
+                            MenuItem(label = it, sublabel = it)
                         }
                     }
                 }

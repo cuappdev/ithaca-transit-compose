@@ -19,7 +19,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    @Singleton
     @Provides
     fun provideHttpClient(): OkHttpClient {
         val logging = HttpLoggingInterceptor { message ->
@@ -38,13 +37,11 @@ object NetworkModule {
             .build()
     }
 
-    @Singleton
     @Provides
     fun provideMoshi(): Moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
         .build()
 
-    @Singleton
     @Provides
     fun provideRetrofit(
         okHttpClient: OkHttpClient,
@@ -55,7 +52,6 @@ object NetworkModule {
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
 
-    @Singleton
     @Provides
     fun provideNetworkApi(retrofit: Retrofit): NetworkApi =
         retrofit.create(NetworkApi::class.java)
