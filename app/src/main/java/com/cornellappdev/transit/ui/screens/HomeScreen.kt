@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
@@ -50,6 +51,7 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.accompanist.permissions.rememberPermissionState
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cornellappdev.transit.ui.components.MenuItem
 
 
 /**
@@ -124,17 +126,17 @@ fun HomeScreen(
 
         Column(
             modifier = Modifier
-                .padding(top = 60.dp)
+                .padding(top = 80.dp)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            SearchBar(
+            DockedSearchBar(
                 query = homeViewModel.searchQuery.value,
                 onQueryChange = { s -> homeViewModel.onQueryChange(s) },
                 onSearch = { it -> searchActive = false; homeViewModel.onSearch(it) },
                 active = searchActive,
                 onActiveChange = { b -> searchActive = b },
-                shape = RoundedCornerShape(8.dp),
+                shape = SearchBarDefaults.dockedShape,
                 colors = SearchBarDefaults.colors(
                     containerColor = Color.White,
                     dividerColor = Color.Gray,
@@ -146,8 +148,10 @@ fun HomeScreen(
             ) {
                 LazyColumn() {
                     items(homeViewModel.placeData) {
-                        if (!homeViewModel.searchQuery.value.isBlank() && it.contains(homeViewModel.searchQuery.value)) {
-                            Text(text = it)
+                        if (!homeViewModel.searchQuery.value.isBlank() && it.lowercase()
+                                .contains(homeViewModel.searchQuery.value.lowercase())
+                        ) {
+                            MenuItem(label=it, sublabel=it)
                         }
                     }
                 }
