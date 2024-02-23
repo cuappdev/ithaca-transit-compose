@@ -15,11 +15,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
@@ -28,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -50,6 +54,8 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.accompanist.permissions.rememberPermissionState
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.components.MenuItem
 
 
 /**
@@ -58,7 +64,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    homeViewModel: HomeViewModel = viewModel()
+    homeViewModel: HomeViewModel = hiltViewModel()
 ) {
 
     // Permissions dialog
@@ -99,6 +105,10 @@ fun HomeScreen(
     }
 
 
+    // Collect flow of rides through API
+    val stopsApiResponse = homeViewModel.stopFlow.collectAsState().value
+
+
     //Map camera
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(homeViewModel.defaultIthaca, 12f)
@@ -119,22 +129,46 @@ fun HomeScreen(
             onMapClick = { searchActive = false },
             onMapLongClick = { searchActive = false }
         ) {
+            //TODO: Not actually any sort of functionality, just demonstrate connection to backend
+            when (stopsApiResponse) {
+                is ApiResponse.Error -> {
+                }
+
+                is ApiResponse.Pending -> {
+
+                }
+
+                is ApiResponse.Success -> {
+                    stopsApiResponse.data.stops.forEach { stop ->
+                        Marker(
+                            state = MarkerState(
+                                position = LatLng(
+                                    stop.latitude,
+                                    stop.longitude
+                                )
+                            ),
+                            title = stop.name
+                        )
+
+                    }
+                }
+            }
 
         }
 
         Column(
             modifier = Modifier
-                .padding(top = 60.dp)
+                .padding(top = 80.dp)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            SearchBar(
+            DockedSearchBar(
                 query = homeViewModel.searchQuery.value,
                 onQueryChange = { s -> homeViewModel.onQueryChange(s) },
                 onSearch = { it -> searchActive = false; homeViewModel.onSearch(it) },
                 active = searchActive,
                 onActiveChange = { b -> searchActive = b },
-                shape = RoundedCornerShape(8.dp),
+                shape = SearchBarDefaults.dockedShape,
                 colors = SearchBarDefaults.colors(
                     containerColor = Color.White,
                     dividerColor = Color.Gray,
@@ -146,8 +180,10 @@ fun HomeScreen(
             ) {
                 LazyColumn() {
                     items(homeViewModel.placeData) {
-                        if (!homeViewModel.searchQuery.value.isBlank() && it.contains(homeViewModel.searchQuery.value)) {
-                            Text(text = it)
+                        if (!homeViewModel.searchQuery.value.isBlank() && it.lowercase()
+                                .contains(homeViewModel.searchQuery.value.lowercase())
+                        ) {
+                            MenuItem(Icons.Filled.Place, label = it, sublabel = it)
                         }
                     }
                 }
