@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
@@ -182,7 +183,7 @@ fun HomeScreen(
                         if (!homeViewModel.searchQuery.value.isBlank() && it.lowercase()
                                 .contains(homeViewModel.searchQuery.value.lowercase())
                         ) {
-                            MenuItem(label = it, sublabel = it)
+                            MenuItem(Icons.Filled.Place, label = it, sublabel = it)
                         }
                     }
                 }
