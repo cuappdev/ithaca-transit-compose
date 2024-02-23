@@ -42,5 +42,5 @@ fun MenuItem(icon: ImageVector, label: String, sublabel: String) {
 @Preview
 @Composable
 fun PreviewMenuItem() {
-    MenuItem(Icons.Filled.Place,"Ithaca Commons", "Ithaca, NY")
+    MenuItem(Icons.Filled.Place, "Ithaca Commons", "Ithaca, NY")
 }
