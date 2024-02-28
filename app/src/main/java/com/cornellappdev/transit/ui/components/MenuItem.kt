@@ -16,6 +16,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cornellappdev.transit.ui.theme.primaryText
+import com.cornellappdev.transit.ui.theme.secondaryText
+import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
+import com.cornellappdev.transit.ui.theme.transitBlue
 
 /**
  * Card for each entry in the search bar
@@ -24,16 +28,17 @@ import androidx.compose.ui.unit.sp
  * @param sublabel The sublabel for the item
  */
 @Composable
-fun MenuItem(icon: ImageVector, label: String, sublabel: String) {
+fun MenuItem(icon: ImageVector, label: String, sublabel: String, onClick: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Icon(
             icon,
             contentDescription = "Place",
-            modifier = Modifier.padding(horizontal = 10.dp)
+            modifier = Modifier.padding(horizontal = 10.dp),
+            tint = transitBlue
         )
         Column() {
-            Text(text = label, fontSize = 24.sp)
-            Text(text = sublabel, fontSize = 16.sp)
+            Text(text = label, fontSize = 24.sp, color = primaryText, fontFamily = sfProDisplayFamily)
+            Text(text = sublabel, fontSize = 16.sp, color = secondaryText, fontFamily = sfProDisplayFamily)
         }
     }
 }
@@ -42,5 +47,5 @@ fun MenuItem(icon: ImageVector, label: String, sublabel: String) {
 @Preview
 @Composable
 fun PreviewMenuItem() {
-    MenuItem(Icons.Filled.Place, "Ithaca Commons", "Ithaca, NY")
+    MenuItem(Icons.Filled.Place, "Ithaca Commons", "Ithaca, NY", {})
 }

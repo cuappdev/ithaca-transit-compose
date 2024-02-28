@@ -183,7 +183,7 @@ fun HomeScreen(
                         if (!homeViewModel.searchQuery.value.isBlank() && it.lowercase()
                                 .contains(homeViewModel.searchQuery.value.lowercase())
                         ) {
-                            MenuItem(Icons.Filled.Place, label = it, sublabel = it)
+                            MenuItem(Icons.Filled.Place, label = it, sublabel = it, {})
                         }
                     }
                 }
