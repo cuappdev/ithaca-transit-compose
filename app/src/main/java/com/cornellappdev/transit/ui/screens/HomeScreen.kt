@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,14 +13,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +33,7 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,7 +44,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
@@ -55,8 +63,9 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.accompanist.permissions.rememberPermissionState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.components.LocationItem
 import com.cornellappdev.transit.ui.components.MenuItem
-
+import com.cornellappdev.transit.ui.theme.TransitBlue
 
 /**
  * Composable for the home screen
@@ -107,6 +116,7 @@ fun HomeScreen(
 
     // Collect flow of rides through API
     val stopsApiResponse = homeViewModel.stopFlow.collectAsState().value
+    val placesResponse = homeViewModel.placeData.collectAsState().value
 
 
     //Map camera
@@ -178,8 +188,8 @@ fun HomeScreen(
                 placeholder = { Text(text = stringResource(R.string.search_placeholder)) }
 
             ) {
-                LazyColumn() {
-                    items(homeViewModel.placeData) {
+                LazyColumn {
+                    items(placesResponse) {
                         if (!homeViewModel.searchQuery.value.isBlank() && it.lowercase()
                                 .contains(homeViewModel.searchQuery.value.lowercase())
                         ) {
@@ -191,4 +201,62 @@ fun HomeScreen(
         }
     }
 
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    var editState by remember {
+        mutableStateOf(false)
+    }
+    var txt by remember {
+        mutableStateOf("Edit")
+    }
+    val data = placesResponse.toMutableList()
+
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetSwipeEnabled = true,
+        sheetContent = {
+
+            Column (modifier = Modifier.padding(bottom = 5.dp)){
+                Row (modifier = Modifier
+                    .padding(start = 12.dp, end = 12.dp, top = 2.5.dp, bottom = 0.dp)
+                    .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically){
+                    Text(
+                        text = "Favorites",
+                        fontWeight = FontWeight.Bold,
+                        fontSize =  24.sp
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = txt,
+                        modifier = Modifier.clickable {
+                            editState = editState==false
+                            if(editState){
+                                txt = "Done"
+                            }else{
+                                txt = "Edit"
+                            } },
+                        color = TransitBlue,
+                        textAlign = TextAlign.Right,
+                        fontSize =  16.sp,
+                    )
+                }
+
+                LazyRow(){
+                    items(data){
+                        if (it ==""){
+                            Log.e("LOG???", it)
+                            LocationItem(icon = Icons.Filled.Add, label = it, sublabel = it, visible = editState)
+                        }else{
+                            LocationItem(icon = Icons.Filled.Place, label = it, sublabel = it, visible = editState)
+                        }
+
+                    }
+                    item{
+                        LocationItem(icon = Icons.Filled.Add, label = "", sublabel = "", visible = editState)
+                    }
+                }
+            }
+        }
+    ) {
+    }
 }
