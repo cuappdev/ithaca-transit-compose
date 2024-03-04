@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.RouteRepository
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -27,7 +28,12 @@ class HomeViewModel @Inject constructor(
 
     val stopFlow = routeRepository.stopFlow
 
-    //Default map location
+    val lastRouteFlow = routeRepository.lastRouteFlow
+
+
+    /**
+     * Default map location
+     */
     val defaultIthaca = LatLng(42.44, -76.50)
 
     /**
@@ -55,6 +61,29 @@ class HomeViewModel @Inject constructor(
     fun getAllStops() {
         viewModelScope.launch {
             routeRepository.getAllStops()
+        }
+    }
+
+    /**
+     * Get a route path for an origin and a destination
+     */
+    fun getRoute(
+        end: LatLng,
+        time: Double,
+        destinationName: String,
+        start: LatLng,
+        arriveBy: Boolean,
+        originName: String
+    ) {
+        viewModelScope.launch {
+            routeRepository.fetchRoute(
+                end = end,
+                time = time,
+                destinationName = destinationName,
+                start = start,
+                arriveBy = arriveBy,
+                originName = originName
+            )
         }
     }
 
