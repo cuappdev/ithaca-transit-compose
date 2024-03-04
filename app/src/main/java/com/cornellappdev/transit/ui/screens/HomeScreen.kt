@@ -141,7 +141,7 @@ fun HomeScreen(
                 }
 
                 is ApiResponse.Success -> {
-                    stopsApiResponse.data.stops.forEach { stop ->
+                    stopsApiResponse.data.forEach { stop ->
                         Marker(
                             state = MarkerState(
                                 position = LatLng(

@@ -5,9 +5,9 @@ import com.squareup.moshi.Json
 /**
  * List of all stops returned from backend
  */
-data class StopList(
+data class StopResponse(
     @Json(name = "success") var success: Boolean,
-    @Json(name = "data") var stops: List<Stop>
+    @Json(name = "data") var data: List<Stop>
 )
 
 /**

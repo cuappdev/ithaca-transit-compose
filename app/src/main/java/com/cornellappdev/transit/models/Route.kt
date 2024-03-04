@@ -51,7 +51,7 @@ data class Route(
 /**
  * Data class wrapping all possible routes from a given start and end
  */
-data class RouteList(
+data class RouteOptions(
     @Json(name = "boardingSoon") val boardingSoon: List<Route>,
     @Json(name = "fromStop") val fromStop: List<Route>,
     @Json(name = "walking") val walking: List<Route>
@@ -62,8 +62,9 @@ data class RouteList(
  */
 data class RouteResponse(
     @Json(name = "success") var success: Boolean,
-    @Json(name = "data") var data: RouteList
+    @Json(name = "data") var data: RouteOptions
 )
+
 /**
  * Data class for parsing a request for a route
  */
