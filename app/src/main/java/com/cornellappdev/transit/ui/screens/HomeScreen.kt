@@ -43,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -215,15 +216,15 @@ fun HomeScreen(
         sheetSwipeEnabled = true,
         sheetContent = {
 
-            Column (modifier = Modifier.padding(bottom = 5.dp)){
+            Column (modifier = Modifier.padding(bottom = 20.dp, top = 5.dp, start = 20.dp, end = 20.dp)){
                 Row (modifier = Modifier
-                    .padding(start = 12.dp, end = 12.dp, top = 2.5.dp, bottom = 0.dp)
+                    .padding(bottom = 20.dp)
                     .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically){
                     Text(
                         text = "Favorites",
                         fontWeight = FontWeight.Bold,
-                        fontSize =  24.sp
+                        fontSize =  20.sp
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
@@ -237,22 +238,16 @@ fun HomeScreen(
                             } },
                         color = TransitBlue,
                         textAlign = TextAlign.Right,
-                        fontSize =  16.sp,
+                        fontSize =  14.sp,
                     )
                 }
 
                 LazyRow(){
                     items(data){
-                        if (it ==""){
-                            Log.e("LOG???", it)
-                            LocationItem(icon = Icons.Filled.Add, label = it, sublabel = it, visible = editState)
-                        }else{
-                            LocationItem(icon = Icons.Filled.Place, label = it, sublabel = it, visible = editState)
-                        }
-
+                        LocationItem(image = painterResource(id = R.drawable.location_icon), editImage = painterResource(id = R.drawable.location_icon_edit), label = it, sublabel = it, editing = editState)
                     }
                     item{
-                        LocationItem(icon = Icons.Filled.Add, label = "", sublabel = "", visible = editState)
+                        LocationItem(image = painterResource(id = R.drawable.add_icon), editImage = painterResource(id = R.drawable.add_icon), label = "Add", sublabel = "", editing = editState)
                     }
                 }
             }
