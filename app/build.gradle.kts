@@ -77,6 +77,7 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+    implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
     //Maps
     implementation ("com.google.maps.android:maps-compose:4.0.0")
