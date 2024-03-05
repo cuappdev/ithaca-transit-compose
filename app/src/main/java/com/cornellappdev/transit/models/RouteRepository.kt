@@ -18,9 +18,9 @@ import javax.inject.Singleton
 
 class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
 
-    suspend fun getAllStops(): StopResponse = networkApi.getAllStops()
+    suspend fun getAllStops(): Payload<List<Stop>> = networkApi.getAllStops()
 
-    private suspend fun getRoute(request: RouteRequest): RouteResponse =
+    private suspend fun getRoute(request: RouteRequest): Payload<RouteOptions> =
         networkApi.getRoute(request)
 
 
@@ -51,8 +51,8 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
         _stopFlow.value = ApiResponse.Pending
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val rides = getAllStops()
-                _stopFlow.value = ApiResponse.Success(rides.data)
+                val rideResponse = getAllStops()
+                _stopFlow.value = ApiResponse.Success(rideResponse.unwrap())
             } catch (e: Exception) {
                 _stopFlow.value = ApiResponse.Error
             }
@@ -90,7 +90,7 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
                         originName = originName
                     )
                 )
-                _lastRouteFlow.value = ApiResponse.Success(routeResponse.data)
+                _lastRouteFlow.value = ApiResponse.Success(routeResponse.unwrap())
             } catch (e: Exception) {
                 _lastRouteFlow.value = ApiResponse.Error
             }

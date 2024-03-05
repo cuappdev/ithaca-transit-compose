@@ -58,14 +58,6 @@ data class RouteOptions(
 )
 
 /**
- * Data class representing a route response from backend
- */
-data class RouteResponse(
-    @Json(name = "success") var success: Boolean,
-    @Json(name = "data") var data: RouteOptions
-)
-
-/**
  * Data class for parsing a request for a route
  */
 data class RouteRequest(
