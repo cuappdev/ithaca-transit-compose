@@ -1,6 +1,5 @@
 package com.cornellappdev.transit.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,18 +16,15 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Button
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -62,7 +58,6 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.accompanist.permissions.rememberPermissionState
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.LocationItem
 import com.cornellappdev.transit.ui.components.MenuItem
@@ -103,7 +98,7 @@ fun HomeScreen(
                     TextButton(
                         onClick = {
                             permissionState.launchPermissionRequest()
-                            openDialog.value = false;
+                            openDialog.value = false
                         },
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
@@ -231,11 +226,12 @@ fun HomeScreen(
                         text = txt,
                         modifier = Modifier.clickable {
                             editState = editState==false
-                            if(editState){
-                                txt = "Done"
+                            txt = if(editState){
+                                "Done"
                             }else{
-                                txt = "Edit"
-                            } },
+                                "Edit"
+                            }
+                        },
                         color = TransitBlue,
                         textAlign = TextAlign.Right,
                         fontSize =  14.sp,
