@@ -26,8 +26,14 @@ class HomeViewModel @Inject constructor(
     //TODO: Replace with Flow from backend, this is a placeholder
     val placeData = MutableList(100) { "Gates Hall" }
 
+    /**
+     * Flow of all TCAT stops
+     */
     val stopFlow = routeRepository.stopFlow
 
+    /**
+     * Flow from backend of last route fetched
+     */
     val lastRouteFlow = routeRepository.lastRouteFlow
 
 
@@ -65,7 +71,13 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Get a route path for an origin and a destination
+     * Load a route path for an origin and a destination and update Flow
+     * @param end The latitude and longitude of the destination
+     * @param time The time of the route request
+     * @param destinationName The name of the destination
+     * @param start The latitude and longitude of the origin
+     * @param arriveBy Whether the route must complete by a certain time
+     * @param originName The name of the origin
      */
     fun getRoute(
         end: LatLng,
