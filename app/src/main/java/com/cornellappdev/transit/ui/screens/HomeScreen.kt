@@ -211,39 +211,61 @@ fun HomeScreen(
         sheetSwipeEnabled = true,
         sheetContent = {
 
-            Column (modifier = Modifier.padding(bottom = 20.dp, top = 5.dp, start = 20.dp, end = 20.dp)){
-                Row (modifier = Modifier
-                    .padding(bottom = 20.dp)
-                    .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically){
+            Column() {
+                Row(
+                    modifier = Modifier
+                        .padding(bottom = 20.dp)
+                        .fillMaxWidth()
+                        .padding(
+                            bottom = 20.dp,
+                            top = 5.dp,
+                            start = 20.dp,
+                            end = 20.dp
+                        ),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         text = "Favorites",
                         fontWeight = FontWeight.Bold,
-                        fontSize =  20.sp
+                        fontSize = 20.sp
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = txt,
                         modifier = Modifier.clickable {
-                            editState = editState==false
-                            txt = if(editState){
+                            editState = editState == false
+                            txt = if (editState) {
                                 "Done"
-                            }else{
+                            } else {
                                 "Edit"
                             }
                         },
                         color = TransitBlue,
                         textAlign = TextAlign.Right,
-                        fontSize =  14.sp,
+                        fontSize = 14.sp,
                     )
                 }
 
-                LazyRow(){
-                    items(data){
-                        LocationItem(image = painterResource(id = R.drawable.location_icon), editImage = painterResource(id = R.drawable.location_icon_edit), label = it, sublabel = it, editing = editState)
+                LazyRow(modifier = Modifier.padding(bottom = 20.dp)) {
+                    items(data) {
+                        LocationItem(
+                            image = painterResource(id = R.drawable.location_icon),
+                            editImage = painterResource(id = R.drawable.location_icon_edit),
+                            label = it,
+                            sublabel = it,
+                            editing = editState,
+                            onClick = {}
+                        )
                     }
-                    item{
-                        LocationItem(image = painterResource(id = R.drawable.add_icon), editImage = painterResource(id = R.drawable.add_icon), label = "Add", sublabel = "", editing = editState)
+                    item {
+                        LocationItem(
+                            image = painterResource(id = R.drawable.ellipse),
+                            editImage = painterResource(id = R.drawable.add_icon),
+                            label = "Add",
+                            sublabel = "",
+                            editing = editState,
+                            onClick = {}
+                        )
                     }
                 }
             }
