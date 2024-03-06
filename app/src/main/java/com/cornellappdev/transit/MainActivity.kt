@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.cornellappdev.transit.ui.screens.HomeScreen
+import com.cornellappdev.transit.ui.screens.RouteScreen
 import com.cornellappdev.transit.ui.theme.TransitTheme
 import dagger.hilt.android.AndroidEntryPoint
 
