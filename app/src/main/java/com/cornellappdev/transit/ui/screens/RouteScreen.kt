@@ -2,28 +2,21 @@ package com.cornellappdev.transit.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.material3.Icon
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.KeyboardArrowLeft
-import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -32,26 +25,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.theme.DividerGrey
 import com.cornellappdev.transit.ui.theme.IconGrey
 import com.cornellappdev.transit.ui.theme.MetadataGrey
 import com.cornellappdev.transit.ui.theme.PrimaryText
-import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
-import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 /**
@@ -99,7 +85,7 @@ fun RouteScreen(
                     fontFamily = sfProDisplayFamily,
                     fontWeight = FontWeight.Normal,
                     fontSize = 14.sp, modifier = Modifier.constrainAs(fromtext) {
-                        top.linkTo(parent.top)
+                        top.linkTo(parent.top, margin = 3.dp)
                     })
 
                 Icon(imageVector = ImageVector.vectorResource(id = R.drawable.boarding_stop),
@@ -121,7 +107,7 @@ fun RouteScreen(
                     fontSize = 14.sp,
                     modifier = Modifier.constrainAs(totext) {
                         top.linkTo(fromtext.bottom, margin = 24.dp)
-                        bottom.linkTo(parent.bottom)
+                        bottom.linkTo(parent.bottom, margin = 2.dp)
                         start.linkTo(fromtext.start)
                     }
                 )
@@ -150,8 +136,6 @@ fun RouteScreen(
                             end.linkTo(fromstop.end)
                         }
                 )
-
-
             }
 
             //TODO user should be able to enter location/destination
