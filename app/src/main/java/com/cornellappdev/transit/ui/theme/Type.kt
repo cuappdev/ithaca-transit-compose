@@ -7,6 +7,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.Font
 import com.cornellappdev.transit.R
 
 // Set of Material typography styles to start with
@@ -17,6 +18,10 @@ val Typography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
+
+
+
+
     )
     /* Other default text styles to override
     titleLarge = TextStyle(
@@ -37,6 +42,11 @@ val Typography = Typography(
 )
 
 val sfProDisplayFamily = FontFamily(
+    Font(R.font.sf_pro_display_regular, FontWeight.Normal),
+)
+
+val sfProTextFamily = FontFamily(
+    Font(R.font.sf_pro_text_regular, FontWeight.Normal),
     Font(R.font.sf_pro_display_bold, FontWeight.Bold),
     Font(R.font.sf_pro_display_black_italic, FontWeight.Black, FontStyle.Italic),
     Font(R.font.sf_pro_display_heavy_italic, FontWeight.Bold, FontStyle.Italic),

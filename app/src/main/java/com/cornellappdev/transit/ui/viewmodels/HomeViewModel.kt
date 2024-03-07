@@ -11,6 +11,8 @@ import com.cornellappdev.transit.models.RouteRepository
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,7 +26,8 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     //TODO: Replace with Flow from backend, this is a placeholder
-    val placeData = MutableList(100) { "Gates Hall" }
+    private val _placeFlow = MutableStateFlow(List(100) { "Gates Hall" })
+    val placeData = _placeFlow.asStateFlow()
 
     /**
      * Flow of all TCAT stops

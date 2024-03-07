@@ -1,7 +1,5 @@
 package com.cornellappdev.transit.ui.screens
 
-import android.util.Log
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,15 +18,15 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.Button
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,10 +51,9 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.accompanist.permissions.rememberPermissionState
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
-
 
 /**
  * Composable for the home screen
@@ -92,7 +89,7 @@ fun HomeScreen(
                     TextButton(
                         onClick = {
                             permissionState.launchPermissionRequest()
-                            openDialog.value = false;
+                            openDialog.value = false
                         },
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
@@ -106,6 +103,7 @@ fun HomeScreen(
 
     // Collect flow of rides through API
     val stopsApiResponse = homeViewModel.stopFlow.collectAsState().value
+    val placesResponse = homeViewModel.placeData.collectAsState().value
 
     //Collect flow of route through API
     val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
@@ -180,8 +178,8 @@ fun HomeScreen(
                 placeholder = { Text(text = stringResource(R.string.search_placeholder)) }
 
             ) {
-                LazyColumn() {
-                    items(homeViewModel.placeData) {
+                LazyColumn {
+                    items(placesResponse) {
                         if (!homeViewModel.searchQuery.value.isBlank() && it.lowercase()
                                 .contains(homeViewModel.searchQuery.value.lowercase())
                         ) {
@@ -193,4 +191,28 @@ fun HomeScreen(
         }
     }
 
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    var editState by remember {
+        mutableStateOf(false)
+    }
+    var txt by remember {
+        mutableStateOf("Edit")
+    }
+    val data = placesResponse.toMutableList()
+
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetSwipeEnabled = true,
+        sheetContent = {
+            BottomSheetContent(txt, editState, data) {
+                editState = editState == false
+                txt = if (editState) {
+                    "Done"
+                } else {
+                    "Edit"
+                }
+            }
+        }
+    ) {
+    }
 }
