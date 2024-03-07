@@ -63,7 +63,6 @@ import com.cornellappdev.transit.ui.components.MenuItem
 fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
-
     // Permissions dialog
     val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
     val openDialog = remember { mutableStateOf(true) }
@@ -106,6 +105,9 @@ fun HomeScreen(
     val stopsApiResponse = homeViewModel.stopFlow.collectAsState().value
     val placesResponse = homeViewModel.placeData.collectAsState().value
 
+    //Collect flow of route through API
+    val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
+
 
     //Map camera
     val cameraPositionState = rememberCameraPositionState {
@@ -137,7 +139,7 @@ fun HomeScreen(
                 }
 
                 is ApiResponse.Success -> {
-                    stopsApiResponse.data.stops.forEach { stop ->
+                    stopsApiResponse.data.forEach { stop ->
                         Marker(
                             state = MarkerState(
                                 position = LatLng(
@@ -181,7 +183,7 @@ fun HomeScreen(
                         if (!homeViewModel.searchQuery.value.isBlank() && it.lowercase()
                                 .contains(homeViewModel.searchQuery.value.lowercase())
                         ) {
-                            MenuItem(Icons.Filled.Place, label = it, sublabel = it)
+                            MenuItem(Icons.Filled.Place, label = it, sublabel = it, {})
                         }
                     }
                 }
