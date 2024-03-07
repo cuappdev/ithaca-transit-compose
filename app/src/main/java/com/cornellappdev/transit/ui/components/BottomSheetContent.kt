@@ -31,7 +31,12 @@ import com.cornellappdev.transit.ui.theme.sfProTextFamily
  * @param onclick The Function to run when the edit/done button is clicked
  */
 @Composable
-fun BottomSheetContent(editText: String, editState: Boolean, data: MutableList<String>,onclick: () -> Unit) {
+fun BottomSheetContent(
+    editText: String,
+    editState: Boolean,
+    data: MutableList<String>,
+    onclick: () -> Unit
+) {
     Column() {
         Row(
             modifier = Modifier
