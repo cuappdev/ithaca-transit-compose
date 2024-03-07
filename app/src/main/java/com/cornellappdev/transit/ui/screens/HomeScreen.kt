@@ -214,11 +214,9 @@ fun HomeScreen(
             Column() {
                 Row(
                     modifier = Modifier
-                        .padding(bottom = 20.dp)
                         .fillMaxWidth()
                         .padding(
                             bottom = 20.dp,
-                            top = 5.dp,
                             start = 20.dp,
                             end = 20.dp
                         ),
@@ -243,6 +241,7 @@ fun HomeScreen(
                         color = TransitBlue,
                         textAlign = TextAlign.Right,
                         fontSize = 14.sp,
+                        fontWeight = FontWeight(500)
                     )
                 }
 

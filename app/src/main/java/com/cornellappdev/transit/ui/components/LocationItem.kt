@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,7 +44,6 @@ fun LocationItem(
     Column(
         modifier = Modifier
             .width(88.dp)
-            .height(86.dp)
             .padding(horizontal = 8.dp)
     ) {
         if (editing && label != "Add") {
@@ -107,7 +107,8 @@ fun LocationItem(
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 8.dp, bottom = 4.dp)
                 .height(14.dp)
-                .width(72.dp)
+                .width(72.dp),
+            fontWeight = FontWeight(400)
         )
 
         Text(
@@ -118,7 +119,8 @@ fun LocationItem(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .height(12.dp)
-                .width(72.dp)
+                .width(72.dp),
+            fontWeight = FontWeight(400)
         )
     }
 }
