@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.theme.TransitBlue
+import com.cornellappdev.transit.ui.theme.sfProTextFamily
 
 /**
  * Card for each entry in favourite locations list
@@ -30,7 +31,8 @@ import com.cornellappdev.transit.ui.theme.TransitBlue
  * @param label The label for the item
  * @param sublabel The sublabel for each item
  * @param editing Whether or nto the list if currently being edited
- * @param onClick The Function to run when the add buttom is clicked
+ * @param addOnClick The Function to run when the add button is clicked
+ * @param removeOnClick The Function to run when the remove button is clicked
  */
 @Composable
 fun LocationItem(
@@ -39,7 +41,8 @@ fun LocationItem(
     label: String,
     sublabel: String,
     editing: Boolean,
-    onClick: () -> Unit
+    addOnClick: () -> Unit,
+    removeOnClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -66,6 +69,7 @@ fun LocationItem(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .size(20.dp)
+                        .clickable(onClick = removeOnClick)
 
                 )
 
@@ -83,7 +87,7 @@ fun LocationItem(
                     modifier = Modifier
                         .size(48.dp)
                         .align(Alignment.Center)
-                        .clickable(onClick = onClick)
+                        .clickable(onClick = addOnClick)
                         .takeIf { label == "Add" } ?: Modifier
                 )
 
@@ -105,10 +109,9 @@ fun LocationItem(
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .padding(top = 8.dp, bottom = 4.dp)
-                .height(14.dp)
-                .width(72.dp),
-            fontWeight = FontWeight(400)
+                .padding(top = 8.dp, bottom = 4.dp),
+            fontWeight = FontWeight(400),
+            fontFamily = sfProTextFamily
         )
 
         Text(
@@ -117,10 +120,9 @@ fun LocationItem(
             fontSize = 10.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .height(12.dp)
-                .width(72.dp),
-            fontWeight = FontWeight(400)
+                .align(Alignment.CenterHorizontally),
+            fontWeight = FontWeight(400),
+            fontFamily = sfProTextFamily
         )
     }
 }
@@ -134,6 +136,7 @@ fun PreviewLocationItem() {
         label = "gates hall",
         sublabel = "hello",
         editing = true,
+        {},
         {}
     )
 

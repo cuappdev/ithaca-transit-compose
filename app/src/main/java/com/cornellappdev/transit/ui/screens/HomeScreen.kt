@@ -59,6 +59,7 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.LocationItem
 import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.theme.TransitBlue
@@ -210,62 +211,12 @@ fun HomeScreen(
         scaffoldState = scaffoldState,
         sheetSwipeEnabled = true,
         sheetContent = {
-
-            Column() {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            bottom = 20.dp,
-                            start = 20.dp,
-                            end = 20.dp
-                        ),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Favorites",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = txt,
-                        modifier = Modifier.clickable {
-                            editState = editState == false
-                            txt = if (editState) {
-                                "Done"
-                            } else {
-                                "Edit"
-                            }
-                        },
-                        color = TransitBlue,
-                        textAlign = TextAlign.Right,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight(500)
-                    )
-                }
-
-                LazyRow(modifier = Modifier.padding(bottom = 20.dp)) {
-                    items(data) {
-                        LocationItem(
-                            image = painterResource(id = R.drawable.location_icon),
-                            editImage = painterResource(id = R.drawable.location_icon_edit),
-                            label = it,
-                            sublabel = it,
-                            editing = editState,
-                            onClick = {}
-                        )
-                    }
-                    item {
-                        LocationItem(
-                            image = painterResource(id = R.drawable.ellipse),
-                            editImage = painterResource(id = R.drawable.add_icon),
-                            label = "Add",
-                            sublabel = "",
-                            editing = editState,
-                            onClick = {}
-                        )
-                    }
+            BottomSheetContent(txt, editState, data){
+                editState = editState == false
+                txt = if (editState) {
+                    "Done"
+                } else {
+                    "Edit"
                 }
             }
         }
