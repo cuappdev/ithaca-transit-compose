@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.RouteRepository
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -25,9 +26,20 @@ class HomeViewModel @Inject constructor(
     //TODO: Replace with Flow from backend, this is a placeholder
     val placeData = MutableList(100) { "Gates Hall" }
 
+    /**
+     * Flow of all TCAT stops
+     */
     val stopFlow = routeRepository.stopFlow
 
-    //Default map location
+    /**
+     * Flow from backend of last route fetched
+     */
+    val lastRouteFlow = routeRepository.lastRouteFlow
+
+
+    /**
+     * Default map location
+     */
     val defaultIthaca = LatLng(42.44, -76.50)
 
     /**
@@ -55,6 +67,35 @@ class HomeViewModel @Inject constructor(
     fun getAllStops() {
         viewModelScope.launch {
             routeRepository.getAllStops()
+        }
+    }
+
+    /**
+     * Load a route path for an origin and a destination and update Flow
+     * @param end The latitude and longitude of the destination
+     * @param time The time of the route request
+     * @param destinationName The name of the destination
+     * @param start The latitude and longitude of the origin
+     * @param arriveBy Whether the route must complete by a certain time
+     * @param originName The name of the origin
+     */
+    fun getRoute(
+        end: LatLng,
+        time: Double,
+        destinationName: String,
+        start: LatLng,
+        arriveBy: Boolean,
+        originName: String
+    ) {
+        viewModelScope.launch {
+            routeRepository.fetchRoute(
+                end = end,
+                time = time,
+                destinationName = destinationName,
+                start = start,
+                arriveBy = arriveBy,
+                originName = originName
+            )
         }
     }
 

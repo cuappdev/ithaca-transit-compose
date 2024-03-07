@@ -3,14 +3,6 @@ package com.cornellappdev.transit.models
 import com.squareup.moshi.Json
 
 /**
- * List of all stops returned from backend
- */
-data class StopList(
-    @Json(name = "success") var success: Boolean,
-    @Json(name = "data") var stops: List<Stop>
-)
-
-/**
  * Data class representing a TCAT stop
  */
 data class Stop(

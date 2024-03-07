@@ -66,7 +66,6 @@ import com.cornellappdev.transit.ui.components.MenuItem
 fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
-
     // Permissions dialog
     val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
     val openDialog = remember { mutableStateOf(true) }
@@ -108,6 +107,9 @@ fun HomeScreen(
     // Collect flow of rides through API
     val stopsApiResponse = homeViewModel.stopFlow.collectAsState().value
 
+    //Collect flow of route through API
+    val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
+
 
     //Map camera
     val cameraPositionState = rememberCameraPositionState {
@@ -139,7 +141,7 @@ fun HomeScreen(
                 }
 
                 is ApiResponse.Success -> {
-                    stopsApiResponse.data.stops.forEach { stop ->
+                    stopsApiResponse.data.forEach { stop ->
                         Marker(
                             state = MarkerState(
                                 position = LatLng(
