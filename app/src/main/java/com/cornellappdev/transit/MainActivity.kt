@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.cornellappdev.transit.ui.NavigationController
 import com.cornellappdev.transit.ui.screens.HomeScreen
 import com.cornellappdev.transit.ui.screens.RouteScreen
 import com.cornellappdev.transit.ui.theme.TransitTheme
@@ -22,7 +23,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             TransitTheme {
-                HomeScreen()
+                NavigationController()
             }
         }
     }
