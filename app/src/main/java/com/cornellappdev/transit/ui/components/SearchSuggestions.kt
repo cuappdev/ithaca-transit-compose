@@ -14,6 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.cornellappdev.transit.models.Stop
 
+/**
+ * Display for suggested searches (recents and favorites)
+ */
 @Composable
 fun SearchSuggestions(
     favorites: List<Stop>,
