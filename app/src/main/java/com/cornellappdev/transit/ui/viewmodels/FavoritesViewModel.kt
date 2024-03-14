@@ -35,16 +35,22 @@ class FavoritesViewModel @Inject constructor(
     )
     private val favoritesFlow = _favoritesFlow.asStateFlow()
 
+    val stopFlow = routeRepository.stopFlow
+
     private val scope = CoroutineScope(Dispatchers.Default)
     private fun fulfillsFilter(stop: Stop, favorites: Map<String, Boolean>): Boolean {
+
+        Log.e("LOGLOGLOG", stop.name)
         if (favorites.get(stop.name) != null) {
 
+            Log.e("LOGLOGLOG", favorites.get(stop.name).toString())
             return favorites.get(stop.name)!!
+
         }
         return false
     }
 
-    val favoriteStops = routeRepository.stopFlow.combine(
+    val favoriteStops = stopFlow.combine(
         favoritesFlow
     ) { apiResponse, favorites ->
         when (apiResponse) {
@@ -60,6 +66,7 @@ class FavoritesViewModel @Inject constructor(
                 apiResponse.data.filter { stop ->
                     fulfillsFilter(stop, favorites)
                 }
+                //Log.e("LOGLOGLOG", "filtering")
             }
         }
     }.stateIn(scope, SharingStarted.Eagerly, emptyList())
