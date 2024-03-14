@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.models.Stop
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.theme.sfProTextFamily
@@ -34,7 +35,7 @@ import com.cornellappdev.transit.ui.theme.sfProTextFamily
 fun BottomSheetContent(
     editText: String,
     editState: Boolean,
-    data: MutableList<String>,
+    data: MutableList<Stop>,
     onclick: () -> Unit
 ) {
     Column() {
@@ -72,8 +73,8 @@ fun BottomSheetContent(
                 LocationItem(
                     image = painterResource(id = R.drawable.location_icon),
                     editImage = painterResource(id = R.drawable.location_icon_edit),
-                    label = it,
-                    sublabel = it,
+                    label = it.name,
+                    sublabel = it.type,
                     editing = editState,
                     addOnClick = {},
                     removeOnClick = {}

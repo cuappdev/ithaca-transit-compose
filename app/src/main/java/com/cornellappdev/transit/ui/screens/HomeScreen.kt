@@ -54,6 +54,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
+import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 
 /**
  * Composable for the home screen
@@ -61,7 +62,8 @@ import com.cornellappdev.transit.ui.components.MenuItem
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    homeViewModel: HomeViewModel = hiltViewModel()
+    homeViewModel: HomeViewModel = hiltViewModel(),
+    favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
     // Permissions dialog
     val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -198,7 +200,8 @@ fun HomeScreen(
     var txt by remember {
         mutableStateOf("Edit")
     }
-    val data = placesResponse.toMutableList()
+
+    val data = favoritesViewModel.favoriteStops.collectAsState().value.toMutableList()
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
