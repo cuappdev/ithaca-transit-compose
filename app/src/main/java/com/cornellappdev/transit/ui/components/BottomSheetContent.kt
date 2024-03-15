@@ -35,7 +35,7 @@ import com.cornellappdev.transit.ui.theme.sfProTextFamily
 fun BottomSheetContent(
     editText: String,
     editState: Boolean,
-    data: MutableList<Stop>,
+    data: List<Stop>,
     onclick: () -> Unit
 ) {
     Column() {

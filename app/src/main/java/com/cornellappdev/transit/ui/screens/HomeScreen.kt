@@ -201,7 +201,7 @@ fun HomeScreen(
         mutableStateOf("Edit")
     }
 
-    val data = favoritesViewModel.favoriteStops.collectAsState().value.toMutableList()
+    val data = favoritesViewModel.favoriteStops.collectAsState().value
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,

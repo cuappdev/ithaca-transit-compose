@@ -25,25 +25,22 @@ class FavoritesViewModel @Inject constructor(
      */
 
     //TODO: This is a placeholder. Replace with flow from UserPreferences
-    private val _favoritesFlow = MutableStateFlow(
+    private val favoritesFlow = MutableStateFlow(
         mapOf(
-            "Gates hall" to true,
-            "olin library" to true,
-            "duffield hall" to true,
-            "statler" to false
+            "Gates Hall" to true,
+            "Olin Library" to true,
+            "Duffield Hall" to true,
+            "Statler" to false
         )
-    )
-    private val favoritesFlow = _favoritesFlow.asStateFlow()
+    ).asStateFlow()
 
     val stopFlow = routeRepository.stopFlow
 
     private val scope = CoroutineScope(Dispatchers.Default)
     private fun fulfillsFilter(stop: Stop, favorites: Map<String, Boolean>): Boolean {
 
-        Log.e("LOGLOGLOG", stop.name)
         if (favorites.get(stop.name) != null) {
 
-            Log.e("LOGLOGLOG", favorites.get(stop.name).toString())
             return favorites.get(stop.name)!!
 
         }
@@ -66,7 +63,6 @@ class FavoritesViewModel @Inject constructor(
                 apiResponse.data.filter { stop ->
                     fulfillsFilter(stop, favorites)
                 }
-                //Log.e("LOGLOGLOG", "filtering")
             }
         }
     }.stateIn(scope, SharingStarted.Eagerly, emptyList())
