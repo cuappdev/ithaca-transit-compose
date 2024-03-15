@@ -32,12 +32,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.theme.DividerGrey
 import com.cornellappdev.transit.ui.theme.IconGrey
 import com.cornellappdev.transit.ui.theme.MetadataGrey
 import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
+import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 /**
@@ -46,7 +48,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun RouteScreen(
-    //homeViewModel: HomeViewModel = hiltViewModel()
+    routeViewModel: RouteViewModel = hiltViewModel()
 ) {
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -79,12 +81,12 @@ fun RouteScreen(
         ) {
 
             ConstraintLayout(modifier = Modifier.heightIn(max = 68.dp)) {
-                val (fromtext, fromstop, totext, tostop, line) = createRefs()
+                val (fromText, fromStop, toText, toStop, line) = createRefs()
 
                 Text(text = "From", color = PrimaryText,
                     fontFamily = sfProDisplayFamily,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 14.sp, modifier = Modifier.constrainAs(fromtext) {
+                    fontSize = 14.sp, modifier = Modifier.constrainAs(fromText) {
                         top.linkTo(parent.top, margin = 3.dp)
                     })
 
@@ -93,10 +95,10 @@ fun RouteScreen(
                     tint = IconGrey,
                     modifier = Modifier
                         .size(12.dp)
-                        .constrainAs(fromstop) {
-                            top.linkTo(fromtext.top, margin = 3.dp)
-                            bottom.linkTo(fromtext.bottom)
-                            start.linkTo(fromtext.end, margin = 12.dp)
+                        .constrainAs(fromStop) {
+                            top.linkTo(fromText.top, margin = 3.dp)
+                            bottom.linkTo(fromText.bottom)
+                            start.linkTo(fromText.end, margin = 12.dp)
                             end.linkTo(parent.end)
                         })
                 Text(
@@ -105,10 +107,10 @@ fun RouteScreen(
                     fontFamily = sfProDisplayFamily,
                     fontWeight = FontWeight.Normal,
                     fontSize = 14.sp,
-                    modifier = Modifier.constrainAs(totext) {
-                        top.linkTo(fromtext.bottom, margin = 24.dp)
+                    modifier = Modifier.constrainAs(toText) {
+                        top.linkTo(fromText.bottom, margin = 24.dp)
                         bottom.linkTo(parent.bottom, margin = 2.dp)
-                        start.linkTo(fromtext.start)
+                        start.linkTo(fromText.start)
                     }
                 )
 
@@ -117,10 +119,10 @@ fun RouteScreen(
                     contentDescription = "",
                     tint = IconGrey,
                     modifier = Modifier.constrainAs(line) {
-                        top.linkTo(fromstop.bottom)
-                        bottom.linkTo(tostop.top)
-                        start.linkTo(fromstop.start)
-                        end.linkTo(fromstop.end)
+                        top.linkTo(fromStop.bottom)
+                        bottom.linkTo(toStop.top)
+                        start.linkTo(fromStop.start)
+                        end.linkTo(fromStop.end)
                     })
 
                 Icon(
@@ -129,11 +131,11 @@ fun RouteScreen(
                     tint = Color.Unspecified,
                     modifier = Modifier
                         .size(16.dp)
-                        .constrainAs(tostop) {
-                            top.linkTo(totext.top, margin = 3.dp)
-                            bottom.linkTo(totext.bottom)
-                            start.linkTo(fromstop.start)
-                            end.linkTo(fromstop.end)
+                        .constrainAs(toStop) {
+                            top.linkTo(toText.top, margin = 3.dp)
+                            bottom.linkTo(toText.bottom)
+                            start.linkTo(fromStop.start)
+                            end.linkTo(fromStop.end)
                         }
                 )
             }
@@ -146,7 +148,7 @@ fun RouteScreen(
                         .fillMaxWidth(0.9f)
                 ) {
                     Text(
-                        text = "Current Location",
+                        text = routeViewModel.startPl,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         color = PrimaryText,
                         fontFamily = sfProDisplayFamily,
@@ -159,7 +161,7 @@ fun RouteScreen(
                         .fillMaxWidth(0.9f)
                 ) {
                     Text(
-                        text = "Destination",
+                        text = routeViewModel.destPl,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         fontFamily = sfProDisplayFamily,
                         fontWeight = FontWeight.Normal,
@@ -197,7 +199,7 @@ fun RouteScreen(
                 tint = Color.Unspecified
             )
             Text(
-                text = "Leave Now (12:15AM)", //PLACEHOLDER!!!
+                text = "Leave Now (" + routeViewModel.time + ")",
                 fontFamily = sfProDisplayFamily,
                 fontWeight = FontWeight.Normal,
                 color = MetadataGrey, fontSize = 14.sp
