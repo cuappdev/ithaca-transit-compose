@@ -39,9 +39,9 @@ class FavoritesViewModel @Inject constructor(
     private val scope = CoroutineScope(Dispatchers.Default)
     private fun fulfillsFilter(stop: Stop, favorites: Map<String, Boolean>): Boolean {
 
-        if (favorites.get(stop.name) != null) {
+        if (favorites[stop.name] != null) {
 
-            return favorites.get(stop.name)!!
+            return favorites[stop.name]!!
 
         }
         return false
