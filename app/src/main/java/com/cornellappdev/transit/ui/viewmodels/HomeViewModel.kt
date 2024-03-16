@@ -13,6 +13,7 @@ import com.cornellappdev.transit.networking.ApiResponse
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,23 +45,44 @@ class HomeViewModel @Inject constructor(
      */
     val lastRouteFlow = routeRepository.lastRouteFlow
 
-    private val _queryFlow: MutableStateFlow<List<Stop>> = MutableStateFlow(emptyList())
+    /**
+     * The current query in the search bar, as a StateFlow
+     */
+    val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
+
+
+    /**
+     * Flow of queries
+     */
+    private val _queryFlow: Flow<List<Stop>> =
+        stopFlow.combine(searchQuery) { allStops, filter ->
+            when (allStops) {
+                is ApiResponse.Error -> {
+                    emptyList()
+                }
+
+                is ApiResponse.Pending -> {
+                    emptyList()
+                }
+
+                is ApiResponse.Success -> {
+                    allStops.data.filter { stop ->
+                        fulfillsQuery(stop, filter)
+                    }
+                }
+            }
+        }
 
     /**
      * Search query filtered flow of all TCAT stops
      */
-    val queryFlow = _queryFlow.asStateFlow()
+    val queryFlow = _queryFlow
 
 
     /**
      * Default map location
      */
     val defaultIthaca = LatLng(42.44, -76.50)
-
-    /**
-     * The current query in the search bar, as a StateFlow
-     */
-    val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
 
     /**
      * Perform a search on the string [query]
@@ -81,28 +103,6 @@ class HomeViewModel @Inject constructor(
      */
     fun onQueryChange(query: String) {
         searchQuery.value = query;
-        viewModelScope.launch {
-            stopFlow.combine(searchQuery) { allStops, filter ->
-                when (allStops) {
-                    is ApiResponse.Error -> {
-                        emptyList()
-                    }
-
-                    is ApiResponse.Pending -> {
-                        emptyList()
-                    }
-
-                    is ApiResponse.Success -> {
-                        allStops.data.filter { stop ->
-                            fulfillsQuery(stop, filter)
-                        }
-                    }
-                }
-
-            }.collect { list ->
-                _queryFlow.value = list
-            }
-        }
     }
 
     /**
