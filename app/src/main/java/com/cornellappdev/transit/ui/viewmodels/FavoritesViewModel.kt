@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
-    private val routeRepository: RouteRepository,
+    routeRepository: RouteRepository,
 ) : ViewModel() {
 
     /**
@@ -41,7 +41,7 @@ class FavoritesViewModel @Inject constructor(
 
         if (favorites[stop.name] != null) {
 
-            return favorites.getValue(stop.name)!!
+            return favorites.getValue(stop.name)
 
         }
         return false
