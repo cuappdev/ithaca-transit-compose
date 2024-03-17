@@ -1,6 +1,6 @@
 package com.cornellappdev.transit.ui.viewmodels
 
-import android.util.Log
+
 import androidx.lifecycle.ViewModel
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.Stop
@@ -34,14 +34,14 @@ class FavoritesViewModel @Inject constructor(
         )
     ).asStateFlow()
 
-    val stopFlow = routeRepository.stopFlow
+    private val stopFlow = routeRepository.stopFlow
 
     private val scope = CoroutineScope(Dispatchers.Default)
     private fun fulfillsFilter(stop: Stop, favorites: Map<String, Boolean>): Boolean {
 
         if (favorites[stop.name] != null) {
 
-            return favorites[stop.name]!!
+            return favorites.getValue(stop.name)!!
 
         }
         return false
