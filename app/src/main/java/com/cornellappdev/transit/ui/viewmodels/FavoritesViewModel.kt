@@ -1,9 +1,7 @@
 package com.cornellappdev.transit.ui.viewmodels
 
-
 import androidx.lifecycle.ViewModel
 import com.cornellappdev.transit.models.RouteRepository
-import com.cornellappdev.transit.models.Stop
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.cornellappdev.transit.networking.ApiResponse
@@ -15,15 +13,17 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
+/**
+ * ViewModel handling favourites screen/bottomsheet UI state
+ */
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
     routeRepository: RouteRepository,
 ) : ViewModel() {
 
     /**
-     * A flow emitting all the locations the user has favorited.
+     * A flow emitting all the locations and whether or not they have bene favorited.
      */
-
     //TODO: This is a placeholder. Replace with flow from UserPreferences
     private val favoritesFlow = MutableStateFlow(
         mapOf(
@@ -34,19 +34,16 @@ class FavoritesViewModel @Inject constructor(
         )
     ).asStateFlow()
 
+    /**
+     * Flow of all TCAT stops
+     */
     private val stopFlow = routeRepository.stopFlow
 
     private val scope = CoroutineScope(Dispatchers.Default)
-    private fun fulfillsFilter(stop: Stop, favorites: Map<String, Boolean>): Boolean {
 
-        if (favorites[stop.name] != null) {
-
-            return favorites.getValue(stop.name)
-
-        }
-        return false
-    }
-
+    /**
+     * A flow emitting all the locations the user has favorited as a list of stops.
+     */
     val favoriteStops = stopFlow.combine(
         favoritesFlow
     ) { apiResponse, favorites ->
@@ -61,7 +58,7 @@ class FavoritesViewModel @Inject constructor(
 
             is ApiResponse.Success -> {
                 apiResponse.data.filter { stop ->
-                    fulfillsFilter(stop, favorites)
+                    favorites[stop.name] == true
                 }
             }
         }
