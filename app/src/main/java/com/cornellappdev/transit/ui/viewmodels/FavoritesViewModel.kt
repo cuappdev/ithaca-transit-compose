@@ -22,7 +22,7 @@ class FavoritesViewModel @Inject constructor(
 ) : ViewModel() {
 
     /**
-     * A flow emitting all the locations and whether or not they have bene favorited.
+     * A flow emitting all the locations and whether or not they have been favorited.
      */
     //TODO: This is a placeholder. Replace with flow from UserPreferences
     private val favoritesFlow = MutableStateFlow(
