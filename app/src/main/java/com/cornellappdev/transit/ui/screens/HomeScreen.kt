@@ -62,6 +62,7 @@ import com.cornellappdev.transit.ui.theme.DividerGrey
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
+import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 
 /**
  * Composable for the home screen
@@ -70,7 +71,8 @@ import com.google.maps.android.compose.MapUiSettings
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel,
-    navController: NavController
+    navController: NavController,
+    favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
     // Permissions dialog
     val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -226,7 +228,8 @@ fun HomeScreen(
     var txt by remember {
         mutableStateOf("Edit")
     }
-    val data = placesResponse.toMutableList()
+
+    val data = favoritesViewModel.favoriteStops.collectAsState().value
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
