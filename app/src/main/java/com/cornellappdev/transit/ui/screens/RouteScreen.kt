@@ -32,6 +32,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.theme.DividerGrey
@@ -48,6 +50,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun RouteScreen(
+    //homeViewModel: HomeViewModel = hiltViewModel()
+    navController: NavController,
     routeViewModel: RouteViewModel = hiltViewModel()
 ) {
 
@@ -216,5 +220,5 @@ fun RouteScreen(
 @Preview
 @Composable
 fun PreviewRouteScreen() {
-    RouteScreen()
+    val previewNav = rememberNavController()
 }

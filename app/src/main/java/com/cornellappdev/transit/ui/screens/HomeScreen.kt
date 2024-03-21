@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -39,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -54,6 +56,12 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
+import com.cornellappdev.transit.ui.components.SearchCategoryHeader
+import com.cornellappdev.transit.ui.components.SearchSuggestions
+import com.cornellappdev.transit.ui.theme.DividerGrey
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.maps.android.compose.MapType
+import com.google.maps.android.compose.MapUiSettings
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 
 /**
@@ -62,18 +70,19 @@ import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    homeViewModel: HomeViewModel = hiltViewModel(),
+    homeViewModel: HomeViewModel,
+    navController: NavController,
     favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
     // Permissions dialog
     val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
-    val openDialog = remember { mutableStateOf(true) }
+    var openDialog by remember { mutableStateOf(true) }
 
-    if (openDialog.value && !permissionState.status.isGranted) {
+    if (openDialog && !permissionState.status.isGranted) {
         AlertDialog(
             onDismissRequest = {
 
-                openDialog.value = false
+                openDialog = false
             }
         ) {
             Surface(
@@ -91,7 +100,7 @@ fun HomeScreen(
                     TextButton(
                         onClick = {
                             permissionState.launchPermissionRequest()
-                            openDialog.value = false
+                            openDialog = false
                         },
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
@@ -102,9 +111,12 @@ fun HomeScreen(
         }
     }
 
+    // Search bar flow
+    val searchBarValue = homeViewModel.searchQuery.collectAsState().value
 
     // Collect flow of rides through API
     val stopsApiResponse = homeViewModel.stopFlow.collectAsState().value
+    val queryResponse = homeViewModel.queryFlow.collectAsState().value
     val placesResponse = homeViewModel.placeData.collectAsState().value
 
     //Collect flow of route through API
@@ -127,9 +139,12 @@ fun HomeScreen(
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            properties = MapProperties(isMyLocationEnabled = permissionState.status.isGranted),
+            properties = MapProperties(
+                isMyLocationEnabled = permissionState.status.isGranted
+            ),
             onMapClick = { searchActive = false },
-            onMapLongClick = { searchActive = false }
+            onMapLongClick = { searchActive = false },
+            uiSettings = MapUiSettings(zoomControlsEnabled = false)
         ) {
             //TODO: Not actually any sort of functionality, just demonstrate connection to backend
             when (stopsApiResponse) {
@@ -165,27 +180,40 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             DockedSearchBar(
-                query = homeViewModel.searchQuery.value,
+                query = searchBarValue,
                 onQueryChange = { s -> homeViewModel.onQueryChange(s) },
                 onSearch = { it -> searchActive = false; homeViewModel.onSearch(it) },
                 active = searchActive,
                 onActiveChange = { b -> searchActive = b },
-                shape = SearchBarDefaults.dockedShape,
+                shape = RoundedCornerShape(size = 8.dp),
                 colors = SearchBarDefaults.colors(
                     containerColor = Color.White,
-                    dividerColor = Color.Gray,
+                    dividerColor = DividerGrey,
                 ),
                 leadingIcon = { Icon(Icons.Outlined.Search, "Search") },
                 trailingIcon = { Icon(Icons.Outlined.Info, "Info") },
                 placeholder = { Text(text = stringResource(R.string.search_placeholder)) }
 
             ) {
-                LazyColumn {
-                    items(placesResponse) {
-                        if (!homeViewModel.searchQuery.value.isBlank() && it.lowercase()
-                                .contains(homeViewModel.searchQuery.value.lowercase())
-                        ) {
-                            MenuItem(Icons.Filled.Place, label = it, sublabel = it, {})
+
+                //If query is blank, display recents and favorites
+                if (searchBarValue.isBlank()) {
+                    SearchSuggestions(
+                        favorites = emptyList(),
+                        recents = emptyList(),
+                        onFavoriteAdd = {},
+                        onRecentClear = {}
+                    )
+                } else {
+                    LazyColumn {
+                        items(queryResponse) {
+                            MenuItem(
+                                Icons.Filled.Place,
+                                label = it.name,
+                                sublabel = it.type,
+                                onClick = {
+                                })
+
                         }
                     }
                 }

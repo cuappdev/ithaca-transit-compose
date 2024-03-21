@@ -8,11 +8,19 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.RouteRepository
-//import com.google.android.gms.location.FusedLocationProviderClient
+import com.cornellappdev.transit.models.Stop
+import com.cornellappdev.transit.networking.ApiResponse
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,16 +47,48 @@ class HomeViewModel @Inject constructor(
      */
     val lastRouteFlow = routeRepository.lastRouteFlow
 
+    /**
+     * The current query in the search bar, as a StateFlow
+     */
+    val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
+
+
+    /**
+     * Flow of queries
+     */
+    private val _queryFlow: Flow<List<Stop>> =
+        stopFlow.combine(searchQuery) { allStops, filter ->
+            when (allStops) {
+                is ApiResponse.Error -> {
+                    emptyList()
+                }
+
+                is ApiResponse.Pending -> {
+                    emptyList()
+                }
+
+                is ApiResponse.Success -> {
+                    allStops.data.filter { stop ->
+                        fulfillsQuery(stop, filter)
+                    }
+                }
+            }
+        }
+
+    /**
+     * Search query filtered flow of all TCAT stops
+     */
+    val queryFlow = _queryFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = emptyList()
+    )
+
 
     /**
      * Default map location
      */
     val defaultIthaca = LatLng(42.44, -76.50)
-
-    /**
-     * The current query in the search bar
-     */
-    val searchQuery = mutableStateOf("")
 
     /**
      * Perform a search on the string [query]
@@ -58,7 +98,14 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Change the query in the search bar
+     * True if the stop can be searched via the [query] string
+     */
+    private fun fulfillsQuery(stop: Stop, query: String): Boolean {
+        return !query.isBlank() && stop.name.lowercase().contains(query.lowercase())
+    }
+
+    /**
+     * Change the query in the search bar and update search results
      */
     fun onQueryChange(query: String) {
         searchQuery.value = query;
