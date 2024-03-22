@@ -17,7 +17,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
-    private val routeRepository: RouteRepository,
+    routeRepository: RouteRepository,
     private val userPreferenceRepository: UserPreferenceRepository
 ) : ViewModel() {
 
@@ -64,7 +64,7 @@ class FavoritesViewModel @Inject constructor(
     suspend fun removeFavorite(stop: String?) {
         if (stop != null) {
             val currentFavorites = favoritesFlow.value.toMutableSet()
-            val wasRemoved = currentFavorites.remove(stop)
+            currentFavorites.remove(stop)
             userPreferenceRepository.setFavorites(currentFavorites.toSet())
 
         }
