@@ -52,38 +52,10 @@ class HomeViewModel @Inject constructor(
      */
     val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
 
-
-    /**
-     * Flow of queries
-     */
-    private val _queryFlow: Flow<List<Stop>> =
-        stopFlow.combine(searchQuery) { allStops, filter ->
-            when (allStops) {
-                is ApiResponse.Error -> {
-                    emptyList()
-                }
-
-                is ApiResponse.Pending -> {
-                    emptyList()
-                }
-
-                is ApiResponse.Success -> {
-                    allStops.data.filter { stop ->
-                        fulfillsQuery(stop, filter)
-                    }
-                }
-            }
-        }
-
     /**
      * Search query filtered flow of all TCAT stops
      */
-    val queryFlow = _queryFlow.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Eagerly,
-        initialValue = emptyList()
-    )
-
+    val queryFlow = createStopQueryFlow(searchQuery, stopFlow)
 
     /**
      * Default map location
