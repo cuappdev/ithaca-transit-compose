@@ -63,12 +63,9 @@ fun RouteOptionsSearchSheet(
     // Search bar flow
     val searchBarValue = routeViewModel.searchQuery.collectAsState().value
 
-    // Search bar active/inactive
-    var searchActive by remember { mutableStateOf(false) }
-
     Column(
         modifier = Modifier
-            .fillMaxHeight(0.95f)
+            .fillMaxHeight(0.92f)
             .fillMaxWidth()
     ) {
         Column(
@@ -108,42 +105,18 @@ fun RouteOptionsSearchSheet(
                 }
             }
 
-            //TODO: Refactor this jawn
-            DockedSearchBar(
-                modifier = Modifier.padding(top = 7.dp, bottom = 11.dp),
-                query = searchBarValue,
-                onQueryChange = { s -> routeViewModel.onQueryChange(s) },
-                onSearch = { it -> searchActive = false; routeViewModel.onSearch(it) },
-                active = searchActive,
-                onActiveChange = { b -> searchActive = b },
-                shape = RoundedCornerShape(size = 8.dp),
-                colors = SearchBarDefaults.colors(
-                    containerColor = DividerGrey,
-                    dividerColor = DividerGrey,
-                ),
-                leadingIcon = { Icon(Icons.Outlined.Search, "Search") },
-                trailingIcon = {
-                    if (!searchActive)
-                        Icon(Icons.Outlined.Info, "Info")
-                    else
-                        TextButton(
-                            onClick = { searchActive = false; routeViewModel.onQueryChange("") },
-                            content = {
-                                Text(
-                                    text = "Cancel",
-                                    fontFamily = sfProDisplayFamily,
-                                    fontStyle = FontStyle.Normal,
-                                    textAlign = TextAlign.Center,
-                                )
-                            }
-                        )
+            SearchTextField(
+                value = searchBarValue,
+                setValue = { s -> routeViewModel.onQueryChange(s) },
+                placeholderText = "Search",
+                singleLine = true,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 7.dp, bottom = 11.dp),
+                height = 50.dp,
+                prefix = {
+                    Icon(Icons.Outlined.Search, "Search")
                 },
 
-                ) {
-
-                //If query is blank, display recents and favorites
-
-            }
+                )
         }
     }
 }

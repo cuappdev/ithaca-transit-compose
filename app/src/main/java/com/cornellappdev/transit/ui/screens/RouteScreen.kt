@@ -78,13 +78,20 @@ fun RouteScreen(
     val openBottomSheet = rememberSaveable { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-    fun openModal() {
+    /**
+     * Open the route selection modal with a [defaultText] filled in
+     */
+    fun openModal(defaultText : String) {
+        routeViewModel.onQueryChange(defaultText)
         openBottomSheet.value = true
         coroutineScope.launch {
             sheetState.show()
         }
     }
 
+    /**
+     * Close the route selection modal
+     */
     fun closeModal() {
         openBottomSheet.value = false
         coroutineScope.launch {
@@ -187,7 +194,7 @@ fun RouteScreen(
                         .background(color = DividerGrey, shape = RoundedCornerShape(8.dp))
                         .fillMaxWidth(0.9f)
                         .clickable {
-                            openModal()
+                            openModal(routeViewModel.startPl)
                         }
                 ) {
                     Text(
@@ -203,7 +210,7 @@ fun RouteScreen(
                         .background(color = DividerGrey, shape = RoundedCornerShape(8.dp))
                         .fillMaxWidth(0.9f)
                         .clickable {
-                            openModal()
+                            openModal(routeViewModel.destPl)
                         }
                 ) {
                     Text(

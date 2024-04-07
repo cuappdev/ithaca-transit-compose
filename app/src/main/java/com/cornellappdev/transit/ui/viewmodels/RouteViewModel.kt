@@ -32,11 +32,11 @@ class RouteViewModel @Inject constructor(
 
     val time = "12:00AM"
 
+    // Route select sheet
     /**
      * The current query in the search bar, as a StateFlow
      */
     val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
-
 
     /**
      * Flow of all TCAT stops
@@ -54,13 +54,6 @@ class RouteViewModel @Inject constructor(
      */
     fun onQueryChange(query: String) {
         searchQuery.value = query;
-    }
-
-    /**
-     * Callback for entering searches
-     */
-    fun onSearch(query: String) {
-
     }
 
 }
