@@ -220,6 +220,7 @@ fun HomeScreen(
                         favorites = emptyList(),
                         recents = emptyList(),
                         onFavoriteAdd = {
+                            //TODO: This is for dev purposes only
                             navController.navigate("route")
                         },
                         onRecentClear = {}
