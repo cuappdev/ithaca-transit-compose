@@ -1,6 +1,7 @@
 package com.cornellappdev.transit.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -13,7 +14,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.BottomSheetScaffold
@@ -113,10 +116,18 @@ fun RouteOptionsSearchSheet(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 7.dp, bottom = 11.dp),
                 height = 50.dp,
                 prefix = {
-                    Icon(Icons.Outlined.Search, "Search")
+                    Icon(
+                        Icons.Outlined.Search,
+                        "Search",
+                        modifier = Modifier.clickable { routeViewModel.onQueryChange("") })
                 },
-
-                )
+                suffix = {
+                    Icon(
+                        Icons.Outlined.Clear,
+                        "Clear",
+                        modifier = Modifier.clickable { routeViewModel.onQueryChange("") })
+                }
+            )
         }
     }
 }

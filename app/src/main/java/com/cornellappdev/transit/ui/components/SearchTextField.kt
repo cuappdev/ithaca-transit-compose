@@ -36,6 +36,9 @@ import com.cornellappdev.transit.ui.theme.DividerGrey
  * @param modifier Modifier to be applied to the [DenseTextField]
  * @param singleLine When set to true, this text field becomes
  *      a single horizontally scrolling text field instead of wrapping onto multiple lines.
+ * @param prefix The composable to be rendered before the text
+ * @param suffix The composable to be rendered after the text
+ * @param height The height of the text field
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
