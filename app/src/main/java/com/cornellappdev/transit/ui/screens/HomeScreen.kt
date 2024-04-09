@@ -207,14 +207,14 @@ fun HomeScreen(
         scaffoldState = scaffoldState,
         sheetSwipeEnabled = true,
         sheetContent = {
-            BottomSheetContent(txt, editState, data) {
+            BottomSheetContent(txt, editState, data, {
                 editState = editState == false
                 txt = if (editState) {
                     "Done"
                 } else {
                     "Edit"
                 }
-            }
+            })
         }
     ) {
     }

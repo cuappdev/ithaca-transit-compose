@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -12,9 +13,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
+import javax.inject.Singleton
 
-
-class UserPreferenceRepository(context: Context) {
+/**
+ * Repository to store data related to user preferences
+ */
+@Singleton
+class UserPreferenceRepository @Inject constructor(@ApplicationContext val context: Context) {
 
     /**
      * User Preferences file for Transit
@@ -47,12 +53,10 @@ class UserPreferenceRepository(context: Context) {
      */
     val favoritesFlow: StateFlow<Set<String>> = dataStore.data
         .catch {
-            val empty: Set<String> = setOf()
-            empty
+            setOf<String>()
         }
         .map { preferences ->
-            val empty: Set<String> = setOf()
-            val favorites = preferences[FAVORITES_MAP] ?: empty
+            val favorites = preferences[FAVORITES_MAP] ?: setOf<String>()
             favorites
         }.stateIn(CoroutineScope(Dispatchers.Default), SharingStarted.Eagerly, emptySet())
 
