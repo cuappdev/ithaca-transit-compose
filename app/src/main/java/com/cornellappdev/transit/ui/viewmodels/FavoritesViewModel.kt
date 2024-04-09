@@ -2,16 +2,12 @@ package com.cornellappdev.transit.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import com.cornellappdev.transit.models.RouteRepository
-import com.cornellappdev.transit.models.Stop
 import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.networking.ApiResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -29,8 +25,8 @@ class FavoritesViewModel @Inject constructor(
     /**
      * A flow emitting all the locations and whether or not they have been favorited.
      */
-    //private val favoritesFlow = userPreferenceRepository.favoritesFlow
-    private val favoritesFlow: StateFlow<Set<String>> = MutableStateFlow(setOf("Gates Hall", "Duffield")).asStateFlow()
+    private val favoritesFlow = userPreferenceRepository.favoritesFlow
+    //private val favoritesFlow: StateFlow<Set<String>> = MutableStateFlow(setOf("Gates Hall", "Duffield")).asStateFlow()
 
     /**
      * Flow of all TCAT stops
