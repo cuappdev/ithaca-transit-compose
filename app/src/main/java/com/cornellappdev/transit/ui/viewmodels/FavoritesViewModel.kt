@@ -1,6 +1,5 @@
 package com.cornellappdev.transit.ui.viewmodels
 
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.Stop
@@ -36,41 +35,33 @@ class FavoritesViewModel @Inject constructor(
     /**
      * Flow of all TCAT stops
      */
-    //private val stopFlow = routeRepository.stopFlow
-    private val stopFlow: StateFlow<List<Stop>> = MutableStateFlow(List(4){Stop(3.3, 3.3, "Gates Hall", "type?")}).asStateFlow()
+    private val stopFlow = routeRepository.stopFlow
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
     /**
      * A flow emitting all the locations the user has favorited as a list of stops.
      */
-//    val favoriteStops = stopFlow.combine(
-//        favoritesFlow
-//    ) { apiResponse, favorites ->
-//        when (apiResponse) {
-//            is ApiResponse.Error -> {
-//                emptyList()
-//            }
-//
-//            is ApiResponse.Pending -> {
-//                emptyList()
-//            }
-//
-//            is ApiResponse.Success -> {
-//                apiResponse.data.filter { stop ->
-//                    favorites.contains(stop.name)
-//                }
-//            }
-//        }
-//    }.stateIn(scope, SharingStarted.Eagerly, emptyList())
-
     val favoriteStops = stopFlow.combine(
         favoritesFlow
     ) { apiResponse, favorites ->
-        apiResponse.filter { stop ->
-            favorites.contains(stop.name)
+        when (apiResponse) {
+            is ApiResponse.Error -> {
+                emptyList()
+            }
+
+            is ApiResponse.Pending -> {
+                emptyList()
+            }
+
+            is ApiResponse.Success -> {
+                apiResponse.data.filter { stop ->
+                    favorites.contains(stop.name)
+                }
+            }
         }
     }.stateIn(scope, SharingStarted.Eagerly, emptyList())
+
 
 
     /**
