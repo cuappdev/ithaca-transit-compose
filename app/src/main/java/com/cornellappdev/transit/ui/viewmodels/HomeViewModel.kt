@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.ui.viewmodels
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -7,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.Stop
 import com.cornellappdev.transit.networking.ApiResponse
@@ -30,7 +32,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val routeRepository: RouteRepository
+    private val routeRepository: RouteRepository,
+    private val locationRepository: LocationRepository
 ) : ViewModel() {
 
     //TODO: Replace with Flow from backend, this is a placeholder
@@ -148,5 +151,15 @@ class HomeViewModel @Inject constructor(
             )
         }
     }
+
+    val currentLocation = locationRepository.currentLocation
+
+    /**
+     * Start emitting location from [locationRepository]
+     */
+    fun instantiateLocation(context : Context) {
+        locationRepository.instantiate(context)
+    }
+
 
 }
