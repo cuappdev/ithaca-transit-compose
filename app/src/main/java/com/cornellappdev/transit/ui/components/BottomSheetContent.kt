@@ -17,11 +17,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Stop
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.theme.sfProTextFamily
+import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 
 
 /**
@@ -36,7 +38,8 @@ fun BottomSheetContent(
     editText: String,
     editState: Boolean,
     data: List<Stop>,
-    onclick: () -> Unit
+    onclick: () -> Unit,
+    favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
     Column() {
         Row(
@@ -77,7 +80,7 @@ fun BottomSheetContent(
                     sublabel = it.type,
                     editing = editState,
                     addOnClick = {},
-                    removeOnClick = {}
+                    removeOnClick = { favoritesViewModel.removeFavorite(it.name) },
                 )
             }
             item {
@@ -87,7 +90,7 @@ fun BottomSheetContent(
                     label = "Add",
                     sublabel = "",
                     editing = editState,
-                    addOnClick = {},
+                    addOnClick = {}, //add function to run when "Add' is clicked
                     removeOnClick = {}
                 )
             }
