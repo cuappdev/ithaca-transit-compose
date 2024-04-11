@@ -1,6 +1,7 @@
 package com.cornellappdev.transit.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.networking.ApiResponse
@@ -67,7 +68,7 @@ class FavoritesViewModel @Inject constructor(
         if (stop != null) {
             val currentFavorites = favoritesFlow.value.toMutableSet()
             currentFavorites.remove(stop)
-            CoroutineScope(Dispatchers.IO).launch {
+            viewModelScope.launch {
                 userPreferenceRepository.setFavorites(currentFavorites.toSet())
             }
         }
@@ -80,7 +81,7 @@ class FavoritesViewModel @Inject constructor(
         if (stop != null) {
             val currentFavorites = favoritesFlow.value.toMutableSet()
             currentFavorites.add(stop)
-            CoroutineScope(Dispatchers.IO).launch {
+            viewModelScope.launch {
                 userPreferenceRepository.setFavorites(currentFavorites.toSet())
             }
         }
