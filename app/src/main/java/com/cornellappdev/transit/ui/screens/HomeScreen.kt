@@ -56,6 +56,7 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.SearchCategoryHeader
@@ -256,14 +257,15 @@ fun HomeScreen(
         scaffoldState = scaffoldState,
         sheetSwipeEnabled = true,
         sheetContent = {
-            BottomSheetContent(txt, editState, data) {
+            /**BottomSheetContent(txt, editState, data) {
                 editState = editState == false
                 txt = if (editState) {
                     "Done"
                 } else {
                     "Edit"
                 }
-            }
+            }**/
+            AddFavoritesSearchSheet()
         }
     ) {
     }
