@@ -70,7 +70,6 @@ fun LocationItem(
                         .align(Alignment.TopEnd)
                         .size(20.dp)
                         .clickable(onClick = removeOnClick)
-
                 )
 
             }
