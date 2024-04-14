@@ -92,6 +92,7 @@ fun SearchTextField(
         maxLines = maxLines,
         prefix = prefix,
         suffix = suffix,
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(8.dp),
+
     )
 }
