@@ -152,6 +152,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Value of the current location. Can be null
+     */
     val currentLocation = locationRepository.currentLocation
 
     /**
