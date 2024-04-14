@@ -1,9 +1,9 @@
 package com.cornellappdev.transit.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.RouteRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.networking.ApiResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -19,20 +20,14 @@ import javax.inject.Inject
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
     routeRepository: RouteRepository,
+    private val userPreferenceRepository: UserPreferenceRepository
 ) : ViewModel() {
 
     /**
      * A flow emitting all the locations and whether or not they have been favorited.
      */
-    //TODO: This is a placeholder. Replace with flow from UserPreferences
-    private val favoritesFlow = MutableStateFlow(
-        mapOf(
-            "Gates Hall" to true,
-            "Olin Library" to true,
-            "Duffield Hall" to true,
-            "Statler" to false
-        )
-    ).asStateFlow()
+    private val favoritesFlow = userPreferenceRepository.favoritesFlow
+    //private val favoritesFlow: StateFlow<Set<String>> = MutableStateFlow(setOf("Gates Hall", "Duffield")).asStateFlow()
 
     /**
      * Flow of all TCAT stops
@@ -58,10 +53,38 @@ class FavoritesViewModel @Inject constructor(
 
             is ApiResponse.Success -> {
                 apiResponse.data.filter { stop ->
-                    favorites[stop.name] == true
+                    favorites.contains(stop.name)
                 }
             }
         }
     }.stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+
+
+    /**
+     * Asynchronous function to remove a stop from favorites
+     */
+    fun removeFavorite(stop: String?) {
+        if (stop != null) {
+            val currentFavorites = favoritesFlow.value.toMutableSet()
+            currentFavorites.remove(stop)
+            viewModelScope.launch {
+                userPreferenceRepository.setFavorites(currentFavorites.toSet())
+            }
+        }
+    }
+
+    /**
+     * Asynchronous function to add a stop to favorites
+     */
+    fun addFavorite(stop: String?) {
+        if (stop != null) {
+            val currentFavorites = favoritesFlow.value.toMutableSet()
+            currentFavorites.add(stop)
+            viewModelScope.launch {
+                userPreferenceRepository.setFavorites(currentFavorites.toSet())
+            }
+        }
+    }
 
 }
