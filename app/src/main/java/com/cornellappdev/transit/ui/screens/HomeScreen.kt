@@ -38,6 +38,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -59,6 +61,7 @@ import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.SearchCategoryHeader
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGrey
+import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
@@ -191,7 +194,22 @@ fun HomeScreen(
                     dividerColor = DividerGrey,
                 ),
                 leadingIcon = { Icon(Icons.Outlined.Search, "Search") },
-                trailingIcon = { Icon(Icons.Outlined.Info, "Info") },
+                trailingIcon = {
+                    if (!searchActive)
+                        Icon(Icons.Outlined.Info, "Info")
+                    else
+                        TextButton(
+                            onClick = { searchActive = false; homeViewModel.onQueryChange("") },
+                            content = {
+                                Text(
+                                    text = "Cancel",
+                                    fontFamily = sfProDisplayFamily,
+                                    fontStyle = FontStyle.Normal,
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
+                        )
+                },
                 placeholder = { Text(text = stringResource(R.string.search_placeholder)) }
 
             ) {
@@ -201,7 +219,10 @@ fun HomeScreen(
                     SearchSuggestions(
                         favorites = emptyList(),
                         recents = emptyList(),
-                        onFavoriteAdd = {},
+                        onFavoriteAdd = {
+                            //TODO: This is for dev purposes only
+                            navController.navigate("route")
+                        },
                         onRecentClear = {}
                     )
                 } else {
