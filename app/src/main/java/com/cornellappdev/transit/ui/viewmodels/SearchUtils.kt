@@ -39,30 +39,25 @@ fun ViewModel.createStopQueryFlow(
     searchQuery: MutableStateFlow<String>,
     stopFlow: StateFlow<ApiResponse<List<Stop>>>,
     fulfillsQuery: (Stop, String) -> Boolean = SearchUtils::fulfillsQuery,
-): StateFlow<List<Stop>> {
+): StateFlow<List<Stop>> =
+    stopFlow.combine(searchQuery) { allStops, filter ->
+        when (allStops) {
+            is ApiResponse.Error -> {
+                emptyList()
+            }
 
-    val queryFlow: StateFlow<List<Stop>> =
-        stopFlow.combine(searchQuery) { allStops, filter ->
-            when (allStops) {
-                is ApiResponse.Error -> {
-                    emptyList()
-                }
+            is ApiResponse.Pending -> {
+                emptyList()
+            }
 
-                is ApiResponse.Pending -> {
-                    emptyList()
-                }
-
-                is ApiResponse.Success -> {
-                    allStops.data.filter { stop ->
-                        fulfillsQuery(stop, filter)
-                    }
+            is ApiResponse.Success -> {
+                allStops.data.filter { stop ->
+                    fulfillsQuery(stop, filter)
                 }
             }
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = emptyList()
-        )
-
-    return queryFlow;
-}
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = emptyList()
+    )

@@ -37,11 +37,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -110,6 +112,14 @@ fun HomeScreen(
             }
         }
     }
+
+    val context = LocalContext.current
+
+    if (permissionState.status.isGranted) {
+        homeViewModel.instantiateLocation(context)
+    }
+
+    val currentLocationValue = homeViewModel.currentLocation.collectAsState().value
 
     // Search bar flow
     val searchBarValue = homeViewModel.searchQuery.collectAsState().value

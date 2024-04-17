@@ -49,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.theme.DividerGrey
+import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 
@@ -101,6 +102,7 @@ fun RouteOptionsSearchSheet(
                                 fontFamily = sfProDisplayFamily,
                                 fontStyle = FontStyle.Normal,
                                 textAlign = TextAlign.Center,
+                                color = SecondaryText
                             )
                         },
                         modifier = Modifier.align(Alignment.CenterEnd)
