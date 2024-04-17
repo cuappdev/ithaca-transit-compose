@@ -4,27 +4,20 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
-import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.networking.NetworkApi
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.model.LatLng
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Repository for data related to routes
+ * Repository for current user locations
  */
 @Singleton
-class LocationRepository @Inject constructor(private val networkApi: NetworkApi) {
+class LocationRepository @Inject constructor(private val networkApi: NetworkApi){
 
     //Source: Uplift
 
