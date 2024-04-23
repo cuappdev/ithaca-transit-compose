@@ -1,6 +1,5 @@
 package com.cornellappdev.transit.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +12,9 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.Info
@@ -33,6 +35,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -56,23 +58,27 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
-import com.cornellappdev.transit.ui.components.SearchCategoryHeader
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGrey
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
+import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
+import kotlinx.coroutines.launch
 
 /**
  * Composable for the home screen
  */
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
+    ExperimentalMaterialApi::class
+)
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel,
+    routeViewModel: RouteViewModel = hiltViewModel(),
     navController: NavController,
     favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
@@ -231,7 +237,9 @@ fun HomeScreen(
         }
     }
 
+    //SheetState for FavoritesBottomSheet
     val scaffoldState = rememberBottomSheetScaffoldState()
+
     var editState by remember {
         mutableStateOf(false)
     }
@@ -241,9 +249,21 @@ fun HomeScreen(
 
     val data = favoritesViewModel.favoriteStops.collectAsState().value
 
+    //sheetState for AddFavorites BottomSheet
+    var addSheetState = androidx.compose.material.rememberModalBottomSheetState(
+        ModalBottomSheetValue.Hidden,
+        confirmValueChange = {
+            true
+        }
+    )
+
+    val scope = rememberCoroutineScope()
+
+    //Favorites BottomSheet
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetSwipeEnabled = true,
+        sheetContainerColor = Color.White,
         sheetContent = {
             BottomSheetContent(txt, editState, data, {
                 editState = editState == false
@@ -252,8 +272,33 @@ fun HomeScreen(
                 } else {
                     "Edit"
                 }
+            }, {
+
+                scope.launch {
+                    addSheetState.show()
+                }
+
             })
         }
     ) {
     }
+
+    //AddFavorites BottomSheet
+    ModalBottomSheetLayout(
+        sheetShape = RoundedCornerShape(16.dp),
+        sheetBackgroundColor = Color.White,
+        sheetState = addSheetState,
+        sheetContent = {
+            AddFavoritesSearchSheet(routeViewModel = routeViewModel) {
+
+                scope.launch {
+                    addSheetState.hide()
+                }
+
+            }
+        },
+    ) {
+
+    }
+
 }
