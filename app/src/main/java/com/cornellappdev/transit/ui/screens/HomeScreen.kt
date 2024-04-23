@@ -162,30 +162,6 @@ fun HomeScreen(
             onMapLongClick = { searchActive = false },
             uiSettings = MapUiSettings(zoomControlsEnabled = false)
         ) {
-            //TODO: Not actually any sort of functionality, just demonstrate connection to backend
-            when (stopsApiResponse) {
-                is ApiResponse.Error -> {
-                }
-
-                is ApiResponse.Pending -> {
-
-                }
-
-                is ApiResponse.Success -> {
-                    stopsApiResponse.data.forEach { stop ->
-                        Marker(
-                            state = MarkerState(
-                                position = LatLng(
-                                    stop.latitude,
-                                    stop.longitude
-                                )
-                            ),
-                            title = stop.name
-                        )
-
-                    }
-                }
-            }
 
         }
 
