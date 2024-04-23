@@ -250,7 +250,7 @@ fun HomeScreen(
     val data = favoritesViewModel.favoriteStops.collectAsState().value
 
     //sheetState for AddFavorites BottomSheet
-    var addSheetState = androidx.compose.material.rememberModalBottomSheetState(
+    val addSheetState = androidx.compose.material.rememberModalBottomSheetState(
         ModalBottomSheetValue.Hidden,
         confirmValueChange = {
             true
