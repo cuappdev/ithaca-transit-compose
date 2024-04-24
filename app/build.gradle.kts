@@ -72,6 +72,7 @@ dependencies {
     implementation("androidx.compose.material:material:1.6.5")
     implementation("androidx.compose.material3:material3")
     implementation("com.google.android.gms:play-services-location:21.1.0")
+    implementation ("androidx.compose.material3:material3:1.1.0-alpha02")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.media3:media3-common:1.3.0")
     testImplementation("junit:junit:4.13.2")

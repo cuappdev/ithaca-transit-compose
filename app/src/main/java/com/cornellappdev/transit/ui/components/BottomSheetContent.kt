@@ -39,6 +39,7 @@ fun BottomSheetContent(
     editState: Boolean,
     data: List<Stop>,
     onclick: () -> Unit,
+    addOnClick: () -> Unit,
     favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
     Column() {
@@ -90,7 +91,7 @@ fun BottomSheetContent(
                     label = "Add",
                     sublabel = "",
                     editing = editState,
-                    addOnClick = {}, //add function to run when "Add' is clicked
+                    addOnClick = addOnClick,
                     removeOnClick = {}
                 )
             }

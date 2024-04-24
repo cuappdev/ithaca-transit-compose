@@ -59,8 +59,6 @@ class FavoritesViewModel @Inject constructor(
         }
     }.stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-
-
     /**
      * Asynchronous function to remove a stop from favorites
      */
