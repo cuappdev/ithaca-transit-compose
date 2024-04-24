@@ -12,6 +12,7 @@ val Pink40 = Color(0xFF7D5260)
 
 val TransitBlue = Color(0xff079ddc)
 val PrimaryText = Color(0xff212121)
+val TextButtonGray = Color(0xff6A737D)
 val SecondaryText = Color(0xff616161)
 val MetadataGrey = Color(0xff9e9e9e)
 val DividerGrey = Color(0xffeeeeee)

@@ -25,7 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.cornellappdev.transit.ui.theme.TransitBlue
+import com.cornellappdev.transit.ui.theme.TextButtonGray
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.theme.sfProTextFamily
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
@@ -82,7 +82,7 @@ fun AddFavoritesSearchSheet(
                                 textAlign = TextAlign.Center,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight(500),
-                                color = TransitBlue,
+                                color = TextButtonGray,
                             )
                         },
                         modifier = Modifier.align(Alignment.CenterEnd)
@@ -108,6 +108,7 @@ fun AddFavoritesSearchSheet(
                     Icon(
                         Icons.Outlined.Search,
                         "Search",
+                        //TODO: replace with actual search function
                         modifier = Modifier.clickable { routeViewModel.onQueryChange("") })
                 },
                 suffix = {
