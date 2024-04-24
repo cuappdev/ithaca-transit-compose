@@ -27,7 +27,6 @@ class FavoritesViewModel @Inject constructor(
      * A flow emitting all the locations and whether or not they have been favorited.
      */
     private val favoritesFlow = userPreferenceRepository.favoritesFlow
-    //private val favoritesFlow: StateFlow<Set<String>> = MutableStateFlow(setOf("Gates Hall", "Duffield")).asStateFlow()
 
     /**
      * Flow of all TCAT stops

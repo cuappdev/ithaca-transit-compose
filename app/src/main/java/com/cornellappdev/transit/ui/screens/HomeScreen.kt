@@ -46,6 +46,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.LocationRepository
+import com.cornellappdev.transit.models.MapState
+import com.cornellappdev.transit.models.RouteOptionType
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -68,6 +70,8 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
+import com.google.maps.android.compose.Polyline
+import java.time.Instant
 
 /**
  * Composable for the home screen
@@ -130,7 +134,6 @@ fun HomeScreen(
     // Collect flow of rides through API
     val stopsApiResponse = homeViewModel.stopFlow.collectAsState().value
     val queryResponse = homeViewModel.queryFlow.collectAsState().value
-    val placesResponse = homeViewModel.placeData.collectAsState().value
 
     //Collect flow of route through API
     val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
@@ -140,6 +143,9 @@ fun HomeScreen(
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(homeViewModel.defaultIthaca, 12f)
     }
+
+    //Map state
+    val mapState = homeViewModel.mapState.collectAsState().value
 
     // Search bar active/inactive
     var searchActive by remember { mutableStateOf(false) }
@@ -160,6 +166,55 @@ fun HomeScreen(
             uiSettings = MapUiSettings(zoomControlsEnabled = false)
         ) {
 
+            if (mapState.isShowing) {
+                when (routeApiResponse) {
+                    is ApiResponse.Pending -> {
+
+                    }
+
+                    is ApiResponse.Error -> {
+
+                    }
+
+                    is ApiResponse.Success -> {
+                        when (mapState.routeOptionType) {
+                            RouteOptionType.None -> {
+
+                            }
+
+                            RouteOptionType.BoardingSoon -> {
+                                routeApiResponse.data.boardingSoon.forEach { route ->
+                                    route.directions.forEach { direction ->
+                                        Polyline(
+                                            points = direction.path
+                                        )
+                                    }
+                                }
+                            }
+
+                            RouteOptionType.FromStop -> {
+                                routeApiResponse.data.fromStop.forEach { route ->
+                                    route.directions.forEach { direction ->
+                                        Polyline(
+                                            points = direction.path
+                                        )
+                                    }
+                                }
+                            }
+
+                            RouteOptionType.Walking -> {
+                                routeApiResponse.data.walking.forEach { route ->
+                                    route.directions.forEach { direction ->
+                                        Polyline(
+                                            points = direction.path
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         Column(
@@ -209,7 +264,22 @@ fun HomeScreen(
                             //TODO: This is for dev purposes only
                             navController.navigate("route")
                         },
-                        onRecentClear = {}
+                        onRecentClear = {
+                            //TODO: This is for dev purposes only
+                            homeViewModel.setMapState(MapState(true, RouteOptionType.Walking))
+
+                            homeViewModel.getRoute(
+                                end = LatLng(42.45322, -76.477264),
+                                time = System.currentTimeMillis().toDouble(),
+                                destinationName = "Helen Newman Hall",
+                                start = if (currentLocationValue != null) LatLng(
+                                    currentLocationValue.latitude,
+                                    currentLocationValue.longitude
+                                ) else LatLng(42.0, -76.0),
+                                arriveBy = false,
+                                originName = "Current Location"
+                            )
+                        }
                     )
                 } else {
                     LazyColumn {

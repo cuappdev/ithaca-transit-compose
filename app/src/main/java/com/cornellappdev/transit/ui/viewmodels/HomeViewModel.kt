@@ -2,6 +2,7 @@ package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -9,9 +10,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
+import com.cornellappdev.transit.models.MapState
+import com.cornellappdev.transit.models.RouteOptionType
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.Stop
 import com.cornellappdev.transit.networking.ApiResponse
+import com.google.android.gms.common.internal.FallbackServiceBroker
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,10 +39,6 @@ class HomeViewModel @Inject constructor(
     private val routeRepository: RouteRepository,
     private val locationRepository: LocationRepository
 ) : ViewModel() {
-
-    //TODO: Replace with Flow from backend, this is a placeholder
-    private val _placeFlow = MutableStateFlow(List(100) { "Gates Hall" })
-    val placeData = _placeFlow.asStateFlow()
 
     /**
      * Flow of all TCAT stops
@@ -132,8 +132,23 @@ class HomeViewModel @Inject constructor(
     /**
      * Start emitting location from [locationRepository]
      */
-    fun instantiateLocation(context : Context) {
+    fun instantiateLocation(context: Context) {
         locationRepository.instantiate(context)
+    }
+
+    // Map state
+
+    /**
+     * Emits whether a route should be showing on the map
+     */
+    val mapState: MutableStateFlow<MapState> =
+        MutableStateFlow(MapState(isShowing = false, routeOptionType = RouteOptionType.None))
+
+    /**
+     * Set map state for home screen
+     */
+    fun setMapState(value: MapState) {
+        mapState.value = value
     }
 
 
