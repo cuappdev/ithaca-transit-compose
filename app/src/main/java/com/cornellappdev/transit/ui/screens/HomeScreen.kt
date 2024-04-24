@@ -133,7 +133,6 @@ fun HomeScreen(
     // Collect flow of rides through API
     val stopsApiResponse = homeViewModel.stopFlow.collectAsState().value
     val queryResponse = homeViewModel.queryFlow.collectAsState().value
-    val placesResponse = homeViewModel.placeData.collectAsState().value
 
     //Collect flow of route through API
     val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
