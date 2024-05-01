@@ -46,6 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.models.MapState
+import com.cornellappdev.transit.models.RouteOptionType
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -62,10 +64,12 @@ import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.SearchSuggestions
+import com.cornellappdev.transit.ui.components.TransitPolyline
 import com.cornellappdev.transit.ui.theme.DividerGrey
 import com.google.maps.android.compose.MapUiSettings
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
+import com.google.maps.android.compose.Polyline
 import kotlinx.coroutines.launch
 
 /**
@@ -143,6 +147,9 @@ fun HomeScreen(
         position = CameraPosition.fromLatLngZoom(homeViewModel.defaultIthaca, 12f)
     }
 
+    //Map state
+    val mapState = homeViewModel.mapState.collectAsState().value
+
     // Search bar active/inactive
     var searchActive by remember { mutableStateOf(false) }
 
@@ -161,7 +168,6 @@ fun HomeScreen(
             onMapLongClick = { searchActive = false },
             uiSettings = MapUiSettings(zoomControlsEnabled = false)
         ) {
-
         }
 
         Column(
@@ -193,7 +199,24 @@ fun HomeScreen(
                         favorites = emptyList(),
                         recents = emptyList(),
                         onFavoriteAdd = {},
-                        onRecentClear = {}
+                        onRecentClear = {
+                            //TODO: This is for dev purposes only
+                            homeViewModel.setMapState(MapState(true, RouteOptionType.Walking))
+
+                            homeViewModel.getRoute(
+                                end = LatLng(42.45322, -76.477264),
+                                time = System.currentTimeMillis().toDouble(),
+                                destinationName = "Helen Newman Hall",
+                                start = if (currentLocationValue != null) LatLng(
+                                    currentLocationValue.latitude,
+                                    currentLocationValue.longitude
+                                ) else LatLng(42.0, -76.0),
+                                arriveBy = false,
+                                originName = "Current Location"
+                            )
+
+                            navController.navigate("details")
+                        }
                     )
                 } else {
                     LazyColumn {
@@ -203,6 +226,7 @@ fun HomeScreen(
                                 label = it.name,
                                 sublabel = it.type,
                                 onClick = {
+                                    navController.navigate("route/${it.name}")
                                 })
 
                         }

@@ -19,6 +19,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.KeyboardArrowLeft
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -73,10 +75,12 @@ import kotlinx.coroutines.launch
 )
 @Composable
 fun RouteScreen(
-    //homeViewModel: HomeViewModel = hiltViewModel()
     navController: NavController,
-    routeViewModel: RouteViewModel = hiltViewModel()
+    routeViewModel: RouteViewModel
 ) {
+
+    val startLocation = routeViewModel.startPl.collectAsState().value
+    val endLocation = routeViewModel.destPl.collectAsState().value
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -113,9 +117,9 @@ fun RouteScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /*TODO make this button nav back to whatever screen*/ }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
-                            imageVector = Icons.Outlined.KeyboardArrowLeft,
+                            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
                             contentDescription = ""
                         )
                     }
@@ -198,13 +202,13 @@ fun RouteScreen(
                             .fillMaxWidth(0.9f)
                             .clickable {
                                 coroutineScope.launch {
-                                    routeViewModel.onQueryChange(routeViewModel.startPl)
+                                    routeViewModel.onQueryChange(startLocation)
                                     sheetState.show()
                                 }
                             }
                     ) {
                         Text(
-                            text = routeViewModel.startPl,
+                            text = startLocation,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                             color = PrimaryText,
                             fontFamily = sfProDisplayFamily,
@@ -217,13 +221,13 @@ fun RouteScreen(
                             .fillMaxWidth(0.9f)
                             .clickable {
                                 coroutineScope.launch {
-                                    routeViewModel.onQueryChange(routeViewModel.destPl)
+                                    routeViewModel.onQueryChange(endLocation)
                                     sheetState.show()
                                 }
                             }
                     ) {
                         Text(
-                            text = routeViewModel.destPl,
+                            text = endLocation,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                             fontFamily = sfProDisplayFamily,
                             fontWeight = FontWeight.Normal,

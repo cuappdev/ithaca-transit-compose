@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.models
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.networking.ApiResponse

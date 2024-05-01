@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.models
 
+import com.google.android.gms.maps.model.LatLng
 import com.squareup.moshi.Json
 
 /**
@@ -10,4 +11,6 @@ data class Stop(
     @Json(name = "long") var longitude: Double,
     @Json(name = "name") var name: String,
     @Json(name = "type") var type: String
-)
+) {
+
+}

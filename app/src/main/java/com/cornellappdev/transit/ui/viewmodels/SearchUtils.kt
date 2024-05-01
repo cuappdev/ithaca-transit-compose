@@ -22,7 +22,7 @@ object SearchUtils {
      * True if the stop can be searched via the [query] string
      */
     fun fulfillsQuery(stop: Stop, query: String): Boolean {
-        return !query.isBlank() && stop.name.lowercase().contains(query.lowercase())
+        return query.isNotBlank() && stop.name.lowercase().contains(query.lowercase())
     }
 
 }
