@@ -46,26 +46,22 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.accompanist.permissions.rememberPermissionState
-import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGrey
-import com.google.maps.android.compose.MapUiSettings
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
+import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
 
 /**
@@ -235,31 +231,31 @@ fun HomeScreen(
 
     val scope = rememberCoroutineScope()
 
-    //Favorites BottomSheet
+    // Favorites BottomSheet
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetSwipeEnabled = true,
         sheetContainerColor = Color.White,
         sheetContent = {
-            BottomSheetContent(txt, editState, data, {
-                editState = editState == false
-                txt = if (editState) {
-                    "Done"
-                } else {
-                    "Edit"
-                }
-            }, {
-
-                scope.launch {
-                    addSheetState.show()
-                }
-
-            })
+            BottomSheetContent(
+                editText = txt,
+                editState = editState, data = data, onclick = {
+                    editState = editState == false
+                    txt = if (editState) {
+                        "Done"
+                    } else {
+                        "Edit"
+                    }
+                }, addOnClick = {
+                    scope.launch {
+                        addSheetState.show()
+                    }
+                }, navController = navController
+            )
         }
-    ) {
-    }
+    ) {}
 
-    //AddFavorites BottomSheet
+    // AddFavorites BottomSheet
     ModalBottomSheetLayout(
         sheetShape = RoundedCornerShape(16.dp),
         sheetBackgroundColor = Color.White,
@@ -273,8 +269,5 @@ fun HomeScreen(
 
             }
         },
-    ) {
-
-    }
-
+    ) {}
 }
