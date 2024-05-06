@@ -41,6 +41,7 @@ fun LocationItem(
     label: String,
     sublabel: String,
     editing: Boolean,
+    itemOnClick: () -> Unit,
     addOnClick: () -> Unit,
     removeOnClick: () -> Unit,
 ) {
@@ -80,17 +81,17 @@ fun LocationItem(
                     .width(48.dp)
                     .align(Alignment.CenterHorizontally)
             ) {
-                Image(
-                    image,
-                    contentDescription = "Place",
-                    modifier = Modifier
-                        .size(48.dp)
-                        .align(Alignment.Center)
-                        .clickable(onClick = addOnClick)
-                        .takeIf { label == "Add" } ?: Modifier
-                )
 
                 if (label == "Add") {
+                    Image(
+                        image,
+                        contentDescription = "Place",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .align(Alignment.Center)
+                            .clickable(onClick = addOnClick)
+                    )
+
                     Image(
                         editImage,
                         contentDescription = "Place",
@@ -98,7 +99,18 @@ fun LocationItem(
                             .align(Alignment.Center)
                             .size(30.dp)
                     )
+                } else {
+                    Image(
+                        image,
+                        contentDescription = "Place",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .align(Alignment.Center)
+                            .clickable(onClick = itemOnClick)
+                    )
+
                 }
+
             }
         }
         Text(
@@ -135,6 +147,7 @@ fun PreviewLocationItem() {
         label = "gates hall",
         sublabel = "hello",
         editing = true,
+        {},
         {},
         {}
     )
