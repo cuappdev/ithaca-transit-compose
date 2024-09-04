@@ -261,7 +261,7 @@ fun HomeScreen(
         sheetBackgroundColor = Color.White,
         sheetState = addSheetState,
         sheetContent = {
-            AddFavoritesSearchSheet(routeViewModel = routeViewModel) {
+            AddFavoritesSearchSheet(routeViewModel = routeViewModel, homeViewModel=homeViewModel, favoritesViewModel=favoritesViewModel) {
 
                 scope.launch {
                     addSheetState.hide()
