@@ -134,7 +134,7 @@ fun AddFavoritesSearchSheet(
                                 if (it in favorites){
                                     //Do something
                                 }else{
-                                    favoritesViewModel.addFavorite(it.name) // TODO: Change type string->stop
+                                    favoritesViewModel.addFavorite(it.name)
                                 }
                             })
                     }
