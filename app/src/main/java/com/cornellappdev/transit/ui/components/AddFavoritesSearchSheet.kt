@@ -131,9 +131,7 @@ fun AddFavoritesSearchSheet(
                             sublabel = it.type,
                             onClick = {
                                 //Add to favorites if not in favorites
-                                if (it in favorites){
-                                    //Do something
-                                }else{
+                                if (!(it in favorites)){
                                     favoritesViewModel.addFavorite(it.name)
                                 }
                             })
