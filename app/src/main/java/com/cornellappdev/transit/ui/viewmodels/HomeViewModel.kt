@@ -56,7 +56,7 @@ class HomeViewModel @Inject constructor(
     val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
 
     /**
-     * The current query in the add search bar, as a StateFlow
+     * The current query in the add favorites search bar, as a StateFlow
      */
     val addSearchQuery: MutableStateFlow<String> = MutableStateFlow("")
 
@@ -66,7 +66,7 @@ class HomeViewModel @Inject constructor(
     val queryFlow = createStopQueryFlow(searchQuery, stopFlow)
 
     /**
-     * Add search query filtered flow of all TCAT stops
+     * Add favorites search query filtered flow of all TCAT stops
      */
     val addQueryFlow = createStopQueryFlow(addSearchQuery, stopFlow)
 
@@ -97,7 +97,7 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Change the query in the add search bar and update search results
+     * Change the query in the add favorites search bar and update search results
      */
     fun onAddQueryChange(query: String) {
         addSearchQuery.value = query;
