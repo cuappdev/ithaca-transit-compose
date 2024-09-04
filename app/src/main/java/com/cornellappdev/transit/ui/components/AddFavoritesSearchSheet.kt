@@ -52,7 +52,6 @@ import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddFavoritesSearchSheet(
-    routeViewModel: RouteViewModel,
     homeViewModel: HomeViewModel,
     favoritesViewModel: FavoritesViewModel,
     cancelOnClick: () -> Unit,
