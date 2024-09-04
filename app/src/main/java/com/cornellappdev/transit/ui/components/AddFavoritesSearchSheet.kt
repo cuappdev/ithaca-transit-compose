@@ -41,11 +41,9 @@ import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.theme.sfProTextFamily
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
-import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 
 /**
  * Contents of AddFavorites BottomSheet
- * @param routeViewModel The routeViewModel used in the app
  * @param homeViewModel the homeViewModel used in the app
  * @param cancelOnClick The function to run when the cancel button is clicked
  */
