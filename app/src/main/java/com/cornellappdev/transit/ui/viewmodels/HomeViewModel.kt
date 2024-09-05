@@ -56,9 +56,19 @@ class HomeViewModel @Inject constructor(
     val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
 
     /**
+     * The current query in the add favorites search bar, as a StateFlow
+     */
+    val addSearchQuery: MutableStateFlow<String> = MutableStateFlow("")
+
+    /**
      * Search query filtered flow of all TCAT stops
      */
     val queryFlow = createStopQueryFlow(searchQuery, stopFlow)
+
+    /**
+     * Add favorites search query filtered flow of all TCAT stops
+     */
+    val addQueryFlow = createStopQueryFlow(addSearchQuery, stopFlow)
 
     /**
      * Default map location
@@ -84,6 +94,13 @@ class HomeViewModel @Inject constructor(
      */
     fun onQueryChange(query: String) {
         searchQuery.value = query;
+    }
+
+    /**
+     * Change the query in the add favorites search bar and update search results
+     */
+    fun onAddQueryChange(query: String) {
+        addSearchQuery.value = query;
     }
 
     /**
