@@ -85,7 +85,6 @@ fun HomeScreen(
     if (openDialog && !permissionState.status.isGranted) {
         AlertDialog(
             onDismissRequest = {
-
                 openDialog = false
             }
         ) {
@@ -134,7 +133,6 @@ fun HomeScreen(
     //Collect flow of route through API
     val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
 
-
     //Map camera
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(homeViewModel.defaultIthaca, 12f)
@@ -147,7 +145,6 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
@@ -157,9 +154,7 @@ fun HomeScreen(
             onMapClick = { searchActive = false },
             onMapLongClick = { searchActive = false },
             uiSettings = MapUiSettings(zoomControlsEnabled = false)
-        ) {
-
-        }
+        ) {}
 
         Column(
             modifier = Modifier
@@ -183,7 +178,6 @@ fun HomeScreen(
                 placeholder = { Text(text = stringResource(R.string.search_placeholder)) }
 
             ) {
-
                 //If query is blank, display recents and favorites
                 if (searchBarValue.isBlank()) {
                     SearchSuggestions(
@@ -201,7 +195,6 @@ fun HomeScreen(
                                 sublabel = it.type,
                                 onClick = {
                                 })
-
                         }
                     }
                 }
@@ -261,12 +254,13 @@ fun HomeScreen(
         sheetBackgroundColor = Color.White,
         sheetState = addSheetState,
         sheetContent = {
-            AddFavoritesSearchSheet(homeViewModel=homeViewModel, favoritesViewModel=favoritesViewModel) {
-
+            AddFavoritesSearchSheet(
+                homeViewModel = homeViewModel,
+                favoritesViewModel = favoritesViewModel
+            ) {
                 scope.launch {
                     addSheetState.hide()
                 }
-
             }
         },
     ) {}

@@ -102,9 +102,7 @@ fun AddFavoritesSearchSheet(
                         },
                         modifier = Modifier.align(Alignment.CenterEnd)
                     )
-
                 }
-
             }
 
             DockedSearchBar(
@@ -121,7 +119,6 @@ fun AddFavoritesSearchSheet(
                 leadingIcon = { Icon(Icons.Outlined.Search, "Search") },
                 trailingIcon = { Icon(Icons.Outlined.Info, "Info") },
                 placeholder = { Text(text = "Search for a stop to add") }
-
             ) {
                 LazyColumn {
                     items(addQueryResponse) {
@@ -131,14 +128,14 @@ fun AddFavoritesSearchSheet(
                             sublabel = it.type,
                             onClick = {
                                 //Add to favorites if not in favorites
-                                if (!(it in favorites)){
+                                if (!(it in favorites)) {
                                     favoritesViewModel.addFavorite(it.name)
                                 }
-                            })
+                            }
+                        )
                     }
                 }
             }
-
         }
     }
 }
