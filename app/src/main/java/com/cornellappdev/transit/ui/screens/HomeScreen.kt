@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.models.Type
 import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
@@ -192,7 +193,7 @@ fun HomeScreen(
                             MenuItem(
                                 Icons.Filled.Place,
                                 label = it.name,
-                                sublabel = it.type,
+                                sublabel = if (it.type == Type.busStop) "BusStop" else it.detail.toString(),
                                 onClick = {
                                 })
                         }
