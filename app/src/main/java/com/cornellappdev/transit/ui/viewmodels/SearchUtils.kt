@@ -2,15 +2,12 @@ package com.cornellappdev.transit.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cornellappdev.transit.models.Stop
+import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.networking.ApiResponse
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.coroutineContext
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -21,7 +18,7 @@ object SearchUtils {
     /**
      * True if the stop can be searched via the [query] string
      */
-    fun fulfillsQuery(stop: Stop, query: String): Boolean {
+    fun fulfillsQuery(stop: Place, query: String): Boolean {
         return !query.isBlank() && stop.name.lowercase().contains(query.lowercase())
     }
 
@@ -37,9 +34,9 @@ object SearchUtils {
  */
 fun ViewModel.createStopQueryFlow(
     searchQuery: MutableStateFlow<String>,
-    stopFlow: StateFlow<ApiResponse<List<Stop>>>,
-    fulfillsQuery: (Stop, String) -> Boolean = SearchUtils::fulfillsQuery,
-): StateFlow<List<Stop>> =
+    stopFlow: StateFlow<ApiResponse<List<Place>>>,
+    fulfillsQuery: (Place, String) -> Boolean = SearchUtils::fulfillsQuery,
+): StateFlow<List<Place>> =
     stopFlow.combine(searchQuery) { allStops, filter ->
         when (allStops) {
             is ApiResponse.Error -> {

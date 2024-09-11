@@ -2,27 +2,15 @@ package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.RouteRepository
-import com.cornellappdev.transit.models.Stop
-import com.cornellappdev.transit.networking.ApiResponse
-import com.google.android.gms.location.FusedLocationProviderClient
+import com.cornellappdev.transit.models.Place
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -85,7 +73,7 @@ class HomeViewModel @Inject constructor(
     /**
      * True if the stop can be searched via the [query] string
      */
-    private fun fulfillsQuery(stop: Stop, query: String): Boolean {
+    private fun fulfillsQuery(stop: Place, query: String): Boolean {
         return !query.isBlank() && stop.name.lowercase().contains(query.lowercase())
     }
 

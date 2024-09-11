@@ -1,7 +1,5 @@
 package com.cornellappdev.transit.models
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.networking.NetworkApi
 import com.google.android.gms.maps.model.LatLng
@@ -19,12 +17,12 @@ import javax.inject.Singleton
 @Singleton
 class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
 
-    suspend fun getAllStops(): Payload<List<Stop>> = networkApi.getAllStops()
+    suspend fun getAllStops(): Payload<List<Place>> = networkApi.getAllStops()
 
     private suspend fun getRoute(request: RouteRequest): Payload<RouteOptions> =
         networkApi.getRoute(request)
 
-    private val _stopFlow: MutableStateFlow<ApiResponse<List<Stop>>> =
+    private val _stopFlow: MutableStateFlow<ApiResponse<List<Place>>> =
         MutableStateFlow(ApiResponse.Pending)
 
     private val _lastRouteFlow: MutableStateFlow<ApiResponse<RouteOptions>> =

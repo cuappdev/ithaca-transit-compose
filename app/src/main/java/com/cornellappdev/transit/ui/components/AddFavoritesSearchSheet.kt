@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cornellappdev.transit.models.Type
 import com.cornellappdev.transit.ui.theme.DividerGrey
 import com.cornellappdev.transit.ui.theme.TextButtonGray
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
@@ -58,7 +59,7 @@ fun AddFavoritesSearchSheet(
     val addSearchBarValue = homeViewModel.addSearchQuery.collectAsState().value
     val addQueryResponse = homeViewModel.addQueryFlow.collectAsState().value
     var addSearchActive by remember { mutableStateOf(false) }
-    val favorites = favoritesViewModel.favoriteStops.collectAsState().value
+    val favorites = favoritesViewModel.favoritesStops.collectAsState().value
 
     Column(
         modifier = Modifier
@@ -125,11 +126,10 @@ fun AddFavoritesSearchSheet(
                         MenuItem(
                             Icons.Filled.Place,
                             label = it.name,
-                            sublabel = it.type,
+                            sublabel = if (it.type == Type.busStop) "BusStop" else it.detail.toString(),
                             onClick = {
-                                //Add to favorites if not in favorites
                                 if (!(it in favorites)) {
-                                    favoritesViewModel.addFavorite(it.name)
+                                    favoritesViewModel.addFavorite(it)
                                 }
                             }
                         )

@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.models.Type
 import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
@@ -192,7 +193,7 @@ fun HomeScreen(
                             MenuItem(
                                 Icons.Filled.Place,
                                 label = it.name,
-                                sublabel = it.type,
+                                sublabel = if (it.type == Type.busStop) "BusStop" else it.detail.toString(),
                                 onClick = {
                                 })
                         }
@@ -212,7 +213,7 @@ fun HomeScreen(
         mutableStateOf("Edit")
     }
 
-    val data = favoritesViewModel.favoriteStops.collectAsState().value
+    val data = favoritesViewModel.favoritesStops.collectAsState().value
 
     //sheetState for AddFavorites BottomSheet
     val addSheetState = androidx.compose.material.rememberModalBottomSheetState(
@@ -232,7 +233,7 @@ fun HomeScreen(
         sheetContent = {
             BottomSheetContent(
                 editText = txt,
-                editState = editState, data = data, onclick = {
+                editState = editState, data = data.toList(), onclick = {
                     editState = editState == false
                     txt = if (editState) {
                         "Done"
