@@ -38,14 +38,14 @@ class RouteViewModel @Inject constructor(
     /**
      * Change start location
      */
-    fun changeStateLocation(location : String) {
+    fun changeStateLocation(location: String) {
         startPl.value = location
     }
 
     /**
      * Change end location
      */
-    fun changeEndLocation(location : String) {
+    fun changeEndLocation(location: String) {
         destPl.value = location
     }
 

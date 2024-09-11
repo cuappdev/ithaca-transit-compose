@@ -33,6 +33,7 @@ sealed class Transport {
     abstract val startTime: String
     abstract val arriveTime: String
     abstract val lateness: BusLateness
+
     class WalkOnly(
         override val startTime: String,
         override val arriveTime: String,

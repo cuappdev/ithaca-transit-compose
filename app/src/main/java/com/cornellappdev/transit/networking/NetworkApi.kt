@@ -22,6 +22,5 @@ interface NetworkApi {
     @POST("/api/v3/route")
     suspend fun getRoute(@Body request: RouteRequest): Payload<RouteOptions>
 
-    
 
 }

@@ -12,8 +12,9 @@ data class QueryResult(
     @Json(name = "busStops") var stops : List<Place>
 )
 
+//TODO: Deprecated, start migrating to Place data class
 /**
- * Data class representing a TCAT stop
+ * DEPRECATED: Data class representing a TCAT stop
  */
 data class Stop(
     @Json(name = "lat") var latitude: Double,

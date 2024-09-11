@@ -61,7 +61,7 @@ import kotlinx.coroutines.launch
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
-fun DetailsScreen(navController: NavHostController, homeViewModel : HomeViewModel) {
+fun DetailsScreen(navController: NavHostController, homeViewModel: HomeViewModel) {
 
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 

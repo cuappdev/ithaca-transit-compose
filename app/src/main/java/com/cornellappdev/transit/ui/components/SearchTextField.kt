@@ -94,5 +94,5 @@ fun SearchTextField(
         suffix = suffix,
         shape = RoundedCornerShape(8.dp),
 
-    )
+        )
 }

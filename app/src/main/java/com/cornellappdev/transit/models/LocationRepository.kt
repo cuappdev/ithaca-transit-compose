@@ -17,7 +17,7 @@ import javax.inject.Singleton
  * Repository for current user locations
  */
 @Singleton
-class LocationRepository @Inject constructor(private val networkApi: NetworkApi){
+class LocationRepository @Inject constructor(private val networkApi: NetworkApi) {
 
     //Source: Uplift
 

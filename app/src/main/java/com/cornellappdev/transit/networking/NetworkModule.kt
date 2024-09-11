@@ -34,7 +34,7 @@ object NetworkModule {
         return OkHttpClient
             .Builder()
             .connectionPool(ConnectionPool(0, 1, TimeUnit.NANOSECONDS))
-            .protocols(listOf( Protocol.HTTP_1_1))
+            .protocols(listOf(Protocol.HTTP_1_1))
             .readTimeout(60, TimeUnit.SECONDS)
             .connectTimeout(60, TimeUnit.SECONDS)
             .addInterceptor(logging)

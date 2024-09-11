@@ -9,7 +9,7 @@ import com.google.maps.android.compose.Polyline
  * Polyline wrapper with Transit design changes
  */
 @Composable
-fun TransitPolyline(points : List<LatLng>){
+fun TransitPolyline(points: List<LatLng>) {
     Polyline(
         points = points,
         color = TransitBlue,
