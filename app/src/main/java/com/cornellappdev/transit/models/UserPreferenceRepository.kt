@@ -15,6 +15,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 /**
  * Repository to store data related to user preferences
@@ -39,25 +42,37 @@ class UserPreferenceRepository @Inject constructor(@ApplicationContext val conte
     }
 
     /**
+     * Configuring serializer
+     */
+    private val json = Json { encodeDefaults = true }
+
+    /**
      * Sets favorites in user preferences
      * @param favorites: The set containing names of stops that have been favorites
      */
-    suspend fun setFavorites(favorites: Set<String>) {
+    suspend fun setFavorites(favorites: Set<Stop>) {
         dataStore.edit { preferences ->
-            preferences[FAVORITES_MAP] = favorites
+            val favoriteStrings = favorites.map { json.encodeToString(it) }.toSet()
+            preferences[FAVORITES_MAP] = favoriteStrings
         }
     }
 
     /**
      * Flow of favorite stops
      */
-    val favoritesFlow: StateFlow<Set<String>> = dataStore.data
+    val favoritesFlow: StateFlow<Set<Stop>> = dataStore.data
         .catch {
-            setOf<String>()
+            setOf<Stop>()
         }
         .map { preferences ->
-            val favorites = preferences[FAVORITES_MAP] ?: setOf<String>()
-            favorites
+            val favoriteStrings = preferences[FAVORITES_MAP] ?: setOf()
+            val response = favoriteStrings.mapNotNull { jsonString ->
+                try {
+                    json.decodeFromString<Stop>(jsonString)
+                } catch (e: Exception) {
+                    null
+                }
+            }.toSet()
+            response
         }.stateIn(CoroutineScope(Dispatchers.Default), SharingStarted.Eagerly, emptySet())
-
 }

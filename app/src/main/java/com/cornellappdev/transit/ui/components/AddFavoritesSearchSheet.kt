@@ -59,7 +59,7 @@ fun AddFavoritesSearchSheet(
     val addSearchBarValue = homeViewModel.addSearchQuery.collectAsState().value
     val addQueryResponse = homeViewModel.addQueryFlow.collectAsState().value
     var addSearchActive by remember { mutableStateOf(false) }
-    val favorites = favoritesViewModel.favoriteStops.collectAsState().value
+    val favorites = favoritesViewModel.favoritesStops.collectAsState().value
 
     Column(
         modifier = Modifier
@@ -129,7 +129,7 @@ fun AddFavoritesSearchSheet(
                             sublabel = if (it.type == Type.busStop) "BusStop" else it.detail.toString(),
                             onClick = {
                                 if (!(it in favorites)) {
-                                    favoritesViewModel.addFavorite(it.name)
+                                    favoritesViewModel.addFavorite(it)
                                 }
                             }
                         )

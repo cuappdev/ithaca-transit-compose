@@ -213,7 +213,7 @@ fun HomeScreen(
         mutableStateOf("Edit")
     }
 
-    val data = favoritesViewModel.favoriteStops.collectAsState().value
+    val data = favoritesViewModel.favoritesStops.collectAsState().value
 
     //sheetState for AddFavorites BottomSheet
     val addSheetState = androidx.compose.material.rememberModalBottomSheetState(
@@ -233,7 +233,7 @@ fun HomeScreen(
         sheetContent = {
             BottomSheetContent(
                 editText = txt,
-                editState = editState, data = data, onclick = {
+                editState = editState, data = data.toList(), onclick = {
                     editState = editState == false
                     txt = if (editState) {
                         "Done"
