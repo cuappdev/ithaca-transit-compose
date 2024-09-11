@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.models.Stop
+import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.Type
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
@@ -39,7 +39,7 @@ import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 fun BottomSheetContent(
     editText: String,
     editState: Boolean,
-    data: List<Stop>,
+    data: List<Place>,
     onclick: () -> Unit,
     addOnClick: () -> Unit,
     favoritesViewModel: FavoritesViewModel = hiltViewModel(),
@@ -83,7 +83,7 @@ fun BottomSheetContent(
                     label = it.name,
                     sublabel = if (it.type == Type.busStop) "BusStop" else it.detail.toString(),
                     editing = editState,
-                    { navController.navigate("route") },
+                    { navController.navigate("route/${it.name}") },
                     addOnClick = {},
                     removeOnClick = { favoritesViewModel.removeFavorite(it) },
                 )

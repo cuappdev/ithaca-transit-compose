@@ -12,7 +12,7 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.cornellappdev.transit.models.Stop
+import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.Type
 
 /**
@@ -20,8 +20,8 @@ import com.cornellappdev.transit.models.Type
  */
 @Composable
 fun SearchSuggestions(
-    favorites: List<Stop>,
-    recents: List<Stop>,
+    favorites: List<Place>,
+    recents: List<Place>,
     onFavoriteAdd: () -> Unit,
     onRecentClear: () -> Unit
 ) {

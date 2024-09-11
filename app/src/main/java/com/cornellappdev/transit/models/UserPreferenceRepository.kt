@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 /**
@@ -50,7 +49,7 @@ class UserPreferenceRepository @Inject constructor(@ApplicationContext val conte
      * Sets favorites in user preferences
      * @param favorites: The set containing names of stops that have been favorites
      */
-    suspend fun setFavorites(favorites: Set<Stop>) {
+    suspend fun setFavorites(favorites: Set<Place>) {
         dataStore.edit { preferences ->
             val favoriteStrings = favorites.map { json.encodeToString(it) }.toSet()
             preferences[FAVORITES_MAP] = favoriteStrings
@@ -60,15 +59,15 @@ class UserPreferenceRepository @Inject constructor(@ApplicationContext val conte
     /**
      * Flow of favorite stops
      */
-    val favoritesFlow: StateFlow<Set<Stop>> = dataStore.data
+    val favoritesFlow: StateFlow<Set<Place>> = dataStore.data
         .catch {
-            setOf<Stop>()
+            setOf<Place>()
         }
         .map { preferences ->
             val favoriteStrings = preferences[FAVORITES_MAP] ?: setOf()
             val response = favoriteStrings.mapNotNull { jsonString ->
                 try {
-                    json.decodeFromString<Stop>(jsonString)
+                    json.decodeFromString<Place>(jsonString)
                 } catch (e: Exception) {
                     null
                 }

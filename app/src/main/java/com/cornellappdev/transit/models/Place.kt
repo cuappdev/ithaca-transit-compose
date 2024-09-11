@@ -15,7 +15,7 @@ enum class Type() {
  * Data class representing a TCAT stop
  */
 @Serializable
-data class Stop(
+data class Place(
     @Json(name = "lat") var latitude: Double,
     @Json(name = "long") var longitude: Double,
     @Json(name = "name") var name: String,
