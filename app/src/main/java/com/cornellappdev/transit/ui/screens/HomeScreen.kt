@@ -200,22 +200,6 @@ fun HomeScreen(
                         recents = emptyList(),
                         onFavoriteAdd = {},
                         onRecentClear = {
-                            //TODO: This is for dev purposes only
-                            homeViewModel.setMapState(MapState(true, RouteOptionType.Walking))
-
-                            homeViewModel.getRoute(
-                                end = LatLng(42.45322, -76.477264),
-                                time = System.currentTimeMillis().toDouble(),
-                                destinationName = "Helen Newman Hall",
-                                start = if (currentLocationValue != null) LatLng(
-                                    currentLocationValue.latitude,
-                                    currentLocationValue.longitude
-                                ) else LatLng(42.0, -76.0),
-                                arriveBy = false,
-                                originName = "Current Location"
-                            )
-
-                            navController.navigate("details")
                         }
                     )
                 } else {

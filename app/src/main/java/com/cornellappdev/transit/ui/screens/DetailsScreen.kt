@@ -1,6 +1,7 @@
 package com.cornellappdev.transit.ui.screens
 
 import android.Manifest
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -62,7 +63,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun DetailsScreen(navController: NavHostController, homeViewModel : HomeViewModel) {
 
-    // Permissions dialog
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
     //Map camera
@@ -114,7 +114,7 @@ fun DetailsScreen(navController: NavHostController, homeViewModel : HomeViewMode
                     }
 
                     is ApiResponse.Error -> {
-
+                        //TODO: Appropriate error
                     }
 
                     is ApiResponse.Success -> {

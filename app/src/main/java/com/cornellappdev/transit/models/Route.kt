@@ -21,7 +21,7 @@ data class DirectionStop(
 data class Direction(
     @Json(name = "endLocation") val endLocation: LatLng,
     @Json(name = "routeId") val routeId: String?,
-    @Json(name = "tripIds") val tripIds: List<String>,
+    @Json(name = "tripIds") val tripIds: List<String>?,
     @Json(name = "stayOnBusForTransfer") val stayOnBusForTransfer: Boolean,
     @Json(name = "delay") val delay: Int?,
     @Json(name = "startLocation") val startLocation: LatLng,
