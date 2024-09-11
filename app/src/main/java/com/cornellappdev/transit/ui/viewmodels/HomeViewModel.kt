@@ -37,20 +37,32 @@ class HomeViewModel @Inject constructor(
      */
     val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
 
-    val placeQueryFlow : StateFlow<ApiResponse<List<Place>>> = routeRepository.placeFlow
+    val placeQueryFlow: StateFlow<ApiResponse<List<Place>>> = routeRepository.placeFlow
 
-    init {
-        viewModelScope.launch {
-            searchQuery.collect {
-                    it -> routeRepository.makeSearch(it)
-            }
-        }
-    }
+    /**
+     * The current query in the add favorites search bar, as a StateFlow
+     */
+    val addSearchQuery: MutableStateFlow<String> = MutableStateFlow("")
 
     /**
      * Default map location
      */
     val defaultIthaca = LatLng(42.44, -76.50)
+
+    init {
+        viewModelScope.launch {
+            launch {
+                searchQuery.collect { it ->
+                    routeRepository.makeSearch(it)
+                }
+            }
+            launch {
+                addSearchQuery.collect { it ->
+                    routeRepository.makeSearch(it)
+                }
+            }
+        }
+    }
 
     /**
      * Perform a search on the string [query]
@@ -64,6 +76,13 @@ class HomeViewModel @Inject constructor(
      */
     fun onQueryChange(query: String) {
         searchQuery.value = query;
+    }
+
+    /**
+     * Change the query in the add favorites search bar and update search results
+     */
+    fun onAddQueryChange(query: String) {
+        addSearchQuery.value = query;
     }
 
     /**

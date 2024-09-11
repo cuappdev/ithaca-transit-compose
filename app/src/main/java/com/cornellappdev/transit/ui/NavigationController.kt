@@ -14,6 +14,7 @@ import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 /**
  * The navigation controller for the app (parent of all screens)
  */
+//TODO: make navContoller accept argument (start + dest) by editing the navHost
 @Composable
 fun NavigationController(
     homeViewModel: HomeViewModel = hiltViewModel(),
@@ -23,7 +24,7 @@ fun NavigationController(
 
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = "home",
     ) {
         composable("home") {
             HomeScreen(homeViewModel = homeViewModel, navController = navController)
@@ -37,6 +38,10 @@ fun NavigationController(
         }
         composable("details") {
             DetailsScreen(navController = navController, homeViewModel = homeViewModel)
+        }
+
+        composable("route") {
+            RouteScreen(navController = navController, routeViewModel = routeViewModel)
         }
 
     }

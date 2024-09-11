@@ -46,17 +46,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.models.MapState
-import com.cornellappdev.transit.models.RouteOptionType
+
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.cornellappdev.transit.networking.ApiResponse
@@ -64,12 +60,11 @@ import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.SearchSuggestions
-import com.cornellappdev.transit.ui.components.TransitPolyline
 import com.cornellappdev.transit.ui.theme.DividerGrey
-import com.google.maps.android.compose.MapUiSettings
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
-import com.google.maps.android.compose.Polyline
+
+import com.google.maps.android.compose.MapUiSettings
 import kotlinx.coroutines.launch
 
 /**
@@ -93,7 +88,6 @@ fun HomeScreen(
     if (openDialog && !permissionState.status.isGranted) {
         AlertDialog(
             onDismissRequest = {
-
                 openDialog = false
             }
         ) {
@@ -139,7 +133,6 @@ fun HomeScreen(
     //Collect flow of route through API
     val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
 
-
     //Map camera
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(homeViewModel.defaultIthaca, 12f)
@@ -155,7 +148,6 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
@@ -190,7 +182,6 @@ fun HomeScreen(
                 placeholder = { Text(text = stringResource(R.string.search_placeholder)) }
 
             ) {
-
                 //If query is blank, display recents and favorites
                 if (searchBarValue.isBlank()) {
                     SearchSuggestions(
@@ -201,17 +192,17 @@ fun HomeScreen(
                         }
                     )
                 } else {
-                    when (placeQueryResponse) {
-                        is ApiResponse.Error -> {
+                    LazyColumn {
+                        when (placeQueryResponse) {
+                            is ApiResponse.Error -> {
 
-                        }
+                            }
 
-                        is ApiResponse.Pending -> {
+                            is ApiResponse.Pending -> {
 
-                        }
+                            }
 
-                        is ApiResponse.Success -> {
-                            LazyColumn {
+                            is ApiResponse.Success -> {
                                 items(placeQueryResponse.data) {
                                     MenuItem(
                                         Icons.Filled.Place,
@@ -252,46 +243,44 @@ fun HomeScreen(
 
     val scope = rememberCoroutineScope()
 
-    //Favorites BottomSheet
+    // Favorites BottomSheet
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetSwipeEnabled = true,
         sheetContainerColor = Color.White,
         sheetContent = {
-            BottomSheetContent(txt, editState, data, {
-                editState = editState == false
-                txt = if (editState) {
-                    "Done"
-                } else {
-                    "Edit"
-                }
-            }, {
-
-                scope.launch {
-                    addSheetState.show()
-                }
-
-            })
+            BottomSheetContent(
+                editText = txt,
+                editState = editState, data = data, onclick = {
+                    editState = editState == false
+                    txt = if (editState) {
+                        "Done"
+                    } else {
+                        "Edit"
+                    }
+                }, addOnClick = {
+                    scope.launch {
+                        addSheetState.show()
+                    }
+                }, navController = navController
+            )
         }
-    ) {
-    }
+    ) {}
 
-    //AddFavorites BottomSheet
+    // AddFavorites BottomSheet
     ModalBottomSheetLayout(
         sheetShape = RoundedCornerShape(16.dp),
         sheetBackgroundColor = Color.White,
         sheetState = addSheetState,
         sheetContent = {
-            AddFavoritesSearchSheet(routeViewModel = routeViewModel) {
-
+            AddFavoritesSearchSheet(
+                homeViewModel = homeViewModel,
+                favoritesViewModel = favoritesViewModel
+            ) {
                 scope.launch {
                     addSheetState.hide()
                 }
-
             }
         },
-    ) {
-
-    }
-
+    ) {}
 }

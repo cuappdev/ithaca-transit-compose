@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.Stop
@@ -41,7 +42,8 @@ fun BottomSheetContent(
     data: List<Stop>,
     onclick: () -> Unit,
     addOnClick: () -> Unit,
-    favoritesViewModel: FavoritesViewModel = hiltViewModel()
+    favoritesViewModel: FavoritesViewModel = hiltViewModel(),
+    navController: NavController
 ) {
     Column() {
         Row(
@@ -81,6 +83,7 @@ fun BottomSheetContent(
                     label = it.name,
                     sublabel = it.type,
                     editing = editState,
+                    { navController.navigate("route")},
                     addOnClick = {},
                     removeOnClick = { favoritesViewModel.removeFavorite(it.name) },
                 )
@@ -92,6 +95,7 @@ fun BottomSheetContent(
                     label = "Add",
                     sublabel = "",
                     editing = editState,
+                    {},
                     addOnClick = addOnClick,
                     removeOnClick = {}
                 )
