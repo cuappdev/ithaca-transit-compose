@@ -37,7 +37,9 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.models.MapState
 import com.cornellappdev.transit.models.RouteOptionType
+import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.TransitPolyline
 import com.cornellappdev.transit.ui.theme.DividerGrey
@@ -47,9 +49,11 @@ import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
@@ -99,57 +103,69 @@ fun DetailsScreen(navController: NavHostController, homeViewModel: HomeViewModel
         )
 
         Divider(thickness = 1.dp, color = DividerGrey)
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState,
-            properties = MapProperties(
-                isMyLocationEnabled = permissionState.status.isGranted
-            ),
-            uiSettings = MapUiSettings(zoomControlsEnabled = false)
-        ) {
-            if (mapState.isShowing) {
-                when (routeApiResponse) {
-                    is ApiResponse.Pending -> {
 
-                    }
+        DrawableMap(mapState, routeApiResponse, cameraPositionState, permissionState)
+    }
+}
 
-                    is ApiResponse.Error -> {
-                        //TODO: Appropriate error
-                    }
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+private fun DrawableMap(
+    mapState: MapState,
+    routeApiResponse: ApiResponse<RouteOptions>,
+    cameraPositionState: CameraPositionState,
+    permissionState: PermissionState
+) {
+    GoogleMap(
+        modifier = Modifier.fillMaxSize(),
+        cameraPositionState = cameraPositionState,
+        properties = MapProperties(
+            isMyLocationEnabled = permissionState.status.isGranted
+        ),
+        uiSettings = MapUiSettings(zoomControlsEnabled = false)
+    ) {
+        if (mapState.isShowing) {
+            when (routeApiResponse) {
+                is ApiResponse.Pending -> {
 
-                    is ApiResponse.Success -> {
-                        when (mapState.routeOptionType) {
-                            RouteOptionType.None -> {
+                }
 
-                            }
+                is ApiResponse.Error -> {
+                    //TODO: Appropriate error
+                }
 
-                            RouteOptionType.BoardingSoon -> {
-                                routeApiResponse.data.boardingSoon.forEach { route ->
-                                    route.directions.forEach { direction ->
-                                        TransitPolyline(
-                                            points = direction.path
-                                        )
-                                    }
+                is ApiResponse.Success -> {
+                    when (mapState.routeOptionType) {
+                        RouteOptionType.None -> {
+
+                        }
+
+                        RouteOptionType.BoardingSoon -> {
+                            routeApiResponse.data.boardingSoon.forEach { route ->
+                                route.directions.forEach { direction ->
+                                    TransitPolyline(
+                                        points = direction.path
+                                    )
                                 }
                             }
+                        }
 
-                            RouteOptionType.FromStop -> {
-                                routeApiResponse.data.fromStop.forEach { route ->
-                                    route.directions.forEach { direction ->
-                                        TransitPolyline(
-                                            points = direction.path
-                                        )
-                                    }
+                        RouteOptionType.FromStop -> {
+                            routeApiResponse.data.fromStop.forEach { route ->
+                                route.directions.forEach { direction ->
+                                    TransitPolyline(
+                                        points = direction.path
+                                    )
                                 }
                             }
+                        }
 
-                            RouteOptionType.Walking -> {
-                                routeApiResponse.data.walking.forEach { route ->
-                                    route.directions.forEach { direction ->
-                                        TransitPolyline(
-                                            points = direction.path
-                                        )
-                                    }
+                        RouteOptionType.Walking -> {
+                            routeApiResponse.data.walking.forEach { route ->
+                                route.directions.forEach { direction ->
+                                    TransitPolyline(
+                                        points = direction.path
+                                    )
                                 }
                             }
                         }

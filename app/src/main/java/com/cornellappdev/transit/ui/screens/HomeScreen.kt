@@ -157,8 +157,7 @@ fun HomeScreen(
             onMapClick = { searchActive = false },
             onMapLongClick = { searchActive = false },
             uiSettings = MapUiSettings(zoomControlsEnabled = false)
-        ) {
-        }
+        )
 
         Column(
             modifier = Modifier
