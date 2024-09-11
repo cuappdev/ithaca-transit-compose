@@ -134,9 +134,7 @@ fun HomeScreen(
     // Search bar flow
     val searchBarValue = homeViewModel.searchQuery.collectAsState().value
 
-    // Collect flow of rides through API
-    val stopsApiResponse = homeViewModel.stopFlow.collectAsState().value
-    val queryResponse = homeViewModel.queryFlow.collectAsState().value
+    val placeQueryResponse = homeViewModel.placeQueryFlow.collectAsState().value
 
     //Collect flow of route through API
     val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
@@ -203,16 +201,28 @@ fun HomeScreen(
                         }
                     )
                 } else {
-                    LazyColumn {
-                        items(queryResponse) {
-                            MenuItem(
-                                Icons.Filled.Place,
-                                label = it.name,
-                                sublabel = it.type,
-                                onClick = {
-                                    navController.navigate("route/${it.name}")
-                                })
+                    when (placeQueryResponse) {
+                        is ApiResponse.Error -> {
 
+                        }
+
+                        is ApiResponse.Pending -> {
+
+                        }
+
+                        is ApiResponse.Success -> {
+                            LazyColumn {
+                                items(placeQueryResponse.data) {
+                                    MenuItem(
+                                        Icons.Filled.Place,
+                                        label = it.name,
+                                        sublabel = it.type,
+                                        onClick = {
+                                            navController.navigate("route/${it.name}")
+                                        })
+
+                                }
+                            }
                         }
                     }
                 }

@@ -2,31 +2,18 @@ package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
 import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.MapState
+import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.RouteOptionType
 import com.cornellappdev.transit.models.RouteRepository
-import com.cornellappdev.transit.models.Stop
 import com.cornellappdev.transit.networking.ApiResponse
-import com.google.android.gms.common.internal.FallbackServiceBroker
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,11 +28,6 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     /**
-     * Flow of all TCAT stops
-     */
-    val stopFlow = routeRepository.stopFlow
-
-    /**
      * Flow from backend of last route fetched
      */
     val lastRouteFlow = routeRepository.lastRouteFlow
@@ -55,10 +37,15 @@ class HomeViewModel @Inject constructor(
      */
     val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
 
-    /**
-     * Search query filtered flow of all TCAT stops
-     */
-    val queryFlow = createStopQueryFlow(searchQuery, stopFlow)
+    val placeQueryFlow : StateFlow<ApiResponse<List<Place>>> = routeRepository.placeFlow
+
+    init {
+        viewModelScope.launch {
+            searchQuery.collect {
+                    it -> routeRepository.makeSearch(it)
+            }
+        }
+    }
 
     /**
      * Default map location
@@ -77,15 +64,6 @@ class HomeViewModel @Inject constructor(
      */
     fun onQueryChange(query: String) {
         searchQuery.value = query;
-    }
-
-    /**
-     * Get all TCAT stops
-     */
-    fun getAllStops() {
-        viewModelScope.launch {
-            routeRepository.getAllStops()
-        }
     }
 
     /**
