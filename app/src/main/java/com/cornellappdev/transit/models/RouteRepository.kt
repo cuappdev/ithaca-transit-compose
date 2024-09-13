@@ -17,7 +17,7 @@ import javax.inject.Singleton
 @Singleton
 class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
 
-    private suspend fun getAllStops(): Payload<List<Stop>> = networkApi.getAllStops()
+    private suspend fun getAllStops(): Payload<List<Place>> = networkApi.getAllStops()
 
     private suspend fun appleSearch(query: SearchQuery): Payload<QueryResult> =
         networkApi.appleSearch(query)
@@ -25,7 +25,7 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
     private suspend fun getRoute(request: RouteRequest): Payload<RouteOptions> =
         networkApi.getRoute(request)
 
-    private val _stopFlow: MutableStateFlow<ApiResponse<List<Stop>>> =
+    private val _stopFlow: MutableStateFlow<ApiResponse<List<Place>>> =
         MutableStateFlow(ApiResponse.Pending)
 
     private val _placeFlow: MutableStateFlow<ApiResponse<List<Place>>> =

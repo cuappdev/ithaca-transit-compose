@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.models.Type
 import com.cornellappdev.transit.ui.theme.DividerGrey
 import com.cornellappdev.transit.ui.theme.TextButtonGray
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
@@ -62,7 +63,7 @@ fun AddFavoritesSearchSheet(
 
     var addSearchActive by remember { mutableStateOf(false) }
 
-    val favorites = favoritesViewModel.favoriteStops.collectAsState().value
+    val favorites = favoritesViewModel.favoritesStops.collectAsState().value
 
     Column(
         modifier = Modifier
@@ -135,23 +136,23 @@ fun AddFavoritesSearchSheet(
                         }
 
                         is ApiResponse.Success -> {
+
+
                             items(placeQueryResponse.data) {
                                 MenuItem(
                                     Icons.Filled.Place,
                                     label = it.name,
-                                    sublabel = it.type,
+                                    sublabel = if (it.type == Type.busStop) "Bus Stop" else it.detail.toString(),
                                     onClick = {
-                                        //TODO: Fully migrate favorites from stops to places
-                                        //Add to favorites if not in favorites
-                                        favoritesViewModel.addFavorite(it.name)
-
+                                        if (it !in favorites) {
+                                            favoritesViewModel.addFavorite(it)
+                                        }
                                     })
-
                             }
                         }
                     }
-                }
 
+                }
             }
         }
     }

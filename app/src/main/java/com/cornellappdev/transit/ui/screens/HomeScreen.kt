@@ -26,6 +26,8 @@ import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,7 +48,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
-
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -56,6 +57,7 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.models.Type
 import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
@@ -206,7 +208,7 @@ fun HomeScreen(
                                     MenuItem(
                                         Icons.Filled.Place,
                                         label = it.name,
-                                        sublabel = it.type,
+                                        sublabel = if (it.type == Type.busStop) "Bus Stop" else it.detail.toString(),
                                         onClick = {
                                             navController.navigate("route/${it.name}")
                                         })
@@ -221,7 +223,14 @@ fun HomeScreen(
     }
 
     //SheetState for FavoritesBottomSheet
-    val scaffoldState = rememberBottomSheetScaffoldState()
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = SheetState(
+            skipPartiallyExpanded = false,
+            initialValue = SheetValue.PartiallyExpanded,
+            confirmValueChange = { true },
+            skipHiddenState = true
+        )
+    )
 
     var editState by remember {
         mutableStateOf(false)
@@ -230,11 +239,12 @@ fun HomeScreen(
         mutableStateOf("Edit")
     }
 
-    val data = favoritesViewModel.favoriteStops.collectAsState().value
+    val data = favoritesViewModel.favoritesStops.collectAsState().value
 
     //sheetState for AddFavorites BottomSheet
     val addSheetState = androidx.compose.material.rememberModalBottomSheetState(
         ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true,
         confirmValueChange = {
             true
         }
@@ -246,11 +256,12 @@ fun HomeScreen(
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetSwipeEnabled = true,
+        sheetPeekHeight = 90.dp,
         sheetContainerColor = Color.White,
         sheetContent = {
             BottomSheetContent(
                 editText = txt,
-                editState = editState, data = data, onclick = {
+                editState = editState, data = data.toList(), onclick = {
                     editState = editState == false
                     txt = if (editState) {
                         "Done"

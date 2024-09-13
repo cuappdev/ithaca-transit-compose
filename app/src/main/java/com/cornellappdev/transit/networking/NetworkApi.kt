@@ -6,7 +6,7 @@ import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.RouteRequest
 import com.cornellappdev.transit.models.QueryResult
 import com.cornellappdev.transit.models.SearchQuery
-import com.cornellappdev.transit.models.Stop
+import com.cornellappdev.transit.models.Place
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -14,7 +14,7 @@ import retrofit2.http.POST
 interface NetworkApi {
 
     @GET("/api/v1/allStops")
-    suspend fun getAllStops(): Payload<List<Stop>>
+    suspend fun getAllStops(): Payload<List<Place>>
 
     @POST("/api/v3/appleSearch")
     suspend fun appleSearch(@Body request: SearchQuery): Payload<QueryResult>

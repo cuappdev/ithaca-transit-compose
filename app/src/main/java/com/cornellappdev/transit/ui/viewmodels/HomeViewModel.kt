@@ -72,6 +72,13 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
+     * True if the stop can be searched via the [query] string
+     */
+    private fun fulfillsQuery(stop: Place, query: String): Boolean {
+        return !query.isBlank() && stop.name.lowercase().contains(query.lowercase())
+    }
+
+    /**
      * Change the query in the search bar and update search results
      */
     fun onQueryChange(query: String) {
