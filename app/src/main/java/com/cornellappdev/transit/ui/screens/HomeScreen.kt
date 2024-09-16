@@ -57,7 +57,7 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.cornellappdev.transit.networking.ApiResponse
-import com.cornellappdev.transit.models.Type
+import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
@@ -208,7 +208,7 @@ fun HomeScreen(
                                     MenuItem(
                                         Icons.Filled.Place,
                                         label = it.name,
-                                        sublabel = if (it.type == Type.busStop) "Bus Stop" else it.detail.toString(),
+                                        sublabel = if (it.type == PlaceType.BUS_STOP) "Bus Stop" else it.detail.toString(),
                                         onClick = {
                                             navController.navigate("route/${it.name}")
                                         })

@@ -36,7 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.networking.ApiResponse
-import com.cornellappdev.transit.models.Type
+import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.ui.theme.DividerGrey
 import com.cornellappdev.transit.ui.theme.TextButtonGray
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
@@ -142,7 +142,7 @@ fun AddFavoritesSearchSheet(
                                 MenuItem(
                                     Icons.Filled.Place,
                                     label = it.name,
-                                    sublabel = if (it.type == Type.busStop) "Bus Stop" else it.detail.toString(),
+                                    sublabel = if (it.type == PlaceType.BUS_STOP) "Bus Stop" else it.detail.toString(),
                                     onClick = {
                                         if (it !in favorites) {
                                             favoritesViewModel.addFavorite(it)
