@@ -39,7 +39,7 @@ fun SearchSuggestions(
             MenuItem(
                 Icons.Filled.Place,
                 label = it.name,
-                sublabel = if (it.type == PlaceType.BUS_STOP) "BusStop" else it.detail.toString(),
+                sublabel = it.subLabel,
                 onClick = {
                 })
         }
@@ -53,7 +53,7 @@ fun SearchSuggestions(
             MenuItem(
                 Icons.Filled.Place,
                 label = it.name,
-                sublabel = if (it.type == PlaceType.BUS_STOP) "Bus Stop" else it.detail.toString(),
+                sublabel = it.subLabel,
                 onClick = {
                 })
         }

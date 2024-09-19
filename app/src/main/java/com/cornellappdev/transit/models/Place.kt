@@ -35,4 +35,7 @@ data class Place(
     @Json(name = "name") var name: String,
     @Json(name = "detail") val detail: String?,
     @Json(name = "type") var type: PlaceType
-)
+) {
+    val subLabel
+        get() = if (type == PlaceType.BUS_STOP) "Bus Stop" else detail.toString()
+}

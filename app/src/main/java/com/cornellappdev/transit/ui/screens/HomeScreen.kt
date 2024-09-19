@@ -208,7 +208,7 @@ fun HomeScreen(
                                     MenuItem(
                                         Icons.Filled.Place,
                                         label = it.name,
-                                        sublabel = if (it.type == PlaceType.BUS_STOP) "Bus Stop" else it.detail.toString(),
+                                        sublabel = it.subLabel,
                                         onClick = {
                                             navController.navigate("route/${it.name}")
                                         })
