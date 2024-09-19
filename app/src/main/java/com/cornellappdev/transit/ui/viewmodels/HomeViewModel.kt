@@ -5,12 +5,15 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
-import com.cornellappdev.transit.models.RouteRepository
+import com.cornellappdev.transit.models.MapState
 import com.cornellappdev.transit.models.Place
+import com.cornellappdev.transit.models.RouteOptionType
+import com.cornellappdev.transit.models.RouteRepository
+import com.cornellappdev.transit.networking.ApiResponse
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,15 +27,6 @@ class HomeViewModel @Inject constructor(
     private val locationRepository: LocationRepository
 ) : ViewModel() {
 
-    //TODO: Replace with Flow from backend, this is a placeholder
-    private val _placeFlow = MutableStateFlow(List(100) { "Gates Hall" })
-    val placeData = _placeFlow.asStateFlow()
-
-    /**
-     * Flow of all TCAT stops
-     */
-    val stopFlow = routeRepository.stopFlow
-
     /**
      * Flow from backend of last route fetched
      */
@@ -43,25 +37,32 @@ class HomeViewModel @Inject constructor(
      */
     val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
 
+    val placeQueryFlow: StateFlow<ApiResponse<List<Place>>> = routeRepository.placeFlow
+
     /**
      * The current query in the add favorites search bar, as a StateFlow
      */
     val addSearchQuery: MutableStateFlow<String> = MutableStateFlow("")
 
     /**
-     * Search query filtered flow of all TCAT stops
-     */
-    val queryFlow = createStopQueryFlow(searchQuery, stopFlow)
-
-    /**
-     * Add favorites search query filtered flow of all TCAT stops
-     */
-    val addQueryFlow = createStopQueryFlow(addSearchQuery, stopFlow)
-
-    /**
      * Default map location
      */
     val defaultIthaca = LatLng(42.44, -76.50)
+
+    init {
+        viewModelScope.launch {
+            launch {
+                searchQuery.collect { it ->
+                    routeRepository.makeSearch(it)
+                }
+            }
+            launch {
+                addSearchQuery.collect { it ->
+                    routeRepository.makeSearch(it)
+                }
+            }
+        }
+    }
 
     /**
      * Perform a search on the string [query]
@@ -89,15 +90,6 @@ class HomeViewModel @Inject constructor(
      */
     fun onAddQueryChange(query: String) {
         addSearchQuery.value = query;
-    }
-
-    /**
-     * Get all TCAT stops
-     */
-    fun getAllStops() {
-        viewModelScope.launch {
-            routeRepository.getAllStops()
-        }
     }
 
     /**
@@ -137,8 +129,23 @@ class HomeViewModel @Inject constructor(
     /**
      * Start emitting location from [locationRepository]
      */
-    fun instantiateLocation(context : Context) {
+    fun instantiateLocation(context: Context) {
         locationRepository.instantiate(context)
+    }
+
+    // Map state
+
+    /**
+     * Emits whether a route should be showing on the map
+     */
+    val mapState: MutableStateFlow<MapState> =
+        MutableStateFlow(MapState(isShowing = false, routeOptionType = RouteOptionType.None))
+
+    /**
+     * Set map state for home screen
+     */
+    fun setMapState(value: MapState) {
+        mapState.value = value
     }
 
 

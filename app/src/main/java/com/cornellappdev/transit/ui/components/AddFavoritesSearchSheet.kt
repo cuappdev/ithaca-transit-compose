@@ -35,7 +35,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.cornellappdev.transit.models.Type
+import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.ui.theme.DividerGrey
 import com.cornellappdev.transit.ui.theme.TextButtonGray
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
@@ -57,8 +58,11 @@ fun AddFavoritesSearchSheet(
 ) {
 
     val addSearchBarValue = homeViewModel.addSearchQuery.collectAsState().value
-    val addQueryResponse = homeViewModel.addQueryFlow.collectAsState().value
+
+    val placeQueryResponse = homeViewModel.placeQueryFlow.collectAsState().value
+
     var addSearchActive by remember { mutableStateOf(false) }
+
     val favorites = favoritesViewModel.favoritesStops.collectAsState().value
 
     Column(
@@ -122,18 +126,32 @@ fun AddFavoritesSearchSheet(
                 placeholder = { Text(text = "Search for a stop to add") }
             ) {
                 LazyColumn {
-                    items(addQueryResponse) {
-                        MenuItem(
-                            Icons.Filled.Place,
-                            label = it.name,
-                            sublabel = if (it.type == Type.busStop) "BusStop" else it.detail.toString(),
-                            onClick = {
-                                if (!(it in favorites)) {
-                                    favoritesViewModel.addFavorite(it)
-                                }
+                    when (placeQueryResponse) {
+                        is ApiResponse.Error -> {
+
+                        }
+
+                        is ApiResponse.Pending -> {
+
+                        }
+
+                        is ApiResponse.Success -> {
+
+
+                            items(placeQueryResponse.data) {
+                                MenuItem(
+                                    Icons.Filled.Place,
+                                    label = it.name,
+                                    sublabel = it.subLabel,
+                                    onClick = {
+                                        if (it !in favorites) {
+                                            favoritesViewModel.addFavorite(it)
+                                        }
+                                    })
                             }
-                        )
+                        }
                     }
+
                 }
             }
         }

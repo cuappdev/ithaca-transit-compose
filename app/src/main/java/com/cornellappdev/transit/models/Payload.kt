@@ -12,8 +12,8 @@ data class Payload<T>(
     /**
      * Unwrap the [data] in the response object. Fail-fast check on [success]
      */
-    fun unwrap() : T {
-        if (!success){
+    fun unwrap(): T {
+        if (!success) {
             throw Exception("Response unwrap failed: Success is false")
         }
         return data

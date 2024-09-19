@@ -21,7 +21,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
-import com.cornellappdev.transit.models.Type
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.theme.sfProTextFamily
@@ -81,7 +80,7 @@ fun BottomSheetContent(
                     image = painterResource(id = R.drawable.location_icon),
                     editImage = painterResource(id = R.drawable.location_icon_edit),
                     label = it.name,
-                    sublabel = if (it.type == Type.busStop) "BusStop" else it.detail.toString(),
+                    sublabel = "",
                     editing = editState,
                     { navController.navigate("route/${it.name}") },
                     addOnClick = {},

@@ -17,12 +17,18 @@ import javax.inject.Singleton
 @Singleton
 class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
 
-    suspend fun getAllStops(): Payload<List<Place>> = networkApi.getAllStops()
+    private suspend fun getAllStops(): Payload<List<Place>> = networkApi.getAllStops()
+
+    private suspend fun appleSearch(query: SearchQuery): Payload<QueryResult> =
+        networkApi.appleSearch(query)
 
     private suspend fun getRoute(request: RouteRequest): Payload<RouteOptions> =
         networkApi.getRoute(request)
 
     private val _stopFlow: MutableStateFlow<ApiResponse<List<Place>>> =
+        MutableStateFlow(ApiResponse.Pending)
+
+    private val _placeFlow: MutableStateFlow<ApiResponse<List<Place>>> =
         MutableStateFlow(ApiResponse.Pending)
 
     private val _lastRouteFlow: MutableStateFlow<ApiResponse<RouteOptions>> =
@@ -43,6 +49,12 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
     val lastRouteFlow = _lastRouteFlow.asStateFlow()
 
     /**
+     * A StateFlow holding the last queried location
+     */
+    val placeFlow = _placeFlow.asStateFlow()
+
+
+    /**
      * Makes a new call to backend for all stops.
      */
     private fun fetchAllStops() {
@@ -53,6 +65,23 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
                 _stopFlow.value = ApiResponse.Success(rideResponse.unwrap())
             } catch (e: Exception) {
                 _stopFlow.value = ApiResponse.Error
+            }
+        }
+    }
+
+    /**
+     * Makes a new call to backend for all stops.
+     */
+    fun makeSearch(query: String) {
+        _placeFlow.value = ApiResponse.Pending
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val placeResponse = appleSearch(SearchQuery(query))
+                val res = placeResponse.unwrap()
+                val totalLocations = res.places + res.stops
+                _placeFlow.value = ApiResponse.Success(totalLocations)
+            } catch (e: Exception) {
+                _placeFlow.value = ApiResponse.Error
             }
         }
     }

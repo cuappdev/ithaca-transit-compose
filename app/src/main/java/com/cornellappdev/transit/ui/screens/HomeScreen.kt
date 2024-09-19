@@ -26,6 +26,8 @@ import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,23 +48,25 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.models.Type
+import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.accompanist.permissions.rememberPermissionState
+import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGrey
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
-import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
+
 import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
 
 /**
@@ -126,10 +130,7 @@ fun HomeScreen(
     // Search bar flow
     val searchBarValue = homeViewModel.searchQuery.collectAsState().value
 
-    // Collect flow of rides through API
-    val stopsApiResponse = homeViewModel.stopFlow.collectAsState().value
-    val queryResponse = homeViewModel.queryFlow.collectAsState().value
-    val placesResponse = homeViewModel.placeData.collectAsState().value
+    val placeQueryResponse = homeViewModel.placeQueryFlow.collectAsState().value
 
     //Collect flow of route through API
     val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
@@ -138,6 +139,9 @@ fun HomeScreen(
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(homeViewModel.defaultIthaca, 12f)
     }
+
+    //Map state
+    val mapState = homeViewModel.mapState.collectAsState().value
 
     // Search bar active/inactive
     var searchActive by remember { mutableStateOf(false) }
@@ -155,7 +159,7 @@ fun HomeScreen(
             onMapClick = { searchActive = false },
             onMapLongClick = { searchActive = false },
             uiSettings = MapUiSettings(zoomControlsEnabled = false)
-        ) {}
+        )
 
         Column(
             modifier = Modifier
@@ -185,17 +189,32 @@ fun HomeScreen(
                         favorites = emptyList(),
                         recents = emptyList(),
                         onFavoriteAdd = {},
-                        onRecentClear = {}
+                        onRecentClear = {
+                        }
                     )
                 } else {
                     LazyColumn {
-                        items(queryResponse) {
-                            MenuItem(
-                                Icons.Filled.Place,
-                                label = it.name,
-                                sublabel = if (it.type == Type.busStop) "BusStop" else it.detail.toString(),
-                                onClick = {
-                                })
+                        when (placeQueryResponse) {
+                            is ApiResponse.Error -> {
+
+                            }
+
+                            is ApiResponse.Pending -> {
+
+                            }
+
+                            is ApiResponse.Success -> {
+                                items(placeQueryResponse.data) {
+                                    MenuItem(
+                                        Icons.Filled.Place,
+                                        label = it.name,
+                                        sublabel = it.subLabel,
+                                        onClick = {
+                                            navController.navigate("route/${it.name}")
+                                        })
+
+                                }
+                            }
                         }
                     }
                 }
@@ -204,7 +223,14 @@ fun HomeScreen(
     }
 
     //SheetState for FavoritesBottomSheet
-    val scaffoldState = rememberBottomSheetScaffoldState()
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = SheetState(
+            skipPartiallyExpanded = false,
+            initialValue = SheetValue.PartiallyExpanded,
+            confirmValueChange = { true },
+            skipHiddenState = true
+        )
+    )
 
     var editState by remember {
         mutableStateOf(false)
@@ -218,6 +244,7 @@ fun HomeScreen(
     //sheetState for AddFavorites BottomSheet
     val addSheetState = androidx.compose.material.rememberModalBottomSheetState(
         ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true,
         confirmValueChange = {
             true
         }
@@ -229,6 +256,7 @@ fun HomeScreen(
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetSwipeEnabled = true,
+        sheetPeekHeight = 90.dp,
         sheetContainerColor = Color.White,
         sheetContent = {
             BottomSheetContent(

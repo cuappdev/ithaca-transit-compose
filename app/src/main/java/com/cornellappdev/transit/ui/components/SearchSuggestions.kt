@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.cornellappdev.transit.models.Place
-import com.cornellappdev.transit.models.Type
+import com.cornellappdev.transit.models.PlaceType
 
 /**
  * Display for suggested searches (recents and favorites)
@@ -39,7 +39,7 @@ fun SearchSuggestions(
             MenuItem(
                 Icons.Filled.Place,
                 label = it.name,
-                sublabel = if (it.type == Type.busStop) "BusStop" else it.detail.toString(),
+                sublabel = it.subLabel,
                 onClick = {
                 })
         }
@@ -53,7 +53,7 @@ fun SearchSuggestions(
             MenuItem(
                 Icons.Filled.Place,
                 label = it.name,
-                sublabel = if (it.type == Type.busStop) "BusStop" else it.detail.toString(),
+                sublabel = it.subLabel,
                 onClick = {
                 })
         }
