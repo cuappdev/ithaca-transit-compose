@@ -57,7 +57,8 @@ fun MenuItem(type: PlaceType, label: String, sublabel: String, onClick: () -> Un
                 color = PrimaryText,
                 fontFamily = sfProDisplayFamily,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                lineHeight = 16.sp
             )
             Text(
                 text = sublabel,
@@ -65,7 +66,8 @@ fun MenuItem(type: PlaceType, label: String, sublabel: String, onClick: () -> Un
                 color = SecondaryText,
                 fontFamily = sfProDisplayFamily,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                lineHeight = 12.sp
             )
         }
     }
