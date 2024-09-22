@@ -45,6 +45,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -202,7 +203,11 @@ fun RouteScreen(
                             .fillMaxWidth(0.9f)
                             .clickable {
                                 coroutineScope.launch {
-                                    routeViewModel.onQueryChange(startLocation)
+                                    if(startLocation == "Current Location") {
+                                        routeViewModel.onQueryChange("")
+                                    } else {
+                                        routeViewModel.onQueryChange(startLocation)
+                                    }
                                     sheetState.show()
                                 }
                             }
@@ -212,7 +217,9 @@ fun RouteScreen(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                             color = PrimaryText,
                             fontFamily = sfProDisplayFamily,
-                            fontWeight = FontWeight.Normal, fontSize = 14.sp
+                            fontWeight = FontWeight.Normal, fontSize = 14.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                     Box(
@@ -221,7 +228,11 @@ fun RouteScreen(
                             .fillMaxWidth(0.9f)
                             .clickable {
                                 coroutineScope.launch {
-                                    routeViewModel.onQueryChange(endLocation)
+                                    if(endLocation == "Current Location") {
+                                        routeViewModel.onQueryChange("")
+                                    } else {
+                                        routeViewModel.onQueryChange(endLocation)
+                                    }
                                     sheetState.show()
                                 }
                             }
@@ -231,7 +242,9 @@ fun RouteScreen(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                             fontFamily = sfProDisplayFamily,
                             fontWeight = FontWeight.Normal,
-                            fontSize = 14.sp
+                            fontSize = 14.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
