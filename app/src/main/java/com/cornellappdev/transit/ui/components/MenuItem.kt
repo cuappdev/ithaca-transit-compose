@@ -20,6 +20,7 @@ import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.SecondaryText
+import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 
 /**
@@ -53,21 +54,17 @@ fun MenuItem(type: PlaceType, label: String, sublabel: String, onClick: () -> Un
         Column() {
             Text(
                 text = label,
-                fontSize = 14.sp,
                 color = PrimaryText,
-                fontFamily = sfProDisplayFamily,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                lineHeight = 16.sp
+                style = Style.heading3
             )
             Text(
                 text = sublabel,
-                fontSize = 10.sp,
                 color = SecondaryText,
-                fontFamily = sfProDisplayFamily,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                lineHeight = 12.sp
+                style = Style.paragraph
             )
         }
     }
