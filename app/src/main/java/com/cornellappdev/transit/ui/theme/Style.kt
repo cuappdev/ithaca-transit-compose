@@ -24,7 +24,6 @@ object Style {
      */
     val paragraph = TextStyle(
         fontSize = 10.sp,
-        color = SecondaryText,
         fontFamily = sfProDisplayFamily,
         lineHeight = 12.sp,
         platformStyle = PlatformTextStyle(
