@@ -37,7 +37,7 @@ fun SearchSuggestions(
         )
         favorites.forEach {
             MenuItem(
-                Icons.Filled.Place,
+                type = it.type,
                 label = it.name,
                 sublabel = it.subLabel,
                 onClick = {
@@ -51,7 +51,7 @@ fun SearchSuggestions(
         )
         recents.forEach {
             MenuItem(
-                Icons.Filled.Place,
+                type = it.type,
                 label = it.name,
                 sublabel = it.subLabel,
                 onClick = {

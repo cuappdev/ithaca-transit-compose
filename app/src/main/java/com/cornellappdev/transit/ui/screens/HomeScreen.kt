@@ -57,12 +57,11 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.cornellappdev.transit.networking.ApiResponse
-import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.SearchSuggestions
-import com.cornellappdev.transit.ui.theme.DividerGrey
+import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 
@@ -176,7 +175,7 @@ fun HomeScreen(
                 shape = RoundedCornerShape(size = 8.dp),
                 colors = SearchBarDefaults.colors(
                     containerColor = Color.White,
-                    dividerColor = DividerGrey,
+                    dividerColor = DividerGray,
                 ),
                 leadingIcon = { Icon(Icons.Outlined.Search, "Search") },
                 trailingIcon = { Icon(Icons.Outlined.Info, "Info") },
@@ -206,7 +205,7 @@ fun HomeScreen(
                             is ApiResponse.Success -> {
                                 items(placeQueryResponse.data) {
                                     MenuItem(
-                                        Icons.Filled.Place,
+                                        type = it.type,
                                         label = it.name,
                                         sublabel = it.subLabel,
                                         onClick = {

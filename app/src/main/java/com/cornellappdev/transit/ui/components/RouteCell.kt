@@ -31,8 +31,8 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.BusLateness
 import com.cornellappdev.transit.models.Transport
-import com.cornellappdev.transit.ui.theme.IconGrey
-import com.cornellappdev.transit.ui.theme.MetadataGrey
+import com.cornellappdev.transit.ui.theme.IconGray
+import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
@@ -118,7 +118,7 @@ fun RouteCell(transport: Transport) {
                             "${transport.distance} mi",
                             fontFamily = sfProDisplayFamily,
                             fontStyle = FontStyle.Normal,
-                            color = MetadataGrey,
+                            color = MetadataGray,
                             fontSize = 10.sp,
                             modifier = Modifier.constrainAs(dist) {
                                 top.linkTo(walkIcon.bottom)
@@ -127,7 +127,7 @@ fun RouteCell(transport: Transport) {
 
                         Icon(imageVector = ImageVector.vectorResource(id = R.drawable.boarding_stop),
                             contentDescription = "",
-                            tint = IconGrey,
+                            tint = IconGray,
                             modifier = Modifier
                                 .size(12.dp)
                                 .constrainAs(fromIcon) {
@@ -139,7 +139,7 @@ fun RouteCell(transport: Transport) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.bus_route_line),
                             contentDescription = "",
-                            tint = IconGrey,
+                            tint = IconGray,
                             modifier = Modifier.constrainAs(line) {
                                 top.linkTo(fromIcon.top)
                                 bottom.linkTo(toIcon.bottom)
@@ -270,7 +270,7 @@ fun RouteCell(transport: Transport) {
 
                         Text(
                             "${transport.distance} mi away",
-                            color = MetadataGrey,
+                            color = MetadataGray,
                             fontFamily = sfProTextFamily,
                             fontSize = 10.sp,
                             modifier = Modifier.constrainAs(dist) {
@@ -478,7 +478,7 @@ fun RouteCell(transport: Transport) {
 
                         Text(
                             "${transport.distance} mi away",
-                            color = MetadataGrey,
+                            color = MetadataGray,
                             fontFamily = sfProTextFamily,
                             fontSize = 10.sp,
                             modifier = Modifier.constrainAs(dist) {
