@@ -38,6 +38,7 @@ class UserPreferenceRepository @Inject constructor(@ApplicationContext val conte
      */
     companion object PreferencesKeys {
         val FAVORITES_MAP = stringSetPreferencesKey("favorites")
+        val RECENTS_MAP = stringSetPreferencesKey("recents")
     }
 
     /**
@@ -74,4 +75,32 @@ class UserPreferenceRepository @Inject constructor(@ApplicationContext val conte
             }.toSet()
             response
         }.stateIn(CoroutineScope(Dispatchers.Default), SharingStarted.Eagerly, emptySet())
+
+    /**
+     * Adds a recent in user preferences
+     * @param recents: The set containing names of stops that have been searched recently
+     */
+    suspend fun setRecents(recents: Set<Place>) {
+        dataStore.edit { preferences ->
+            val recentStrings = recents.map { json.encodeToString(it) }.toSet()
+            preferences[RECENTS_MAP] = recentStrings
+        }
+    }
+
+    /**
+     * Flow of recently searched stops
+     */
+    val recentsFlow: StateFlow<Set<Place>> = dataStore.data.catch {
+        setOf<Place>()
+    }.map { preferences ->
+        val recentStrings = preferences[RECENTS_MAP] ?: setOf()
+        val response = recentStrings.mapNotNull { jsonString ->
+            try {
+                json.decodeFromString<Place>(jsonString)
+            } catch (e: Exception) {
+                null
+            }
+        }.toSet()
+        response
+    }.stateIn(CoroutineScope(Dispatchers.Default), SharingStarted.Eagerly, emptySet())
 }

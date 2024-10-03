@@ -23,7 +23,8 @@ fun SearchSuggestions(
     favorites: List<Place>,
     recents: List<Place>,
     onFavoriteAdd: () -> Unit,
-    onRecentClear: () -> Unit
+    onRecentClear: () -> Unit,
+    onClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -35,13 +36,12 @@ fun SearchSuggestions(
             buttonText = "Add",
             onClick = onFavoriteAdd
         )
-        favorites.forEach {
+        favorites.take(minOf(5, favorites.size)).forEach {
             MenuItem(
                 type = it.type,
                 label = it.name,
                 sublabel = it.subLabel,
-                onClick = {
-                })
+                onClick = onClick)
         }
         Spacer(Modifier.height(16.dp))
         SearchCategoryHeader(
@@ -54,8 +54,7 @@ fun SearchSuggestions(
                 type = it.type,
                 label = it.name,
                 sublabel = it.subLabel,
-                onClick = {
-                })
+                onClick = onClick)
         }
 
     }

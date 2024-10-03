@@ -63,6 +63,7 @@ import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
+import com.cornellappdev.transit.ui.viewmodels.RecentsViewModel
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 
 import com.google.maps.android.compose.MapUiSettings
@@ -80,7 +81,8 @@ fun HomeScreen(
     homeViewModel: HomeViewModel,
     routeViewModel: RouteViewModel = hiltViewModel(),
     navController: NavController,
-    favoritesViewModel: FavoritesViewModel = hiltViewModel()
+    favoritesViewModel: FavoritesViewModel = hiltViewModel(),
+    recentsViewModel: RecentsViewModel = hiltViewModel()
 ) {
     // Permissions dialog
     val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -185,11 +187,13 @@ fun HomeScreen(
                 //If query is blank, display recents and favorites
                 if (searchBarValue.isBlank()) {
                     SearchSuggestions(
-                        favorites = emptyList(),
-                        recents = emptyList(),
+                        favorites = favoritesViewModel.favoritesStops.collectAsState().value.toList(),
+                        recents = recentsViewModel.recentStops.collectAsState().value.toList(),
                         onFavoriteAdd = {},
                         onRecentClear = {
-                        }
+                            recentsViewModel.clearRecents()
+                        },
+                        onClick = {}/*{ navController.navigate("route/${it.name}") }*/
                     )
                 } else {
                     LazyColumn {
@@ -209,6 +213,7 @@ fun HomeScreen(
                                         label = it.name,
                                         sublabel = it.subLabel,
                                         onClick = {
+                                            recentsViewModel.addRecent(it)
                                             navController.navigate("route/${it.name}")
                                         })
 
