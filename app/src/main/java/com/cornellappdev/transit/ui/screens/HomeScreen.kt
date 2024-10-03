@@ -129,9 +129,13 @@ fun HomeScreen(
     val currentLocationValue = homeViewModel.currentLocation.collectAsState().value
 
     // Search bar flow
-    val searchBarValue = homeViewModel.searchQuery.collectAsState().value
+    val searchBarValue = homeViewModel.searchBarUiState.value.searchQuery.collectAsState().value
 
-    val placeQueryResponse = homeViewModel.placeQueryFlow.collectAsState().value
+    val placeQueryResponse = homeViewModel.searchBarUiState.value.searched.collectAsState().value
+
+    val favorites = homeViewModel.searchBarUiState.value.favorites.collectAsState().value
+
+    val recents = homeViewModel.searchBarUiState.value.recents.collectAsState().value
 
     //Collect flow of route through API
     val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
@@ -187,8 +191,8 @@ fun HomeScreen(
                 //If query is blank, display recents and favorites
                 if (searchBarValue.isBlank()) {
                     SearchSuggestions(
-                        favorites = favoritesViewModel.favoritesStops.collectAsState().value.toList(),
-                        recents = recentsViewModel.recentStops.collectAsState().value.toList(),
+                        favorites = favorites,
+                        recents = recents,
                         onFavoriteAdd = {},
                         onRecentClear = {
                             recentsViewModel.clearRecents()

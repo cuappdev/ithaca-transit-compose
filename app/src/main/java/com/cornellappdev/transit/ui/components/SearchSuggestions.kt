@@ -20,7 +20,7 @@ import com.cornellappdev.transit.models.PlaceType
  */
 @Composable
 fun SearchSuggestions(
-    favorites: List<Place>,
+    favorites: Set<Place>,
     recents: List<Place>,
     onFavoriteAdd: () -> Unit,
     onRecentClear: () -> Unit,
@@ -41,7 +41,8 @@ fun SearchSuggestions(
                 type = it.type,
                 label = it.name,
                 sublabel = it.subLabel,
-                onClick = onClick)
+                onClick = onClick
+            )
         }
         Spacer(Modifier.height(16.dp))
         SearchCategoryHeader(
@@ -54,7 +55,8 @@ fun SearchSuggestions(
                 type = it.type,
                 label = it.name,
                 sublabel = it.subLabel,
-                onClick = onClick)
+                onClick = onClick
+            )
         }
 
     }

@@ -26,14 +26,16 @@ class RecentsViewModel @Inject constructor(
      */
     fun addRecent(stop: Place?) {
         if (stop != null) {
-            val currentRecents = recentStops.value.toMutableList()
-            currentRecents.remove(stop)
+            var currentRecents = recentStops.value.toMutableList()
+            currentRecents = currentRecents
+                .filter { it != stop }
+                .toMutableList()
             currentRecents.add(0, stop)
             if (currentRecents.size > 5) {
-                currentRecents.removeAt(5)
+                currentRecents = currentRecents.take(5).toMutableList()
             }
             viewModelScope.launch {
-                userPreferenceRepository.setRecents(currentRecents.toSet())
+                userPreferenceRepository.setRecents(currentRecents)
             }
         }
     }
@@ -43,7 +45,7 @@ class RecentsViewModel @Inject constructor(
      */
     fun clearRecents() {
         viewModelScope.launch {
-            userPreferenceRepository.setRecents(mutableSetOf())
+            userPreferenceRepository.setRecents(mutableListOf())
         }
     }
 }

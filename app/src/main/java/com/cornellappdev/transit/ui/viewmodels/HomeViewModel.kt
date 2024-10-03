@@ -9,11 +9,15 @@ import com.cornellappdev.transit.models.MapState
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.RouteOptionType
 import com.cornellappdev.transit.models.RouteRepository
+import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.viewmodels.state.SearchBarUIState
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,8 +28,12 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val routeRepository: RouteRepository,
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
+    private val userPreferenceRepository: UserPreferenceRepository
 ) : ViewModel() {
+
+    private val _searchBarUiState = MutableStateFlow(SearchBarUIState())
+    val searchBarUiState: StateFlow<SearchBarUIState> = _searchBarUiState.asStateFlow()
 
     /**
      * Flow from backend of last route fetched
@@ -35,9 +43,9 @@ class HomeViewModel @Inject constructor(
     /**
      * The current query in the search bar, as a StateFlow
      */
-    val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
+    private val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
 
-    val placeQueryFlow: StateFlow<ApiResponse<List<Place>>> = routeRepository.placeFlow
+    val placeQueryFlow: StateFlow<ApiResponse<List<Place>>> = routeRepository.placeFlow//add to uistate
 
     /**
      * The current query in the add favorites search bar, as a StateFlow
@@ -62,6 +70,13 @@ class HomeViewModel @Inject constructor(
                 }
             }
         }
+        _searchBarUiState.update { currentState ->
+            currentState.copy(
+                searchQuery = searchQuery,
+                searched = routeRepository.placeFlow,
+                recents = userPreferenceRepository.recentsFlow,
+                favorites = userPreferenceRepository.favoritesFlow,
+            ) }
     }
 
     /**
