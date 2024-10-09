@@ -1,12 +1,10 @@
 package com.cornellappdev.transit.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -24,7 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.cornellappdev.transit.ui.theme.DividerGrey
+import com.cornellappdev.transit.ui.theme.DividerGray
 
 /**
  * Creates a dense TextField, e.g. a TextField with no internal padding.
@@ -63,11 +61,11 @@ fun SearchTextField(
 ) {
     OutlinedTextField(
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = DividerGrey,
-            unfocusedContainerColor = DividerGrey,
+            focusedContainerColor = DividerGray,
+            unfocusedContainerColor = DividerGray,
             cursorColor = Black,
-            unfocusedBorderColor = DividerGrey,
-            focusedBorderColor = DividerGrey,
+            unfocusedBorderColor = DividerGray,
+            focusedBorderColor = DividerGray,
         ),
         value = value,
         onValueChange = setValue,

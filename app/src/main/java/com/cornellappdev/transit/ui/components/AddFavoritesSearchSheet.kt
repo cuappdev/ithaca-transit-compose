@@ -36,8 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.networking.ApiResponse
-import com.cornellappdev.transit.models.PlaceType
-import com.cornellappdev.transit.ui.theme.DividerGrey
+import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.TextButtonGray
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.theme.sfProTextFamily
@@ -119,7 +118,7 @@ fun AddFavoritesSearchSheet(
                 shape = RoundedCornerShape(size = 8.dp),
                 colors = SearchBarDefaults.colors(
                     containerColor = Color.White,
-                    dividerColor = DividerGrey,
+                    dividerColor = DividerGray,
                 ),
                 leadingIcon = { Icon(Icons.Outlined.Search, "Search") },
                 trailingIcon = { Icon(Icons.Outlined.Info, "Info") },
@@ -140,7 +139,7 @@ fun AddFavoritesSearchSheet(
 
                             items(placeQueryResponse.data) {
                                 MenuItem(
-                                    Icons.Filled.Place,
+                                    type = it.type,
                                     label = it.name,
                                     sublabel = it.subLabel,
                                     onClick = {
