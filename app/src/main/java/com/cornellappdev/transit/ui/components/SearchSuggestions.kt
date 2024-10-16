@@ -12,19 +12,24 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.PlaceType
+import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 
 /**
  * Display for suggested searches (recents and favorites)
  */
 @Composable
 fun SearchSuggestions(
-    favorites: List<Place>,
+    favorites: Set<Place>,
     recents: List<Place>,
     onFavoriteAdd: () -> Unit,
-    onRecentClear: () -> Unit
-) {
+    onRecentClear: () -> Unit,
+    navController: NavController,
+    homeViewModel: HomeViewModel,
+
+    ) {
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 16.dp)
@@ -35,13 +40,16 @@ fun SearchSuggestions(
             buttonText = "Add",
             onClick = onFavoriteAdd
         )
-        favorites.forEach {
+        favorites.take(minOf(5, favorites.size)).forEach {
             MenuItem(
                 type = it.type,
                 label = it.name,
                 sublabel = it.subLabel,
                 onClick = {
-                })
+                    homeViewModel.addRecent(it)
+                    navController.navigate("route/${it.name}")
+                }
+            )
         }
         Spacer(Modifier.height(16.dp))
         SearchCategoryHeader(
@@ -55,7 +63,10 @@ fun SearchSuggestions(
                 label = it.name,
                 sublabel = it.subLabel,
                 onClick = {
-                })
+                    homeViewModel.addRecent(it)
+                    navController.navigate("route/${it.name}")
+                }
+            )
         }
 
     }

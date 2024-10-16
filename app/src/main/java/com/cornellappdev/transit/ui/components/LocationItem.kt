@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -122,7 +123,9 @@ fun LocationItem(
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 8.dp, bottom = 4.dp),
             fontWeight = FontWeight(400),
-            fontFamily = sfProTextFamily
+            fontFamily = sfProTextFamily,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
 
         Text(
@@ -133,7 +136,9 @@ fun LocationItem(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally),
             fontWeight = FontWeight(400),
-            fontFamily = sfProTextFamily
+            fontFamily = sfProTextFamily,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

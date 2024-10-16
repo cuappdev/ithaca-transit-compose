@@ -16,7 +16,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
@@ -64,6 +63,7 @@ import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
+import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
 
 import com.google.maps.android.compose.MapUiSettings
 import kotlinx.coroutines.launch
@@ -127,9 +127,7 @@ fun HomeScreen(
     val currentLocationValue = homeViewModel.currentLocation.collectAsState().value
 
     // Search bar flow
-    val searchBarValue = homeViewModel.searchQuery.collectAsState().value
-
-    val placeQueryResponse = homeViewModel.placeQueryFlow.collectAsState().value
+    val searchBarValue = homeViewModel.searchBarUiState.collectAsState().value
 
     //Collect flow of route through API
     val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
@@ -167,7 +165,7 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             DockedSearchBar(
-                query = searchBarValue,
+                query = (searchBarValue as? SearchBarUIState.Query)?.queryText ?: "",
                 onQueryChange = { s -> homeViewModel.onQueryChange(s) },
                 onSearch = { it -> searchActive = false; homeViewModel.onSearch(it) },
                 active = searchActive,
@@ -183,35 +181,43 @@ fun HomeScreen(
 
             ) {
                 //If query is blank, display recents and favorites
-                if (searchBarValue.isBlank()) {
-                    SearchSuggestions(
-                        favorites = emptyList(),
-                        recents = emptyList(),
-                        onFavoriteAdd = {},
-                        onRecentClear = {
-                        }
-                    )
-                } else {
-                    LazyColumn {
-                        when (placeQueryResponse) {
-                            is ApiResponse.Error -> {
+                when (searchBarValue) {
+                    is SearchBarUIState.RecentAndFavorites -> {
+                        SearchSuggestions(
+                            favorites = searchBarValue.favorites,
+                            recents = searchBarValue.recents,
+                            onFavoriteAdd = {},
+                            onRecentClear = {
+                                homeViewModel.clearRecents()
+                            },
+                            navController = navController,
+                            homeViewModel = homeViewModel
+                        )
+                    }
 
-                            }
+                    is SearchBarUIState.Query -> {
+                        LazyColumn {
+                            when (searchBarValue.searched) {
+                                is ApiResponse.Error -> {
 
-                            is ApiResponse.Pending -> {
+                                }
 
-                            }
+                                is ApiResponse.Pending -> {
 
-                            is ApiResponse.Success -> {
-                                items(placeQueryResponse.data) {
-                                    MenuItem(
-                                        type = it.type,
-                                        label = it.name,
-                                        sublabel = it.subLabel,
-                                        onClick = {
-                                            navController.navigate("route/${it.name}")
-                                        })
+                                }
 
+                                is ApiResponse.Success -> {
+                                    items(searchBarValue.searched.data) {
+                                        MenuItem(
+                                            type = it.type,
+                                            label = it.name,
+                                            sublabel = it.subLabel,
+                                            onClick = {
+                                                homeViewModel.addRecent(it)
+                                                navController.navigate("route/${it.name}")
+                                            })
+
+                                    }
                                 }
                             }
                         }
