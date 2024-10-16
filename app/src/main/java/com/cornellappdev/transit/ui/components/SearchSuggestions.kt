@@ -12,8 +12,10 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.PlaceType
+import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 
 /**
  * Display for suggested searches (recents and favorites)
@@ -24,8 +26,10 @@ fun SearchSuggestions(
     recents: List<Place>,
     onFavoriteAdd: () -> Unit,
     onRecentClear: () -> Unit,
-    onClick: () -> Unit
-) {
+    navController: NavController,
+    homeViewModel: HomeViewModel,
+
+    ) {
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 16.dp)
@@ -41,7 +45,10 @@ fun SearchSuggestions(
                 type = it.type,
                 label = it.name,
                 sublabel = it.subLabel,
-                onClick = onClick
+                onClick = {
+                    homeViewModel.addRecent(it)
+                    navController.navigate("route/${it.name}")
+                }
             )
         }
         Spacer(Modifier.height(16.dp))
@@ -55,7 +62,10 @@ fun SearchSuggestions(
                 type = it.type,
                 label = it.name,
                 sublabel = it.subLabel,
-                onClick = onClick
+                onClick = {
+                    homeViewModel.addRecent(it)
+                    navController.navigate("route/${it.name}")
+                }
             )
         }
 

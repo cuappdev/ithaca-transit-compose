@@ -190,7 +190,8 @@ fun HomeScreen(
                             onRecentClear = {
                                 homeViewModel.clearRecents()
                             },
-                            onClick = {}
+                            navController = navController,
+                            homeViewModel = homeViewModel
                         )
                     }
 
