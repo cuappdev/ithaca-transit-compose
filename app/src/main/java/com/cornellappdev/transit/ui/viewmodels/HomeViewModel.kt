@@ -11,13 +11,11 @@ import com.cornellappdev.transit.models.RouteOptionType
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.networking.ApiResponse
-import com.cornellappdev.transit.ui.viewmodels.state.SearchBarUIState
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,25 +30,27 @@ class HomeViewModel @Inject constructor(
     private val userPreferenceRepository: UserPreferenceRepository
 ) : ViewModel() {
 
-    private val _searchBarUiState = MutableStateFlow(SearchBarUIState())
-    val searchBarUiState: StateFlow<SearchBarUIState> = _searchBarUiState.asStateFlow()
-
     /**
      * Flow from backend of last route fetched
      */
     val lastRouteFlow = routeRepository.lastRouteFlow
 
     /**
-     * The current query in the search bar, as a StateFlow
-     */
-    private val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
-
-    val placeQueryFlow: StateFlow<ApiResponse<List<Place>>> = routeRepository.placeFlow//add to uistate
-
-    /**
      * The current query in the add favorites search bar, as a StateFlow
      */
     val addSearchQuery: MutableStateFlow<String> = MutableStateFlow("")
+
+    /**
+     * The list of queried places retrieved from the route repository, as a StateFlow.
+     */
+    val placeQueryFlow: StateFlow<ApiResponse<List<Place>>> = routeRepository.placeFlow
+
+    /**
+     * The current UI state of the search bar, as a MutableStateFlow
+     */
+    private val _searchBarUiState: MutableStateFlow<SearchBarUIState> =
+        MutableStateFlow(SearchBarUIState.RecentAndFavorites(emptySet(), emptyList()))
+    val searchBarUiState: StateFlow<SearchBarUIState> = _searchBarUiState.asStateFlow()
 
     /**
      * Default map location
@@ -60,23 +60,36 @@ class HomeViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             launch {
-                searchQuery.collect { it ->
-                    routeRepository.makeSearch(it)
+                userPreferenceRepository.favoritesFlow.collect {
+                    if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
+                        _searchBarUiState.value =
+                            (_searchBarUiState.value as SearchBarUIState.RecentAndFavorites).copy(
+                                favorites = it
+                            )
+                    }
                 }
             }
             launch {
-                addSearchQuery.collect { it ->
-                    routeRepository.makeSearch(it)
+                userPreferenceRepository.recentsFlow.collect {
+                    if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
+                        _searchBarUiState.value =
+                            (_searchBarUiState.value as SearchBarUIState.RecentAndFavorites).copy(
+                                recents = it
+                            )
+                    }
+                }
+            }
+            launch {
+                routeRepository.placeFlow.collect {
+                    if (_searchBarUiState.value is SearchBarUIState.Query) {
+                        _searchBarUiState.value =
+                            (_searchBarUiState.value as SearchBarUIState.Query).copy(
+                                searched = it
+                            )
+                    }
                 }
             }
         }
-        _searchBarUiState.update { currentState ->
-            currentState.copy(
-                searchQuery = searchQuery,
-                searched = routeRepository.placeFlow,
-                recents = userPreferenceRepository.recentsFlow,
-                favorites = userPreferenceRepository.favoritesFlow,
-            ) }
     }
 
     /**
@@ -97,7 +110,17 @@ class HomeViewModel @Inject constructor(
      * Change the query in the search bar and update search results
      */
     fun onQueryChange(query: String) {
-        searchQuery.value = query;
+        if (query == "") {
+            _searchBarUiState.value = SearchBarUIState.RecentAndFavorites(
+                userPreferenceRepository.favoritesFlow.value,
+                userPreferenceRepository.recentsFlow.value
+            )
+        } else {
+            _searchBarUiState.value = SearchBarUIState.Query(
+                ApiResponse.Pending, query
+            )
+        }
+        routeRepository.makeSearch(query)
     }
 
     /**
@@ -105,6 +128,7 @@ class HomeViewModel @Inject constructor(
      */
     fun onAddQueryChange(query: String) {
         addSearchQuery.value = query;
+        routeRepository.makeSearch(query)
     }
 
     /**
