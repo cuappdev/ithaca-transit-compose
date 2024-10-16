@@ -127,7 +127,7 @@ class HomeViewModel @Inject constructor(
      * Change the query in the add favorites search bar and update search results
      */
     fun onAddQueryChange(query: String) {
-        addSearchQuery.value = query;
+        addSearchQuery.value = query
         routeRepository.makeSearch(query)
     }
 

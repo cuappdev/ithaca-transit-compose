@@ -16,7 +16,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
@@ -184,7 +183,7 @@ fun HomeScreen(
 
             ) {
                 //If query is blank, display recents and favorites
-                when(searchBarValue){
+                when (searchBarValue) {
                     is SearchBarUIState.RecentAndFavorites -> {
                         SearchSuggestions(
                             favorites = searchBarValue.favorites,
@@ -196,6 +195,7 @@ fun HomeScreen(
                             onClick = {}
                         )
                     }
+
                     is SearchBarUIState.Query -> {
                         LazyColumn {
                             when (searchBarValue.searched) {
