@@ -132,6 +132,34 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
+     * Asynchronous function to add a stop to recents
+     */
+    fun addRecent(stop: Place?) {
+        if (stop != null) {
+            var currentRecents = userPreferenceRepository.recentsFlow.value.toMutableList()
+            currentRecents = currentRecents
+                .filter { it != stop }
+                .toMutableList()
+            currentRecents.add(0, stop)
+            if (currentRecents.size > 5) {
+                currentRecents = currentRecents.take(5).toMutableList()
+            }
+            viewModelScope.launch {
+                userPreferenceRepository.setRecents(currentRecents)
+            }
+        }
+    }
+
+    /**
+     * Asynchronous function to clear set of recents
+     */
+    fun clearRecents() {
+        viewModelScope.launch {
+            userPreferenceRepository.setRecents(mutableListOf())
+        }
+    }
+
+    /**
      * Load a route path for an origin and a destination and update Flow
      * @param end The latitude and longitude of the destination
      * @param time The time of the route request

@@ -62,7 +62,6 @@ import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
-import com.cornellappdev.transit.ui.viewmodels.RecentsViewModel
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
 
@@ -81,8 +80,7 @@ fun HomeScreen(
     homeViewModel: HomeViewModel,
     routeViewModel: RouteViewModel = hiltViewModel(),
     navController: NavController,
-    favoritesViewModel: FavoritesViewModel = hiltViewModel(),
-    recentsViewModel: RecentsViewModel = hiltViewModel()
+    favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
     // Permissions dialog
     val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -190,7 +188,7 @@ fun HomeScreen(
                             recents = searchBarValue.recents,
                             onFavoriteAdd = {},
                             onRecentClear = {
-                                recentsViewModel.clearRecents()
+                                homeViewModel.clearRecents()
                             },
                             onClick = {}
                         )
@@ -214,7 +212,7 @@ fun HomeScreen(
                                             label = it.name,
                                             sublabel = it.subLabel,
                                             onClick = {
-                                                recentsViewModel.addRecent(it)
+                                                homeViewModel.addRecent(it)
                                                 navController.navigate("route/${it.name}")
                                             })
 
