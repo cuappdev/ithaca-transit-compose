@@ -13,8 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
@@ -199,11 +197,9 @@ fun HomeScreen(
                         LazyColumn {
                             when (searchBarValue.searched) {
                                 is ApiResponse.Error -> {
-
                                 }
 
                                 is ApiResponse.Pending -> {
-
                                 }
 
                                 is ApiResponse.Success -> {
@@ -217,6 +213,10 @@ fun HomeScreen(
                                                 navController.navigate("route/${it.name}")
                                             })
 
+                                    }
+                                    if (searchBarValue.searched.data.isEmpty()) {
+                                        //TODO: change temp fix
+                                        item { Text("No search results") }
                                     }
                                 }
                             }
@@ -232,8 +232,6 @@ fun HomeScreen(
         bottomSheetState = SheetState(
             skipPartiallyExpanded = false,
             initialValue = SheetValue.PartiallyExpanded,
-            confirmValueChange = { true },
-            skipHiddenState = true
         )
     )
 
@@ -247,12 +245,11 @@ fun HomeScreen(
     val data = favoritesViewModel.favoritesStops.collectAsState().value
 
     //sheetState for AddFavorites BottomSheet
-    val addSheetState = androidx.compose.material.rememberModalBottomSheetState(
-        ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true,
-        confirmValueChange = {
-            true
-        }
+    val addSheetState = rememberBottomSheetScaffoldState(
+        bottomSheetState = SheetState(
+            skipPartiallyExpanded = true,
+            initialValue = SheetValue.Hidden
+        )
     )
 
     val scope = rememberCoroutineScope()
@@ -275,27 +272,32 @@ fun HomeScreen(
                     }
                 }, addOnClick = {
                     scope.launch {
-                        addSheetState.show()
+                        addSheetState.bottomSheetState.expand()
                     }
-                }, navController = navController
+                },
+                navController = navController
             )
         }
     ) {}
+    //TODO: fix favorites closing when there's a change
 
     // AddFavorites BottomSheet
-    ModalBottomSheetLayout(
+    BottomSheetScaffold(
         sheetShape = RoundedCornerShape(16.dp),
-        sheetBackgroundColor = Color.White,
-        sheetState = addSheetState,
+        scaffoldState = addSheetState,
+        sheetContainerColor = Color.White,
+        sheetPeekHeight = 0.dp,
         sheetContent = {
             AddFavoritesSearchSheet(
                 homeViewModel = homeViewModel,
                 favoritesViewModel = favoritesViewModel
             ) {
                 scope.launch {
-                    addSheetState.hide()
+                    addSheetState.bottomSheetState.hide()
                 }
             }
         },
-    ) {}
+
+        ) {}
+    //TODO: Fix keyboard
 }

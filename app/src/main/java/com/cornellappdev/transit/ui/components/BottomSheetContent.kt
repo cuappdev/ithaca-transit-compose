@@ -84,7 +84,9 @@ fun BottomSheetContent(
                     editing = editState,
                     { navController.navigate("route/${it.name}") },
                     addOnClick = {},
-                    removeOnClick = { favoritesViewModel.removeFavorite(it) },
+                    removeOnClick = {
+                        favoritesViewModel.removeFavorite(it)
+                    },
                 )
             }
             item {
