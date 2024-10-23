@@ -10,8 +10,8 @@ data class SearchQuery(
 )
 
 data class QueryResult(
-    @Json(name = "applePlaces") var places: List<Place>,
-    @Json(name = "busStops") var stops: List<Place>
+    @Json(name = "applePlaces") var places: List<Place>?,
+    @Json(name = "busStops") var stops: List<Place>?
 )
 
 /**

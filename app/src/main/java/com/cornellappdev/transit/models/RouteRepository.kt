@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.models
 
+import android.util.Log
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.networking.NetworkApi
 import com.google.android.gms.maps.model.LatLng
@@ -78,7 +79,7 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
             try {
                 val placeResponse = appleSearch(SearchQuery(query))
                 val res = placeResponse.unwrap()
-                val totalLocations = res.places + res.stops
+                val totalLocations = (res.places ?: emptyList()) + (res.stops?: (emptyList()))
                 _placeFlow.value = ApiResponse.Success(totalLocations)
             } catch (e: Exception) {
                 _placeFlow.value = ApiResponse.Error
