@@ -54,7 +54,7 @@ import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 fun AddFavoritesSearchSheet(
     homeViewModel: HomeViewModel,
     favoritesViewModel: FavoritesViewModel,
-    onClick: () -> Unit,
+    cancelOnClick: () -> Unit,
 ) {
 
     val addSearchBarValue = homeViewModel.addSearchQuery.collectAsState().value
@@ -97,7 +97,7 @@ fun AddFavoritesSearchSheet(
                     )
                     TextButton(
                         onClick = {
-                            onClick()
+                            cancelOnClick()
                             keyboardController?.hide()
                         },
                         content = {
