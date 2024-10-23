@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.DockedSearchBar
@@ -30,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -42,6 +42,7 @@ import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.theme.sfProTextFamily
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
+
 
 /**
  * Contents of AddFavorites BottomSheet
@@ -63,6 +64,9 @@ fun AddFavoritesSearchSheet(
     var addSearchActive by remember { mutableStateOf(false) }
 
     val favorites = favoritesViewModel.favoritesStops.collectAsState().value
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+
 
     Column(
         modifier = Modifier
@@ -92,7 +96,10 @@ fun AddFavoritesSearchSheet(
                         modifier = Modifier.align(Alignment.Center)
                     )
                     TextButton(
-                        onClick = onClick,
+                        onClick = {
+                            onClick()
+                            keyboardController?.hide()
+                        },
                         content = {
                             Text(
                                 text = "Cancel",
@@ -145,6 +152,7 @@ fun AddFavoritesSearchSheet(
                                     onClick = {
                                         if (it !in favorites) {
                                             favoritesViewModel.addFavorite(it)
+                                            keyboardController?.hide()
                                         }
                                     })
                             }
