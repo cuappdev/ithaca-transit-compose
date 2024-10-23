@@ -82,7 +82,7 @@ fun BottomSheetContent(
                     label = it.name,
                     sublabel = "",
                     editing = editState,
-                    { navController.navigate("route/${it.name}") },
+                    { navController.navigate("route/${it.name}/${it.latitude}/${it.longitude}") },
                     addOnClick = {},
                     removeOnClick = { favoritesViewModel.removeFavorite(it) },
                 )

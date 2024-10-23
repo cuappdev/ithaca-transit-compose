@@ -26,7 +26,7 @@ data class Direction(
     @Json(name = "delay") val delay: Int?,
     @Json(name = "startLocation") val startLocation: LatLng,
     @Json(name = "path") val path: List<LatLng>,
-    @Json(name = "type") val type: String,
+    @Json(name = "type") val type: String, // "walk" or "depart"
     @Json(name = "stops") val stops: List<DirectionStop>,
     @Json(name = "endTime") val endTime: String,
     @Json(name = "distance") val distance: String,

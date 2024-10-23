@@ -1,12 +1,19 @@
 package com.cornellappdev.transit.ui.viewmodels
 
+import android.content.Context
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cornellappdev.transit.models.LocationRepository
+import com.cornellappdev.transit.models.Place
+import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.RouteRepository
+import com.cornellappdev.transit.networking.ApiResponse
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -14,11 +21,24 @@ import javax.inject.Inject
 @OptIn(ExperimentalMaterial3Api::class)
 class RouteViewModel @Inject constructor(
     private val routeRepository: RouteRepository,
+    private val locationRepository: LocationRepository
 ) : ViewModel() {
 
-    val startPl: MutableStateFlow<String> = MutableStateFlow("Current Location")
+    /**
+     * Value of the current location. Can be null
+     */
+    val currentLocation = locationRepository.currentLocation
 
-    val destPl: MutableStateFlow<String> = MutableStateFlow("")
+    /**
+     * Pair of the name of the starting location and the coordinates
+     */
+    val startPl: MutableStateFlow<Pair<String, LatLng?>> =
+        MutableStateFlow("Current Location" to null)
+
+    /**
+     * Pair of the name of the ending location and the coordinates
+     */
+    val destPl: MutableStateFlow<Pair<String, LatLng?>> = MutableStateFlow("" to null)
 
     val time = "12:00AM"
 
@@ -28,6 +48,21 @@ class RouteViewModel @Inject constructor(
      */
     val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
 
+    val placeQueryFlow: StateFlow<ApiResponse<List<Place>>> = routeRepository.placeFlow
+
+    val lastRouteFlow: StateFlow<ApiResponse<RouteOptions>> = routeRepository.lastRouteFlow
+
+    init {
+        viewModelScope.launch {
+            launch {
+                searchQuery.collect { it ->
+                    routeRepository.makeSearch(it)
+                }
+            }
+        }
+    }
+
+
     /**
      * Change the query in the search bar and update search results
      */
@@ -36,17 +71,24 @@ class RouteViewModel @Inject constructor(
     }
 
     /**
+     * Update emitted location from [locationRepository]
+     */
+    fun updateLocation(context: Context) {
+        locationRepository.updateLocation(context)
+    }
+
+    /**
      * Change start location
      */
-    fun changeStateLocation(location: String) {
-        startPl.value = location
+    fun changeStartLocation(location: String, latitude: Double, longitude: Double) {
+        startPl.value = location to LatLng(latitude, longitude)
     }
 
     /**
      * Change end location
      */
-    fun changeEndLocation(location: String) {
-        destPl.value = location
+    fun changeEndLocation(location: String, latitude: Double, longitude: Double) {
+        destPl.value = location to LatLng(latitude, longitude)
     }
 
     /**
@@ -66,12 +108,20 @@ class RouteViewModel @Inject constructor(
         arriveBy: Boolean,
         originName: String
     ) {
+        val currentLocationLatLng =
+            currentLocation.value?.longitude?.let {
+                currentLocation.value?.latitude?.let { it1 ->
+                    LatLng(
+                        it1, it
+                    )
+                }
+            }
         viewModelScope.launch {
             routeRepository.fetchRoute(
-                end = end,
+                end = if (destinationName == "Current Location" && currentLocationLatLng != null) currentLocationLatLng else end,
                 time = time,
                 destinationName = destinationName,
-                start = start,
+                start = if (originName == "Current Location" && currentLocationLatLng != null) currentLocationLatLng else start,
                 arriveBy = arriveBy,
                 originName = originName
             )

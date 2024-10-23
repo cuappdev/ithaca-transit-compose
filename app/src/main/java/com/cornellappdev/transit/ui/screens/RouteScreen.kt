@@ -1,5 +1,7 @@
 package com.cornellappdev.transit.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
@@ -43,6 +46,12 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.models.Route
+import com.cornellappdev.transit.models.RouteOptions
+import com.cornellappdev.transit.models.Transport
+import com.cornellappdev.transit.models.createTransport
+import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.components.RouteCell
 import com.cornellappdev.transit.ui.components.RouteOptionsSearchSheet
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.IconGray
@@ -56,6 +65,7 @@ import kotlinx.coroutines.launch
 /**
  * Composable for the route screen, which specifies a location, destination, and routes between them
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(
     ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
     ExperimentalMaterialApi::class
@@ -70,6 +80,8 @@ fun RouteScreen(
     val endLocation = routeViewModel.destPl.collectAsState().value
 
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    val lastRoute = routeViewModel.lastRouteFlow.collectAsState().value
 
     val sheetState =
         androidx.compose.material.rememberModalBottomSheetState(
@@ -86,6 +98,10 @@ fun RouteScreen(
         sheetState = sheetState,
         sheetContent = {
             RouteOptionsSearchSheet(routeViewModel, onCancelClicked = {
+                coroutineScope.launch {
+                    sheetState.hide()
+                }
+            }, onItemClicked = {
                 coroutineScope.launch {
                     sheetState.hide()
                 }
@@ -189,17 +205,17 @@ fun RouteScreen(
                             .fillMaxWidth(0.9f)
                             .clickable {
                                 coroutineScope.launch {
-                                    if(startLocation == "Current Location") {
+                                    if (startLocation.first == "Current Location") {
                                         routeViewModel.onQueryChange("")
                                     } else {
-                                        routeViewModel.onQueryChange(startLocation)
+                                        routeViewModel.onQueryChange(startLocation.first)
                                     }
                                     sheetState.show()
                                 }
                             }
                     ) {
                         Text(
-                            text = startLocation,
+                            text = startLocation.first,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                             color = PrimaryText,
                             fontFamily = sfProDisplayFamily,
@@ -214,17 +230,17 @@ fun RouteScreen(
                             .fillMaxWidth(0.9f)
                             .clickable {
                                 coroutineScope.launch {
-                                    if(endLocation == "Current Location") {
+                                    if (endLocation.first == "Current Location") {
                                         routeViewModel.onQueryChange("")
                                     } else {
-                                        routeViewModel.onQueryChange(endLocation)
+                                        routeViewModel.onQueryChange(endLocation.first)
                                     }
                                     sheetState.show()
                                 }
                             }
                     ) {
                         Text(
-                            text = endLocation,
+                            text = endLocation.first,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                             fontFamily = sfProDisplayFamily,
                             fontWeight = FontWeight.Normal,
@@ -271,12 +287,57 @@ fun RouteScreen(
                 )
             }
 
-
-            LazyColumn(modifier = Modifier
-                .background(color = DividerGray)
-                .fillMaxSize(), content = {})
+            RouteList(lastRoute)
         }
 
     }
 
+}
+
+@Composable
+private fun PaddedRouteCell(transport: Transport) {
+    Row(modifier = Modifier.padding(12.dp)) {
+        RouteCell(transport)
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+private fun RouteList(lastRouteResponse: ApiResponse<RouteOptions>) {
+    when (lastRouteResponse) {
+        is ApiResponse.Error -> {
+            Text("Error")
+        }
+
+        is ApiResponse.Pending -> {
+            Text("Pending")
+        }
+
+        is ApiResponse.Success -> {
+
+            LazyColumn(modifier = Modifier
+                .background(color = DividerGray)
+                .fillMaxSize(), content = {
+                items(lastRouteResponse.data.fromStop, itemContent = { item ->
+                    PaddedRouteCell(createTransport(item))
+                })
+                if (lastRouteResponse.data.boardingSoon.isNotEmpty()) {
+                    item {
+                        Text("Boarding Soon From Nearby Stops")
+                    }
+                }
+                items(lastRouteResponse.data.boardingSoon, itemContent = { item ->
+                    PaddedRouteCell(createTransport(item))
+                })
+                if (lastRouteResponse.data.walking.isNotEmpty()) {
+                    item {
+                        Text("By Walking")
+                    }
+                }
+                items(lastRouteResponse.data.walking, itemContent = { item ->
+                    PaddedRouteCell(createTransport(item))
+                })
+            })
+        }
+    }
 }

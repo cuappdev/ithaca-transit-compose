@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Search
@@ -25,9 +28,11 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
+import com.google.android.gms.maps.model.LatLng
 
 
 /**
@@ -37,11 +42,15 @@ import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 @Composable
 fun RouteOptionsSearchSheet(
     routeViewModel: RouteViewModel,
-    onCancelClicked: () -> Unit
+    onCancelClicked: () -> Unit,
+    onItemClicked: () -> Unit,
 ) {
 
     // Search bar flow
     val searchBarValue = routeViewModel.searchQuery.collectAsState().value
+
+    // Search bar results
+    val placeQueryResponse = routeViewModel.placeQueryFlow.collectAsState().value
 
     Column(
         modifier = Modifier
@@ -106,6 +115,40 @@ fun RouteOptionsSearchSheet(
                         modifier = Modifier.clickable { routeViewModel.onQueryChange("") })
                 }
             )
+
+            LazyColumn {
+                when (placeQueryResponse) {
+                    is ApiResponse.Error -> {
+
+                    }
+
+                    is ApiResponse.Pending -> {
+
+                    }
+
+                    is ApiResponse.Success -> {
+
+                        items(placeQueryResponse.data) {
+                            MenuItem(
+                                type = it.type,
+                                label = it.name,
+                                sublabel = it.subLabel,
+                                onClick = {
+                                    routeViewModel.getRoute(
+                                        start = if(routeViewModel.startPl.value.second == null) LatLng(0.0, 0.0) else routeViewModel.startPl.value.second!!,
+                                        end = if(routeViewModel.destPl.value.second == null) LatLng(0.0, 0.0) else routeViewModel.destPl.value.second!!,
+                                        arriveBy = false,
+                                        destinationName = routeViewModel.destPl.value.first,
+                                        originName = routeViewModel.startPl.value.first,
+                                        time = (System.currentTimeMillis() / 1000).toDouble() //TODO: Implement arriveBy
+                                    )
+                                    onItemClicked()
+                                })
+                        }
+                    }
+                }
+
+            }
         }
     }
 }

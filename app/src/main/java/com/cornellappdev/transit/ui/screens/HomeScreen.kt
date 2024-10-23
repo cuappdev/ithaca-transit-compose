@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -64,7 +65,7 @@ import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
-
+import com.cornellappdev.transit.util.StringUtils.toURLString
 import com.google.maps.android.compose.MapUiSettings
 import kotlinx.coroutines.launch
 
@@ -209,7 +210,7 @@ fun HomeScreen(
                                         label = it.name,
                                         sublabel = it.subLabel,
                                         onClick = {
-                                            navController.navigate("route/${it.name}")
+                                            navController.navigate("route/${it.name.toURLString()}/${it.latitude}/${it.longitude}")
                                         })
 
                                 }
