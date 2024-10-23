@@ -216,7 +216,6 @@ fun HomeScreen(
 
                                     }
                                     if (searchBarValue.searched.data.isEmpty()) {
-                                        //TODO: change temp fix
                                         item { Text("No search results") }
                                     }
                                 }

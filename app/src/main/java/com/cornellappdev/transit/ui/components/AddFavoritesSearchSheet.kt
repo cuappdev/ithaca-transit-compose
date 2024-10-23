@@ -143,7 +143,6 @@ fun AddFavoritesSearchSheet(
 
                         is ApiResponse.Success -> {
 
-
                             items(placeQueryResponse.data) {
                                 MenuItem(
                                     type = it.type,
@@ -158,7 +157,6 @@ fun AddFavoritesSearchSheet(
                             }
                         }
                     }
-
                 }
             }
         }
