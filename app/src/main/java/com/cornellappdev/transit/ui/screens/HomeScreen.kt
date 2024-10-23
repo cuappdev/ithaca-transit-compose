@@ -188,7 +188,9 @@ fun HomeScreen(
                                 homeViewModel.clearRecents()
                             },
                             navController = navController,
-                            homeViewModel = homeViewModel
+                            onStopPressed = { place ->
+                                homeViewModel.addRecent(place)
+                            },
                         )
                     }
 
