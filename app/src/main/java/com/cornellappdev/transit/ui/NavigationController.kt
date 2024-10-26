@@ -3,6 +3,7 @@ package com.cornellappdev.transit.ui
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -11,6 +12,7 @@ import com.cornellappdev.transit.ui.screens.DetailsScreen
 import com.cornellappdev.transit.ui.screens.HomeScreen
 import com.cornellappdev.transit.ui.screens.RouteScreen
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
+import com.cornellappdev.transit.ui.viewmodels.LocationUIState
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.cornellappdev.transit.util.StringUtils.fromURLString
 import com.google.android.gms.maps.model.LatLng
@@ -41,17 +43,13 @@ fun NavigationController(
             val longitudeArg = backStackEntry.arguments?.getString("longitude")
             if (destArg != null && latitudeArg != null && longitudeArg != null) {
                 routeViewModel.changeEndLocation(
-                    destArg.fromURLString(),
-                    latitudeArg.toDouble(),
-                    longitudeArg.toDouble()
-                )
-                routeViewModel.getRoute(
-                    originName = "Current Location",
-                    start = LatLng(0.0, 0.0),
-                    destinationName = destArg.fromURLString(),
-                    end = LatLng(latitudeArg.toDouble(), longitudeArg.toDouble()),
-                    arriveBy = false,
-                    time = (System.currentTimeMillis() / 1000).toDouble()
+                    LocationUIState.Place(
+                        destArg.fromURLString(),
+                        LatLng(
+                            latitudeArg.toDouble(),
+                            longitudeArg.toDouble()
+                        )
+                    )
                 )
             }
             RouteScreen(navController = navController, routeViewModel = routeViewModel)

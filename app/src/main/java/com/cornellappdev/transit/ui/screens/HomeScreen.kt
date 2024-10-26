@@ -78,7 +78,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel,
-    routeViewModel: RouteViewModel = hiltViewModel(),
     navController: NavController,
     favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
@@ -128,9 +127,6 @@ fun HomeScreen(
 
     // Search bar flow
     val searchBarValue = homeViewModel.searchBarUiState.collectAsState().value
-
-    //Collect flow of route through API
-    val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
 
     //Map camera
     val cameraPositionState = rememberCameraPositionState {
