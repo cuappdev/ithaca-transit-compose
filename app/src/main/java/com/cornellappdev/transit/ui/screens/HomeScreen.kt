@@ -1,6 +1,5 @@
 package com.cornellappdev.transit.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,7 +16,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
@@ -49,14 +47,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.accompanist.permissions.rememberPermissionState
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
@@ -64,9 +54,18 @@ import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
+import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.cornellappdev.transit.util.StringUtils.toURLString
+import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
 
 /**
@@ -128,9 +127,7 @@ fun HomeScreen(
     val currentLocationValue = homeViewModel.currentLocation.collectAsState().value
 
     // Search bar flow
-    val searchBarValue = homeViewModel.searchQuery.collectAsState().value
-
-    val placeQueryResponse = homeViewModel.placeQueryFlow.collectAsState().value
+    val searchBarValue = homeViewModel.searchBarUiState.collectAsState().value
 
     //Collect flow of route through API
     val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
@@ -168,7 +165,7 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             DockedSearchBar(
-                query = searchBarValue,
+                query = (searchBarValue as? SearchBarUIState.Query)?.queryText ?: "",
                 onQueryChange = { s -> homeViewModel.onQueryChange(s) },
                 onSearch = { it -> searchActive = false; homeViewModel.onSearch(it) },
                 active = searchActive,
@@ -184,34 +181,44 @@ fun HomeScreen(
 
             ) {
                 //If query is blank, display recents and favorites
-                if (searchBarValue.isBlank()) {
-                    SearchSuggestions(
-                        favorites = emptyList(),
-                        recents = emptyList(),
-                        onFavoriteAdd = {},
-                        onRecentClear = {
-                        }
-                    )
-                } else {
-                    LazyColumn {
-                        when (placeQueryResponse) {
-                            is ApiResponse.Error -> {
+                when (searchBarValue) {
+                    is SearchBarUIState.RecentAndFavorites -> {
+                        SearchSuggestions(
+                            favorites = searchBarValue.favorites,
+                            recents = searchBarValue.recents,
+                            onFavoriteAdd = {},
+                            onRecentClear = {
+                                homeViewModel.clearRecents()
+                            },
+                            navController = navController,
+                            onStopPressed = { place ->
+                                homeViewModel.addRecent(place)
+                            },
+                        )
+                    }
 
-                            }
+                    is SearchBarUIState.Query -> {
+                        LazyColumn {
+                            when (searchBarValue.searched) {
+                                is ApiResponse.Error -> {
 
-                            is ApiResponse.Pending -> {
+                                }
 
-                            }
+                                is ApiResponse.Pending -> {
 
-                            is ApiResponse.Success -> {
-                                items(placeQueryResponse.data) {
-                                    MenuItem(
-                                        type = it.type,
-                                        label = it.name,
-                                        sublabel = it.subLabel,
-                                        onClick = {
-                                            navController.navigate("route/${it.name.toURLString()}/${it.latitude}/${it.longitude}")
-                                        })
+                                }
+
+                                is ApiResponse.Success -> {
+                                    items(searchBarValue.searched.data) {
+                                        MenuItem(
+                                            type = it.type,
+                                            label = it.name,
+                                            sublabel = it.subLabel,
+                                            onClick = {
+                                                navController.navigate("route/${it.name.toURLString()}/${it.latitude}/${it.longitude}")
+                                            })
+                                    }
+
 
                                 }
                             }
@@ -220,77 +227,77 @@ fun HomeScreen(
                 }
             }
         }
-    }
 
-    //SheetState for FavoritesBottomSheet
-    val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = SheetState(
-            skipPartiallyExpanded = false,
-            initialValue = SheetValue.PartiallyExpanded,
-            confirmValueChange = { true },
-            skipHiddenState = true
-        )
-    )
-
-    var editState by remember {
-        mutableStateOf(false)
-    }
-    var txt by remember {
-        mutableStateOf("Edit")
-    }
-
-    val data = favoritesViewModel.favoritesStops.collectAsState().value
-
-    //sheetState for AddFavorites BottomSheet
-    val addSheetState = androidx.compose.material.rememberModalBottomSheetState(
-        ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true,
-        confirmValueChange = {
-            true
-        }
-    )
-
-    val scope = rememberCoroutineScope()
-
-    // Favorites BottomSheet
-    BottomSheetScaffold(
-        scaffoldState = scaffoldState,
-        sheetSwipeEnabled = true,
-        sheetPeekHeight = 90.dp,
-        sheetContainerColor = Color.White,
-        sheetContent = {
-            BottomSheetContent(
-                editText = txt,
-                editState = editState, data = data.toList(), onclick = {
-                    editState = editState == false
-                    txt = if (editState) {
-                        "Done"
-                    } else {
-                        "Edit"
-                    }
-                }, addOnClick = {
-                    scope.launch {
-                        addSheetState.show()
-                    }
-                }, navController = navController
+        //SheetState for FavoritesBottomSheet
+        val scaffoldState = rememberBottomSheetScaffoldState(
+            bottomSheetState = SheetState(
+                skipPartiallyExpanded = false,
+                initialValue = SheetValue.PartiallyExpanded,
+                confirmValueChange = { true },
+                skipHiddenState = true
             )
-        }
-    ) {}
+        )
 
-    // AddFavorites BottomSheet
-    ModalBottomSheetLayout(
-        sheetShape = RoundedCornerShape(16.dp),
-        sheetBackgroundColor = Color.White,
-        sheetState = addSheetState,
-        sheetContent = {
-            AddFavoritesSearchSheet(
-                homeViewModel = homeViewModel,
-                favoritesViewModel = favoritesViewModel
-            ) {
-                scope.launch {
-                    addSheetState.hide()
-                }
+        var editState by remember {
+            mutableStateOf(false)
+        }
+        var txt by remember {
+            mutableStateOf("Edit")
+        }
+
+        val data = favoritesViewModel.favoritesStops.collectAsState().value
+
+        //sheetState for AddFavorites BottomSheet
+        val addSheetState = androidx.compose.material.rememberModalBottomSheetState(
+            ModalBottomSheetValue.Hidden,
+            skipHalfExpanded = true,
+            confirmValueChange = {
+                true
             }
-        },
-    ) {}
+        )
+
+        val scope = rememberCoroutineScope()
+
+        // Favorites BottomSheet
+        BottomSheetScaffold(
+            scaffoldState = scaffoldState,
+            sheetSwipeEnabled = true,
+            sheetPeekHeight = 90.dp,
+            sheetContainerColor = Color.White,
+            sheetContent = {
+                BottomSheetContent(
+                    editText = txt,
+                    editState = editState, data = data.toList(), onclick = {
+                        editState = editState == false
+                        txt = if (editState) {
+                            "Done"
+                        } else {
+                            "Edit"
+                        }
+                    }, addOnClick = {
+                        scope.launch {
+                            addSheetState.show()
+                        }
+                    }, navController = navController
+                )
+            }
+        ) {}
+
+        // AddFavorites BottomSheet
+        ModalBottomSheetLayout(
+            sheetShape = RoundedCornerShape(16.dp),
+            sheetBackgroundColor = Color.White,
+            sheetState = addSheetState,
+            sheetContent = {
+                AddFavoritesSearchSheet(
+                    homeViewModel = homeViewModel,
+                    favoritesViewModel = favoritesViewModel
+                ) {
+                    scope.launch {
+                        addSheetState.hide()
+                    }
+                }
+            },
+        ) {}
+    }
 }

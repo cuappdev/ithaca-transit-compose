@@ -20,6 +20,18 @@ object Style {
     )
 
     /**
+     * TextStyle for headers of route types
+     */
+    val heading4 = TextStyle(
+        fontSize = 12.sp,
+        fontFamily = sfProDisplayFamily,
+        lineHeight = 14.sp,
+        platformStyle = PlatformTextStyle(
+            includeFontPadding = false
+        )
+    )
+
+    /**
      * TextStyle for Descriptions, Stop names, and Route numbers
      */
     val paragraph = TextStyle(

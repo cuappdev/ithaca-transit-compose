@@ -57,6 +57,7 @@ import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.theme.PrimaryText
+import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -306,11 +307,9 @@ private fun PaddedRouteCell(transport: Transport) {
 private fun RouteList(lastRouteResponse: ApiResponse<RouteOptions>) {
     when (lastRouteResponse) {
         is ApiResponse.Error -> {
-            Text("Error")
         }
 
         is ApiResponse.Pending -> {
-            Text("Pending")
         }
 
         is ApiResponse.Success -> {
@@ -323,7 +322,7 @@ private fun RouteList(lastRouteResponse: ApiResponse<RouteOptions>) {
                 })
                 if (lastRouteResponse.data.boardingSoon.isNotEmpty()) {
                     item {
-                        Text("Boarding Soon From Nearby Stops")
+                        Text("Boarding Soon From Nearby Stops", style = Style.heading4, color = MetadataGray, modifier = Modifier.padding(start = 12.dp))
                     }
                 }
                 items(lastRouteResponse.data.boardingSoon, itemContent = { item ->
@@ -331,7 +330,7 @@ private fun RouteList(lastRouteResponse: ApiResponse<RouteOptions>) {
                 })
                 if (lastRouteResponse.data.walking.isNotEmpty()) {
                     item {
-                        Text("By Walking")
+                        Text("By Walking", style = Style.heading4, color = MetadataGray, modifier = Modifier.padding(start = 12.dp))
                     }
                 }
                 items(lastRouteResponse.data.walking, itemContent = { item ->

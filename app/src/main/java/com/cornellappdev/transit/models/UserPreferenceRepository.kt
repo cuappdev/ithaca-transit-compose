@@ -13,10 +13,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Repository to store data related to user preferences
@@ -38,6 +38,7 @@ class UserPreferenceRepository @Inject constructor(@ApplicationContext val conte
      */
     companion object PreferencesKeys {
         val FAVORITES_MAP = stringSetPreferencesKey("favorites")
+        val RECENTS_MAP = stringSetPreferencesKey("recents")
     }
 
     /**
@@ -74,4 +75,47 @@ class UserPreferenceRepository @Inject constructor(@ApplicationContext val conte
             }.toSet()
             response
         }.stateIn(CoroutineScope(Dispatchers.Default), SharingStarted.Eagerly, emptySet())
+
+    /**
+     * Adds a recent in user preferences
+     * @param recents: The set containing names of stops that have been searched recently
+     */
+    suspend fun setRecents(stop: Place) {
+        var currentRecents = recentsFlow.value.toMutableList()
+        currentRecents = currentRecents
+            .filter { it != stop }
+            .toMutableList()
+        currentRecents.add(0, stop)
+        if (currentRecents.size > 5) {
+            currentRecents = currentRecents.take(5).toMutableList()
+        }
+        dataStore.edit { preferences ->
+            val recentStrings = currentRecents.map { json.encodeToString(it) }.toSet()
+            preferences[RECENTS_MAP] = recentStrings
+        }
+    }
+
+    suspend fun clearRecents() {
+        dataStore.edit { preferences ->
+            val recentStrings = mutableListOf<Place>().map { json.encodeToString(it) }.toSet()
+            preferences[RECENTS_MAP] = recentStrings
+        }
+    }
+
+    /**
+     * Flow of recently searched stops
+     */
+    val recentsFlow: StateFlow<List<Place>> = dataStore.data.catch {
+        listOf<Place>()
+    }.map { preferences ->
+        val recentStrings = preferences[RECENTS_MAP] ?: setOf()
+        val response = recentStrings.mapNotNull { jsonString ->
+            try {
+                json.decodeFromString<Place>(jsonString)
+            } catch (e: Exception) {
+                null
+            }
+        }.toList()
+        response
+    }.stateIn(CoroutineScope(Dispatchers.Default), SharingStarted.Eagerly, emptyList())
 }
