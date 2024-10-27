@@ -2,11 +2,9 @@ package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
-import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.UserPreferenceRepository
@@ -128,8 +126,8 @@ class RouteViewModel @Inject constructor(
                 }.collect {
                     val startState = it.first
                     val endState = it.second
-                    unwrapLocationState(it.second)?.let { end ->
-                        unwrapLocationState(it.first)?.let { start ->
+                    getCoordinatesFromLocationState(it.second)?.let { end ->
+                        getCoordinatesFromLocationState(it.first)?.let { start ->
                             getRoute(
                                 end = end,
                                 start = start,

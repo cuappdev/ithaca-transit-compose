@@ -6,6 +6,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 
+/**
+ * High fidelity text styles
+ */
 object Style {
     /**
      * TextStyle for Card titles, On time/Late, and Board time

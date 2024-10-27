@@ -1,8 +1,5 @@
 package com.cornellappdev.transit.ui.viewmodels
 
-import android.util.Log
-import com.cornellappdev.transit.models.Place
-import com.cornellappdev.transit.networking.ApiResponse
 import com.google.android.gms.maps.model.LatLng
 
 /**
@@ -16,7 +13,10 @@ sealed class LocationUIState {
         LocationUIState()
 }
 
-fun unwrapLocationState(locationState: LocationUIState): LatLng? {
+/**
+ * Retrieve the coordinates from a LocationUIState regardless of type
+ */
+fun getCoordinatesFromLocationState(locationState: LocationUIState): LatLng? {
     return when (locationState) {
         is LocationUIState.CurrentLocation -> {
             locationState.coordinates

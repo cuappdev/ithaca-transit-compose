@@ -6,7 +6,14 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+/**
+ * Extra utility functions for datetime
+ */
 object TimeUtils {
+
+    /**
+     * Convert ISO datetime string to hours, minutes, and AM/PM in format HH:MM AM
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     fun getHHMM(isoString: String): String {
 
