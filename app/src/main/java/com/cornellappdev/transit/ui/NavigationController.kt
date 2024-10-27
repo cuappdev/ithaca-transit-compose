@@ -21,7 +21,6 @@ import kotlin.math.log
 /**
  * The navigation controller for the app (parent of all screens)
  */
-//TODO: make navContoller accept argument (start + dest) by editing the navHost
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationController(
@@ -41,7 +40,13 @@ fun NavigationController(
             val destArg = backStackEntry.arguments?.getString("destination")
             val latitudeArg = backStackEntry.arguments?.getString("latitude")
             val longitudeArg = backStackEntry.arguments?.getString("longitude")
-            if (destArg != null && latitudeArg != null && longitudeArg != null) {
+            val currentLocation = routeViewModel.currentLocation.collectAsState().value
+            if (destArg != null && latitudeArg != null && longitudeArg != null && currentLocation != null) {
+                routeViewModel.changeStartLocation(
+                    LocationUIState.CurrentLocation(
+                        LatLng(currentLocation.latitude, currentLocation.longitude)
+                    )
+                )
                 routeViewModel.changeEndLocation(
                     LocationUIState.Place(
                         destArg.fromURLString(),
