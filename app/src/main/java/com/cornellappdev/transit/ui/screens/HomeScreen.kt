@@ -247,7 +247,7 @@ fun HomeScreen(
     var editState by remember {
         mutableStateOf(false)
     }
-    var txt by remember {
+    var editText by remember {
         mutableStateOf("Edit")
     }
 
@@ -263,12 +263,12 @@ fun HomeScreen(
         sheetContainerColor = Color.White,
         sheetContent = {
             BottomSheetContent(
-                editText = txt,
+                editText = editText,
                 editState = editState,
                 data = data.toList(),
                 onclick = {
                     editState = !editState
-                    txt = if (editState) {
+                    editText = if (editState) {
                         "Done"
                     } else {
                         "Edit"
