@@ -13,8 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
@@ -200,11 +198,9 @@ fun HomeScreen(
                         LazyColumn {
                             when (searchBarValue.searched) {
                                 is ApiResponse.Error -> {
-
                                 }
 
                                 is ApiResponse.Pending -> {
-
                                 }
 
                                 is ApiResponse.Success -> {
@@ -219,6 +215,9 @@ fun HomeScreen(
                                             })
 
                                     }
+                                    if (searchBarValue.searched.data.isEmpty()) {
+                                        item { Text("No search results") }
+                                    }
                                 }
                             }
                         }
@@ -229,74 +228,89 @@ fun HomeScreen(
     }
 
     //SheetState for FavoritesBottomSheet
-    val scaffoldState = rememberBottomSheetScaffoldState(
+    val favoritesSheetState = rememberBottomSheetScaffoldState(
         bottomSheetState = SheetState(
             skipPartiallyExpanded = false,
-            initialValue = SheetValue.PartiallyExpanded,
-            confirmValueChange = { true },
+            initialValue = SheetValue.Expanded,
             skipHiddenState = true
+        )
+    )
+
+    //sheetState for AddFavorites BottomSheet
+    val addSheetState = rememberBottomSheetScaffoldState(
+        bottomSheetState = SheetState(
+            skipPartiallyExpanded = true,
+            initialValue = SheetValue.Hidden
         )
     )
 
     var editState by remember {
         mutableStateOf(false)
     }
-    var txt by remember {
+    var editText by remember {
         mutableStateOf("Edit")
     }
 
-    val data = favoritesViewModel.favoritesStops.collectAsState().value
-
-    //sheetState for AddFavorites BottomSheet
-    val addSheetState = androidx.compose.material.rememberModalBottomSheetState(
-        ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true,
-        confirmValueChange = {
-            true
-        }
-    )
-
     val scope = rememberCoroutineScope()
+
+    val data = favoritesViewModel.favoritesStops.collectAsState().value
 
     // Favorites BottomSheet
     BottomSheetScaffold(
-        scaffoldState = scaffoldState,
+        scaffoldState = favoritesSheetState,
         sheetSwipeEnabled = true,
         sheetPeekHeight = 90.dp,
         sheetContainerColor = Color.White,
         sheetContent = {
             BottomSheetContent(
-                editText = txt,
-                editState = editState, data = data.toList(), onclick = {
-                    editState = editState == false
-                    txt = if (editState) {
+                editText = editText,
+                editState = editState,
+                data = data.toList(),
+                onclick = {
+                    editState = !editState
+                    editText = if (editState) {
                         "Done"
                     } else {
                         "Edit"
                     }
                 }, addOnClick = {
                     scope.launch {
-                        addSheetState.show()
+                        if (!favoritesSheetState.bottomSheetState.hasExpandedState) {
+                            favoritesSheetState.bottomSheetState.expand()
+                        }
+                        if (editState) {
+                            editState = false
+                        }
+                        addSheetState.bottomSheetState.expand()
                     }
-                }, navController = navController
+                },
+                removeOnClick = { place ->
+                    favoritesViewModel.removeFavorite(place)
+                    scope.launch {
+                        favoritesSheetState.bottomSheetState.expand()
+                    }
+                },
+                navController = navController
             )
         }
     ) {}
 
     // AddFavorites BottomSheet
-    ModalBottomSheetLayout(
+    BottomSheetScaffold(
         sheetShape = RoundedCornerShape(16.dp),
-        sheetBackgroundColor = Color.White,
-        sheetState = addSheetState,
+        scaffoldState = addSheetState,
+        sheetContainerColor = Color.White,
+        sheetPeekHeight = 0.dp,
         sheetContent = {
             AddFavoritesSearchSheet(
                 homeViewModel = homeViewModel,
                 favoritesViewModel = favoritesViewModel
             ) {
                 scope.launch {
-                    addSheetState.hide()
+                    addSheetState.bottomSheetState.hide()
                 }
             }
         },
-    ) {}
+
+        ) {}
 }
