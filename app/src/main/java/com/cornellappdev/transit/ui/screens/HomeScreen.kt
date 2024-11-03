@@ -13,8 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
@@ -56,8 +54,8 @@ import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
-import com.cornellappdev.transit.util.StringUtils.toURLString
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
+import com.cornellappdev.transit.util.StringUtils.toURLString
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -78,6 +76,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel,
+    routeViewModel: RouteViewModel = hiltViewModel(),
     navController: NavController,
     favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
@@ -127,6 +126,9 @@ fun HomeScreen(
 
     // Search bar flow
     val searchBarValue = homeViewModel.searchBarUiState.collectAsState().value
+
+    //Collect flow of route through API
+    val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
 
     //Map camera
     val cameraPositionState = rememberCameraPositionState {
@@ -197,11 +199,9 @@ fun HomeScreen(
                         LazyColumn {
                             when (searchBarValue.searched) {
                                 is ApiResponse.Error -> {
-
                                 }
 
                                 is ApiResponse.Pending -> {
-
                                 }
 
                                 is ApiResponse.Success -> {
@@ -211,11 +211,14 @@ fun HomeScreen(
                                             label = it.name,
                                             sublabel = it.subLabel,
                                             onClick = {
+                                                homeViewModel.addRecent(it)
                                                 navController.navigate("route/${it.name.toURLString()}/${it.latitude}/${it.longitude}")
                                             })
+
                                     }
-
-
+                                    if (searchBarValue.searched.data.isEmpty()) {
+                                        item { Text("No search results") }
+                                    }
                                 }
                             }
                         }
@@ -223,77 +226,92 @@ fun HomeScreen(
                 }
             }
         }
-
-        //SheetState for FavoritesBottomSheet
-        val scaffoldState = rememberBottomSheetScaffoldState(
-            bottomSheetState = SheetState(
-                skipPartiallyExpanded = false,
-                initialValue = SheetValue.PartiallyExpanded,
-                confirmValueChange = { true },
-                skipHiddenState = true
-            )
-        )
-
-        var editState by remember {
-            mutableStateOf(false)
-        }
-        var txt by remember {
-            mutableStateOf("Edit")
-        }
-
-        val data = favoritesViewModel.favoritesStops.collectAsState().value
-
-        //sheetState for AddFavorites BottomSheet
-        val addSheetState = androidx.compose.material.rememberModalBottomSheetState(
-            ModalBottomSheetValue.Hidden,
-            skipHalfExpanded = true,
-            confirmValueChange = {
-                true
-            }
-        )
-
-        val scope = rememberCoroutineScope()
-
-        // Favorites BottomSheet
-        BottomSheetScaffold(
-            scaffoldState = scaffoldState,
-            sheetSwipeEnabled = true,
-            sheetPeekHeight = 90.dp,
-            sheetContainerColor = Color.White,
-            sheetContent = {
-                BottomSheetContent(
-                    editText = txt,
-                    editState = editState, data = data.toList(), onclick = {
-                        editState = editState == false
-                        txt = if (editState) {
-                            "Done"
-                        } else {
-                            "Edit"
-                        }
-                    }, addOnClick = {
-                        scope.launch {
-                            addSheetState.show()
-                        }
-                    }, navController = navController
-                )
-            }
-        ) {}
-
-        // AddFavorites BottomSheet
-        ModalBottomSheetLayout(
-            sheetShape = RoundedCornerShape(16.dp),
-            sheetBackgroundColor = Color.White,
-            sheetState = addSheetState,
-            sheetContent = {
-                AddFavoritesSearchSheet(
-                    homeViewModel = homeViewModel,
-                    favoritesViewModel = favoritesViewModel
-                ) {
-                    scope.launch {
-                        addSheetState.hide()
-                    }
-                }
-            },
-        ) {}
     }
+
+    //SheetState for FavoritesBottomSheet
+    val favoritesSheetState = rememberBottomSheetScaffoldState(
+        bottomSheetState = SheetState(
+            skipPartiallyExpanded = false,
+            initialValue = SheetValue.Expanded,
+            skipHiddenState = true
+        )
+    )
+
+    //sheetState for AddFavorites BottomSheet
+    val addSheetState = rememberBottomSheetScaffoldState(
+        bottomSheetState = SheetState(
+            skipPartiallyExpanded = true,
+            initialValue = SheetValue.Hidden
+        )
+    )
+
+    var editState by remember {
+        mutableStateOf(false)
+    }
+    var editText by remember {
+        mutableStateOf("Edit")
+    }
+
+    val scope = rememberCoroutineScope()
+
+    val data = favoritesViewModel.favoritesStops.collectAsState().value
+
+    // Favorites BottomSheet
+    BottomSheetScaffold(
+        scaffoldState = favoritesSheetState,
+        sheetSwipeEnabled = true,
+        sheetPeekHeight = 90.dp,
+        sheetContainerColor = Color.White,
+        sheetContent = {
+            BottomSheetContent(
+                editText = editText,
+                editState = editState,
+                data = data.toList(),
+                onclick = {
+                    editState = !editState
+                    editText = if (editState) {
+                        "Done"
+                    } else {
+                        "Edit"
+                    }
+                }, addOnClick = {
+                    scope.launch {
+                        if (!favoritesSheetState.bottomSheetState.hasExpandedState) {
+                            favoritesSheetState.bottomSheetState.expand()
+                        }
+                        if (editState) {
+                            editState = false
+                        }
+                        addSheetState.bottomSheetState.expand()
+                    }
+                },
+                removeOnClick = { place ->
+                    favoritesViewModel.removeFavorite(place)
+                    scope.launch {
+                        favoritesSheetState.bottomSheetState.expand()
+                    }
+                },
+                navController = navController
+            )
+        }
+    ) {}
+
+    // AddFavorites BottomSheet
+    BottomSheetScaffold(
+        sheetShape = RoundedCornerShape(16.dp),
+        scaffoldState = addSheetState,
+        sheetContainerColor = Color.White,
+        sheetPeekHeight = 0.dp,
+        sheetContent = {
+            AddFavoritesSearchSheet(
+                homeViewModel = homeViewModel,
+                favoritesViewModel = favoritesViewModel
+            ) {
+                scope.launch {
+                    addSheetState.bottomSheetState.hide()
+                }
+            }
+        },
+
+        ) {}
 }

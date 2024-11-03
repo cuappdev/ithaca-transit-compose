@@ -42,10 +42,11 @@ fun BottomSheetContent(
     data: List<Place>,
     onclick: () -> Unit,
     addOnClick: () -> Unit,
+    removeOnClick: (Place) -> Unit,
     favoritesViewModel: FavoritesViewModel = hiltViewModel(),
     navController: NavController
 ) {
-    Column() {
+    Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -85,7 +86,7 @@ fun BottomSheetContent(
                     editing = editState,
                     { navController.navigate("route/${it.name.toURLString()}/${it.latitude}/${it.longitude}") },
                     addOnClick = {},
-                    removeOnClick = { favoritesViewModel.removeFavorite(it) },
+                    removeOnClick = { removeOnClick(it) },
                 )
             }
             item {
