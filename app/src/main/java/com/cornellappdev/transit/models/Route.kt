@@ -14,6 +14,10 @@ data class DirectionStop(
     @Json(name = "stopId") val stopId: String
 )
 
+enum class DirectionType {
+    WALK,
+    DEPART
+}
 
 /**
  * Data class representing a direction
@@ -26,12 +30,15 @@ data class Direction(
     @Json(name = "delay") val delay: Int?,
     @Json(name = "startLocation") val startLocation: LatLng,
     @Json(name = "path") val path: List<LatLng>,
-    @Json(name = "type") val type: String, // "walk" or "depart"
+    @Json(name = "type") private val directionType: String, // "walk" or "depart"
     @Json(name = "stops") val stops: List<DirectionStop>,
     @Json(name = "endTime") val endTime: String,
     @Json(name = "distance") val distance: String,
     @Json(name = "startTime") val startTime: String,
-)
+) {
+    val type
+        get() = if (directionType == "walk") DirectionType.WALK else DirectionType.DEPART
+}
 
 
 /**

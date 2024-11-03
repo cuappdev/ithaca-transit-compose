@@ -52,7 +52,7 @@ import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.Transport
-import com.cornellappdev.transit.models.createTransport
+import com.cornellappdev.transit.models.toTransport
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.RouteCell
@@ -401,7 +401,7 @@ private fun RouteList(lastRouteResponse: ApiResponse<RouteOptions>) {
                 .background(color = DividerGray)
                 .fillMaxSize(), content = {
                 items(lastRouteResponse.data.fromStop, itemContent = { item ->
-                    PaddedRouteCell(createTransport(item))
+                    PaddedRouteCell(item.toTransport())
                 })
                 if (lastRouteResponse.data.boardingSoon.isNotEmpty()) {
                     item {
@@ -417,7 +417,7 @@ private fun RouteList(lastRouteResponse: ApiResponse<RouteOptions>) {
                     }
                 }
                 items(lastRouteResponse.data.boardingSoon, itemContent = { item ->
-                    PaddedRouteCell(createTransport(item))
+                    PaddedRouteCell(item.toTransport())
                 })
                 if (lastRouteResponse.data.walking.isNotEmpty()) {
                     item {
@@ -433,7 +433,7 @@ private fun RouteList(lastRouteResponse: ApiResponse<RouteOptions>) {
                     }
                 }
                 items(lastRouteResponse.data.walking, itemContent = { item ->
-                    PaddedRouteCell(createTransport(item))
+                    PaddedRouteCell(item.toTransport())
                 })
             })
         }

@@ -74,35 +74,35 @@ sealed class Transport {
  * Create a Transport object from Route
  */
 @RequiresApi(Build.VERSION_CODES.O)
-fun createTransport(route: Route) : Transport {
+fun Route.toTransport(): Transport {
     // TODO: We need to change the Transport class to accurately reflect all possible route configs
-    val allBus = route.directions.all { dir ->
-        dir.type == "depart"
+    val allBus = this.directions.all { dir ->
+        dir.type == DirectionType.DEPART
     }
-    val containsBus = route.directions.any { dir ->
-        dir.type == "depart"
+    val containsBus = this.directions.any { dir ->
+        dir.type == DirectionType.DEPART
     }
 
     if (allBus || containsBus) {
         return Transport.BusOnly(
-            startTime = TimeUtils.getHHMM(route.departureTime),
-            arriveTime = TimeUtils.getHHMM(route.arrivalTime),
-            distance = String.format("%.1f", route.travelDistance),
-            start = route.startName,
-            dest = route.endName,
-            firstBus = route.directions[0].routeId?.toInt() ?: 0,
+            startTime = TimeUtils.getHHMM(this.departureTime),
+            arriveTime = TimeUtils.getHHMM(this.arrivalTime),
+            distance = String.format("%.1f", this.travelDistance),
+            start = this.startName,
+            dest = this.endName,
+            firstBus = this.directions[0].routeId?.toInt() ?: 0,
             lateness = BusLateness.LATE,
-            secondBus = route.directions[1].routeId?.toInt() ?: 0,
+            secondBus = this.directions[1].routeId?.toInt() ?: 0,
             timeToBoard = 0,
             transferStop = ""
 
         )
     } else {
         return Transport.WalkOnly(
-            startTime = TimeUtils.getHHMM(route.departureTime),
-            arriveTime = TimeUtils.getHHMM(route.arrivalTime),
-            dest = route.endName,
-            distance = String.format("%.1f", route.travelDistance)
+            startTime = TimeUtils.getHHMM(this.departureTime),
+            arriveTime = TimeUtils.getHHMM(this.arrivalTime),
+            dest = this.endName,
+            distance = String.format("%.1f", this.travelDistance)
         )
     }
 
