@@ -1,13 +1,15 @@
 package com.cornellappdev.transit.models
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
 import com.cornellappdev.transit.ui.theme.LateRed
 import com.cornellappdev.transit.ui.theme.LiveGreen
+import com.cornellappdev.transit.util.TimeUtils
 
 /**
- * TODO: add spec
+ * Enum representing whether a bus is late
  */
-
 enum class BusLateness {
     LATE {
         override fun color() = LateRed
@@ -27,7 +29,7 @@ enum class BusLateness {
 }
 
 /**
- * TODO: add spec
+ * Class representing a total path for a route
  */
 sealed class Transport {
     abstract val startTime: String
@@ -66,4 +68,42 @@ sealed class Transport {
         val secondBus: Int,
         override val lateness: BusLateness
     ) : Transport()
+}
+
+/**
+ * Create a Transport object from Route
+ */
+@RequiresApi(Build.VERSION_CODES.O)
+fun Route.toTransport(): Transport {
+    // TODO: We need to change the Transport class to accurately reflect all possible route configs
+    val allBus = this.directions.all { dir ->
+        dir.type == DirectionType.DEPART
+    }
+    val containsBus = this.directions.any { dir ->
+        dir.type == DirectionType.DEPART
+    }
+
+    if (allBus || containsBus) {
+        return Transport.BusOnly(
+            startTime = TimeUtils.getHHMM(this.departureTime),
+            arriveTime = TimeUtils.getHHMM(this.arrivalTime),
+            distance = String.format("%.1f", this.travelDistance),
+            start = this.startName,
+            dest = this.endName,
+            firstBus = this.directions[0].routeId?.toInt() ?: 0,
+            lateness = BusLateness.LATE,
+            secondBus = this.directions[1].routeId?.toInt() ?: 0,
+            timeToBoard = 0,
+            transferStop = ""
+
+        )
+    } else {
+        return Transport.WalkOnly(
+            startTime = TimeUtils.getHHMM(this.departureTime),
+            arriveTime = TimeUtils.getHHMM(this.arrivalTime),
+            dest = this.endName,
+            distance = String.format("%.1f", this.travelDistance)
+        )
+    }
+
 }

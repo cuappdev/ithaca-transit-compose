@@ -1,12 +1,20 @@
 package com.cornellappdev.transit.ui.viewmodels
 
+import android.content.Context
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cornellappdev.transit.models.LocationRepository
+import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.RouteRepository
+import com.cornellappdev.transit.models.UserPreferenceRepository
+import com.cornellappdev.transit.networking.ApiResponse
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -14,38 +22,163 @@ import javax.inject.Inject
 @OptIn(ExperimentalMaterial3Api::class)
 class RouteViewModel @Inject constructor(
     private val routeRepository: RouteRepository,
+    private val locationRepository: LocationRepository,
+    private val userPreferenceRepository: UserPreferenceRepository
 ) : ViewModel() {
 
-    val startPl: MutableStateFlow<String> = MutableStateFlow("Current Location")
+    /**
+     * Value of the current location. Can be null
+     */
+    val currentLocation = locationRepository.currentLocation
 
-    val destPl: MutableStateFlow<String> = MutableStateFlow("")
+    /**
+     * Pair of the name of the starting location and the coordinates
+     */
+    val startPl: MutableStateFlow<LocationUIState> =
+        MutableStateFlow(
+            LocationUIState.CurrentLocation(currentLocation.value?.longitude?.let {
+                currentLocation.value?.latitude?.let { it1 ->
+                    LatLng(
+                        it, it1
+                    )
+                }
+            })
+        )
+
+    /**
+     * Pair of the name of the ending location and the coordinates
+     */
+    val destPl: MutableStateFlow<LocationUIState> = MutableStateFlow(
+        LocationUIState.CurrentLocation(currentLocation.value?.longitude?.let {
+            currentLocation.value?.latitude?.let { it1 ->
+                LatLng(
+                    it, it1
+                )
+            }
+        })
+    )
 
     val time = "12:00AM"
 
-    // Route select sheet
+    val lastRouteFlow: StateFlow<ApiResponse<RouteOptions>> = routeRepository.lastRouteFlow
+
     /**
-     * The current query in the search bar, as a StateFlow
+     * The current UI state of the search bar, as a MutableStateFlow
      */
-    val searchQuery: MutableStateFlow<String> = MutableStateFlow("")
+    private val _searchBarUiState: MutableStateFlow<SearchBarUIState> =
+        MutableStateFlow(SearchBarUIState.RecentAndFavorites(emptySet(), emptyList()))
+    val searchBarUiState: StateFlow<SearchBarUIState> = _searchBarUiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            launch {
+                userPreferenceRepository.favoritesFlow.collect {
+                    if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
+                        _searchBarUiState.value =
+                            (_searchBarUiState.value as SearchBarUIState.RecentAndFavorites).copy(
+                                favorites = it
+                            )
+                    }
+                }
+            }
+            launch {
+                userPreferenceRepository.recentsFlow.collect {
+                    if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
+                        _searchBarUiState.value =
+                            (_searchBarUiState.value as SearchBarUIState.RecentAndFavorites).copy(
+                                recents = it
+                            )
+                    }
+                }
+            }
+            launch {
+                routeRepository.placeFlow.collect {
+                    if (_searchBarUiState.value is SearchBarUIState.Query) {
+                        _searchBarUiState.value =
+                            (_searchBarUiState.value as SearchBarUIState.Query).copy(
+                                searched = it
+                            )
+                    }
+                }
+            }
+            launch {
+                currentLocation.collect {
+                    if (startPl.value is LocationUIState.CurrentLocation) {
+                        if (it != null) {
+                            startPl.value = LocationUIState.CurrentLocation(
+                                LatLng(it.latitude, it.longitude)
+                            )
+                        }
+                    }
+                    if (destPl.value is LocationUIState.CurrentLocation) {
+                        if (it != null) {
+                            destPl.value = LocationUIState.CurrentLocation(
+                                LatLng(it.latitude, it.longitude)
+                            )
+                        }
+                    }
+                }
+            }
+            launch {
+                // Every time startPl or destPl changes, make a route request
+                startPl.combine(destPl) { start, dest ->
+                    start to dest
+                }.collect {
+                    val startState = it.first
+                    val endState = it.second
+                    getCoordinatesFromLocationState(it.second)?.let { end ->
+                        getCoordinatesFromLocationState(it.first)?.let { start ->
+                            getRoute(
+                                end = end,
+                                start = start,
+                                arriveBy = false,
+                                destinationName = if (endState is LocationUIState.Place) endState.name else "Current Location",
+                                originName = if (startState is LocationUIState.Place) startState.name else "Current Location",
+                                time = (System.currentTimeMillis() / 1000).toDouble()
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     /**
      * Change the query in the search bar and update search results
      */
     fun onQueryChange(query: String) {
-        searchQuery.value = query;
+        if (query == "") {
+            _searchBarUiState.value = SearchBarUIState.RecentAndFavorites(
+                userPreferenceRepository.favoritesFlow.value,
+                userPreferenceRepository.recentsFlow.value
+            )
+        } else {
+            _searchBarUiState.value = SearchBarUIState.Query(
+                ApiResponse.Pending, query
+            )
+        }
+        routeRepository.makeSearch(query)
+    }
+
+    /**
+     * Update emitted location from [locationRepository]
+     */
+    fun updateLocation(context: Context) {
+        locationRepository.updateLocation(context)
     }
 
     /**
      * Change start location
      */
-    fun changeStateLocation(location: String) {
+    fun changeStartLocation(location: LocationUIState) {
         startPl.value = location
     }
 
     /**
      * Change end location
      */
-    fun changeEndLocation(location: String) {
+    fun changeEndLocation(location: LocationUIState) {
         destPl.value = location
     }
 

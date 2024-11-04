@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.cornellappdev.transit.networking.NetworkApi
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -39,7 +40,7 @@ class LocationRepository @Inject constructor(private val networkApi: NetworkApi)
     }
 
 
-    private fun updateLocation(context: Context) {
+    fun updateLocation(context: Context) {
         if (ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_FINE_LOCATION

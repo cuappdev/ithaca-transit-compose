@@ -55,6 +55,7 @@ import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
+import com.cornellappdev.transit.util.StringUtils.toURLString
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -211,7 +212,7 @@ fun HomeScreen(
                                             sublabel = it.subLabel,
                                             onClick = {
                                                 homeViewModel.addRecent(it)
-                                                navController.navigate("route/${it.name}")
+                                                navController.navigate("route/${it.name.toURLString()}/${it.latitude}/${it.longitude}")
                                             })
 
                                     }

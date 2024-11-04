@@ -25,6 +25,7 @@ import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.theme.sfProTextFamily
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
+import com.cornellappdev.transit.util.StringUtils.toURLString
 
 
 /**
@@ -83,7 +84,7 @@ fun BottomSheetContent(
                     label = it.name,
                     sublabel = "",
                     editing = editState,
-                    { navController.navigate("route/${it.name}") },
+                    { navController.navigate("route/${it.name.toURLString()}/${it.latitude}/${it.longitude}") },
                     addOnClick = {},
                     removeOnClick = { removeOnClick(it) },
                 )

@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cornellappdev.transit.models.Place
+import com.cornellappdev.transit.util.StringUtils.toURLString
 
 /**
  * Display for suggested searches (recents and favorites)
@@ -42,7 +43,7 @@ fun SearchSuggestions(
                 sublabel = it.subLabel,
                 onClick = {
                     onStopPressed(it)
-                    navController.navigate("route/${it.name}")
+                    navController.navigate("route/${it.name.toURLString()}/${it.latitude}/${it.longitude}")
                 }
             )
         }
@@ -59,7 +60,7 @@ fun SearchSuggestions(
                 sublabel = it.subLabel,
                 onClick = {
                     onStopPressed(it)
-                    navController.navigate("route/${it.name}")
+                    navController.navigate("route/${it.name.toURLString()}/${it.latitude}/${it.longitude}")
                 }
             )
         }

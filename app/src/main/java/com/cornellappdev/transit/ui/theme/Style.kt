@@ -6,6 +6,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 
+/**
+ * High fidelity text styles
+ */
 object Style {
     /**
      * TextStyle for Card titles, On time/Late, and Board time
@@ -17,6 +20,18 @@ object Style {
         platformStyle = PlatformTextStyle(
             includeFontPadding = false
         ),
+    )
+
+    /**
+     * TextStyle for headers of route types
+     */
+    val heading4 = TextStyle(
+        fontSize = 12.sp,
+        fontFamily = sfProDisplayFamily,
+        lineHeight = 14.sp,
+        platformStyle = PlatformTextStyle(
+            includeFontPadding = false
+        )
     )
 
     /**
