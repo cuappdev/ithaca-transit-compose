@@ -5,9 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
-import com.cornellappdev.transit.models.MapState
 import com.cornellappdev.transit.models.Place
-import com.cornellappdev.transit.models.RouteOptionType
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.networking.ApiResponse
@@ -184,21 +182,5 @@ class HomeViewModel @Inject constructor(
     fun instantiateLocation(context: Context) {
         locationRepository.instantiate(context)
     }
-
-    // Map state
-
-    /**
-     * Emits whether a route should be showing on the map
-     */
-    val mapState: MutableStateFlow<MapState> =
-        MutableStateFlow(MapState(isShowing = false, routeOptionType = RouteOptionType.None))
-
-    /**
-     * Set map state for home screen
-     */
-    fun setMapState(value: MapState) {
-        mapState.value = value
-    }
-
 
 }

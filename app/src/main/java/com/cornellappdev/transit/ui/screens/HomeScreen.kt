@@ -135,9 +135,6 @@ fun HomeScreen(
         position = CameraPosition.fromLatLngZoom(homeViewModel.defaultIthaca, 12f)
     }
 
-    //Map state
-    val mapState = homeViewModel.mapState.collectAsState().value
-
     // Search bar active/inactive
     var searchActive by remember { mutableStateOf(false) }
 

@@ -26,7 +26,7 @@ data class Direction(
     @Json(name = "endLocation") val endLocation: LatLng,
     @Json(name = "routeId") val routeId: String?,
     @Json(name = "tripIds") val tripIds: List<String>?,
-    @Json(name = "stayOnBusForTransfer") val stayOnBusForTransfer: Boolean,
+    @Json(name = "stayOnBusForTransfer") val stayOnBusForTransfer: Boolean?,
     @Json(name = "delay") val delay: Int?,
     @Json(name = "startLocation") val startLocation: LatLng,
     @Json(name = "path") val path: List<LatLng>,
@@ -59,9 +59,9 @@ data class Route(
  * Data class wrapping all possible routes from a given start and end
  */
 data class RouteOptions(
-    @Json(name = "boardingSoon") val boardingSoon: List<Route>,
-    @Json(name = "fromStop") val fromStop: List<Route>,
-    @Json(name = "walking") val walking: List<Route>
+    @Json(name = "boardingSoon") val boardingSoon: List<Route>?,
+    @Json(name = "fromStop") val fromStop: List<Route>?,
+    @Json(name = "walking") val walking: List<Route>?
 )
 
 /**
