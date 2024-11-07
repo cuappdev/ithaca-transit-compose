@@ -76,7 +76,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel,
-    routeViewModel: RouteViewModel = hiltViewModel(),
     navController: NavController,
     favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
