@@ -11,6 +11,5 @@ enum class RouteOptionType {
 
 data class MapState(
     val isShowing: Boolean,
-    val routeOptionType: RouteOptionType,
     val route: Route?
 )

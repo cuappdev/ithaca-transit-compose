@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.MapState
-import com.cornellappdev.transit.models.RouteOptionType
 import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.UserPreferenceRepository
@@ -226,7 +225,6 @@ class RouteViewModel @Inject constructor(
         MutableStateFlow(
             MapState(
                 isShowing = false,
-                routeOptionType = RouteOptionType.None,
                 route = null
             )
         )

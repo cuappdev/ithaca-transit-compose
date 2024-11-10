@@ -52,7 +52,6 @@ import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.MapState
 import com.cornellappdev.transit.models.Route
-import com.cornellappdev.transit.models.RouteOptionType
 import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.Transport
 import com.cornellappdev.transit.models.toTransport
@@ -162,12 +161,11 @@ fun RouteScreen(
                 lastRoute = lastRoute,
                 startSheetState = startSheetState,
                 destSheetState = destSheetState
-            ) { routeOptionsType, transport ->
+            ) { route ->
                 routeViewModel.setMapState(
                     MapState(
                         true,
-                        routeOptionsType,
-                        transport
+                        route
                     )
                 );navController.navigate("details")
             }
@@ -191,7 +189,7 @@ private fun RouteOptionsMainMenu(
     lastRoute: ApiResponse<RouteOptions>,
     startSheetState: ModalBottomSheetState,
     destSheetState: ModalBottomSheetState,
-    onClick: (RouteOptionType, Route) -> Unit
+    onClick: (Route) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
@@ -400,7 +398,7 @@ private fun PaddedRouteCell(transport: Transport, onClick: () -> Unit) {
 @Composable
 private fun RouteList(
     lastRouteResponse: ApiResponse<RouteOptions>,
-    onClick: (RouteOptionType, Route) -> Unit
+    onClick: (Route) -> Unit
 ) {
     when (lastRouteResponse) {
         is ApiResponse.Error -> {
@@ -421,7 +419,6 @@ private fun RouteList(
                     items(it) { item ->
                         PaddedRouteCell(item.toTransport()) {
                             onClick(
-                                RouteOptionType.FromStop,
                                 item
                             )
                         }
@@ -444,7 +441,6 @@ private fun RouteList(
                     items(it) { item ->
                         PaddedRouteCell(item.toTransport()) {
                             onClick(
-                                RouteOptionType.BoardingSoon,
                                 item
                             )
                         }
@@ -467,7 +463,6 @@ private fun RouteList(
                     items(it) { item ->
                         PaddedRouteCell(item.toTransport()) {
                             onClick(
-                                RouteOptionType.Walking,
                                 item
                             )
                         }
