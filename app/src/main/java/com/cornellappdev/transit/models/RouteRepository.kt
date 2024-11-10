@@ -121,7 +121,6 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
                 _lastRouteFlow.value = ApiResponse.Success(routeResponse.unwrap())
             } catch (e: Exception) {
                 _lastRouteFlow.value = ApiResponse.Error
-                Log.e("helpme", e.toString())
             }
         }
     }
