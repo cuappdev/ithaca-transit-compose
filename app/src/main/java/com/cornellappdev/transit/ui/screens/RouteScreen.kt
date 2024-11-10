@@ -162,7 +162,15 @@ fun RouteScreen(
                 lastRoute = lastRoute,
                 startSheetState = startSheetState,
                 destSheetState = destSheetState
-            ) { routeOptionsType, transport -> routeViewModel.setMapState(MapState(true, routeOptionsType, transport)) ;navController.navigate("details") }
+            ) { routeOptionsType, transport ->
+                routeViewModel.setMapState(
+                    MapState(
+                        true,
+                        routeOptionsType,
+                        transport
+                    )
+                );navController.navigate("details")
+            }
         }
     }
 
@@ -411,7 +419,12 @@ private fun RouteList(
             ) {
                 lastRouteResponse.data.fromStop?.let {
                     items(it) { item ->
-                        PaddedRouteCell(item.toTransport()) { onClick(RouteOptionType.FromStop, item) }
+                        PaddedRouteCell(item.toTransport()) {
+                            onClick(
+                                RouteOptionType.FromStop,
+                                item
+                            )
+                        }
                     }
                 }
                 if (lastRouteResponse.data.boardingSoon?.isNotEmpty() == true) {
@@ -429,7 +442,12 @@ private fun RouteList(
                 }
                 lastRouteResponse.data.boardingSoon?.let {
                     items(it) { item ->
-                        PaddedRouteCell(item.toTransport()) { onClick(RouteOptionType.BoardingSoon, item) }
+                        PaddedRouteCell(item.toTransport()) {
+                            onClick(
+                                RouteOptionType.BoardingSoon,
+                                item
+                            )
+                        }
                     }
                 }
                 if (lastRouteResponse.data.walking?.isNotEmpty() == true) {
@@ -447,7 +465,12 @@ private fun RouteList(
                 }
                 lastRouteResponse.data.walking?.let {
                     items(it) { item ->
-                        PaddedRouteCell(item.toTransport()) { onClick(RouteOptionType.Walking, item) }
+                        PaddedRouteCell(item.toTransport()) {
+                            onClick(
+                                RouteOptionType.Walking,
+                                item
+                            )
+                        }
                     }
                 }
             }

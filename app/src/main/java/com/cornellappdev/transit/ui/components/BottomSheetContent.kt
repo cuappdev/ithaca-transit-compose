@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.theme.sfProTextFamily
@@ -89,7 +88,7 @@ fun BottomSheetContent(
                     editing = editState,
                     { navController.navigate("route/${it.name.toURLString()}/${it.latitude}/${it.longitude}") },
                     addOnClick = {},
-                    removeOnClick = {favoritesViewModel.removeFavorite(it); removeOnClick()},
+                    removeOnClick = { favoritesViewModel.removeFavorite(it); removeOnClick() },
                 )
             }
             item {
