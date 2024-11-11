@@ -18,13 +18,10 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.cornellappdev.transit.models.MapState
-import com.cornellappdev.transit.models.RouteOptionType
-import com.cornellappdev.transit.models.RouteOptions
-import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.TransitPolyline
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
-import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
+import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
@@ -41,20 +38,17 @@ import com.google.maps.android.compose.rememberCameraPositionState
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
-fun DetailsScreen(navController: NavHostController, homeViewModel: HomeViewModel) {
+fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewModel) {
 
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
     //Map camera
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(homeViewModel.defaultIthaca, 12f)
+        position = CameraPosition.fromLatLngZoom(routeViewModel.defaultIthaca, 12f)
     }
 
-    //Collect flow of route through API
-    val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
-
     //Map state
-    val mapState = homeViewModel.mapState.collectAsState().value
+    val mapState = routeViewModel.mapState.collectAsState().value
 
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -80,7 +74,8 @@ fun DetailsScreen(navController: NavHostController, homeViewModel: HomeViewModel
 
         Divider(thickness = 1.dp, color = DividerGray)
 
-        DrawableMap(mapState, routeApiResponse, cameraPositionState, permissionState)
+        DrawableMap(mapState, cameraPositionState, permissionState)
+
     }
 }
 
@@ -88,7 +83,6 @@ fun DetailsScreen(navController: NavHostController, homeViewModel: HomeViewModel
 @Composable
 private fun DrawableMap(
     mapState: MapState,
-    routeApiResponse: ApiResponse<RouteOptions>,
     cameraPositionState: CameraPositionState,
     permissionState: PermissionState
 ) {
@@ -101,52 +95,10 @@ private fun DrawableMap(
         uiSettings = MapUiSettings(zoomControlsEnabled = false)
     ) {
         if (mapState.isShowing) {
-            when (routeApiResponse) {
-                is ApiResponse.Pending -> {
-
-                }
-
-                is ApiResponse.Error -> {
-                    //TODO: Appropriate error
-                }
-
-                is ApiResponse.Success -> {
-                    when (mapState.routeOptionType) {
-                        RouteOptionType.None -> {
-
-                        }
-
-                        RouteOptionType.BoardingSoon -> {
-                            routeApiResponse.data.boardingSoon.forEach { route ->
-                                route.directions.forEach { direction ->
-                                    TransitPolyline(
-                                        points = direction.path
-                                    )
-                                }
-                            }
-                        }
-
-                        RouteOptionType.FromStop -> {
-                            routeApiResponse.data.fromStop.forEach { route ->
-                                route.directions.forEach { direction ->
-                                    TransitPolyline(
-                                        points = direction.path
-                                    )
-                                }
-                            }
-                        }
-
-                        RouteOptionType.Walking -> {
-                            routeApiResponse.data.walking.forEach { route ->
-                                route.directions.forEach { direction ->
-                                    TransitPolyline(
-                                        points = direction.path
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+            mapState.route?.directions?.forEach { direction ->
+                TransitPolyline(
+                    points = direction.path
+                )
             }
         }
     }

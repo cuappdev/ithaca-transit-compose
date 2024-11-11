@@ -16,7 +16,6 @@ import com.cornellappdev.transit.ui.viewmodels.LocationUIState
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.cornellappdev.transit.util.StringUtils.fromURLString
 import com.google.android.gms.maps.model.LatLng
-import kotlin.math.log
 
 /**
  * The navigation controller for the app (parent of all screens)
@@ -60,7 +59,10 @@ fun NavigationController(
             RouteScreen(navController = navController, routeViewModel = routeViewModel)
         }
         composable("details") {
-            DetailsScreen(navController = navController, homeViewModel = homeViewModel)
+            DetailsScreen(
+                navController = navController,
+                routeViewModel = routeViewModel,
+            )
         }
 
         composable("route") {

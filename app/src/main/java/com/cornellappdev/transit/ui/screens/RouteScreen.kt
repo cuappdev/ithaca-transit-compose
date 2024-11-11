@@ -50,6 +50,8 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.models.MapState
+import com.cornellappdev.transit.models.Route
 import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.Transport
 import com.cornellappdev.transit.models.toTransport
@@ -159,7 +161,14 @@ fun RouteScreen(
                 lastRoute = lastRoute,
                 startSheetState = startSheetState,
                 destSheetState = destSheetState
-            )
+            ) { route ->
+                routeViewModel.setMapState(
+                    MapState(
+                        true,
+                        route
+                    )
+                );navController.navigate("details")
+            }
         }
     }
 
@@ -179,7 +188,8 @@ private fun RouteOptionsMainMenu(
     endLocation: LocationUIState,
     lastRoute: ApiResponse<RouteOptions>,
     startSheetState: ModalBottomSheetState,
-    destSheetState: ModalBottomSheetState
+    destSheetState: ModalBottomSheetState,
+    onClick: (Route) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
@@ -365,8 +375,7 @@ private fun RouteOptionsMainMenu(
                 color = MetadataGray, fontSize = 14.sp
             )
         }
-
-        RouteList(lastRoute)
+        RouteList(lastRoute, onClick)
     }
 }
 
@@ -374,8 +383,10 @@ private fun RouteOptionsMainMenu(
  * Route cell with padding
  */
 @Composable
-private fun PaddedRouteCell(transport: Transport) {
-    Row(modifier = Modifier.padding(12.dp)) {
+private fun PaddedRouteCell(transport: Transport, onClick: () -> Unit) {
+    Row(modifier = Modifier
+        .padding(12.dp)
+        .clickable { onClick() }) {
         RouteCell(transport)
     }
 }
@@ -385,7 +396,10 @@ private fun PaddedRouteCell(transport: Transport) {
  */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun RouteList(lastRouteResponse: ApiResponse<RouteOptions>) {
+private fun RouteList(
+    lastRouteResponse: ApiResponse<RouteOptions>,
+    onClick: (Route) -> Unit
+) {
     when (lastRouteResponse) {
         is ApiResponse.Error -> {
             Text("Error")
@@ -396,14 +410,21 @@ private fun RouteList(lastRouteResponse: ApiResponse<RouteOptions>) {
         }
 
         is ApiResponse.Success -> {
-
-            LazyColumn(modifier = Modifier
-                .background(color = DividerGray)
-                .fillMaxSize(), content = {
-                items(lastRouteResponse.data.fromStop, itemContent = { item ->
-                    PaddedRouteCell(item.toTransport())
-                })
-                if (lastRouteResponse.data.boardingSoon.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .background(color = DividerGray)
+                    .fillMaxSize()
+            ) {
+                lastRouteResponse.data.fromStop?.let {
+                    items(it) { item ->
+                        PaddedRouteCell(item.toTransport()) {
+                            onClick(
+                                item
+                            )
+                        }
+                    }
+                }
+                if (lastRouteResponse.data.boardingSoon?.isNotEmpty() == true) {
                     item {
                         Text(
                             "Boarding Soon From Nearby Stops",
@@ -411,15 +432,21 @@ private fun RouteList(lastRouteResponse: ApiResponse<RouteOptions>) {
                             color = MetadataGray,
                             modifier = Modifier.padding(
                                 start = 12.dp,
-                                top = if (lastRouteResponse.data.fromStop.isEmpty()) 12.dp else 0.dp
+                                top = if (lastRouteResponse.data.fromStop?.isEmpty() == true) 12.dp else 0.dp
                             )
                         )
                     }
                 }
-                items(lastRouteResponse.data.boardingSoon, itemContent = { item ->
-                    PaddedRouteCell(item.toTransport())
-                })
-                if (lastRouteResponse.data.walking.isNotEmpty()) {
+                lastRouteResponse.data.boardingSoon?.let {
+                    items(it) { item ->
+                        PaddedRouteCell(item.toTransport()) {
+                            onClick(
+                                item
+                            )
+                        }
+                    }
+                }
+                if (lastRouteResponse.data.walking?.isNotEmpty() == true) {
                     item {
                         Text(
                             "By Walking",
@@ -427,15 +454,21 @@ private fun RouteList(lastRouteResponse: ApiResponse<RouteOptions>) {
                             color = MetadataGray,
                             modifier = Modifier.padding(
                                 start = 12.dp,
-                                top = if (lastRouteResponse.data.boardingSoon.isEmpty()) 12.dp else 0.dp
+                                top = if (lastRouteResponse.data.boardingSoon?.isEmpty() == true) 12.dp else 0.dp
                             )
                         )
                     }
                 }
-                items(lastRouteResponse.data.walking, itemContent = { item ->
-                    PaddedRouteCell(item.toTransport())
-                })
-            })
+                lastRouteResponse.data.walking?.let {
+                    items(it) { item ->
+                        PaddedRouteCell(item.toTransport()) {
+                            onClick(
+                                item
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

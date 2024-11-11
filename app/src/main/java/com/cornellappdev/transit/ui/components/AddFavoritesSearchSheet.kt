@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.TextButtonGray
@@ -53,7 +54,7 @@ import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 @Composable
 fun AddFavoritesSearchSheet(
     homeViewModel: HomeViewModel,
-    favoritesViewModel: FavoritesViewModel,
+    favoritesViewModel: FavoritesViewModel = hiltViewModel(),
     cancelOnClick: () -> Unit,
 ) {
 
