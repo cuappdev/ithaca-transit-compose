@@ -7,6 +7,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
+import com.cornellappdev.transit.models.MapState
 import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.UserPreferenceRepository
@@ -68,6 +69,11 @@ class RouteViewModel @Inject constructor(
     val time = "12:00AM"
 
     val lastRouteFlow: StateFlow<ApiResponse<RouteOptions>> = routeRepository.lastRouteFlow
+
+    /**
+     * Default map location
+     */
+    val defaultIthaca = LatLng(42.44, -76.50)
 
     /**
      * The current UI state of the search bar, as a MutableStateFlow
@@ -225,6 +231,23 @@ class RouteViewModel @Inject constructor(
      */
     fun changeArriveBy(arriveBy: ArriveByUIState) {
         arriveByFlow.value = arriveBy
+    }
+    /**
+     * Emits whether a route should be showing on the map
+     */
+    val mapState: MutableStateFlow<MapState> =
+        MutableStateFlow(
+            MapState(
+                isShowing = false,
+                route = null
+            )
+        )
+
+    /**
+     * Set map state for home screen
+     */
+    fun setMapState(value: MapState) {
+        mapState.value = value
     }
 
 }

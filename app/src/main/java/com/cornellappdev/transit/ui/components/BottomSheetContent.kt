@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -20,7 +21,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.theme.sfProTextFamily
@@ -39,13 +39,15 @@ import com.cornellappdev.transit.util.StringUtils.toURLString
 fun BottomSheetContent(
     editText: String,
     editState: Boolean,
-    data: List<Place>,
     onclick: () -> Unit,
     addOnClick: () -> Unit,
-    removeOnClick: (Place) -> Unit,
+    removeOnClick: () -> Unit,
     favoritesViewModel: FavoritesViewModel = hiltViewModel(),
     navController: NavController
 ) {
+
+    val data = favoritesViewModel.favoritesStops.collectAsState().value.toList()
+
     Column {
         Row(
             modifier = Modifier
@@ -86,7 +88,7 @@ fun BottomSheetContent(
                     editing = editState,
                     { navController.navigate("route/${it.name.toURLString()}/${it.latitude}/${it.longitude}") },
                     addOnClick = {},
-                    removeOnClick = { removeOnClick(it) },
+                    removeOnClick = { favoritesViewModel.removeFavorite(it); removeOnClick() },
                 )
             }
             item {

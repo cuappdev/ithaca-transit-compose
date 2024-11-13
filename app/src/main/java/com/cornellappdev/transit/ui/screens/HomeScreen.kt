@@ -42,7 +42,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.networking.ApiResponse
@@ -51,9 +50,7 @@ import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGray
-import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
-import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
 import com.cornellappdev.transit.util.StringUtils.toURLString
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -76,9 +73,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel,
-    routeViewModel: RouteViewModel = hiltViewModel(),
     navController: NavController,
-    favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
     // Permissions dialog
     val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -134,9 +129,6 @@ fun HomeScreen(
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(homeViewModel.defaultIthaca, 12f)
     }
-
-    //Map state
-    val mapState = homeViewModel.mapState.collectAsState().value
 
     // Search bar active/inactive
     var searchActive by remember { mutableStateOf(false) }
@@ -254,7 +246,6 @@ fun HomeScreen(
 
     val scope = rememberCoroutineScope()
 
-    val data = favoritesViewModel.favoritesStops.collectAsState().value
 
     // Favorites BottomSheet
     BottomSheetScaffold(
@@ -266,7 +257,6 @@ fun HomeScreen(
             BottomSheetContent(
                 editText = editText,
                 editState = editState,
-                data = data.toList(),
                 onclick = {
                     editState = !editState
                     editText = if (editState) {
@@ -285,8 +275,7 @@ fun HomeScreen(
                         addSheetState.bottomSheetState.expand()
                     }
                 },
-                removeOnClick = { place ->
-                    favoritesViewModel.removeFavorite(place)
+                removeOnClick = {
                     scope.launch {
                         favoritesSheetState.bottomSheetState.expand()
                     }
@@ -305,7 +294,6 @@ fun HomeScreen(
         sheetContent = {
             AddFavoritesSearchSheet(
                 homeViewModel = homeViewModel,
-                favoritesViewModel = favoritesViewModel
             ) {
                 scope.launch {
                     addSheetState.bottomSheetState.hide()
