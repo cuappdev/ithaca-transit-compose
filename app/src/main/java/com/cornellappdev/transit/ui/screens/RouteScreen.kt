@@ -582,7 +582,13 @@ private fun arriveByLabel(arriveBy: ArriveByUIState): String {
         }
 
         is ArriveByUIState.ArriveBy -> {
-            "${arriveBy.getTag()} ${TimeUtils.dateFormatter.format(arriveBy.getDate())} at ${
+            // If date is the same as today, don't display date
+            "${arriveBy.getTag()} ${
+                if (TimeUtils.dateFormatter.format(arriveBy.getDate()) == TimeUtils.dateFormatter.format(
+                        Date.from(Instant.now())
+                    )
+                ) "" else (TimeUtils.dateFormatter.format(arriveBy.getDate()) + " at ")
+            }${
                 TimeUtils.timeFormatter.format(
                     arriveBy.getDate()
                 )
@@ -590,7 +596,13 @@ private fun arriveByLabel(arriveBy: ArriveByUIState): String {
         }
 
         is ArriveByUIState.LeaveAt -> {
-            "${arriveBy.getTag()} ${TimeUtils.dateFormatter.format(arriveBy.getDate())} at ${
+            // If date is the same as today, don't display date
+            "${arriveBy.getTag()} ${
+                if (TimeUtils.dateFormatter.format(arriveBy.getDate()) == TimeUtils.dateFormatter.format(
+                        Date.from(Instant.now())
+                    )
+                ) "" else (TimeUtils.dateFormatter.format(arriveBy.getDate()) + " at ")
+            }${
                 TimeUtils.timeFormatter.format(
                     arriveBy.getDate()
                 )
