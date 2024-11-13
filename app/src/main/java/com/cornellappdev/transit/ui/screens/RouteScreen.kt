@@ -1,6 +1,8 @@
 package com.cornellappdev.transit.ui.screens
 
+import android.icu.text.SimpleDateFormat
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,9 +10,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,23 +27,35 @@ import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -54,23 +70,34 @@ import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.Transport
 import com.cornellappdev.transit.models.toTransport
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.components.DatePicker
 import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.RouteCell
 import com.cornellappdev.transit.ui.components.SearchTextField
+import com.cornellappdev.transit.ui.components.TernarySelector
+import com.cornellappdev.transit.ui.components.TimePicker
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
+import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
+import com.cornellappdev.transit.ui.viewmodels.ArriveByUIState
 import com.cornellappdev.transit.ui.viewmodels.LocationUIState
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
+import com.cornellappdev.transit.ui.viewmodels.getDate
+import com.cornellappdev.transit.ui.viewmodels.getTag
+import com.cornellappdev.transit.util.TimeUtils
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.util.Date
+import java.util.Locale
 
 /**
  * Composable for the route screen, which specifies a location, destination, and routes between them
@@ -166,6 +193,142 @@ fun RouteScreen(
 }
 
 /**
+ * Bottom sheet to select Leave Now/Leave At/Arrive By
+ */
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+private fun ArriveByBottomSheet(
+    arriveBy: ArriveByUIState,
+    routeViewModel: RouteViewModel,
+    onCancelClicked: () -> Unit = {}, onDoneClicked: () -> Unit = {
+
+    }
+) {
+
+    val dateState = rememberSaveable {
+        mutableStateOf(
+            TimeUtils.dateFormatter.format(
+                Date.from(Instant.now())
+            )
+        )
+    }
+
+    val timeState = rememberSaveable {
+        mutableStateOf(
+            TimeUtils.timeFormatter.format(
+                Date.from(Instant.now())
+            )
+        )
+    }
+
+    val selectedButton = remember { mutableStateOf(0) }
+
+    Column(
+        modifier = Modifier.height(
+            240.dp
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.weight(1f)) {
+                TextButton(
+                    onClick = onCancelClicked,
+                    content = {
+                        Text(
+                            text = "Cancel",
+                            fontFamily = sfProDisplayFamily,
+                            fontStyle = FontStyle.Normal,
+                            textAlign = TextAlign.Center,
+                            color = SecondaryText
+                        )
+                    },
+                    modifier = Modifier.align(Alignment.CenterStart)
+                )
+                TextButton(
+                    onClick = {
+                        onDoneClicked();
+                        if (selectedButton.value == 0) {
+                            routeViewModel.changeArriveBy(
+                                ArriveByUIState.LeaveNow()
+                            )
+                        } else if (selectedButton.value == 1) {
+                            routeViewModel.changeArriveBy(
+                                ArriveByUIState.LeaveAt(
+                                    date = TimeUtils.dateTimeFormatter.parse(
+                                        dateState.value + " " + timeState.value
+                                    )
+                                )
+                            )
+                        } else {
+                            routeViewModel.changeArriveBy(
+                                ArriveByUIState.ArriveBy(
+                                    date = TimeUtils.dateTimeFormatter.parse(
+                                        dateState.value + " " + timeState.value
+                                    )
+                                )
+                            )
+                        }
+                        Log.d("TIME", arriveBy.getDate().toString())
+
+                    },
+                    content = {
+                        Text(
+                            text = "Done",
+                            fontFamily = sfProDisplayFamily,
+                            fontStyle = FontStyle.Normal,
+                            textAlign = TextAlign.Center,
+                            color = TransitBlue
+                        )
+                    },
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                )
+            }
+        }
+
+        TernarySelector(
+            firstButtonLabel = "Leave Now",
+            secondButtonLabel = "Leave At",
+            thirdButtonLabel = "Arrive By",
+            buttonWidth = 120.dp,
+            buttonHeight = 40.dp,
+            selectState = selectedButton,
+            onSelectChanged = {
+
+            }
+        )
+
+        Column(
+            modifier = Modifier.fillMaxHeight(),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                DatePicker(
+                    dateState = dateState,
+                    dateFormatter = TimeUtils.dateFormatter,
+                    modifier = Modifier.padding(horizontal = 5.dp),
+                    disabled = selectedButton.value == 0
+                )
+                TimePicker(
+                    timeState = timeState,
+                    timeFormatter = TimeUtils.timeFormatter,
+                    modifier = Modifier.padding(horizontal = 5.dp),
+                    disabled = selectedButton.value == 0
+                )
+            }
+        }
+    }
+
+}
+
+/**
  * Main menu of Route Options
  */
 @RequiresApi(Build.VERSION_CODES.O)
@@ -181,192 +344,258 @@ private fun RouteOptionsMainMenu(
     startSheetState: ModalBottomSheetState,
     destSheetState: ModalBottomSheetState
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = {
-                Text(
-                    text = "Route Options",
-                    fontFamily = sfProDisplayFamily,
-                    fontStyle = FontStyle.Normal
-                )
-            },
-            navigationIcon = {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
-                        contentDescription = ""
-                    )
-                }
-            }
 
+    //SheetState for Arrive By Route Options
+    val arriveBySheetState =
+        androidx.compose.material.rememberModalBottomSheetState(
+            ModalBottomSheetValue.Hidden,
+            skipHalfExpanded = true
         )
 
-        Divider(thickness = 1.dp, color = DividerGray)
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 20.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+    val arriveBy = routeViewModel.arriveByFlow.collectAsState().value
 
-            ConstraintLayout(modifier = Modifier.heightIn(max = 68.dp)) {
-                val (fromText, fromStop, toText, toStop, line) = createRefs()
 
-                Text(text = "From", color = PrimaryText,
-                    fontFamily = sfProDisplayFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 14.sp, modifier = Modifier.constrainAs(fromText) {
-                        top.linkTo(parent.top, margin = 3.dp)
-                    })
-
-                Icon(imageVector = ImageVector.vectorResource(id = R.drawable.boarding_stop),
-                    contentDescription = "",
-                    tint = IconGray,
-                    modifier = Modifier
-                        .size(12.dp)
-                        .constrainAs(fromStop) {
-                            top.linkTo(fromText.top, margin = 3.dp)
-                            bottom.linkTo(fromText.bottom)
-                            start.linkTo(fromText.end, margin = 12.dp)
-                            end.linkTo(parent.end)
-                        })
-                Text(
-                    text = "To",
-                    color = PrimaryText,
-                    fontFamily = sfProDisplayFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 14.sp,
-                    modifier = Modifier.constrainAs(toText) {
-                        top.linkTo(fromText.bottom, margin = 24.dp)
-                        bottom.linkTo(parent.bottom, margin = 2.dp)
-                        start.linkTo(fromText.start)
+    ModalBottomSheetLayout(
+        sheetState = arriveBySheetState,
+        sheetContent = {
+            ArriveByBottomSheet(
+                arriveBy,
+                routeViewModel,
+                onCancelClicked = {
+                    coroutineScope.launch {
+                        arriveBySheetState.hide()
                     }
-                )
-
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.bus_route_line),
-                    contentDescription = "",
-                    tint = IconGray,
-                    modifier = Modifier.constrainAs(line) {
-                        top.linkTo(fromStop.bottom)
-                        bottom.linkTo(toStop.top)
-                        start.linkTo(fromStop.start)
-                        end.linkTo(fromStop.end)
-                    })
-
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.destination_stop),
-                    contentDescription = "",
-                    tint = Color.Unspecified,
-                    modifier = Modifier
-                        .size(16.dp)
-                        .constrainAs(toStop) {
-                            top.linkTo(toText.top, margin = 3.dp)
-                            bottom.linkTo(toText.bottom)
-                            start.linkTo(fromStop.start)
-                            end.linkTo(fromStop.end)
-                        }
-                )
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(
-                    modifier = Modifier
-                        .background(color = DividerGray, shape = RoundedCornerShape(8.dp))
-                        .fillMaxWidth(0.9f)
-                        .clickable {
-                            coroutineScope.launch {
-                                when (startLocation) {
-                                    is LocationUIState.CurrentLocation -> {
-                                        routeViewModel.onQueryChange("")
-                                    }
-
-                                    is LocationUIState.Place -> {
-                                        routeViewModel.onQueryChange(startLocation.name)
-                                    }
-                                }
-                                startSheetState.show()
-                            }
-                        }
-                ) {
+                }, onDoneClicked = {
+                    coroutineScope.launch {
+                        arriveBySheetState.hide()
+                    }
+                })
+        },
+        sheetShape = RoundedCornerShape(8.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            TopAppBar(
+                title = {
                     Text(
-                        text = if (startLocation is LocationUIState.Place) startLocation.name else "Current Location",
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        color = PrimaryText,
+                        text = "Route Options",
                         fontFamily = sfProDisplayFamily,
-                        fontWeight = FontWeight.Normal, fontSize = 14.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        fontStyle = FontStyle.Normal
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
+                            contentDescription = ""
+                        )
+                    }
                 }
-                Box(
-                    modifier = Modifier
-                        .background(color = DividerGray, shape = RoundedCornerShape(8.dp))
-                        .fillMaxWidth(0.9f)
-                        .clickable {
-                            coroutineScope.launch {
-                                when (endLocation) {
-                                    is LocationUIState.CurrentLocation -> {
-                                        routeViewModel.onQueryChange("")
-                                    }
 
-                                    is LocationUIState.Place -> {
-                                        routeViewModel.onQueryChange(endLocation.name)
-                                    }
-                                }
-                                destSheetState.show()
-                            }
-                        }
-                ) {
+            )
+
+            Divider(thickness = 1.dp, color = DividerGray)
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                ConstraintLayout(modifier = Modifier.heightIn(max = 68.dp)) {
+                    val (fromText, fromStop, toText, toStop, line) = createRefs()
+
+                    Text(text = "From", color = PrimaryText,
+                        fontFamily = sfProDisplayFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 14.sp, modifier = Modifier.constrainAs(fromText) {
+                            top.linkTo(parent.top, margin = 3.dp)
+                        })
+
+                    Icon(imageVector = ImageVector.vectorResource(id = R.drawable.boarding_stop),
+                        contentDescription = "",
+                        tint = IconGray,
+                        modifier = Modifier
+                            .size(12.dp)
+                            .constrainAs(fromStop) {
+                                top.linkTo(fromText.top, margin = 3.dp)
+                                bottom.linkTo(fromText.bottom)
+                                start.linkTo(fromText.end, margin = 12.dp)
+                                end.linkTo(parent.end)
+                            })
                     Text(
-                        text = if (endLocation is LocationUIState.Place) endLocation.name else "Current Location",
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        text = "To",
+                        color = PrimaryText,
                         fontFamily = sfProDisplayFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 14.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        modifier = Modifier.constrainAs(toText) {
+                            top.linkTo(fromText.bottom, margin = 24.dp)
+                            bottom.linkTo(parent.bottom, margin = 2.dp)
+                            start.linkTo(fromText.start)
+                        }
+                    )
+
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.bus_route_line),
+                        contentDescription = "",
+                        tint = IconGray,
+                        modifier = Modifier.constrainAs(line) {
+                            top.linkTo(fromStop.bottom)
+                            bottom.linkTo(toStop.top)
+                            start.linkTo(fromStop.start)
+                            end.linkTo(fromStop.end)
+                        })
+
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.destination_stop),
+                        contentDescription = "",
+                        tint = Color.Unspecified,
+                        modifier = Modifier
+                            .size(16.dp)
+                            .constrainAs(toStop) {
+                                top.linkTo(toText.top, margin = 3.dp)
+                                bottom.linkTo(toText.bottom)
+                                start.linkTo(fromStop.start)
+                                end.linkTo(fromStop.end)
+                            }
+                    )
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .background(color = DividerGray, shape = RoundedCornerShape(8.dp))
+                            .fillMaxWidth(0.9f)
+                            .clickable {
+                                coroutineScope.launch {
+                                    when (startLocation) {
+                                        is LocationUIState.CurrentLocation -> {
+                                            routeViewModel.onQueryChange("")
+                                        }
+
+                                        is LocationUIState.Place -> {
+                                            routeViewModel.onQueryChange(startLocation.name)
+                                        }
+                                    }
+                                    startSheetState.show()
+                                }
+                            }
+                    ) {
+                        Text(
+                            text = if (startLocation is LocationUIState.Place) startLocation.name else "Current Location",
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            color = PrimaryText,
+                            fontFamily = sfProDisplayFamily,
+                            fontWeight = FontWeight.Normal, fontSize = 14.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .background(color = DividerGray, shape = RoundedCornerShape(8.dp))
+                            .fillMaxWidth(0.9f)
+                            .clickable {
+                                coroutineScope.launch {
+                                    when (endLocation) {
+                                        is LocationUIState.CurrentLocation -> {
+                                            routeViewModel.onQueryChange("")
+                                        }
+
+                                        is LocationUIState.Place -> {
+                                            routeViewModel.onQueryChange(endLocation.name)
+                                        }
+                                    }
+                                    destSheetState.show()
+                                }
+                            }
+                    ) {
+                        Text(
+                            text = if (endLocation is LocationUIState.Place) endLocation.name else "Current Location",
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            fontFamily = sfProDisplayFamily,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 14.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                //TODO this should probably be an IconButton that swaps current/dest
+                Icon(
+                    imageVector = ImageVector.vectorResource(
+                        id = R.drawable.swap
+                    ),
+                    contentDescription = "",
+                    modifier = Modifier.size(width = 20.dp, height = 20.dp),
+                    tint = Color.Unspecified
+                )
+
+            }
+
+            Divider(thickness = 1.dp, color = DividerGray)
+
+            Row(
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(
+                        id = R.drawable.clock
+                    ),
+                    contentDescription = "",
+                    modifier = Modifier.size(12.dp),
+                    tint = Color.Unspecified
+                )
+                TextButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            arriveBySheetState.show()
+                        }
+                    }
+                ) {
+                    Text(
+                        text = arriveByLabel(arriveBy),
+                        fontFamily = sfProDisplayFamily,
+                        fontWeight = FontWeight.Normal,
+                        color = MetadataGray, fontSize = 14.sp
                     )
                 }
             }
 
-            //TODO this should probably be an IconButton that swaps current/dest
-            Icon(
-                imageVector = ImageVector.vectorResource(
-                    id = R.drawable.swap
-                ),
-                contentDescription = "",
-                modifier = Modifier.size(width = 20.dp, height = 20.dp),
-                tint = Color.Unspecified
-            )
+            RouteList(lastRoute)
+        }
+    }
 
+}
+
+/**
+ * Return label based on ArriveBy state
+ */
+@RequiresApi(Build.VERSION_CODES.O)
+private fun arriveByLabel(arriveBy: ArriveByUIState): String {
+    return when (arriveBy) {
+        is ArriveByUIState.LeaveNow -> {
+            "${arriveBy.getTag()} (${TimeUtils.timeFormatter.format(arriveBy.getDate())})"
         }
 
-        Divider(thickness = 1.dp, color = DividerGray)
-
-        //TODO the text should be set to what the time is (passed in by screen call?)
-        Row(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(
-                    id = R.drawable.clock
-                ),
-                contentDescription = "",
-                modifier = Modifier.size(12.dp),
-                tint = Color.Unspecified
-            )
-            Text(
-                text = "Leave Now (" + routeViewModel.time + ")",
-                fontFamily = sfProDisplayFamily,
-                fontWeight = FontWeight.Normal,
-                color = MetadataGray, fontSize = 14.sp
-            )
+        is ArriveByUIState.ArriveBy -> {
+            "${arriveBy.getTag()} ${TimeUtils.dateFormatter.format(arriveBy.getDate())} at ${
+                TimeUtils.timeFormatter.format(
+                    arriveBy.getDate()
+                )
+            } "
         }
 
-        RouteList(lastRoute)
+        is ArriveByUIState.LeaveAt -> {
+            "${arriveBy.getTag()} ${TimeUtils.dateFormatter.format(arriveBy.getDate())} at ${
+                TimeUtils.timeFormatter.format(
+                    arriveBy.getDate()
+                )
+            } "
+        }
     }
 }
 
@@ -443,6 +672,7 @@ private fun RouteList(lastRouteResponse: ApiResponse<RouteOptions>) {
 /**
  * Route options select sheet
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RouteOptionsSearchSheet(

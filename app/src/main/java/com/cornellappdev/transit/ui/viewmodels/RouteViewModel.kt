@@ -1,6 +1,8 @@
 package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 class RouteViewModel @Inject constructor(
@@ -56,6 +59,10 @@ class RouteViewModel @Inject constructor(
                 )
             }
         })
+    )
+
+    val arriveByFlow: MutableStateFlow<ArriveByUIState> = MutableStateFlow(
+        ArriveByUIState.LeaveNow()
     )
 
     val time = "12:00AM"
@@ -119,22 +126,24 @@ class RouteViewModel @Inject constructor(
                     }
                 }
             }
+
             launch {
-                // Every time startPl or destPl changes, make a route request
-                startPl.combine(destPl) { start, dest ->
-                    start to dest
+                // Every time startPl, destPl, or arriveBy changes, make a route request
+                combine(startPl, destPl, arriveByFlow) { start, dest, arriveBy ->
+                    Triple(start, dest, arriveBy)
                 }.collect {
                     val startState = it.first
                     val endState = it.second
+                    val arriveByState = it.third
                     getCoordinatesFromLocationState(it.second)?.let { end ->
                         getCoordinatesFromLocationState(it.first)?.let { start ->
                             getRoute(
                                 end = end,
                                 start = start,
-                                arriveBy = false,
+                                arriveBy = arriveByState is ArriveByUIState.ArriveBy,
                                 destinationName = if (endState is LocationUIState.Place) endState.name else "Current Location",
                                 originName = if (startState is LocationUIState.Place) startState.name else "Current Location",
-                                time = (System.currentTimeMillis() / 1000).toDouble()
+                                time = (arriveByState.getDate().time / 1000).toDouble()
                             )
                         }
                     }
@@ -209,6 +218,13 @@ class RouteViewModel @Inject constructor(
                 originName = originName
             )
         }
+    }
+
+    /**
+     * Change the arriveBy parameter for routes
+     */
+    fun changeArriveBy(arriveBy: ArriveByUIState) {
+        arriveByFlow.value = arriveBy
     }
 
 }
