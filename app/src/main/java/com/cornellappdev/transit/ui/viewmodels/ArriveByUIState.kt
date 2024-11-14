@@ -2,6 +2,7 @@ package com.cornellappdev.transit.ui.viewmodels
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.cornellappdev.transit.util.TimeUtils
 import java.time.Instant
 import java.util.Date
 
@@ -51,20 +52,41 @@ fun ArriveByUIState.getDate(): Date {
 }
 
 /**
- * Get the String value of the ArriveBy state
+ * Return label based on ArriveBy state
  */
-fun ArriveByUIState.getTag(): String {
+@RequiresApi(Build.VERSION_CODES.O)
+fun ArriveByUIState.getLabel(): String {
     return when (this) {
         is ArriveByUIState.LeaveNow -> {
-            this.tag
+            "${this.tag} (${TimeUtils.timeFormatter.format(this.getDate())})"
         }
 
         is ArriveByUIState.ArriveBy -> {
-            this.tag
+            // If date is the same as today, don't display date
+            "${this.tag} ${
+                if (TimeUtils.dateFormatter.format(this.getDate()) == TimeUtils.dateFormatter.format(
+                        Date.from(Instant.now())
+                    )
+                ) "" else (TimeUtils.dateFormatter.format(this.getDate()) + " at ")
+            }${
+                TimeUtils.timeFormatter.format(
+                    this.getDate()
+                )
+            } "
         }
 
         is ArriveByUIState.LeaveAt -> {
-            this.tag
+            // If date is the same as today, don't display date
+            "${this.tag} ${
+                if (TimeUtils.dateFormatter.format(this.getDate()) == TimeUtils.dateFormatter.format(
+                        Date.from(Instant.now())
+                    )
+                ) "" else (TimeUtils.dateFormatter.format(this.getDate()) + " at ")
+            }${
+                TimeUtils.timeFormatter.format(
+                    this.getDate()
+                )
+            } "
         }
     }
 }

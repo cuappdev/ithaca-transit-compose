@@ -1,6 +1,5 @@
 package com.cornellappdev.transit.ui.screens
 
-import android.icu.text.SimpleDateFormat
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,35 +25,26 @@ import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.SheetState
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -91,7 +80,7 @@ import com.cornellappdev.transit.ui.viewmodels.LocationUIState
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
 import com.cornellappdev.transit.ui.viewmodels.getDate
-import com.cornellappdev.transit.ui.viewmodels.getTag
+import com.cornellappdev.transit.ui.viewmodels.getLabel
 import com.cornellappdev.transit.util.TimeUtils
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.maps.model.LatLng
@@ -99,7 +88,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.Date
-import java.util.Locale
 
 /**
  * Composable for the route screen, which specifies a location, destination, and routes between them
@@ -282,8 +270,6 @@ private fun ArriveByBottomSheet(
                                 )
                             )
                         }
-                        Log.d("TIME", arriveBy.getDate().toString())
-
                     },
                     content = {
                         Text(
@@ -567,7 +553,7 @@ private fun RouteOptionsMainMenu(
                     }
                 ) {
                     Text(
-                        text = arriveByLabel(arriveBy),
+                        text = arriveBy.getLabel(),
                         fontFamily = sfProDisplayFamily,
                         fontWeight = FontWeight.Normal,
                         color = MetadataGray, fontSize = 14.sp
@@ -579,45 +565,6 @@ private fun RouteOptionsMainMenu(
         }
     }
 
-}
-
-/**
- * Return label based on ArriveBy state
- */
-@RequiresApi(Build.VERSION_CODES.O)
-private fun arriveByLabel(arriveBy: ArriveByUIState): String {
-    return when (arriveBy) {
-        is ArriveByUIState.LeaveNow -> {
-            "${arriveBy.getTag()} (${TimeUtils.timeFormatter.format(arriveBy.getDate())})"
-        }
-
-        is ArriveByUIState.ArriveBy -> {
-            // If date is the same as today, don't display date
-            "${arriveBy.getTag()} ${
-                if (TimeUtils.dateFormatter.format(arriveBy.getDate()) == TimeUtils.dateFormatter.format(
-                        Date.from(Instant.now())
-                    )
-                ) "" else (TimeUtils.dateFormatter.format(arriveBy.getDate()) + " at ")
-            }${
-                TimeUtils.timeFormatter.format(
-                    arriveBy.getDate()
-                )
-            } "
-        }
-        is ArriveByUIState.LeaveAt -> {
-            // If date is the same as today, don't display date
-            "${arriveBy.getTag()} ${
-                if (TimeUtils.dateFormatter.format(arriveBy.getDate()) == TimeUtils.dateFormatter.format(
-                        Date.from(Instant.now())
-                    )
-                ) "" else (TimeUtils.dateFormatter.format(arriveBy.getDate()) + " at ")
-            }${
-                TimeUtils.timeFormatter.format(
-                    arriveBy.getDate()
-                )
-            } "
-        }
-    }
 }
 
 /**

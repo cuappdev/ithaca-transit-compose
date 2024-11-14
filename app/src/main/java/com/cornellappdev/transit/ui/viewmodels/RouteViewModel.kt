@@ -66,7 +66,6 @@ class RouteViewModel @Inject constructor(
         ArriveByUIState.LeaveNow()
     )
 
-    val time = "12:00AM"
 
     val lastRouteFlow: StateFlow<ApiResponse<RouteOptions>> = routeRepository.lastRouteFlow
 
@@ -232,6 +231,7 @@ class RouteViewModel @Inject constructor(
     fun changeArriveBy(arriveBy: ArriveByUIState) {
         arriveByFlow.value = arriveBy
     }
+
     /**
      * Emits whether a route should be showing on the map
      */

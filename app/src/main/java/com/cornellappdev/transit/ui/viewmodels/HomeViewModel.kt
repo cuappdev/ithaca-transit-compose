@@ -94,7 +94,7 @@ class HomeViewModel @Inject constructor(
      * Perform a search on the string [query]
      */
     fun onSearch(query: String) {
-        Log.d("SEARCHED", query)
+
     }
 
     /**
