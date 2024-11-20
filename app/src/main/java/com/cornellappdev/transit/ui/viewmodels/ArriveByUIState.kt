@@ -9,84 +9,57 @@ import java.util.Date
 /**
  * Wrapper for state of the search bar in HomeScreen
  */
+@RequiresApi(Build.VERSION_CODES.O)
 sealed class ArriveByUIState {
-    data class LeaveNow(val tag: String = "Leave now") :
+
+    abstract val date: Date
+    abstract val tag: String
+    abstract val label: String
+
+    data class LeaveNow constructor(
+        override val tag: String = "Leave now"
+    ) :
         ArriveByUIState() {
-        val date
-            @RequiresApi(Build.VERSION_CODES.O)
+        override val date: Date
             get() = Date.from(Instant.now())
 
+        override val label: String
+            get() = "${this.tag} (${TimeUtils.timeFormatter.format(this.date)})"
     }
 
     data class LeaveAt(
-        val date: Date,
-        val tag: String = "Leave at",
+        override val date: Date,
+        override val tag: String = "Leave at"
     ) :
-        ArriveByUIState()
+        ArriveByUIState() {
+        override val label: String
+            get() = "${this.tag} ${
+                if (TimeUtils.dateFormatter.format(this.date) == TimeUtils.dateFormatter.format(
+                        Date.from(Instant.now())
+                    )
+                ) "" else (TimeUtils.dateFormatter.format(this.date) + " at ")
+            }${
+                TimeUtils.timeFormatter.format(
+                    this.date
+                )
+            } "
+    }
 
     data class ArriveBy(
-        val date: Date,
-        val tag: String = "Arrive by"
+        override val date: Date,
+        override val tag: String = "Arrive by"
     ) :
-        ArriveByUIState()
-}
-
-/**
- * Get the Date object of the ArriveBy state
- */
-@RequiresApi(Build.VERSION_CODES.O)
-fun ArriveByUIState.getDate(): Date {
-    return when (this) {
-        is ArriveByUIState.LeaveNow -> {
-            this.date
-        }
-
-        is ArriveByUIState.ArriveBy -> {
-            this.date
-        }
-
-        is ArriveByUIState.LeaveAt -> {
-            this.date
-        }
-    }
-}
-
-/**
- * Return label based on ArriveBy state
- */
-@RequiresApi(Build.VERSION_CODES.O)
-fun ArriveByUIState.getLabel(): String {
-    return when (this) {
-        is ArriveByUIState.LeaveNow -> {
-            "${this.tag} (${TimeUtils.timeFormatter.format(this.getDate())})"
-        }
-
-        is ArriveByUIState.ArriveBy -> {
-            // If date is the same as today, don't display date
-            "${this.tag} ${
-                if (TimeUtils.dateFormatter.format(this.getDate()) == TimeUtils.dateFormatter.format(
+        ArriveByUIState() {
+        override val label: String
+            get() = "${this.tag} ${
+                if (TimeUtils.dateFormatter.format(this.date) == TimeUtils.dateFormatter.format(
                         Date.from(Instant.now())
                     )
-                ) "" else (TimeUtils.dateFormatter.format(this.getDate()) + " at ")
+                ) "" else (TimeUtils.dateFormatter.format(this.date) + " at ")
             }${
                 TimeUtils.timeFormatter.format(
-                    this.getDate()
+                    this.date
                 )
             } "
-        }
-
-        is ArriveByUIState.LeaveAt -> {
-            // If date is the same as today, don't display date
-            "${this.tag} ${
-                if (TimeUtils.dateFormatter.format(this.getDate()) == TimeUtils.dateFormatter.format(
-                        Date.from(Instant.now())
-                    )
-                ) "" else (TimeUtils.dateFormatter.format(this.getDate()) + " at ")
-            }${
-                TimeUtils.timeFormatter.format(
-                    this.getDate()
-                )
-            } "
-        }
     }
 }

@@ -36,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -79,15 +80,11 @@ import com.cornellappdev.transit.ui.viewmodels.ArriveByUIState
 import com.cornellappdev.transit.ui.viewmodels.LocationUIState
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
-import com.cornellappdev.transit.ui.viewmodels.getDate
-import com.cornellappdev.transit.ui.viewmodels.getLabel
 import com.cornellappdev.transit.util.TimeUtils
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.util.Date
 
 /**
  * Composable for the route screen, which specifies a location, destination, and routes between them
@@ -202,23 +199,7 @@ private fun ArriveByBottomSheet(
     }
 ) {
 
-    val dateState = rememberSaveable {
-        mutableStateOf(
-            TimeUtils.dateFormatter.format(
-                Date.from(Instant.now())
-            )
-        )
-    }
-
-    val timeState = rememberSaveable {
-        mutableStateOf(
-            TimeUtils.timeFormatter.format(
-                Date.from(Instant.now())
-            )
-        )
-    }
-
-    val selectedButton = remember { mutableStateOf(0) }
+    val selectedButton = remember { mutableIntStateOf(0) }
 
     Column(
         modifier = Modifier.height(
@@ -257,7 +238,7 @@ private fun ArriveByBottomSheet(
                             routeViewModel.changeArriveBy(
                                 ArriveByUIState.LeaveAt(
                                     date = TimeUtils.dateTimeFormatter.parse(
-                                        dateState.value + " " + timeState.value
+                                        routeViewModel.dateState.value + " " + routeViewModel.timeState.value
                                     )
                                 )
                             )
@@ -265,7 +246,7 @@ private fun ArriveByBottomSheet(
                             routeViewModel.changeArriveBy(
                                 ArriveByUIState.ArriveBy(
                                     date = TimeUtils.dateTimeFormatter.parse(
-                                        dateState.value + " " + timeState.value
+                                        routeViewModel.dateState.value + " " + routeViewModel.timeState.value
                                     )
                                 )
                             )
@@ -306,16 +287,18 @@ private fun ArriveByBottomSheet(
                 horizontalArrangement = Arrangement.Center
             ) {
                 DatePicker(
-                    dateState = dateState,
+                    date = routeViewModel.dateState.value,
                     dateFormatter = TimeUtils.dateFormatter,
                     modifier = Modifier.padding(horizontal = 5.dp),
-                    disabled = selectedButton.value == 0
+                    disabled = selectedButton.value == 0,
+                    onDateChanged = { it -> routeViewModel.dateState.value = it }
                 )
                 TimePicker(
-                    timeState = timeState,
+                    time = routeViewModel.timeState.value,
                     timeFormatter = TimeUtils.timeFormatter,
                     modifier = Modifier.padding(horizontal = 5.dp),
-                    disabled = selectedButton.value == 0
+                    disabled = selectedButton.value == 0,
+                    onTimeChanged = { it -> routeViewModel.timeState.value = it }
                 )
             }
         }
@@ -553,7 +536,7 @@ private fun RouteOptionsMainMenu(
                     }
                 ) {
                     Text(
-                        text = arriveBy.getLabel(),
+                        text = arriveBy.label,
                         fontFamily = sfProDisplayFamily,
                         fontWeight = FontWeight.Normal,
                         color = MetadataGray, fontSize = 14.sp

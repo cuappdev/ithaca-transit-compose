@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
@@ -12,6 +14,7 @@ import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.util.TimeUtils
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +22,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.util.Date
 import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -62,8 +67,29 @@ class RouteViewModel @Inject constructor(
         })
     )
 
+    /**
+     * State of the arriveBy selector
+     */
     val arriveByFlow: MutableStateFlow<ArriveByUIState> = MutableStateFlow(
         ArriveByUIState.LeaveNow()
+    )
+
+    /**
+     * State of date picker
+     */
+    val dateState: MutableState<String> = mutableStateOf(
+        TimeUtils.dateFormatter.format(
+            Date.from(Instant.now())
+        )
+    )
+
+    /**
+     * State of time picker
+     */
+    val timeState: MutableState<String> = mutableStateOf(
+        TimeUtils.timeFormatter.format(
+            Date.from(Instant.now())
+        )
     )
 
 
@@ -148,7 +174,7 @@ class RouteViewModel @Inject constructor(
                                 arriveBy = arriveByState is ArriveByUIState.ArriveBy,
                                 destinationName = if (endState is LocationUIState.Place) endState.name else "Current Location",
                                 originName = if (startState is LocationUIState.Place) startState.name else "Current Location",
-                                time = (arriveByState.getDate().time / 1000).toDouble()
+                                time = (arriveByState.date.time / 1000).toDouble()
                             )
                         }
                     }

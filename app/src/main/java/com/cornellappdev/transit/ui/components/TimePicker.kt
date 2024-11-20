@@ -51,11 +51,11 @@ import java.util.*
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TimePicker(
-    timeState: MutableState<String>,
+    time: String,
     timeFormatter: SimpleDateFormat,
     modifier: Modifier = Modifier,
     disabled: Boolean = false,
-    onTimeChanged: (String) -> Unit = { it -> timeState.value = it },
+    onTimeChanged: (String) -> Unit,
 ) {
     val timePickerDialog =
         createTimePickerDialog(LocalContext.current, onTimeChanged, timeFormatter)
@@ -81,7 +81,7 @@ fun TimePicker(
         Text(
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
-            text = if (disabled) timeFormatter.format(Date.from(Instant.now())) else timeState.value,
+            text = if (disabled) timeFormatter.format(Date.from(Instant.now())) else time,
             style = Style.heading3,
             color = if (disabled) Color.DarkGray else Color.Black
         )

@@ -64,11 +64,11 @@ import java.util.Locale
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DatePicker(
-    dateState: MutableState<String>,
+    date: String,
     dateFormatter: SimpleDateFormat,
     modifier: Modifier = Modifier,
     disabled: Boolean = false,
-    onDateChanged: (String) -> Unit = { it -> dateState.value = it },
+    onDateChanged: (String) -> Unit,
 ) {
 
     val datePickerDialog = createDatePickerDialog(
@@ -98,7 +98,7 @@ fun DatePicker(
         Text(
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
-            text = if (disabled) dateFormatter.format(Date.from(Instant.now())) else dateState.value,
+            text = if (disabled) dateFormatter.format(Date.from(Instant.now())) else date,
             style = Style.heading3,
             color = if (disabled) Color.DarkGray else Color.Black
         )
