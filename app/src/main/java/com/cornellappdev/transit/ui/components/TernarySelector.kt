@@ -40,11 +40,11 @@ fun TernarySelector(
     thirdButtonLabel: String,
     buttonWidth: Dp,
     buttonHeight: Dp,
-    selectState: MutableState<Int>,
+    selected: Int,
     onSelectChanged: (Int) -> Unit
 ) {
 
-    val transition = updateTransition(targetState = selectState.value, label = "Button Transition")
+    val transition = updateTransition(targetState = selected, label = "Button Transition")
 
     // Animate the selector's horizontal position based on the selected button
     val selectorOffset by transition.animateDp(label = "Selector Offset") { targetSelected ->
@@ -104,7 +104,7 @@ fun TernarySelector(
             // Iterate over button titles and create a button for each
             buttonTitles.forEachIndexed { index, title ->
                 TextButton(
-                    onClick = { selectState.value = index; onSelectChanged(index) },
+                    onClick = { onSelectChanged(index) },
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = Color.Black,
                         containerColor = Color.Transparent
@@ -117,7 +117,7 @@ fun TernarySelector(
                     Text(
                         text = title,
                         style = Style.heading3,
-                        fontWeight = if (selectState.value == index) FontWeight.SemiBold else FontWeight.Normal
+                        fontWeight = if (selected == index) FontWeight.SemiBold else FontWeight.Normal
                     )
                 }
 

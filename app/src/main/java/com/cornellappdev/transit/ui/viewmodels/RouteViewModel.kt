@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -90,6 +91,13 @@ class RouteViewModel @Inject constructor(
         TimeUtils.timeFormatter.format(
             Date.from(Instant.now())
         )
+    )
+
+    /**
+     * State of arriveBy button
+     */
+    val selectedArriveByButton: MutableState<Int> = mutableIntStateOf(
+        0
     )
 
 

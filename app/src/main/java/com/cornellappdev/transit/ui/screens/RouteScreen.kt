@@ -1,7 +1,6 @@
 package com.cornellappdev.transit.ui.screens
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,11 +35,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -85,6 +80,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.util.Date
 
 /**
  * Composable for the route screen, which specifies a location, destination, and routes between them
@@ -192,14 +189,10 @@ fun RouteScreen(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun ArriveByBottomSheet(
-    arriveBy: ArriveByUIState,
     routeViewModel: RouteViewModel,
     onCancelClicked: () -> Unit = {}, onDoneClicked: () -> Unit = {
-
     }
 ) {
-
-    val selectedButton = remember { mutableIntStateOf(0) }
 
     Column(
         modifier = Modifier.height(
@@ -230,11 +223,11 @@ private fun ArriveByBottomSheet(
                 TextButton(
                     onClick = {
                         onDoneClicked();
-                        if (selectedButton.value == 0) {
+                        if (routeViewModel.selectedArriveByButton.value == 0) {
                             routeViewModel.changeArriveBy(
                                 ArriveByUIState.LeaveNow()
                             )
-                        } else if (selectedButton.value == 1) {
+                        } else if (routeViewModel.selectedArriveByButton.value == 1) {
                             routeViewModel.changeArriveBy(
                                 ArriveByUIState.LeaveAt(
                                     date = TimeUtils.dateTimeFormatter.parse(
@@ -272,9 +265,9 @@ private fun ArriveByBottomSheet(
             thirdButtonLabel = "Arrive By",
             buttonWidth = 120.dp,
             buttonHeight = 40.dp,
-            selectState = selectedButton,
-            onSelectChanged = {
-
+            selected = routeViewModel.selectedArriveByButton.value,
+            onSelectChanged = { it ->
+                routeViewModel.selectedArriveByButton.value = it
             }
         )
 
@@ -290,14 +283,14 @@ private fun ArriveByBottomSheet(
                     date = routeViewModel.dateState.value,
                     dateFormatter = TimeUtils.dateFormatter,
                     modifier = Modifier.padding(horizontal = 5.dp),
-                    disabled = selectedButton.value == 0,
+                    disabled = routeViewModel.selectedArriveByButton.value == 0,
                     onDateChanged = { it -> routeViewModel.dateState.value = it }
                 )
                 TimePicker(
                     time = routeViewModel.timeState.value,
                     timeFormatter = TimeUtils.timeFormatter,
                     modifier = Modifier.padding(horizontal = 5.dp),
-                    disabled = selectedButton.value == 0,
+                    disabled = routeViewModel.selectedArriveByButton.value == 0,
                     onTimeChanged = { it -> routeViewModel.timeState.value = it }
                 )
             }
@@ -338,7 +331,6 @@ private fun RouteOptionsMainMenu(
         sheetState = arriveBySheetState,
         sheetContent = {
             ArriveByBottomSheet(
-                arriveBy,
                 routeViewModel,
                 onCancelClicked = {
                     coroutineScope.launch {
@@ -531,6 +523,18 @@ private fun RouteOptionsMainMenu(
                 TextButton(
                     onClick = {
                         coroutineScope.launch {
+                            // If stale datetime in viewmodel, update to current datetime
+                            if (TimeUtils.dateTimeFormatter.parse(
+                                    routeViewModel.dateState.value + " " + routeViewModel.timeState.value
+                                ) <= Date.from(Instant.now())
+                            ) {
+                                routeViewModel.dateState.value = TimeUtils.dateFormatter.format(
+                                    Date.from(Instant.now())
+                                )
+                                routeViewModel.timeState.value = TimeUtils.timeFormatter.format(
+                                    Date.from(Instant.now())
+                                )
+                            }
                             arriveBySheetState.show()
                         }
                     }
