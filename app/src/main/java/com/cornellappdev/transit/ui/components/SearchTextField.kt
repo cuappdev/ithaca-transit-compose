@@ -25,13 +25,13 @@ import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.ui.theme.DividerGray
 
 /**
- * Creates a dense TextField, e.g. a TextField with no internal padding.
+ * Creates a searching text field.
  *
  * @param value The text to be displayed
  * @param setValue The callback that is triggered when the input service updates the text.
  *      An updated text comes as a parameter of the callback.
  * @param placeholderText The placeholder to be displayed when the text field is in focus and the input text is empty
- * @param modifier Modifier to be applied to the [DenseTextField]
+ * @param modifier Modifier to be applied to the [SearchTextField]
  * @param singleLine When set to true, this text field becomes
  *      a single horizontally scrolling text field instead of wrapping onto multiple lines.
  * @param prefix The composable to be rendered before the text

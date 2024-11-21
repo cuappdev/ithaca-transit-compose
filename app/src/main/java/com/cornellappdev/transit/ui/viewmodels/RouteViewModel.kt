@@ -1,7 +1,12 @@
 package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
@@ -10,6 +15,7 @@ import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.util.TimeUtils
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,8 +23,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.util.Date
 import javax.inject.Inject
 
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 class RouteViewModel @Inject constructor(
@@ -59,7 +68,38 @@ class RouteViewModel @Inject constructor(
         })
     )
 
-    val time = "12:00AM"
+    /**
+     * State of the arriveBy selector
+     */
+    val arriveByFlow: MutableStateFlow<ArriveByUIState> = MutableStateFlow(
+        ArriveByUIState.LeaveNow()
+    )
+
+    /**
+     * State of date picker
+     */
+    val dateState: MutableState<String> = mutableStateOf(
+        TimeUtils.dateFormatter.format(
+            Date.from(Instant.now())
+        )
+    )
+
+    /**
+     * State of time picker
+     */
+    val timeState: MutableState<String> = mutableStateOf(
+        TimeUtils.timeFormatter.format(
+            Date.from(Instant.now())
+        )
+    )
+
+    /**
+     * State of arriveBy button
+     */
+    val selectedArriveByButton: MutableState<Int> = mutableIntStateOf(
+        0
+    )
+
 
     val lastRouteFlow: StateFlow<ApiResponse<RouteOptions>> = routeRepository.lastRouteFlow
 
@@ -125,22 +165,24 @@ class RouteViewModel @Inject constructor(
                     }
                 }
             }
+
             launch {
-                // Every time startPl or destPl changes, make a route request
-                startPl.combine(destPl) { start, dest ->
-                    start to dest
+                // Every time startPl, destPl, or arriveBy changes, make a route request
+                combine(startPl, destPl, arriveByFlow) { start, dest, arriveBy ->
+                    Triple(start, dest, arriveBy)
                 }.collect {
                     val startState = it.first
                     val endState = it.second
+                    val arriveByState = it.third
                     getCoordinatesFromLocationState(it.second)?.let { end ->
                         getCoordinatesFromLocationState(it.first)?.let { start ->
                             getRoute(
                                 end = end,
                                 start = start,
-                                arriveBy = false,
+                                arriveBy = arriveByState is ArriveByUIState.ArriveBy,
                                 destinationName = if (endState is LocationUIState.Place) endState.name else "Current Location",
                                 originName = if (startState is LocationUIState.Place) startState.name else "Current Location",
-                                time = (System.currentTimeMillis() / 1000).toDouble()
+                                time = (arriveByState.date.time / 1000).toDouble()
                             )
                         }
                     }
@@ -217,6 +259,12 @@ class RouteViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Change the arriveBy parameter for routes
+     */
+    fun changeArriveBy(arriveBy: ArriveByUIState) {
+        arriveByFlow.value = arriveBy
+    }
 
     /**
      * Emits whether a route should be showing on the map
