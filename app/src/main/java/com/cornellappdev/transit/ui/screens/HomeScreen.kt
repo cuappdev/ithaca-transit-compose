@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -225,7 +226,8 @@ fun HomeScreen(
         bottomSheetState = SheetState(
             skipPartiallyExpanded = false,
             initialValue = SheetValue.Expanded,
-            skipHiddenState = true
+            skipHiddenState = true,
+            density = LocalDensity.current
         )
     )
 
@@ -233,7 +235,8 @@ fun HomeScreen(
     val addSheetState = rememberBottomSheetScaffoldState(
         bottomSheetState = SheetState(
             skipPartiallyExpanded = true,
-            initialValue = SheetValue.Hidden
+            initialValue = SheetValue.Hidden,
+            density = LocalDensity.current
         )
     )
 

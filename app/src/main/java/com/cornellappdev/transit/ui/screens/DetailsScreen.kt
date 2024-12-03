@@ -1,8 +1,12 @@
 package com.cornellappdev.transit.ui.screens
 
 import android.Manifest
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material3.Divider
@@ -32,11 +36,17 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
+import io.morfly.compose.bottomsheet.material3.BottomSheetScaffold
+import io.morfly.compose.bottomsheet.material3.rememberBottomSheetScaffoldState
+import io.morfly.compose.bottomsheet.material3.rememberBottomSheetState
 
 /**
  * Screen for showing a particular route
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class,
+    ExperimentalFoundationApi::class
+)
 @Composable
 fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewModel) {
 
@@ -50,33 +60,57 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
     //Map state
     val mapState = routeViewModel.mapState.collectAsState().value
 
+    // Using advanced-bottomsheet-compose from https://github.com/Morfly/advanced-bottomsheet-compose
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.PartiallyExpanded,
+        defineValues = {
+            // Bottom sheet height is 100 dp.
+            SheetValue.Collapsed at height(100.dp)
+            // Bottom sheet offset is 60%, meaning it takes 40% of the screen.
+            SheetValue.PartiallyExpanded at offset(percent = 60)
+            // Bottom sheet height is equal to its content height.
+            SheetValue.Expanded at contentHeight
+        }
+    )
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        //TODO make an AppBarColors class w/ the right colors and correct icon
-        TopAppBar(
-            title = {
-                Text(
-                    text = "Route Details",
-                    fontFamily = sfProDisplayFamily,
-                    fontStyle = FontStyle.Normal
+    val scaffoldState = rememberBottomSheetScaffoldState(sheetState)
+
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetContent = {
+            // Bottom sheet content
+            DetailsBottomSheet()
+        },
+        content = {
+            // Screen content
+            Column(modifier = Modifier.fillMaxSize()) {
+                //TODO make an AppBarColors class w/ the right colors and correct icon
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "Route Details",
+                            fontFamily = sfProDisplayFamily,
+                            fontStyle = FontStyle.Normal
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
+                                contentDescription = ""
+                            )
+                        }
+                    }
+
                 )
-            },
-            navigationIcon = {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
-                        contentDescription = ""
-                    )
-                }
+
+                Divider(thickness = 1.dp, color = DividerGray)
+
+                DrawableMap(mapState, cameraPositionState, permissionState)
+
             }
-
-        )
-
-        Divider(thickness = 1.dp, color = DividerGray)
-
-        DrawableMap(mapState, cameraPositionState, permissionState)
-
-    }
+        }
+    )
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -101,5 +135,14 @@ private fun DrawableMap(
                 )
             }
         }
+    }
+}
+
+enum class SheetValue { Collapsed, PartiallyExpanded, Expanded }
+
+@Composable
+fun DetailsBottomSheet(){
+    Column(modifier = Modifier.height(300.dp)) {
+        Text("HERE")
     }
 }
