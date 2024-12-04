@@ -53,7 +53,8 @@ sealed class Transport {
         val timeToBoard: Int,
         val endStop: String,
         val bus: Int,
-        override val lateness: BusLateness
+        override val lateness: BusLateness,
+        val transferList: List<Direction>,
     ) : Transport()
 
     class BusOnly(
@@ -66,6 +67,7 @@ sealed class Transport {
         val timeToBoard: Int,
         val firstBus: Int,
         val secondBus: Int,
+        val transferList: List<Direction>,
         override val lateness: BusLateness
     ) : Transport()
 }
@@ -83,7 +85,7 @@ fun Route.toTransport(): Transport {
         dir.type == DirectionType.DEPART
     }
 
-    if (allBus || containsBus) {
+    if (containsBus) {
         return Transport.BusOnly(
             startTime = TimeUtils.getHHMM(this.departureTime),
             arriveTime = TimeUtils.getHHMM(this.arrivalTime),
@@ -94,10 +96,11 @@ fun Route.toTransport(): Transport {
             lateness = BusLateness.LATE,
             secondBus = this.directions[1].routeId?.toInt() ?: 0,
             timeToBoard = 0,
-            transferStop = ""
-
+            transferStop = "",
+            transferList = this.directions
         )
-    } else {
+    }
+    else {
         return Transport.WalkOnly(
             startTime = TimeUtils.getHHMM(this.departureTime),
             arriveTime = TimeUtils.getHHMM(this.arrivalTime),

@@ -2,6 +2,7 @@ package com.cornellappdev.transit.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,9 +28,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstrainedLayoutReference
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.BusLateness
+import com.cornellappdev.transit.models.Direction
 import com.cornellappdev.transit.models.Transport
 import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.MetadataGray
@@ -78,7 +81,6 @@ fun RouteCell(transport: Transport) {
                     lineHeight = 20.sp,
                     style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                 )
-
                 Row(
                     modifier = Modifier.wrapContentWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -102,50 +104,21 @@ fun RouteCell(transport: Transport) {
             when (transport) {
                 is Transport.WalkOnly -> {
                     ConstraintLayout {
-                        val (walkIcon, dist, currLoc, dest, fromIcon, toIcon, line) = createRefs()
+                        val (route, dest, toIcon) = createRefs()
 
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.walk),
-                            tint = Color.Unspecified,
-                            contentDescription = "",
-                            modifier = Modifier.constrainAs(walkIcon) {
-                                start.linkTo(dist.start)
-                                end.linkTo(dist.end)
-                                top.linkTo(parent.top)
-                                bottom.linkTo(parent.bottom)
-                            })
-                        Text(
-                            "${transport.distance} mi",
-                            fontFamily = sfProDisplayFamily,
-                            fontStyle = FontStyle.Normal,
-                            color = MetadataGray,
-                            fontSize = 10.sp,
-                            modifier = Modifier.constrainAs(dist) {
-                                top.linkTo(walkIcon.bottom)
-                                start.linkTo(parent.start)
-                            })
+                        Box(modifier = Modifier.constrainAs(route){
+                            top.linkTo(parent.top, margin = 8.dp)
+                            start.linkTo(parent.start)
+                        }){
+                            SingleRoute(
+                                isBus = false,
+                                walkOnly = true,
+                                stopName = "Current Location",
+                                distance = transport.distance,
+                                busLine = null
+                            )
+                        }
 
-                        Icon(imageVector = ImageVector.vectorResource(id = R.drawable.boarding_stop),
-                            contentDescription = "",
-                            tint = IconGray,
-                            modifier = Modifier
-                                .size(12.dp)
-                                .constrainAs(fromIcon) {
-                                    top.linkTo(parent.top, margin = 12.dp)
-                                    start.linkTo(dist.end, margin = 16.dp)
-
-                                })
-
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.bus_route_line),
-                            contentDescription = "",
-                            tint = IconGray,
-                            modifier = Modifier.constrainAs(line) {
-                                top.linkTo(fromIcon.top)
-                                bottom.linkTo(toIcon.bottom)
-                                start.linkTo(fromIcon.start)
-                                end.linkTo(fromIcon.end)
-                            })
 
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.destination_stop),
@@ -154,21 +127,11 @@ fun RouteCell(transport: Transport) {
                             modifier = Modifier
                                 .size(16.dp)
                                 .constrainAs(toIcon) {
-                                    bottom.linkTo(parent.bottom)
-                                    start.linkTo(fromIcon.start)
-                                    end.linkTo(fromIcon.end)
+                                    top.linkTo(route.bottom)
+                                    start.linkTo(parent.start, margin = 70.dp)
                                 }
                         )
-                        Text(
-                            "Current Location",
-                            fontFamily = sfProDisplayFamily,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal,
-                            modifier = Modifier.constrainAs(currLoc) {
-                                start.linkTo(fromIcon.end, margin = 16.dp)
-                                top.linkTo(fromIcon.top)
-                                bottom.linkTo(fromIcon.bottom)
-                            })
+
 
                         Text(
                             transport.dest,
@@ -176,7 +139,7 @@ fun RouteCell(transport: Transport) {
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Normal,
                             modifier = Modifier.constrainAs(dest) {
-                                start.linkTo(currLoc.start)
+                                start.linkTo(toIcon.end, margin = 14.dp)
                                 top.linkTo(toIcon.top)
                                 bottom.linkTo(toIcon.bottom)
                             })
@@ -393,15 +356,15 @@ fun RouteCell(transport: Transport) {
                     }
 
                     ConstraintLayout {
-                        val (endStop, startLoc, destLoc, busBox, line2, dist, startIcon, endIcon, destIcon, line, secondBusBox) = createRefs()
-
+                        val (endStop, startLoc, destLoc, busBox, line2, lineIcon, dist, startIcon, destIcon, secondBusBox) = createRefs()
+                        lateinit var transferRefs:  MutableMap<Int, ConstrainedLayoutReference>
+                        lateinit var routeLineRefs:  MutableMap<Int, ConstrainedLayoutReference>
+                        lateinit var boardingStopRefs:  MutableMap<Int, ConstrainedLayoutReference>
                         Row(modifier = Modifier
                             .background(
                                 color = TransitBlue,
                                 shape = RoundedCornerShape(4.dp)
                             )
-
-
                             .constrainAs(busBox) {
                                 top.linkTo(startLoc.bottom)
                                 bottom.linkTo(endStop.top)
@@ -485,16 +448,36 @@ fun RouteCell(transport: Transport) {
                                 start.linkTo(startLoc.start)
                                 top.linkTo(startLoc.bottom, margin = (-6).dp)
                             })
-                        Text(
-                            transport.transferStop,
-                            color = PrimaryText,
-                            fontFamily = sfProDisplayFamily,
-                            fontStyle = FontStyle.Normal,
-                            fontSize = 14.sp,
-                            modifier = Modifier.constrainAs(endStop) {
-                                start.linkTo(startLoc.start)
-                                top.linkTo(dist.bottom, margin = 8.dp)
-                            })
+
+                        ConstraintLayout(modifier = Modifier.constrainAs(endStop) {
+                            start.linkTo(startLoc.start)
+                            top.linkTo(dist.bottom, margin = 0.dp)
+                        }){
+                            transferRefs = mutableMapOf()
+
+                            transport.transferList.forEachIndexed { index, _ ->
+                                transferRefs[index] = createRef()
+                            }
+                            transport.transferList.forEachIndexed { index, direction ->
+                                Text(
+                                    direction.endLocation.toString(),
+                                    color = PrimaryText,
+                                    fontFamily = sfProDisplayFamily,
+                                    fontStyle = FontStyle.Normal,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.constrainAs(transferRefs[index]!!) {
+                                        top.linkTo(
+                                            if (index == 0) parent.top else transferRefs[index - 1]!!.bottom,
+                                            margin = 8.dp
+                                        )
+                                        start.linkTo(parent.start)
+                                        end.linkTo(parent.end)
+                                    }
+                                )
+                            }
+
+                        }
+
                         Text(
                             transport.dest,
                             color = PrimaryText,
@@ -517,7 +500,51 @@ fun RouteCell(transport: Transport) {
                                 start.linkTo(busBox.end, margin = 16.dp)
                             })
 
-                        Icon(
+                        ConstraintLayout(modifier = Modifier.constrainAs(lineIcon) {
+                            top.linkTo(startIcon.top, margin = 8.dp)
+                            bottom.linkTo(line2.top)
+                            end.linkTo(startIcon.end)
+                            start.linkTo(startIcon.start)
+                        }) {
+                            routeLineRefs = mutableMapOf()
+                            boardingStopRefs = mutableMapOf()
+
+                            transport.transferList.forEachIndexed { index, _ ->
+                                routeLineRefs[index] = createRef()
+                                boardingStopRefs[index] = createRef()
+                            }
+
+                            transport.transferList.forEachIndexed { index, _ ->
+
+                                val routeLineRef = routeLineRefs[index]!!
+                                val boardingStopRef = boardingStopRefs[index]!!
+
+                                Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.bus_route_line),
+                                tint = TransitBlue,
+                                contentDescription = "",
+                                    modifier = Modifier.constrainAs(routeLineRef) {
+                                        top.linkTo(
+                                            if (index == 0) startIcon.bottom else boardingStopRefs[index-1]!!.top, margin = 6.dp
+                                        )
+                                        start.linkTo(parent.start)
+                                        end.linkTo(parent.end)
+                                    })
+
+                                Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.boarding_stop),
+                                tint = Color.Unspecified,
+                                contentDescription = "",
+                                modifier = Modifier.constrainAs(boardingStopRef) {
+
+                                    bottom.linkTo(routeLineRefs[index]!!.bottom, margin =(-2).dp)
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                })
+                                }
+                        }
+
+                        /*Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.bus_route_line),
                             tint = TransitBlue,
                             contentDescription = "",
@@ -538,17 +565,17 @@ fun RouteCell(transport: Transport) {
                                 top.linkTo(endStop.top)
                                 bottom.linkTo(endStop.bottom)
                                 start.linkTo(startIcon.start)
-                            })
+                            })*/
 
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.bus_route_line),
                             tint = TransitBlue,
                             contentDescription = "",
                             modifier = Modifier.constrainAs(line2) {
-                                top.linkTo(endIcon.top)
+                                top.linkTo(lineIcon.bottom)
                                 bottom.linkTo(destIcon.bottom)
-                                end.linkTo(endIcon.end)
-                                start.linkTo(endIcon.start)
+                                end.linkTo(lineIcon.end)
+                                start.linkTo(lineIcon.start)
 
                             })
 
@@ -571,6 +598,199 @@ fun RouteCell(transport: Transport) {
     }
 }
 
+@Composable
+fun SingleRoute(isBus: Boolean, walkOnly: Boolean, stopName: String, distance: String?, busLine: String?){
+    ConstraintLayout() {
+        val (iconBox, startIcon, line, startLoc, dist) = createRefs()
+        if (isBus){
+            Row(modifier = Modifier
+                .background(
+                    color = TransitBlue,
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .constrainAs(iconBox) {
+                    top.linkTo(parent.bottom)
+                    bottom.linkTo(parent.top)
+                    start.linkTo(parent.start, margin = 16.dp)
+                }) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(
+                        horizontal = 8.dp,
+                        vertical = 0.dp
+                    )
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.bus),
+                        contentDescription = "",
+                        tint = Color.Unspecified
+                    )
+                    Text(
+                        "$busLine",
+                        fontFamily = sfProDisplayFamily,
+                        fontSize = 10.sp,
+                        fontStyle = FontStyle.Normal,
+                        color = Color.White,
+                    )
+                }
+            }
+        }
+        else{
+            Column(modifier = Modifier.constrainAs(iconBox) {
+                top.linkTo(parent.bottom)
+                bottom.linkTo(parent.top)
+                start.linkTo(parent.start)
+                end.linkTo(line.start, margin = 8.dp)
+            }){
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.walk),
+                    tint = Color.Unspecified,
+                    contentDescription = "",
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                if (walkOnly){
+                    Text(
+                        "$distance mi away",
+                        color = MetadataGray,
+                        fontFamily = sfProTextFamily,
+                        fontSize = 10.sp,
+                        )
+                }
+            }
+
+
+        }
+
+        Icon(
+            imageVector = ImageVector.vectorResource(R.drawable.boarding_stop),
+            tint = if (isBus or !walkOnly) Color.Unspecified else IconGray,
+            contentDescription = "",
+            modifier = Modifier.constrainAs(startIcon) {
+                top.linkTo(parent.top, margin = if (walkOnly) 0.dp else 12.dp)
+                bottom.linkTo(line.top)
+                start.linkTo(parent.start, margin = 72.dp)
+                end.linkTo(startLoc.start)
+            })
+
+        if (isBus){
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.bus_route_line),
+                tint = TransitBlue,
+                contentDescription = "",
+                modifier = Modifier.constrainAs(line) {
+                    top.linkTo(startIcon.top)
+                    bottom.linkTo(parent.bottom)
+                    end.linkTo(startIcon.end)
+                    start.linkTo(startIcon.start)
+
+                })
+        }
+        else{
+            if (walkOnly){
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.bus_route_line),
+                    tint = IconGray,
+                    contentDescription = "",
+                    modifier = Modifier.constrainAs(line) {
+                        top.linkTo(startIcon.bottom, margin = (-5).dp)
+                        bottom.linkTo(parent.bottom)
+                        end.linkTo(startIcon.end)
+                        start.linkTo(startIcon.start)
+
+                    })
+            }else{
+                Column(verticalArrangement = Arrangement.Bottom,
+
+                    modifier = Modifier
+                        .constrainAs(line) {
+                            top.linkTo(startIcon.top)
+                            bottom.linkTo(parent.bottom)
+                            end.linkTo(startIcon.end)
+                            start.linkTo(startIcon.start)
+                        }
+                        .height(41.dp)){
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ellipse_small),
+                        tint = Color.Unspecified,
+                        contentDescription = "",
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ellipse_small),
+                        tint = Color.Unspecified,
+                        contentDescription = "",
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                }
+            }
+
+        }
+
+        Text(
+            stopName,
+            color = PrimaryText,
+            fontFamily = sfProDisplayFamily,
+            fontStyle = FontStyle.Normal,
+            fontSize = 14.sp,
+            modifier = Modifier.constrainAs(startLoc) {
+                top.linkTo(parent.top)
+                start.linkTo(startIcon.end, margin = 16.dp)
+                end.linkTo(parent.end, margin = 16.dp)
+                bottom.linkTo(if (((distance==null)) or walkOnly) parent.bottom else dist.top)
+            })
+
+        if ((distance!=null) and !walkOnly){
+            Text(
+                "$distance mi away",
+                color = MetadataGray,
+                fontFamily = sfProTextFamily,
+                fontSize = 10.sp,
+                modifier = Modifier.constrainAs(dist) {
+                    start.linkTo(startLoc.start)
+                    top.linkTo(startLoc.bottom, margin = (-6).dp)
+                })
+        }
+
+    }
+}
+
+@Preview
+@Composable
+fun PreviewSingleRouteWithDistance(){
+    Box(modifier = Modifier.background(Color.White)){
+        SingleRoute(isBus = true, stopName = "Gates Hall", distance = "1.2", busLine = "30", walkOnly = false)
+
+    }
+}
+
+@Preview
+@Composable
+fun PreviewSingleRouteWithoutDistance(){
+    Box(modifier = Modifier.background(Color.White)){
+        SingleRoute(isBus = true, stopName = "Gates Hall", distance = null, busLine = "30", walkOnly = false)
+
+    }
+}
+
+@Preview
+@Composable
+fun PreviewSingleRouteIsWalk(){
+    Box(modifier = Modifier.background(Color.White)){
+        SingleRoute(isBus = false, stopName = "Gates Hall", distance = null, busLine = null, walkOnly = false)
+
+    }
+}
+
+@Preview
+@Composable
+fun PreviewSingleRouteIsWalkOnlyWithDistance(){
+    Box(modifier = Modifier.background(Color.White)){
+        SingleRoute(isBus = false, stopName = "College @ Oak", distance = "1.2", busLine = null, walkOnly = true)
+
+    }
+}
 
 @Preview
 @Composable
@@ -585,7 +805,42 @@ fun PreviewRouteCell() {
             timeToBoard = 7,
             endStop = "College @ Oak",
             bus = 30,
-            lateness = BusLateness.NORMAL
+            lateness = BusLateness.NORMAL,
+            transferList = listOf<Direction>()
         )
+    )
+}
+
+@Preview
+@Composable
+fun PreviewRouteCell2() {
+    RouteCell(
+        Transport.BusOnly(
+            startTime = "12:42AM",
+            arriveTime = "12:49AM",
+            distance = "0.2",
+            start = "Gates Hall",
+            dest = "Collegetown Terrace Apartments",
+            transferStop = "Statler Hall",
+            timeToBoard = 7,
+            firstBus = 0,
+            secondBus = 30,
+            lateness = BusLateness.NORMAL,
+            transferList = listOf<Direction>()
+        )
+    )
+}
+
+@Preview
+@Composable
+fun PreviewRouteCell3(){
+    RouteCell(
+        Transport.WalkOnly(
+            startTime = "12:42AM",
+            arriveTime = "12:49AM",
+            distance = "0.2",
+            lateness = BusLateness.NONE,
+            dest = "Collegetown Terrace Apartments",
+            )
     )
 }
