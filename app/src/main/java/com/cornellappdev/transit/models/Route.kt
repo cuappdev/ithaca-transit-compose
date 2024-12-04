@@ -35,6 +35,7 @@ data class Direction(
     @Json(name = "endTime") val endTime: String,
     @Json(name = "distance") val distance: String,
     @Json(name = "startTime") val startTime: String,
+    @Json(name = "name") val name: String
 ) {
     val type
         get() = if (directionType == "walk") DirectionType.WALK else DirectionType.DEPART
