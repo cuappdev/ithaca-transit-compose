@@ -58,7 +58,7 @@ import io.morfly.compose.bottomsheet.material3.rememberBottomSheetScaffoldState
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetState
 
 
-enum class SheetValue { Collapsed, PartiallyExpanded, Expanded }
+private enum class SheetValue { Collapsed, PartiallyExpanded, Expanded }
 
 /**
  * Screen for showing a particular route
@@ -89,7 +89,7 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
             // Bottom sheet offset is 50%, i.e. it takes 50% of the screen
             SheetValue.PartiallyExpanded at offset(percent = 50)
             // Wrap full height
-            SheetValue.Expanded at contentHeight
+            SheetValue.Expanded at offset(percent = 10)
         }
     )
 
@@ -103,32 +103,7 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
         },
         content = {
             // Screen content
-            Column(modifier = Modifier.fillMaxSize()) {
-                //TODO make an AppBarColors class w/ the right colors and correct icon
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = "Route Details",
-                            fontFamily = sfProDisplayFamily,
-                            fontStyle = FontStyle.Normal
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
-                                contentDescription = ""
-                            )
-                        }
-                    }
-
-                )
-
-                HorizontalDivider(thickness = 1.dp, color = DividerGray)
-
-                DrawableMap(mapState, cameraPositionState, permissionState)
-
-            }
+            DetailsMainScreen(mapState, cameraPositionState, permissionState, navController)
         }
     )
 }
@@ -160,7 +135,7 @@ private fun DrawableMap(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun DetailsBottomSheet(route: Route?) {
+private fun DetailsBottomSheet(route: Route?) {
 
     if (route == null) {
         Text("No route selected")
@@ -173,7 +148,7 @@ fun DetailsBottomSheet(route: Route?) {
 
     Column(modifier = Modifier.height(700.dp)) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -229,6 +204,42 @@ fun DetailsBottomSheet(route: Route?) {
                 )
             }
         }
+
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@Composable
+private fun DetailsMainScreen(
+    mapState: MapState,
+    cameraPositionState: CameraPositionState,
+    permissionState: PermissionState,
+    navController: NavHostController
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        //TODO make an AppBarColors class w/ the right colors and correct icon
+        TopAppBar(
+            title = {
+                Text(
+                    text = "Route Details",
+                    fontFamily = sfProDisplayFamily,
+                    fontStyle = FontStyle.Normal
+                )
+            },
+            navigationIcon = {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
+                        contentDescription = ""
+                    )
+                }
+            }
+
+        )
+
+        HorizontalDivider(thickness = 1.dp, color = DividerGray)
+
+        DrawableMap(mapState, cameraPositionState, permissionState)
 
     }
 }
