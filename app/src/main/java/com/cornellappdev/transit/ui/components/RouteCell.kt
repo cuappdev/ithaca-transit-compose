@@ -149,7 +149,10 @@ fun RouteCell(transport: Transport) {
                 contentDescription = "",
                 modifier = Modifier
                     .padding(start = 70.5.dp)
-                    .offset(y = if (transport.walkOnly) (-5).dp else 0.dp)
+                    .offset(
+                        y = if (transport.directionList.last().type == DirectionType.WALK && !transport.walkOnly)
+                            0.dp else (-5).dp
+                    )
             )
         }
     }
