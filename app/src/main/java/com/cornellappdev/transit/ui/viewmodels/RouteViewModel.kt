@@ -285,13 +285,5 @@ class RouteViewModel @Inject constructor(
         mapState.value = value
     }
 
-    fun setStartPl(value: LocationUIState){
-        startPl.value = value
-    }
-
-    fun setDestPL(value: LocationUIState){
-        destPl.value = value
-    }
-
 }
 

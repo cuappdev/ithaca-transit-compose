@@ -31,13 +31,12 @@ enum class BusLateness {
 /**
  * Class representing a total path for a route
  */
-class Transport (
+class Transport(
     val startTime: String,
     val arriveTime: String,
     val lateness: BusLateness,
     val distance: String,
     val start: String,
-    val dest: String,
     val walkOnly: Boolean,
     val timeToBoard: Int,
     val directionList: List<Direction>
@@ -58,10 +57,9 @@ fun Route.toTransport(): Transport {
         arriveTime = TimeUtils.getHHMM(this.arrivalTime),
         distance = String.format("%.1f", this.travelDistance),
         start = this.startName,
-        dest = this.endName,
         walkOnly = !containsBus,
         lateness = if (containsBus) BusLateness.LATE else BusLateness.NONE,
         timeToBoard = 0,
         directionList = this.directions
     )
-    }
+}
