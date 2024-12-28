@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,6 +34,8 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.BusLateness
 import com.cornellappdev.transit.models.Direction
+import com.cornellappdev.transit.models.DirectionStop
+import com.cornellappdev.transit.models.DirectionType
 import com.cornellappdev.transit.models.Transport
 import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.MetadataGray
@@ -40,23 +43,15 @@ import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.theme.sfProTextFamily
+import com.google.android.gms.maps.model.LatLng
 
 //Invariant: if transport is WalkOnly, lateness must be None <- maybe can enforce this somehow idk
 @Composable
 fun RouteCell(transport: Transport) {
-    val headerText = when (transport) {
-        is Transport.WalkOnly -> {
-            "Directions"
-        }
-
-        is Transport.WalkAndBus -> {
+    val headerText =
+        if (transport.walkOnly)
+            "Directions" else
             "Board in ${transport.timeToBoard} min"
-        }
-
-        is Transport.BusOnly -> {
-            "Board in ${transport.timeToBoard} min"
-        }
-    }
 
     Row(
         modifier = Modifier
@@ -70,7 +65,9 @@ fun RouteCell(transport: Transport) {
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = if (transport.walkOnly) 8.dp else 4.dp)
             ) {
                 Text(
                     "${transport.startTime} - ${transport.arriveTime}",
@@ -101,7 +98,52 @@ fun RouteCell(transport: Transport) {
                 }
             }
 
-            when (transport) {
+            if (!transport.walkOnly) {
+                Row(
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                ) {
+                    Text(
+                        text = transport.lateness.text(),
+                        fontFamily = sfProDisplayFamily,
+                        color = transport.lateness.color(),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        lineHeight = 16.sp,
+                        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.live_glyph__late_),
+                        contentDescription = "",
+                        tint = transport.lateness.color()
+                    )
+                }
+            }
+            Row() {
+
+            }
+            for (direction in transport.directionList) {
+                SingleRoute(
+                    isBus = direction.type == DirectionType.DEPART,
+                    walkOnly = transport.walkOnly,
+                    stopName = direction.endLocation.toString(),
+                    distance = direction.distance,
+                    busLine = direction.routeId
+                )
+            }
+            Icon(
+                imageVector = if (transport.directionList.last().type == DirectionType.DEPART)
+                    ImageVector.vectorResource(R.drawable.bus_destination) else
+                    ImageVector.vectorResource(R.drawable.destination_stop),
+                tint = Color.Unspecified,
+                contentDescription = "",
+                modifier = Modifier
+                    .padding(start = 70.dp)
+                    .offset(y = if (transport.walkOnly) (-4).dp else 0.dp)
+            )
+            /*when (transport) {
                 is Transport.WalkOnly -> {
                     ConstraintLayout {
                         val (route, dest, toIcon) = createRefs()
@@ -333,7 +375,7 @@ fun RouteCell(transport: Transport) {
 
                 }
 
-                is Transport.BusOnly -> {
+                is Transport.HasBus -> {
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(
                         horizontalArrangement = Arrangement.Start,
@@ -455,10 +497,10 @@ fun RouteCell(transport: Transport) {
                         }){
                             transferRefs = mutableMapOf()
 
-                            transport.transferList.forEachIndexed { index, _ ->
+                            transport.directionList.forEachIndexed { index, _ ->
                                 transferRefs[index] = createRef()
                             }
-                            transport.transferList.forEachIndexed { index, direction ->
+                            transport.directionList.forEachIndexed { index, direction ->
                                 Text(
                                     direction.endLocation.toString(),
                                     color = PrimaryText,
@@ -509,12 +551,12 @@ fun RouteCell(transport: Transport) {
                             routeLineRefs = mutableMapOf()
                             boardingStopRefs = mutableMapOf()
 
-                            transport.transferList.forEachIndexed { index, _ ->
+                            transport.directionList.forEachIndexed { index, _ ->
                                 routeLineRefs[index] = createRef()
                                 boardingStopRefs[index] = createRef()
                             }
 
-                            transport.transferList.forEachIndexed { index, _ ->
+                            transport.directionList.forEachIndexed { index, _ ->
 
                                 val routeLineRef = routeLineRefs[index]!!
                                 val boardingStopRef = boardingStopRefs[index]!!
@@ -593,23 +635,29 @@ fun RouteCell(transport: Transport) {
 
                     }
                 }
-            }
+            }*/
         }
     }
 }
 
 @Composable
-fun SingleRoute(isBus: Boolean, walkOnly: Boolean, stopName: String, distance: String?, busLine: String?){
+fun SingleRoute(
+    isBus: Boolean,
+    walkOnly: Boolean,
+    stopName: String,
+    distance: String,
+    busLine: String?
+) {
     ConstraintLayout() {
         val (iconBox, startIcon, line, startLoc, dist) = createRefs()
-        if (isBus){
+        if (isBus) {
             Row(modifier = Modifier
                 .background(
                     color = TransitBlue,
                     shape = RoundedCornerShape(4.dp)
                 )
                 .constrainAs(iconBox) {
-                    top.linkTo(parent.bottom)
+                    top.linkTo(parent.bottom, margin = 8.dp)
                     bottom.linkTo(parent.top)
                     start.linkTo(parent.start, margin = 16.dp)
                 }) {
@@ -635,27 +683,26 @@ fun SingleRoute(isBus: Boolean, walkOnly: Boolean, stopName: String, distance: S
                     )
                 }
             }
-        }
-        else{
+        } else {
             Column(modifier = Modifier.constrainAs(iconBox) {
-                top.linkTo(parent.bottom)
+                top.linkTo(parent.bottom, margin = 8.dp)
                 bottom.linkTo(parent.top)
                 start.linkTo(parent.start)
                 end.linkTo(line.start, margin = 8.dp)
-            }){
+            }) {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.walk),
                     tint = Color.Unspecified,
                     contentDescription = "",
                     modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
-                if (walkOnly){
+                )
+                if (walkOnly) {
                     Text(
                         "$distance mi away",
                         color = MetadataGray,
                         fontFamily = sfProTextFamily,
                         fontSize = 10.sp,
-                        )
+                    )
                 }
             }
 
@@ -667,13 +714,13 @@ fun SingleRoute(isBus: Boolean, walkOnly: Boolean, stopName: String, distance: S
             tint = if (isBus or !walkOnly) Color.Unspecified else IconGray,
             contentDescription = "",
             modifier = Modifier.constrainAs(startIcon) {
-                top.linkTo(parent.top, margin = if (walkOnly) 0.dp else 12.dp)
+                top.linkTo(parent.top, margin = if (walkOnly) 10.dp else 12.dp)
                 bottom.linkTo(line.top)
                 start.linkTo(parent.start, margin = 72.dp)
                 end.linkTo(startLoc.start)
             })
 
-        if (isBus){
+        if (isBus) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.bus_route_line),
                 tint = TransitBlue,
@@ -685,21 +732,20 @@ fun SingleRoute(isBus: Boolean, walkOnly: Boolean, stopName: String, distance: S
                     start.linkTo(startIcon.start)
 
                 })
-        }
-        else{
-            if (walkOnly){
+        } else {
+            if (walkOnly) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.bus_route_line),
                     tint = IconGray,
                     contentDescription = "",
                     modifier = Modifier.constrainAs(line) {
-                        top.linkTo(startIcon.bottom, margin = (-5).dp)
+                        top.linkTo(startIcon.top)
                         bottom.linkTo(parent.bottom)
                         end.linkTo(startIcon.end)
                         start.linkTo(startIcon.start)
 
                     })
-            }else{
+            } else {
                 Column(verticalArrangement = Arrangement.Bottom,
 
                     modifier = Modifier
@@ -709,7 +755,7 @@ fun SingleRoute(isBus: Boolean, walkOnly: Boolean, stopName: String, distance: S
                             end.linkTo(startIcon.end)
                             start.linkTo(startIcon.start)
                         }
-                        .height(41.dp)){
+                        .height(41.dp)) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.ellipse_small),
                         tint = Color.Unspecified,
@@ -735,13 +781,13 @@ fun SingleRoute(isBus: Boolean, walkOnly: Boolean, stopName: String, distance: S
             fontStyle = FontStyle.Normal,
             fontSize = 14.sp,
             modifier = Modifier.constrainAs(startLoc) {
-                top.linkTo(parent.top)
+                top.linkTo(parent.top, margin = 2.dp)
                 start.linkTo(startIcon.end, margin = 16.dp)
                 end.linkTo(parent.end, margin = 16.dp)
-                bottom.linkTo(if (((distance==null)) or walkOnly) parent.bottom else dist.top)
+                bottom.linkTo(if (((distance == null)) or walkOnly) parent.bottom else dist.top)
             })
 
-        if ((distance!=null) and !walkOnly){
+        if ((distance != null) and !walkOnly) {
             Text(
                 "$distance mi away",
                 color = MetadataGray,
@@ -758,36 +804,60 @@ fun SingleRoute(isBus: Boolean, walkOnly: Boolean, stopName: String, distance: S
 
 @Preview
 @Composable
-fun PreviewSingleRouteWithDistance(){
-    Box(modifier = Modifier.background(Color.White)){
-        SingleRoute(isBus = true, stopName = "Gates Hall", distance = "1.2", busLine = "30", walkOnly = false)
+fun PreviewSingleRouteWithDistance() {
+    Box(modifier = Modifier.background(Color.White)) {
+        SingleRoute(
+            isBus = true,
+            stopName = "Gates Hall",
+            distance = "1.2",
+            busLine = "30",
+            walkOnly = false
+        )
 
     }
 }
 
 @Preview
 @Composable
-fun PreviewSingleRouteWithoutDistance(){
-    Box(modifier = Modifier.background(Color.White)){
-        SingleRoute(isBus = true, stopName = "Gates Hall", distance = null, busLine = "30", walkOnly = false)
+fun PreviewSingleRouteWithoutDistance() {
+    Box(modifier = Modifier.background(Color.White)) {
+        SingleRoute(
+            isBus = true,
+            stopName = "Gates Hall",
+            distance = "0",
+            busLine = "30",
+            walkOnly = false
+        )
 
     }
 }
 
 @Preview
 @Composable
-fun PreviewSingleRouteIsWalk(){
-    Box(modifier = Modifier.background(Color.White)){
-        SingleRoute(isBus = false, stopName = "Gates Hall", distance = null, busLine = null, walkOnly = false)
+fun PreviewSingleRouteIsWalk() {
+    Box(modifier = Modifier.background(Color.White)) {
+        SingleRoute(
+            isBus = false,
+            stopName = "Gates Hall",
+            distance = "0",
+            busLine = null,
+            walkOnly = false
+        )
 
     }
 }
 
 @Preview
 @Composable
-fun PreviewSingleRouteIsWalkOnlyWithDistance(){
-    Box(modifier = Modifier.background(Color.White)){
-        SingleRoute(isBus = false, stopName = "College @ Oak", distance = "1.2", busLine = null, walkOnly = true)
+fun PreviewSingleRouteIsWalkOnlyWithDistance() {
+    Box(modifier = Modifier.background(Color.White)) {
+        SingleRoute(
+            isBus = false,
+            stopName = "College @ Oak",
+            distance = "1.2",
+            busLine = null,
+            walkOnly = true
+        )
 
     }
 }
@@ -796,17 +866,45 @@ fun PreviewSingleRouteIsWalkOnlyWithDistance(){
 @Composable
 fun PreviewRouteCell() {
     RouteCell(
-        Transport.WalkAndBus(
+        Transport(
             startTime = "12:42AM",
             arriveTime = "12:49AM",
             distance = "0.2",
             start = "Gates Hall",
             dest = "Collegetown Terrace Apartments",
             timeToBoard = 7,
-            endStop = "College @ Oak",
-            bus = 30,
             lateness = BusLateness.NORMAL,
-            transferList = listOf<Direction>()
+            directionList = listOf<Direction>(
+                Direction(
+                    endLocation = LatLng(40.7128, -74.0060),
+                    routeId = "30",
+                    tripIds = listOf("1"),
+                    stayOnBusForTransfer = false,
+                    delay = 0,
+                    startLocation = LatLng(40.7128, -74.0060),
+                    path = listOf<LatLng>(),
+                    stops = listOf<DirectionStop>(),
+                    endTime = "12:49AM",
+                    distance = "0.2",
+                    startTime = "12:42AM",
+                    directionType = "depart",
+                ),
+                Direction(
+                    endLocation = LatLng(40.7128, -74.0060),
+                    routeId = "",
+                    tripIds = listOf("1"),
+                    stayOnBusForTransfer = false,
+                    delay = 0,
+                    startLocation = LatLng(40.7128, -74.0060),
+                    path = listOf<LatLng>(),
+                    stops = listOf<DirectionStop>(),
+                    endTime = "12:49AM",
+                    distance = "0.2",
+                    startTime = "12:42AM",
+                    directionType = "walk",
+                ),
+            ),
+            walkOnly = false
         )
     )
 }
@@ -815,32 +913,92 @@ fun PreviewRouteCell() {
 @Composable
 fun PreviewRouteCell2() {
     RouteCell(
-        Transport.BusOnly(
+        Transport(
             startTime = "12:42AM",
             arriveTime = "12:49AM",
             distance = "0.2",
             start = "Gates Hall",
             dest = "Collegetown Terrace Apartments",
-            transferStop = "Statler Hall",
             timeToBoard = 7,
-            firstBus = 0,
-            secondBus = 30,
             lateness = BusLateness.NORMAL,
-            transferList = listOf<Direction>()
+            directionList = listOf<Direction>(
+                Direction(
+                    endLocation = LatLng(40.7128, -74.0060),
+                    routeId = "30",
+                    tripIds = listOf("1"),
+                    stayOnBusForTransfer = false,
+                    delay = 0,
+                    startLocation = LatLng(40.7128, -74.0060),
+                    path = listOf<LatLng>(),
+                    stops = listOf<DirectionStop>(),
+                    endTime = "12:49AM",
+                    distance = "0.2",
+                    startTime = "12:42AM",
+                    directionType = "depart",
+                ),
+                Direction(
+                    endLocation = LatLng(40.7128, -74.0060),
+                    routeId = "30",
+                    tripIds = listOf("1"),
+                    stayOnBusForTransfer = false,
+                    delay = 0,
+                    startLocation = LatLng(40.7128, -74.0060),
+                    path = listOf<LatLng>(),
+                    stops = listOf<DirectionStop>(),
+                    endTime = "12:49AM",
+                    distance = "0.2",
+                    startTime = "12:42AM",
+                    directionType = "walk",
+                ),
+                Direction(
+                    endLocation = LatLng(40.7128, -74.0060),
+                    routeId = "30",
+                    tripIds = listOf("1"),
+                    stayOnBusForTransfer = false,
+                    delay = 0,
+                    startLocation = LatLng(40.7128, -74.0060),
+                    path = listOf<LatLng>(),
+                    stops = listOf<DirectionStop>(),
+                    endTime = "12:49AM",
+                    distance = "0.2",
+                    startTime = "12:42AM",
+                    directionType = "depart",
+                ),
+            ),
+            walkOnly = false
         )
     )
 }
 
 @Preview
 @Composable
-fun PreviewRouteCell3(){
+fun PreviewRouteCell3() {
     RouteCell(
-        Transport.WalkOnly(
+        Transport(
             startTime = "12:42AM",
             arriveTime = "12:49AM",
             distance = "0.2",
             lateness = BusLateness.NONE,
             dest = "Collegetown Terrace Apartments",
+            start = "Gates Hall",
+            walkOnly = true,
+            timeToBoard = 0,
+            directionList = listOf<Direction>(
+                Direction(
+                    endLocation = LatLng(40.7128, -74.0060),
+                    routeId = "30",
+                    tripIds = listOf("1"),
+                    stayOnBusForTransfer = false,
+                    delay = 0,
+                    startLocation = LatLng(40.7128, -74.0060),
+                    path = listOf<LatLng>(),
+                    stops = listOf<DirectionStop>(),
+                    endTime = "12:49AM",
+                    distance = "0.2",
+                    startTime = "12:42AM",
+                    directionType = "walk",
+                )
             )
+        )
     )
 }
