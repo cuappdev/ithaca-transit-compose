@@ -42,7 +42,11 @@ import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.theme.sfProTextFamily
 import com.google.android.gms.maps.model.LatLng
 
-//Invariant: if transport is WalkOnly, lateness must be None <- maybe can enforce this somehow idk
+/**
+ * Composable function to display a route cell with transport details.
+ *
+ * @param transport The transport data to display in the route cell.
+ */
 @Composable
 fun RouteCell(transport: Transport) {
     val headerText =
@@ -158,6 +162,15 @@ fun RouteCell(transport: Transport) {
     }
 }
 
+/**
+ * Composable function to display a single route within a route cell.
+ *
+ * @param isBus Indicates if the route is a bus route.
+ * @param walkOnly Indicates if the route is walk-only.
+ * @param stopName The name of the stop.
+ * @param distance The distance to the stop.
+ * @param busLine The bus line number.
+ */
 @Composable
 fun SingleRoute(
     isBus: Boolean,
@@ -223,10 +236,7 @@ fun SingleRoute(
 
                 }
             }
-
-
         }
-
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.boarding_stop),
             tint = if (isBus or !walkOnly) Color.Unspecified else IconGray,
@@ -238,63 +248,16 @@ fun SingleRoute(
                 end.linkTo(startLoc.start)
             })
 
-        if (isBus) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.bus_route_line),
-                tint = TransitBlue,
-                contentDescription = "",
-                modifier = Modifier
-                    .offset(y=2.dp)
-                    .constrainAs(line) {
-                    top.linkTo(startIcon.top)
-                    bottom.linkTo(parent.bottom)
-                    end.linkTo(startIcon.end)
-                    start.linkTo(startIcon.start)
-
-                })
-        } else {
-            if (walkOnly) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.bus_route_line),
-                    tint = IconGray,
-                    contentDescription = "",
-                    modifier = Modifier
-                        .offset(y=2.dp)
-                        .constrainAs(line) {
-                        top.linkTo(startIcon.top)
-                        bottom.linkTo(parent.bottom)
-                        end.linkTo(startIcon.end)
-                        start.linkTo(startIcon.start)
-
-                    })
-            } else {
-                Column(verticalArrangement = Arrangement.Bottom,
-
-                    modifier = Modifier
-                        .constrainAs(line) {
-                            top.linkTo(startIcon.top)
-                            bottom.linkTo(parent.bottom)
-                            end.linkTo(startIcon.end)
-                            start.linkTo(startIcon.start)
-                        }
-                        .height(44.dp)) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ellipse_small),
-                        tint = Color.Unspecified,
-                        contentDescription = "",
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ellipse_small),
-                        tint = Color.Unspecified,
-                        contentDescription = "",
-                        modifier = Modifier.padding(bottom = 6.dp)
-                    )
-                }
+        DrawLine(
+            isBus = isBus,
+            walkOnly = walkOnly,
+            Modifier.constrainAs(line) {
+                top.linkTo(startIcon.top)
+                bottom.linkTo(parent.bottom)
+                end.linkTo(startIcon.end)
+                start.linkTo(startIcon.start)
             }
-
-        }
+        )
 
         Text(
             stopName,
@@ -322,6 +285,43 @@ fun SingleRoute(
                 })
         }
 
+    }
+}
+
+/**
+ * Composable function to draw a line indicating the route type.
+ *
+ * @param isBus Indicates if the route is a bus route.
+ * @param walkOnly Indicates if the route is walk-only.
+ * @param modifier The modifier to be applied to the line.
+ */
+@Composable
+fun DrawLine(isBus: Boolean, walkOnly: Boolean, modifier: Modifier = Modifier) {
+    if (isBus || walkOnly) {
+        Icon(
+            imageVector = ImageVector.vectorResource(R.drawable.bus_route_line),
+            tint = if (isBus) TransitBlue else IconGray,
+            contentDescription = "",
+            modifier = modifier.offset(y = 2.dp)
+        )
+    } else {
+        Column(
+            verticalArrangement = Arrangement.Bottom,
+            modifier = modifier.height(44.dp)
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ellipse_small),
+                tint = Color.Unspecified,
+                contentDescription = "",
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.ellipse_small),
+                tint = Color.Unspecified,
+                contentDescription = "",
+                modifier = Modifier.padding(bottom = 6.dp)
+            )
+        }
     }
 }
 
