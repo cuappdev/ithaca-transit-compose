@@ -243,7 +243,9 @@ fun SingleRoute(
                 imageVector = ImageVector.vectorResource(R.drawable.bus_route_line),
                 tint = TransitBlue,
                 contentDescription = "",
-                modifier = Modifier.constrainAs(line) {
+                modifier = Modifier
+                    .offset(y=2.dp)
+                    .constrainAs(line) {
                     top.linkTo(startIcon.top)
                     bottom.linkTo(parent.bottom)
                     end.linkTo(startIcon.end)
@@ -256,7 +258,9 @@ fun SingleRoute(
                     imageVector = ImageVector.vectorResource(R.drawable.bus_route_line),
                     tint = IconGray,
                     contentDescription = "",
-                    modifier = Modifier.constrainAs(line) {
+                    modifier = Modifier
+                        .offset(y=2.dp)
+                        .constrainAs(line) {
                         top.linkTo(startIcon.top)
                         bottom.linkTo(parent.bottom)
                         end.linkTo(startIcon.end)

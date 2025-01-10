@@ -80,6 +80,27 @@ fun HomeScreen(
     val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
     var openDialog by remember { mutableStateOf(true) }
 
+    val scope = rememberCoroutineScope()
+
+    //SheetState for FavoritesBottomSheet
+    val favoritesSheetState = rememberBottomSheetScaffoldState(
+        bottomSheetState = SheetState(
+            skipPartiallyExpanded = false,
+            initialValue = SheetValue.Expanded,
+            skipHiddenState = true,
+            density = LocalDensity.current
+        )
+    )
+
+    //sheetState for AddFavorites BottomSheet
+    val addSheetState = rememberBottomSheetScaffoldState(
+        bottomSheetState = SheetState(
+            skipPartiallyExpanded = true,
+            initialValue = SheetValue.Hidden,
+            density = LocalDensity.current
+        )
+    )
+
     if (openDialog && !permissionState.status.isGranted) {
         AlertDialog(
             onDismissRequest = {
@@ -177,7 +198,11 @@ fun HomeScreen(
                         SearchSuggestions(
                             favorites = searchBarValue.favorites,
                             recents = searchBarValue.recents,
-                            onFavoriteAdd = {},
+                            onFavoriteAdd = {
+                                scope.launch {
+                                    addSheetState.bottomSheetState.expand()
+                                }
+                            },
                             onRecentClear = {
                                 homeViewModel.clearRecents()
                             },
@@ -221,34 +246,12 @@ fun HomeScreen(
         }
     }
 
-    //SheetState for FavoritesBottomSheet
-    val favoritesSheetState = rememberBottomSheetScaffoldState(
-        bottomSheetState = SheetState(
-            skipPartiallyExpanded = false,
-            initialValue = SheetValue.Expanded,
-            skipHiddenState = true,
-            density = LocalDensity.current
-        )
-    )
-
-    //sheetState for AddFavorites BottomSheet
-    val addSheetState = rememberBottomSheetScaffoldState(
-        bottomSheetState = SheetState(
-            skipPartiallyExpanded = true,
-            initialValue = SheetValue.Hidden,
-            density = LocalDensity.current
-        )
-    )
-
     var editState by remember {
         mutableStateOf(false)
     }
     var editText by remember {
         mutableStateOf("Edit")
     }
-
-    val scope = rememberCoroutineScope()
-
 
     // Favorites BottomSheet
     BottomSheetScaffold(

@@ -493,14 +493,15 @@ private fun RouteOptionsMainMenu(
                     }
                 }
 
-                //TODO this should probably be an IconButton that swaps current/dest
                 Icon(
                     imageVector = ImageVector.vectorResource(
                         id = R.drawable.swap
                     ),
                     contentDescription = "",
-                    modifier = Modifier.size(width = 20.dp, height = 20.dp),
-                    tint = Color.Unspecified
+                    modifier = Modifier
+                        .size(width = 20.dp, height = 20.dp)
+                        .clickable { routeViewModel.swapLocations() },
+                    tint = Color.Unspecified,
                 )
 
             }
