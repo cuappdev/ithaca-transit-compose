@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,8 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -38,7 +43,12 @@ import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.MapState
 import com.cornellappdev.transit.models.Route
 import com.cornellappdev.transit.ui.components.TransitPolyline
+import com.cornellappdev.transit.ui.components.details.BusIcon
 import com.cornellappdev.transit.ui.theme.DividerGray
+import com.cornellappdev.transit.ui.theme.IconGray
+import com.cornellappdev.transit.ui.theme.LiveGreen
+import com.cornellappdev.transit.ui.theme.MetadataGray
+import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
@@ -75,7 +85,7 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
 
     //Map camera
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(routeViewModel.defaultIthaca, 12f)
+        position = CameraPosition.fromLatLngZoom(routeViewModel.defaultIthaca, 13.5f)
     }
 
     //Map state
@@ -83,7 +93,7 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
 
     // Using advanced-bottomsheet-compose from https://github.com/Morfly/advanced-bottomsheet-compose
     val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Collapsed,
+        initialValue = SheetValue.PartiallyExpanded,
         defineValues = {
             SheetValue.Collapsed at height(100.dp)
             // Bottom sheet offset is 50%, i.e. it takes 50% of the screen
@@ -97,6 +107,7 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
+        sheetDragHandle = {},
         sheetContent = {
             // Bottom sheet content
             DetailsBottomSheet(mapState.route)
@@ -148,61 +159,77 @@ private fun DetailsBottomSheet(route: Route?) {
 
     Column(modifier = Modifier.height(700.dp)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = DividerGray)
+                .height(100.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (busDirection != null) {
-                Row(
-                    modifier = Modifier.background(
-                        color = TransitBlue,
-                        shape = RoundedCornerShape(4.dp)
+            Column(
+                modifier = Modifier.weight(0.25f),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (busDirection != null) {
+                    BusIcon(Integer.parseInt(busDirection.routeId!!))
+                } else {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.walk),
+                        contentDescription = "Walking",
+                        tint = Color.Unspecified,
+                        modifier = Modifier.size(36.dp)
                     )
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.padding(
-                            horizontal = 8.dp,
-                            vertical = 8.dp
-                        )
-                    ) {
-
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.bus),
-                            contentDescription = "Bus",
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            busDirection.routeId!!,
-                            fontFamily = sfProDisplayFamily,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                        )
-
-                    }
                 }
-            } else {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.walk),
-                    contentDescription = "Walking",
-                    tint = Color.Unspecified,
-                    modifier = Modifier.size(24.dp)
+            }
+            Column(
+                modifier = Modifier.weight(0.75f),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.Start
+            ) {
+                if (busDirection != null) {
+                    Text(
+                        buildAnnotatedString {
+                            append("Depart at ")
+                            withStyle(
+                                style = SpanStyle(
+                                    fontWeight = FontWeight.Bold,
+                                    color = LiveGreen
+                                )
+                            ) {
+                                append(TimeUtils.getHHMM(busDirection.startTime))
+                            }
+                            append(" from ")
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append(busDirection.name)
+                            }
+                        },
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
+                    )
+                } else {
+                    Text(
+                        buildAnnotatedString {
+                            append("Walk to ")
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append(route.endName)
+                            }
+                        },
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
+                    )
+                }
+                Text(
+                    text = "Trip Duration: ${route.totalDuration} minutes",
+                    style = Style.paragraph,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                 )
             }
-            if (busDirection != null) {
-                Text(
-                    text = "Depart at ${TimeUtils.getHHMM(busDirection.startTime)} from ${busDirection.name}",
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-            } else {
-                Text(
-                    text = "Walk to ${route.endName}",
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-            }
+
         }
 
     }
