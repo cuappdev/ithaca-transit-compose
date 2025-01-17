@@ -103,7 +103,6 @@ class RouteViewModel @Inject constructor(
 
     val lastRouteFlow: StateFlow<ApiResponse<RouteOptions>> = routeRepository.lastRouteFlow
 
-    //TODO: set with an init block
     /**
      * Default map location
      */

@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 import com.cornellappdev.transit.ui.theme.LateRed
 import com.cornellappdev.transit.ui.theme.LiveGreen
 import com.cornellappdev.transit.util.TimeUtils
+import java.util.Locale
 
 /**
  * Enum representing whether a bus is late
@@ -31,7 +32,7 @@ enum class BusLateness {
 /**
  * Class representing a total path for a route
  */
-class Transport(
+data class Transport(
     val startTime: String,
     val arriveTime: String,
     val lateness: BusLateness,
@@ -55,7 +56,7 @@ fun Route.toTransport(): Transport {
     return Transport(
         startTime = TimeUtils.getHHMM(this.departureTime),
         arriveTime = TimeUtils.getHHMM(this.arrivalTime),
-        distance = String.format("%.1f", this.travelDistance),
+        distance = String.format(Locale.US, "%.1f", this.travelDistance),
         start = this.startName,
         walkOnly = !containsBus,
         lateness = if (containsBus) BusLateness.LATE else BusLateness.NONE,

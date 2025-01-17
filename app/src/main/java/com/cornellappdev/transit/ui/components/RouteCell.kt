@@ -41,6 +41,7 @@ import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.ui.theme.sfProTextFamily
 import com.google.android.gms.maps.model.LatLng
+import java.util.Locale
 
 /**
  * Composable function to display a route cell with transport details.
@@ -49,114 +50,119 @@ import com.google.android.gms.maps.model.LatLng
  */
 @Composable
 fun RouteCell(transport: Transport) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = Color.White, shape = RoundedCornerShape(12.dp))
+            .padding(16.dp)
+    ) {
+        RouteCellHeader(transport = transport)
+
+        if (!transport.walkOnly) {
+            Row(
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 4.dp)
+            ) {
+                Text(
+                    text = transport.lateness.text(),
+                    fontFamily = sfProDisplayFamily,
+                    color = transport.lateness.color(),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    lineHeight = 16.sp,
+                    style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.live_glyph__late_),
+                    contentDescription = "Lateness",
+                    tint = transport.lateness.color()
+                )
+            }
+        }
+
+        ConstraintLayout {
+            val directionRefs = transport.directionList.map { createRef() }
+
+            for ((index, direction) in transport.directionList.withIndex()) {
+                Box(
+                    modifier = Modifier.constrainAs(directionRefs[index]) {
+                        top.linkTo(if (index == 0) parent.top else directionRefs[index - 1].bottom)
+                        start.linkTo(parent.start)
+                        bottom.linkTo(if (index == transport.directionList.lastIndex) parent.bottom else directionRefs[index + 1].top)
+                    }) {
+                    SingleRoute(
+                        isBus = direction.type == DirectionType.DEPART,
+                        walkOnly = transport.walkOnly,
+                        stopName = direction.name,
+                        distance = if (index == transport.directionList.lastIndex) transport.distance else null,
+                        busLine = direction.routeId
+
+                    )
+                }
+
+            }
+        }
+        Icon(
+            imageVector = if (transport.directionList.lastOrNull()?.type == DirectionType.DEPART)
+                ImageVector.vectorResource(R.drawable.bus_destination) else
+                ImageVector.vectorResource(R.drawable.destination_stop),
+            tint = Color.Unspecified,
+            contentDescription = "",
+            modifier = Modifier
+                .padding(start = 70.5.dp)
+                .offset(
+                    y = if (transport.directionList.lastOrNull()?.type == DirectionType.WALK && !transport.walkOnly)
+                        0.dp else (-5).dp
+                )
+        )
+    }
+
+}
+
+/**
+ * Composable function to display the header of a route cell.
+ *
+ * @param transport The transport data to display in the route cell.
+ */
+@Composable
+fun RouteCellHeader(transport: Transport) {
     val headerText =
         if (transport.walkOnly)
             "Directions" else
             "Board in ${transport.timeToBoard} min"
-
     Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = Color.White, shape = RoundedCornerShape(12.dp))
+            .padding(bottom = if (transport.walkOnly) 8.dp else 4.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
+        Text(
+            "${transport.startTime} - ${transport.arriveTime}",
+            fontFamily = sfProDisplayFamily,
+            color = PrimaryText,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            lineHeight = 20.sp,
+            style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
+        )
+        Row(
+            modifier = Modifier.wrapContentWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = if (transport.walkOnly) 8.dp else 4.dp)
-            ) {
-                Text(
-                    "${transport.startTime} - ${transport.arriveTime}",
-                    fontFamily = sfProDisplayFamily,
-                    color = PrimaryText,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    lineHeight = 20.sp,
-                    style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
-                )
-                Row(
-                    modifier = Modifier.wrapContentWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        headerText,
-                        fontFamily = sfProDisplayFamily,
-                        color = transport.lateness.color(),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
-                    )
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.left_arrow),
-                        contentDescription = ""
-                    )
-                }
-            }
-
-            if (!transport.walkOnly) {
-                Row(
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                ) {
-                    Text(
-                        text = transport.lateness.text(),
-                        fontFamily = sfProDisplayFamily,
-                        color = transport.lateness.color(),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        lineHeight = 16.sp,
-                        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.live_glyph__late_),
-                        contentDescription = "",
-                        tint = transport.lateness.color()
-                    )
-                }
-            }
-
-            ConstraintLayout {
-                val directionRefs = transport.directionList.map { createRef() }
-
-                for ((index, direction) in transport.directionList.withIndex()) {
-                    Box(
-                        modifier = Modifier.constrainAs(directionRefs[index]) {
-                            top.linkTo(if (index == 0) parent.top else directionRefs[index - 1].bottom)
-                            start.linkTo(parent.start)
-                            bottom.linkTo(if (index == transport.directionList.size - 1) parent.bottom else directionRefs[index + 1].top)
-                        }) {
-                        SingleRoute(
-                            isBus = direction.type == DirectionType.DEPART,
-                            walkOnly = transport.walkOnly,
-                            stopName = direction.name,
-                            distance = if (index == transport.directionList.size - 1) transport.distance else null,
-                            busLine = direction.routeId
-
-                        )
-                    }
-
-                }
-            }
+            Text(
+                headerText,
+                fontFamily = sfProDisplayFamily,
+                color = transport.lateness.color(),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
+            )
             Icon(
-                imageVector = if (transport.directionList.last().type == DirectionType.DEPART)
-                    ImageVector.vectorResource(R.drawable.bus_destination) else
-                    ImageVector.vectorResource(R.drawable.destination_stop),
-                tint = Color.Unspecified,
-                contentDescription = "",
-                modifier = Modifier
-                    .padding(start = 70.5.dp)
-                    .offset(
-                        y = if (transport.directionList.last().type == DirectionType.WALK && !transport.walkOnly)
-                            0.dp else (-5).dp
-                    )
+                imageVector = ImageVector.vectorResource(id = R.drawable.left_arrow),
+                contentDescription = ""
             )
         }
     }
@@ -228,7 +234,7 @@ fun SingleRoute(
                 )
                 if (walkOnly && distance != null) {
                     Text(
-                        "${String.format("%.1f", distance.toFloat())} mi away",
+                        "${String.format(Locale.US, "%.1f", distance.toFloat())} mi away",
                         color = MetadataGray,
                         fontFamily = sfProTextFamily,
                         fontSize = 10.sp,
@@ -274,7 +280,7 @@ fun SingleRoute(
 
         if (distance != null && !walkOnly) {
             Text(
-                "${String.format("%.1f", distance.toFloat())} mi away",
+                "${String.format(Locale.US, "%.1f", distance.toFloat())} mi away",
                 color = MetadataGray,
                 fontFamily = sfProTextFamily,
                 fontSize = 10.sp,
@@ -372,7 +378,7 @@ fun PreviewSingleRouteIsWalk() {
 
 @Preview
 @Composable
-fun PreviewSingleRouteIsWalkOnlyWithDistance() {
+fun PreviewSingleRouteWalkOnlyWithDistance() {
     Box(modifier = Modifier.background(Color.White)) {
         SingleRoute(
             isBus = false,
@@ -387,7 +393,7 @@ fun PreviewSingleRouteIsWalkOnlyWithDistance() {
 
 @Preview
 @Composable
-fun PreviewRouteCell() {
+fun PreviewRouteCellBusAndWalk() {
     RouteCell(
         Transport(
             startTime = "12:42AM",
@@ -435,7 +441,7 @@ fun PreviewRouteCell() {
 
 @Preview
 @Composable
-fun PreviewRouteCell2() {
+fun PreviewRouteCellMultBusesAndWalk() {
     RouteCell(
         Transport(
             startTime = "12:42AM",
@@ -498,7 +504,7 @@ fun PreviewRouteCell2() {
 
 @Preview
 @Composable
-fun PreviewRouteCell3() {
+fun PreviewRouteCellWalkOnly() {
     RouteCell(
         Transport(
             startTime = "12:42AM",
