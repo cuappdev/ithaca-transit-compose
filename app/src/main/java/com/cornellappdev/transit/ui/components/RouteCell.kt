@@ -127,7 +127,7 @@ fun RouteCell(transport: Transport) {
  * @param transport The transport data to display in the route cell.
  */
 @Composable
-fun RouteCellHeader(transport: Transport) {
+private fun RouteCellHeader(transport: Transport) {
     val headerText =
         if (transport.walkOnly)
             "Directions" else
@@ -333,7 +333,7 @@ fun DrawLine(isBus: Boolean, walkOnly: Boolean, modifier: Modifier = Modifier) {
 
 @Preview
 @Composable
-fun PreviewSingleRouteWithDistance() {
+private fun PreviewSingleRouteWithDistance() {
     Box(modifier = Modifier.background(Color.White)) {
         SingleRoute(
             isBus = true,
@@ -348,7 +348,7 @@ fun PreviewSingleRouteWithDistance() {
 
 @Preview
 @Composable
-fun PreviewSingleRouteWithoutDistance() {
+private fun PreviewSingleRouteWithoutDistance() {
     Box(modifier = Modifier.background(Color.White)) {
         SingleRoute(
             isBus = true,
@@ -363,7 +363,7 @@ fun PreviewSingleRouteWithoutDistance() {
 
 @Preview
 @Composable
-fun PreviewSingleRouteIsWalk() {
+private fun PreviewSingleRouteIsWalk() {
     Box(modifier = Modifier.background(Color.White)) {
         SingleRoute(
             isBus = false,
@@ -378,7 +378,7 @@ fun PreviewSingleRouteIsWalk() {
 
 @Preview
 @Composable
-fun PreviewSingleRouteWalkOnlyWithDistance() {
+private fun PreviewSingleRouteWalkOnlyWithDistance() {
     Box(modifier = Modifier.background(Color.White)) {
         SingleRoute(
             isBus = false,
@@ -393,7 +393,7 @@ fun PreviewSingleRouteWalkOnlyWithDistance() {
 
 @Preview
 @Composable
-fun PreviewRouteCellBusAndWalk() {
+private fun PreviewRouteCellBusAndWalk() {
     RouteCell(
         Transport(
             startTime = "12:42AM",
@@ -441,7 +441,7 @@ fun PreviewRouteCellBusAndWalk() {
 
 @Preview
 @Composable
-fun PreviewRouteCellMultBusesAndWalk() {
+private fun PreviewRouteCellMultBusesAndWalk() {
     RouteCell(
         Transport(
             startTime = "12:42AM",
@@ -504,7 +504,7 @@ fun PreviewRouteCellMultBusesAndWalk() {
 
 @Preview
 @Composable
-fun PreviewRouteCellWalkOnly() {
+private fun PreviewRouteCellWalkOnly() {
     RouteCell(
         Transport(
             startTime = "12:42AM",
