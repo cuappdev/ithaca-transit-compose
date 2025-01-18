@@ -284,5 +284,14 @@ class RouteViewModel @Inject constructor(
         mapState.value = value
     }
 
+    /**
+     * Swap start and destination locations
+     */
+    fun swapLocations() {
+        val temp = startPl.value
+        startPl.value = destPl.value
+        destPl.value = temp
+    }
+
 }
 
