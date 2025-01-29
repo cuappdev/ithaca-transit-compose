@@ -22,7 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.theme.TransitBlue
-import com.cornellappdev.transit.ui.theme.helveticaFamily
+import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.util.StringUtils.toURLString
 
@@ -63,7 +63,7 @@ fun BottomSheetContent(
                 text = "Favorites",
                 fontWeight = FontWeight(600),
                 fontSize = 20.sp,
-                fontFamily = helveticaFamily
+                fontFamily = robotoFamily
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
@@ -73,7 +73,7 @@ fun BottomSheetContent(
                 textAlign = TextAlign.Right,
                 fontSize = 14.sp,
                 fontWeight = FontWeight(500),
-                fontFamily = helveticaFamily
+                fontFamily = robotoFamily
             )
         }
 

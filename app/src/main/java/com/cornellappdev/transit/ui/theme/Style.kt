@@ -13,7 +13,7 @@ object Style {
      */
     val heading3 = TextStyle(
         fontSize = 14.sp,
-        fontFamily = helveticaFamily,
+        fontFamily = robotoFamily,
         lineHeight = 16.sp,
         platformStyle = PlatformTextStyle(
             includeFontPadding = false
@@ -25,7 +25,7 @@ object Style {
      */
     val heading4 = TextStyle(
         fontSize = 12.sp,
-        fontFamily = helveticaFamily,
+        fontFamily = robotoFamily,
         lineHeight = 14.sp,
         platformStyle = PlatformTextStyle(
             includeFontPadding = false
@@ -37,7 +37,7 @@ object Style {
      */
     val paragraph = TextStyle(
         fontSize = 10.sp,
-        fontFamily = helveticaFamily,
+        fontFamily = robotoFamily,
         lineHeight = 12.sp,
         platformStyle = PlatformTextStyle(
             includeFontPadding = false

@@ -38,11 +38,15 @@ val Typography = Typography(
     */
 )
 
-val helveticaFamily = FontFamily(
-    Font(R.font.helvetica_regular, FontWeight.Normal),
-    Font(R.font.helvetica_bold, FontWeight.Bold),
-    Font(R.font.helvetica_light, FontWeight.Light),
-    Font(R.font.helvetica_oblique, FontWeight.Normal, FontStyle.Italic),
-    Font(R.font.helvetica_bold_oblique, FontWeight.SemiBold, FontStyle.Italic),
-    Font(R.font.helvetica_rounded_bold, FontWeight.Normal),
+val robotoFamily = FontFamily(
+    Font(R.font.roboto_regular, FontWeight.Normal),
+    Font(R.font.roboto_bold, FontWeight.Bold),
+    Font(R.font.roboto_black_italic, FontWeight.Black, FontStyle.Italic),
+    Font(R.font.roboto_heavy_italic, FontWeight.Bold, FontStyle.Italic),
+    Font(R.font.roboto_medium, FontWeight.Medium),
+    Font(R.font.roboto_light_italic, FontWeight.Light, FontStyle.Italic),
+    Font(R.font.roboto_semibold_italic, FontWeight.SemiBold, FontStyle.Italic),
+    Font(R.font.roboto_thin_italic, FontWeight.Thin, FontStyle.Italic),
+    Font(R.font.roboto_ultra_light_italic, FontWeight.ExtraLight, FontStyle.Italic),
+    Font(R.font.roboto_thin, FontWeight.Thin)
 )
