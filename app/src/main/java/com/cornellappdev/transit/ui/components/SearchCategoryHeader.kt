@@ -12,7 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.theme.TransitBlue
-import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
+import com.cornellappdev.transit.ui.theme.helveticaFamily
 
 /**
  * Headers for suggested searches
@@ -28,7 +28,7 @@ fun SearchCategoryHeader(headerText: String, buttonText: String, onClick: () -> 
             text = headerText,
             fontSize = 10.sp,
             lineHeight = 12.sp,
-            fontFamily = sfProDisplayFamily,
+            fontFamily = helveticaFamily,
             color = MetadataGray,
             fontWeight = FontWeight.Bold
         )
@@ -37,7 +37,7 @@ fun SearchCategoryHeader(headerText: String, buttonText: String, onClick: () -> 
             text = buttonText,
             fontSize = 10.sp,
             lineHeight = 12.sp,
-            fontFamily = sfProDisplayFamily,
+            fontFamily = helveticaFamily,
             color = TransitBlue,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.clickable {

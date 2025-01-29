@@ -38,19 +38,11 @@ val Typography = Typography(
     */
 )
 
-val sfProDisplayFamily = FontFamily(
-    Font(R.font.sf_pro_display_regular, FontWeight.Normal),
-)
-
-val sfProTextFamily = FontFamily(
-    Font(R.font.sf_pro_text_regular, FontWeight.Normal),
-    Font(R.font.sf_pro_display_bold, FontWeight.Bold),
-    Font(R.font.sf_pro_display_black_italic, FontWeight.Black, FontStyle.Italic),
-    Font(R.font.sf_pro_display_heavy_italic, FontWeight.Bold, FontStyle.Italic),
-    Font(R.font.sf_pro_display_regular, FontWeight.Normal),
-    Font(R.font.sf_pro_display_medium, FontWeight.Medium),
-    Font(R.font.sf_pro_display_light_italic, FontWeight.Light, FontStyle.Italic),
-    Font(R.font.sf_pro_display_semibold_italic, FontWeight.SemiBold, FontStyle.Italic),
-    Font(R.font.sf_pro_display_thin_italic, FontWeight.Thin, FontStyle.Italic),
-    Font(R.font.sf_pro_display_ultra_light_italic, FontWeight.ExtraLight, FontStyle.Italic)
+val helveticaFamily = FontFamily(
+    Font(R.font.helvetica_regular, FontWeight.Normal),
+    Font(R.font.helvetica_bold, FontWeight.Bold),
+    Font(R.font.helvetica_light, FontWeight.Light),
+    Font(R.font.helvetica_oblique, FontWeight.Normal, FontStyle.Italic),
+    Font(R.font.helvetica_bold_oblique, FontWeight.SemiBold, FontStyle.Italic),
+    Font(R.font.helvetica_rounded_bold, FontWeight.Normal),
 )
