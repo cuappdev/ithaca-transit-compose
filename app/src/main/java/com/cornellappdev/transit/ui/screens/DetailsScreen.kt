@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.models.DirectionType
 import com.cornellappdev.transit.models.MapState
 import com.cornellappdev.transit.models.Route
 import com.cornellappdev.transit.ui.components.TransitPolyline
@@ -126,7 +127,12 @@ private fun DrawableMap(
         if (mapState.isShowing) {
             mapState.route?.directions?.forEach { direction ->
                 TransitPolyline(
-                    points = direction.path
+                    points = direction.path,
+                    color = if (direction.type == DirectionType.WALK) {
+                        Color.Gray
+                    } else {
+                        TransitBlue
+                    }
                 )
             }
         }
@@ -148,7 +154,9 @@ private fun DetailsBottomSheet(route: Route?) {
 
     Column(modifier = Modifier.height(700.dp)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
