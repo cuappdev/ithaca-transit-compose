@@ -70,7 +70,7 @@ import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
-import com.cornellappdev.transit.ui.theme.helveticaFamily
+import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.ArriveByUIState
 import com.cornellappdev.transit.ui.viewmodels.LocationUIState
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
@@ -212,7 +212,7 @@ private fun ArriveByBottomSheet(
                     content = {
                         Text(
                             text = "Cancel",
-                            fontFamily = helveticaFamily,
+                            fontFamily = robotoFamily,
                             fontStyle = FontStyle.Normal,
                             textAlign = TextAlign.Center,
                             color = SecondaryText
@@ -248,7 +248,7 @@ private fun ArriveByBottomSheet(
                     content = {
                         Text(
                             text = "Done",
-                            fontFamily = helveticaFamily,
+                            fontFamily = robotoFamily,
                             fontStyle = FontStyle.Normal,
                             textAlign = TextAlign.Center,
                             color = TransitBlue
@@ -349,7 +349,7 @@ private fun RouteOptionsMainMenu(
                 title = {
                     Text(
                         text = "Route Options",
-                        fontFamily = helveticaFamily,
+                        fontFamily = robotoFamily,
                         fontStyle = FontStyle.Normal
                     )
                 },
@@ -376,7 +376,7 @@ private fun RouteOptionsMainMenu(
                     val (fromText, fromStop, toText, toStop, line) = createRefs()
 
                     Text(text = "From", color = PrimaryText,
-                        fontFamily = helveticaFamily,
+                        fontFamily = robotoFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 14.sp, modifier = Modifier.constrainAs(fromText) {
                             top.linkTo(parent.top, margin = 3.dp)
@@ -396,7 +396,7 @@ private fun RouteOptionsMainMenu(
                     Text(
                         text = "To",
                         color = PrimaryText,
-                        fontFamily = helveticaFamily,
+                        fontFamily = robotoFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 14.sp,
                         modifier = Modifier.constrainAs(toText) {
@@ -456,7 +456,7 @@ private fun RouteOptionsMainMenu(
                             text = if (startLocation is LocationUIState.Place) startLocation.name else "Current Location",
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                             color = PrimaryText,
-                            fontFamily = helveticaFamily,
+                            fontFamily = robotoFamily,
                             fontWeight = FontWeight.Normal, fontSize = 14.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -484,7 +484,7 @@ private fun RouteOptionsMainMenu(
                         Text(
                             text = if (endLocation is LocationUIState.Place) endLocation.name else "Current Location",
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            fontFamily = helveticaFamily,
+                            fontFamily = robotoFamily,
                             fontWeight = FontWeight.Normal,
                             fontSize = 14.sp,
                             maxLines = 1,
@@ -542,7 +542,7 @@ private fun RouteOptionsMainMenu(
                 ) {
                     Text(
                         text = arriveBy.label,
-                        fontFamily = helveticaFamily,
+                        fontFamily = robotoFamily,
                         fontWeight = FontWeight.Normal,
                         color = MetadataGray, fontSize = 14.sp
                     )
@@ -686,7 +686,7 @@ private fun RouteOptionsSearchSheet(
                 Box(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Route Options",
-                        fontFamily = helveticaFamily,
+                        fontFamily = robotoFamily,
                         fontStyle = FontStyle.Normal,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
@@ -697,7 +697,7 @@ private fun RouteOptionsSearchSheet(
                         content = {
                             Text(
                                 text = "Cancel",
-                                fontFamily = helveticaFamily,
+                                fontFamily = robotoFamily,
                                 fontStyle = FontStyle.Normal,
                                 textAlign = TextAlign.Center,
                                 color = SecondaryText

@@ -39,7 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.TextButtonGray
-import com.cornellappdev.transit.ui.theme.helveticaFamily
+import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 
@@ -89,7 +89,7 @@ fun AddFavoritesSearchSheet(
                 Box(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Add Favorites",
-                        fontFamily = helveticaFamily,
+                        fontFamily = robotoFamily,
                         fontStyle = FontStyle.Normal,
                         fontWeight = FontWeight(600),
                         fontSize = 20.sp,
@@ -103,7 +103,7 @@ fun AddFavoritesSearchSheet(
                         content = {
                             Text(
                                 text = "Cancel",
-                                fontFamily = helveticaFamily,
+                                fontFamily = robotoFamily,
                                 fontStyle = FontStyle.Normal,
                                 textAlign = TextAlign.Center,
                                 fontSize = 14.sp,

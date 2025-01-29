@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.theme.TransitBlue
-import com.cornellappdev.transit.ui.theme.helveticaFamily
+import com.cornellappdev.transit.ui.theme.robotoFamily
 
 /**
  * Card for each entry in favourite locations list
@@ -123,7 +123,7 @@ fun LocationItem(
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 8.dp, bottom = 4.dp),
             fontWeight = FontWeight(400),
-            fontFamily = helveticaFamily,
+            fontFamily = robotoFamily,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -136,7 +136,7 @@ fun LocationItem(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally),
             fontWeight = FontWeight(400),
-            fontFamily = helveticaFamily,
+            fontFamily = robotoFamily,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
