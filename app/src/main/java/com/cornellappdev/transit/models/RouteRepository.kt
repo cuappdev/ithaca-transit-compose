@@ -1,8 +1,8 @@
 package com.cornellappdev.transit.models
 
-import android.util.Log
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.networking.NetworkApi
+import com.cornellappdev.transit.ui.viewmodels.LocationUIState
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +35,14 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
     private val _lastRouteFlow: MutableStateFlow<ApiResponse<RouteOptions>> =
         MutableStateFlow(ApiResponse.Pending)
 
+    private val _startPl: MutableStateFlow<LocationUIState> = MutableStateFlow(
+        LocationUIState.Place("Current Location", LatLng(42.44, -76.50))
+    )
+
+    private val _destPl: MutableStateFlow<LocationUIState> = MutableStateFlow(
+        LocationUIState.Place("Current Location", LatLng(42.45, -76.51))
+    )
+
     init {
         fetchAllStops()
     }
@@ -54,6 +62,15 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
      */
     val placeFlow = _placeFlow.asStateFlow()
 
+    /**
+     * Pair of the name of the starting location and the coordinates
+     */
+    val startPl = _startPl.asStateFlow()
+
+    /**
+     * Pair of the name of the ending location and the coordinates
+     */
+    val destPl = _destPl.asStateFlow()
 
     /**
      * Makes a new call to backend for all stops.
@@ -123,6 +140,20 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
                 _lastRouteFlow.value = ApiResponse.Error
             }
         }
+    }
+
+    /**
+     * Change start location
+     */
+    fun setStartLocation(location: LocationUIState) {
+        _startPl.value = location
+    }
+
+    /**
+     * Change end location
+     */
+    fun setEndLocation(location: LocationUIState) {
+        _destPl.value = location
     }
 
 }

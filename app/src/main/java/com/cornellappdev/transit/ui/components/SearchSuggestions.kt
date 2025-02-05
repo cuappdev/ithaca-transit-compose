@@ -12,7 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cornellappdev.transit.models.Place
-import com.cornellappdev.transit.util.StringUtils.toURLString
+import com.cornellappdev.transit.ui.viewmodels.LocationUIState
+import com.google.android.gms.maps.model.LatLng
 
 /**
  * Display for suggested searches (recents and favorites)
@@ -23,6 +24,7 @@ fun SearchSuggestions(
     recents: List<Place>,
     onFavoriteAdd: () -> Unit,
     onRecentClear: () -> Unit,
+    changeEndLocation: (LocationUIState) -> Unit,
     navController: NavController,
     onStopPressed: (Place) -> Unit,
 ) {
@@ -43,7 +45,16 @@ fun SearchSuggestions(
                 sublabel = it.subLabel,
                 onClick = {
                     onStopPressed(it)
-                    navController.navigate("route/${it.name.toURLString()}/${it.latitude}/${it.longitude}")
+                    changeEndLocation(
+                        LocationUIState.Place(
+                            it.name,
+                            LatLng(
+                                it.latitude,
+                                it.longitude
+                            )
+                        )
+                    )
+                    navController.navigate("route")
                 }
             )
         }
@@ -60,7 +71,16 @@ fun SearchSuggestions(
                 sublabel = it.subLabel,
                 onClick = {
                     onStopPressed(it)
-                    navController.navigate("route/${it.name.toURLString()}/${it.latitude}/${it.longitude}")
+                    changeEndLocation(
+                        LocationUIState.Place(
+                            it.name,
+                            LatLng(
+                                it.latitude,
+                                it.longitude
+                            )
+                        )
+                    )
+                    navController.navigate("route")
                 }
             )
         }

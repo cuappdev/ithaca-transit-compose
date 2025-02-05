@@ -24,7 +24,8 @@ import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
-import com.cornellappdev.transit.util.StringUtils.toURLString
+import com.cornellappdev.transit.ui.viewmodels.LocationUIState
+import com.google.android.gms.maps.model.LatLng
 
 
 /**
@@ -41,6 +42,7 @@ fun BottomSheetContent(
     onclick: () -> Unit,
     addOnClick: () -> Unit,
     removeOnClick: () -> Unit,
+    changeEndLocation: (LocationUIState) -> Unit,
     favoritesViewModel: FavoritesViewModel = hiltViewModel(),
     navController: NavController
 ) {
@@ -85,7 +87,18 @@ fun BottomSheetContent(
                     label = it.name,
                     sublabel = "",
                     editing = editState,
-                    { navController.navigate("route/${it.name.toURLString()}/${it.latitude}/${it.longitude}") },
+                    {
+                        changeEndLocation(
+                            LocationUIState.Place(
+                                it.name,
+                                LatLng(
+                                    it.latitude,
+                                    it.longitude
+                                )
+                            )
+                        )
+                        navController.navigate("route")
+                    },
                     addOnClick = {},
                     removeOnClick = { favoritesViewModel.removeFavorite(it); removeOnClick() },
                 )
