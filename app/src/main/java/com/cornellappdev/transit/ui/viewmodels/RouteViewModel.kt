@@ -44,29 +44,13 @@ class RouteViewModel @Inject constructor(
     /**
      * Pair of the name of the starting location and the coordinates
      */
-    val startPl: MutableStateFlow<LocationUIState> =
-        MutableStateFlow(
-            LocationUIState.CurrentLocation(currentLocation.value?.longitude?.let {
-                currentLocation.value?.latitude?.let { it1 ->
-                    LatLng(
-                        it, it1
-                    )
-                }
-            })
-        )
+    val startPl = routeRepository.startPl
+
 
     /**
      * Pair of the name of the ending location and the coordinates
      */
-    val destPl: MutableStateFlow<LocationUIState> = MutableStateFlow(
-        LocationUIState.CurrentLocation(currentLocation.value?.longitude?.let {
-            currentLocation.value?.latitude?.let { it1 ->
-                LatLng(
-                    it, it1
-                )
-            }
-        })
-    )
+    val destPl = routeRepository.destPl
 
     /**
      * State of the arriveBy selector
@@ -151,15 +135,19 @@ class RouteViewModel @Inject constructor(
                 currentLocation.collect {
                     if (startPl.value is LocationUIState.CurrentLocation) {
                         if (it != null) {
-                            startPl.value = LocationUIState.CurrentLocation(
-                                LatLng(it.latitude, it.longitude)
+                            routeRepository.setStartLocation(
+                                LocationUIState.CurrentLocation(
+                                    LatLng(it.latitude, it.longitude)
+                                )
                             )
                         }
                     }
                     if (destPl.value is LocationUIState.CurrentLocation) {
                         if (it != null) {
-                            destPl.value = LocationUIState.CurrentLocation(
-                                LatLng(it.latitude, it.longitude)
+                            routeRepository.setEndLocation(
+                                LocationUIState.CurrentLocation(
+                                    LatLng(it.latitude, it.longitude)
+                                )
                             )
                         }
                     }
@@ -219,15 +207,15 @@ class RouteViewModel @Inject constructor(
     /**
      * Change start location
      */
-    fun changeStartLocation(location: LocationUIState) {
-        startPl.value = location
+    fun setStartLocation(location: LocationUIState) {
+        routeRepository.setStartLocation(location)
     }
 
     /**
      * Change end location
      */
-    fun changeEndLocation(location: LocationUIState) {
-        destPl.value = location
+    fun setEndLocation(location: LocationUIState) {
+        routeRepository.setEndLocation(location)
     }
 
     /**
@@ -289,8 +277,8 @@ class RouteViewModel @Inject constructor(
      */
     fun swapLocations() {
         val temp = startPl.value
-        startPl.value = destPl.value
-        destPl.value = temp
+        routeRepository.setStartLocation(destPl.value)
+        routeRepository.setEndLocation(temp)
     }
 
 }
