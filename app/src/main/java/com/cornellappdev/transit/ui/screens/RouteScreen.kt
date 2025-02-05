@@ -747,14 +747,14 @@ private fun RouteOptionsSearchSheet(
                                 sublabel = it.subLabel,
                                 onClick = {
                                     if (isStart) {
-                                        routeViewModel.changeStartLocation(
+                                        routeViewModel.setStartLocation(
                                             LocationUIState.Place(
                                                 it.name,
                                                 LatLng(it.latitude, it.longitude)
                                             )
                                         )
                                     } else {
-                                        routeViewModel.changeEndLocation(
+                                        routeViewModel.setEndLocation(
                                             LocationUIState.Place(
                                                 it.name,
                                                 LatLng(it.latitude, it.longitude)
@@ -780,14 +780,14 @@ private fun RouteOptionsSearchSheet(
                                 sublabel = it.subLabel,
                                 onClick = {
                                     if (isStart) {
-                                        routeViewModel.changeStartLocation(
+                                        routeViewModel.setStartLocation(
                                             LocationUIState.Place(
                                                 it.name,
                                                 LatLng(it.latitude, it.longitude)
                                             )
                                         )
                                     } else {
-                                        routeViewModel.changeEndLocation(
+                                        routeViewModel.setEndLocation(
                                             LocationUIState.Place(
                                                 it.name,
                                                 LatLng(it.latitude, it.longitude)
@@ -823,14 +823,14 @@ private fun RouteOptionsSearchSheet(
                                         sublabel = it.subLabel,
                                         onClick = {
                                             if (isStart) {
-                                                routeViewModel.changeStartLocation(
+                                                routeViewModel.setStartLocation(
                                                     LocationUIState.Place(
                                                         it.name,
                                                         LatLng(it.latitude, it.longitude)
                                                     )
                                                 )
                                             } else {
-                                                routeViewModel.changeEndLocation(
+                                                routeViewModel.setEndLocation(
                                                     LocationUIState.Place(
                                                         it.name,
                                                         LatLng(it.latitude, it.longitude)

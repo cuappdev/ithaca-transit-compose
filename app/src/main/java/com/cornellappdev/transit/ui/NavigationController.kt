@@ -41,12 +41,12 @@ fun NavigationController(
             val longitudeArg = backStackEntry.arguments?.getString("longitude")
             val currentLocation = routeViewModel.currentLocation.collectAsState().value
             if (destArg != null && latitudeArg != null && longitudeArg != null && currentLocation != null) {
-                routeViewModel.changeStartLocation(
+                routeViewModel.setStartLocation(
                     LocationUIState.CurrentLocation(
                         LatLng(currentLocation.latitude, currentLocation.longitude)
                     )
                 )
-                routeViewModel.changeEndLocation(
+                routeViewModel.setEndLocation(
                     LocationUIState.Place(
                         destArg.fromURLString(),
                         LatLng(

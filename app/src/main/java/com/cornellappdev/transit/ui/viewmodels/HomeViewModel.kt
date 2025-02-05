@@ -1,7 +1,6 @@
 package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
@@ -175,6 +174,13 @@ class HomeViewModel @Inject constructor(
      * Value of the current location. Can be null
      */
     val currentLocation = locationRepository.currentLocation
+
+    /**
+     * Change end location
+     */
+    fun changeEndLocation(location: LocationUIState) {
+        routeRepository.setEndLocation(location)
+    }
 
     /**
      * Start emitting location from [locationRepository]
