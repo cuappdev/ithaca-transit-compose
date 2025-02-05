@@ -25,6 +25,7 @@ import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -95,7 +96,7 @@ fun RouteCell(transport: Transport) {
                         isBus = direction.type == DirectionType.DEPART,
                         walkOnly = transport.walkOnly,
                         stopName = direction.name,
-                        distance = if (index == transport.directionList.lastIndex) transport.distance else null,
+                        distance = if (index == 0) direction.distance else null,
                         busLine = direction.routeId
 
                     )
@@ -103,19 +104,31 @@ fun RouteCell(transport: Transport) {
 
             }
         }
-        Icon(
-            imageVector = if (transport.directionList.lastOrNull()?.type == DirectionType.DEPART)
-                ImageVector.vectorResource(R.drawable.bus_destination) else
-                ImageVector.vectorResource(R.drawable.destination_stop),
-            tint = Color.Unspecified,
-            contentDescription = "",
+        Row(
             modifier = Modifier
                 .padding(start = 70.5.dp)
                 .offset(
                     y = if (transport.directionList.lastOrNull()?.type == DirectionType.WALK && !transport.walkOnly)
                         0.dp else (-5).dp
                 )
-        )
+        ) {
+            Icon(
+                imageVector = if (transport.directionList.lastOrNull()?.type == DirectionType.DEPART)
+                    ImageVector.vectorResource(R.drawable.bus_destination) else
+                    ImageVector.vectorResource(R.drawable.destination_stop),
+                tint = Color.Unspecified,
+                contentDescription = "",
+
+                )
+            Text(
+                text = transport.end,
+                fontFamily = robotoFamily,
+                color = PrimaryText,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(start = 13.dp)
+            )
+        }
+
     }
 
 }
@@ -265,16 +278,16 @@ fun SingleRoute(
         )
 
         Text(
-            stopName,
+            if (stopName.length > 60) stopName.take(60) + "..." else stopName,
             color = PrimaryText,
             fontFamily = robotoFamily,
             fontStyle = FontStyle.Normal,
             fontSize = 14.sp,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.constrainAs(startLoc) {
-                top.linkTo(parent.top, margin = 2.dp)
+                top.linkTo(parent.top)
                 start.linkTo(startIcon.end, margin = 16.dp)
                 end.linkTo(parent.end, margin = 16.dp)
-                bottom.linkTo(if (distance == null || walkOnly) parent.bottom else dist.top)
             })
 
         if (distance != null && !walkOnly) {
@@ -285,8 +298,7 @@ fun SingleRoute(
                 fontSize = 10.sp,
                 modifier = Modifier.constrainAs(dist) {
                     start.linkTo(startLoc.start)
-                    top.linkTo(startLoc.bottom, margin = (-6).dp)
-                    bottom.linkTo(parent.bottom)
+                    top.linkTo(startLoc.bottom, margin = (2).dp)
                 })
         }
 
@@ -399,6 +411,7 @@ private fun PreviewRouteCellBusAndWalk() {
             arriveTime = "12:49AM",
             distance = "0.2",
             start = "Gates Hall",
+            end = "Upson Hall",
             timeToBoard = 7,
             lateness = BusLateness.NORMAL,
             directionList = listOf(
@@ -447,6 +460,7 @@ private fun PreviewRouteCellMultBusesAndWalk() {
             arriveTime = "12:49AM",
             distance = "0.2",
             start = "Gates Hall",
+            end = "Upson Hall",
             timeToBoard = 7,
             lateness = BusLateness.NORMAL,
             directionList = listOf(
@@ -508,9 +522,10 @@ private fun PreviewRouteCellWalkOnly() {
         Transport(
             startTime = "12:42AM",
             arriveTime = "12:49AM",
-            distance = "0.2",
+            distance = "0.1",
             lateness = BusLateness.NONE,
             start = "Gates Hall",
+            end = "Upson Hall",
             walkOnly = true,
             timeToBoard = 0,
             directionList = listOf(

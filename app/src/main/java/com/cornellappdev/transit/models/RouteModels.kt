@@ -38,6 +38,7 @@ data class Transport(
     val lateness: BusLateness,
     val distance: String,
     val start: String,
+    val end: String,
     val walkOnly: Boolean,
     val timeToBoard: Int,
     val directionList: List<Direction>
@@ -58,6 +59,7 @@ fun Route.toTransport(): Transport {
         arriveTime = TimeUtils.getHHMM(this.arrivalTime),
         distance = String.format(Locale.US, "%.1f", this.travelDistance),
         start = this.startName,
+        end = this.endName,
         walkOnly = !containsBus,
         lateness = if (containsBus) BusLateness.LATE else BusLateness.NONE,
         timeToBoard = 0,
