@@ -127,7 +127,9 @@ fun RouteCell(transport: Transport) {
                 fontSize = 14.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(start = 13.dp)
+                modifier = Modifier
+                    .width(200.dp)
+                    .padding(start = 13.dp)
             )
         }
 
@@ -280,18 +282,20 @@ fun SingleRoute(
         )
 
         Text(
-            if (stopName.length > 60) stopName.take(60) + "..." else stopName,
+            stopName,
             color = PrimaryText,
             fontFamily = robotoFamily,
             fontStyle = FontStyle.Normal,
             fontSize = 14.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.constrainAs(startLoc) {
-                top.linkTo(parent.top)
-                start.linkTo(startIcon.end, margin = 16.dp)
-                end.linkTo(parent.end, margin = 16.dp)
-            })
+            modifier = Modifier
+                .width(200.dp)
+                .constrainAs(startLoc) {
+                    top.linkTo(parent.top)
+                    start.linkTo(startIcon.end, margin = 16.dp)
+                    end.linkTo(parent.end, margin = 16.dp)
+                })
 
         if (distance != null && !walkOnly) {
             Text(
