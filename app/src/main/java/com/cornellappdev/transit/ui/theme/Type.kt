@@ -38,19 +38,15 @@ val Typography = Typography(
     */
 )
 
-val sfProDisplayFamily = FontFamily(
-    Font(R.font.sf_pro_display_regular, FontWeight.Normal),
-)
-
-val sfProTextFamily = FontFamily(
-    Font(R.font.sf_pro_text_regular, FontWeight.Normal),
-    Font(R.font.sf_pro_display_bold, FontWeight.Bold),
-    Font(R.font.sf_pro_display_black_italic, FontWeight.Black, FontStyle.Italic),
-    Font(R.font.sf_pro_display_heavy_italic, FontWeight.Bold, FontStyle.Italic),
-    Font(R.font.sf_pro_display_regular, FontWeight.Normal),
-    Font(R.font.sf_pro_display_medium, FontWeight.Medium),
-    Font(R.font.sf_pro_display_light_italic, FontWeight.Light, FontStyle.Italic),
-    Font(R.font.sf_pro_display_semibold_italic, FontWeight.SemiBold, FontStyle.Italic),
-    Font(R.font.sf_pro_display_thin_italic, FontWeight.Thin, FontStyle.Italic),
-    Font(R.font.sf_pro_display_ultra_light_italic, FontWeight.ExtraLight, FontStyle.Italic)
+val robotoFamily = FontFamily(
+    Font(R.font.roboto_regular, FontWeight.Normal),
+    Font(R.font.roboto_bold, FontWeight.Bold),
+    Font(R.font.roboto_black_italic, FontWeight.Black, FontStyle.Italic),
+    Font(R.font.roboto_heavy_italic, FontWeight.Bold, FontStyle.Italic),
+    Font(R.font.roboto_medium, FontWeight.Medium),
+    Font(R.font.roboto_light_italic, FontWeight.Light, FontStyle.Italic),
+    Font(R.font.roboto_semibold_italic, FontWeight.SemiBold, FontStyle.Italic),
+    Font(R.font.roboto_thin_italic, FontWeight.Thin, FontStyle.Italic),
+    Font(R.font.roboto_ultra_light_italic, FontWeight.ExtraLight, FontStyle.Italic),
+    Font(R.font.roboto_thin, FontWeight.Thin)
 )

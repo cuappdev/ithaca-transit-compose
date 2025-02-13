@@ -38,8 +38,7 @@ import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.TransitBlue
-import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
-import com.cornellappdev.transit.ui.theme.sfProTextFamily
+import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.google.android.gms.maps.model.LatLng
 import java.util.Locale
 
@@ -66,7 +65,7 @@ fun RouteCell(transport: Transport) {
             ) {
                 Text(
                     text = transport.lateness.text(),
-                    fontFamily = sfProDisplayFamily,
+                    fontFamily = robotoFamily,
                     color = transport.lateness.color(),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -140,7 +139,7 @@ private fun RouteCellHeader(transport: Transport) {
     ) {
         Text(
             "${transport.startTime} - ${transport.arriveTime}",
-            fontFamily = sfProDisplayFamily,
+            fontFamily = robotoFamily,
             color = PrimaryText,
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
@@ -154,7 +153,7 @@ private fun RouteCellHeader(transport: Transport) {
         ) {
             Text(
                 headerText,
-                fontFamily = sfProDisplayFamily,
+                fontFamily = robotoFamily,
                 color = transport.lateness.color(),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -212,7 +211,7 @@ fun SingleRoute(
                     )
                     Text(
                         "$busLine",
-                        fontFamily = sfProDisplayFamily,
+                        fontFamily = robotoFamily,
                         fontSize = 10.sp,
                         fontStyle = FontStyle.Normal,
                         color = Color.White,
@@ -236,7 +235,7 @@ fun SingleRoute(
                     Text(
                         "${String.format(Locale.US, "%.1f", distance.toFloat())} mi away",
                         color = MetadataGray,
-                        fontFamily = sfProTextFamily,
+                        fontFamily = robotoFamily,
                         fontSize = 10.sp,
                     )
 
@@ -268,7 +267,7 @@ fun SingleRoute(
         Text(
             stopName,
             color = PrimaryText,
-            fontFamily = sfProDisplayFamily,
+            fontFamily = robotoFamily,
             fontStyle = FontStyle.Normal,
             fontSize = 14.sp,
             modifier = Modifier.constrainAs(startLoc) {
@@ -282,7 +281,7 @@ fun SingleRoute(
             Text(
                 "${String.format(Locale.US, "%.1f", distance.toFloat())} mi away",
                 color = MetadataGray,
-                fontFamily = sfProTextFamily,
+                fontFamily = robotoFamily,
                 fontSize = 10.sp,
                 modifier = Modifier.constrainAs(dist) {
                     start.linkTo(startLoc.start)

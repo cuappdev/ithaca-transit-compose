@@ -40,7 +40,7 @@ import com.cornellappdev.transit.models.Route
 import com.cornellappdev.transit.ui.components.TransitPolyline
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.TransitBlue
-import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
+import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.cornellappdev.transit.util.TimeUtils
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -176,7 +176,7 @@ private fun DetailsBottomSheet(route: Route?) {
                         )
                         Text(
                             busDirection.routeId!!,
-                            fontFamily = sfProDisplayFamily,
+                            fontFamily = robotoFamily,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
@@ -222,7 +222,7 @@ private fun DetailsMainScreen(
             title = {
                 Text(
                     text = "Route Details",
-                    fontFamily = sfProDisplayFamily,
+                    fontFamily = robotoFamily,
                     fontStyle = FontStyle.Normal
                 )
             },
