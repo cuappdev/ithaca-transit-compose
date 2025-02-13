@@ -125,6 +125,8 @@ fun RouteCell(transport: Transport) {
                 fontFamily = robotoFamily,
                 color = PrimaryText,
                 fontSize = 14.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(start = 13.dp)
             )
         }
@@ -283,6 +285,7 @@ fun SingleRoute(
             fontFamily = robotoFamily,
             fontStyle = FontStyle.Normal,
             fontSize = 14.sp,
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.constrainAs(startLoc) {
                 top.linkTo(parent.top)
