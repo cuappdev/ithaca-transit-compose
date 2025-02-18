@@ -108,6 +108,9 @@ class RouteViewModel @Inject constructor(
      */
     val defaultIthaca = LatLng(42.44, -76.50)
 
+
+    // TODO: Move DetailsBottomSheet route parsing logic here
+
     /**
      * The current UI state of the search bar, as a MutableStateFlow
      */

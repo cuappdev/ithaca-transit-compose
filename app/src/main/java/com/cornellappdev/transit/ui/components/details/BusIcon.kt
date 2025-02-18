@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,25 +27,27 @@ import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 
 
 /**
- * Large icon badge for bus routes on details screen
+ * Multi-size icon badge for bus routes on details screen
+ *
  */
 @Composable
-fun BusIcon(busNumber: Int, modifier: Modifier = Modifier) {
+fun BusIcon(busNumber: Int, modifier: Modifier = Modifier, isSmall: Boolean = false) {
+
     Row(
         modifier = modifier
             .background(
                 color = TransitBlue,
                 shape = RoundedCornerShape(4.dp)
             )
-            .width(72.dp)
-            .height(36.dp)
+            .width(if (isSmall) 40.dp else 72.dp)
+            .height(if (isSmall) 24.dp else 36.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.padding(
-                horizontal = 8.dp,
-                vertical = 8.dp
+                horizontal = if (isSmall) 2.dp else 8.dp,
+                vertical = if (isSmall) 4.dp else 8.dp
             )
         ) {
 
@@ -51,14 +55,18 @@ fun BusIcon(busNumber: Int, modifier: Modifier = Modifier) {
                 imageVector = ImageVector.vectorResource(R.drawable.bus),
                 contentDescription = "Bus",
                 tint = Color.Unspecified,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier
+                    .size(if (isSmall) 14.dp else 24.dp)
+                    .padding(start = 4.dp, end = if (isSmall) 3.dp else 6.dp)
             )
             Text(
                 text = busNumber.toString(),
                 fontFamily = sfProDisplayFamily,
-                fontSize = 18.sp,
+                fontSize = (if (isSmall) 10.sp else 18.sp),
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
+                modifier = Modifier.padding(vertical = if (isSmall) 3.dp else 0.dp),
+                style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
             )
 
         }

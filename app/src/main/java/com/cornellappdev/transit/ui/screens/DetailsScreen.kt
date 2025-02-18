@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,12 +39,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.models.DirectionType
 import com.cornellappdev.transit.models.MapState
 import com.cornellappdev.transit.models.Route
+import com.cornellappdev.transit.models.toTransport
+import com.cornellappdev.transit.ui.components.SingleRoute
 import com.cornellappdev.transit.ui.components.TransitPolyline
 import com.cornellappdev.transit.ui.components.details.BusIcon
+import com.cornellappdev.transit.ui.components.details.DetailsSheet
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.LiveGreen
@@ -83,17 +89,20 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
 
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
-    //Map camera
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(routeViewModel.defaultIthaca, 13.5f)
-    }
 
     //Map state
     val mapState = routeViewModel.mapState.collectAsState().value
 
+    //Map camera
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(
+            mapState.route?.startCoords ?: routeViewModel.defaultIthaca, 16.75f
+        )
+    }
+
     // Using advanced-bottomsheet-compose from https://github.com/Morfly/advanced-bottomsheet-compose
     val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.PartiallyExpanded,
+        initialValue = SheetValue.Collapsed,
         defineValues = {
             SheetValue.Collapsed at height(100.dp)
             // Bottom sheet offset is 50%, i.e. it takes 50% of the screen
@@ -158,6 +167,8 @@ private fun DetailsBottomSheet(route: Route?) {
     }
 
     Column(modifier = Modifier.height(700.dp)) {
+
+        // Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -224,13 +235,16 @@ private fun DetailsBottomSheet(route: Route?) {
                     )
                 }
                 Text(
-                    text = "Trip Duration: ${route.totalDuration} minutes",
+                    text = "Trip Duration: ${route.totalDuration} minute" + if (route.totalDuration != 1) "s" else "",
                     style = Style.paragraph,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                 )
             }
 
         }
+
+        // Route details
+        DetailsSheet(route)
 
     }
 }

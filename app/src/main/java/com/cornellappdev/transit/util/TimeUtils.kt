@@ -8,6 +8,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import android.icu.text.SimpleDateFormat
+import java.time.Duration
 
 
 /**
@@ -49,4 +50,18 @@ object TimeUtils {
         val formatter = DateTimeFormatter.ofPattern("hh:mm a")
         return zonedDateTime.format(formatter)
     }
+
+    /**
+     * Calculate the minute difference between two ISO datetime strings
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun minuteDifference(startString: String, endString: String): Int {
+        val start = Instant.parse(startString)
+        val end = Instant.parse(endString)
+
+        val duration = Duration.between(start, end)
+
+        return duration.toMinutes().toInt()
+    }
+
 }
