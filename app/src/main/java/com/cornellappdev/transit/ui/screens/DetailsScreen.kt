@@ -35,9 +35,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.models.DirectionType
 import com.cornellappdev.transit.models.MapState
 import com.cornellappdev.transit.models.Route
-import com.cornellappdev.transit.ui.components.TransitPolyline
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
@@ -52,6 +52,7 @@ import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import io.morfly.compose.bottomsheet.material3.BottomSheetScaffold
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetScaffoldState
@@ -125,9 +126,15 @@ private fun DrawableMap(
     ) {
         if (mapState.isShowing) {
             mapState.route?.directions?.forEach { direction ->
-                TransitPolyline(
-                    points = direction.path
+                Polyline(
+                    points = direction.path,
+                    color = if (direction.type == DirectionType.WALK) {
+                        Color.Gray
+                    } else {
+                        TransitBlue
+                    },
                 )
+
             }
         }
     }
@@ -148,7 +155,9 @@ private fun DetailsBottomSheet(route: Route?) {
 
     Column(modifier = Modifier.height(700.dp)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
