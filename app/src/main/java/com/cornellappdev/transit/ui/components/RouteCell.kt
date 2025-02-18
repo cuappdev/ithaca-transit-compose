@@ -25,6 +25,7 @@ import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,8 +39,7 @@ import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.TransitBlue
-import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
-import com.cornellappdev.transit.ui.theme.sfProTextFamily
+import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.google.android.gms.maps.model.LatLng
 import java.util.Locale
 
@@ -66,7 +66,7 @@ fun RouteCell(transport: Transport) {
             ) {
                 Text(
                     text = transport.lateness.text(),
-                    fontFamily = sfProDisplayFamily,
+                    fontFamily = robotoFamily,
                     color = transport.lateness.color(),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -96,7 +96,7 @@ fun RouteCell(transport: Transport) {
                         isBus = direction.type == DirectionType.DEPART,
                         walkOnly = transport.walkOnly,
                         stopName = direction.name,
-                        distance = if (index == transport.directionList.lastIndex) transport.distance else null,
+                        distance = if (index == 0) direction.distance else null,
                         busLine = direction.routeId
 
                     )
@@ -104,19 +104,35 @@ fun RouteCell(transport: Transport) {
 
             }
         }
-        Icon(
-            imageVector = if (transport.directionList.lastOrNull()?.type == DirectionType.DEPART)
-                ImageVector.vectorResource(R.drawable.bus_destination) else
-                ImageVector.vectorResource(R.drawable.destination_stop),
-            tint = Color.Unspecified,
-            contentDescription = "",
+        Row(
             modifier = Modifier
                 .padding(start = 70.5.dp)
                 .offset(
                     y = if (transport.directionList.lastOrNull()?.type == DirectionType.WALK && !transport.walkOnly)
                         0.dp else (-5).dp
                 )
-        )
+        ) {
+            Icon(
+                imageVector = if (transport.directionList.lastOrNull()?.type == DirectionType.DEPART)
+                    ImageVector.vectorResource(R.drawable.bus_destination) else
+                    ImageVector.vectorResource(R.drawable.destination_stop),
+                tint = Color.Unspecified,
+                contentDescription = "",
+
+                )
+            Text(
+                text = transport.end,
+                fontFamily = robotoFamily,
+                color = PrimaryText,
+                fontSize = 14.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .width(200.dp)
+                    .padding(start = 13.dp)
+            )
+        }
+
     }
 
 }
@@ -140,7 +156,7 @@ private fun RouteCellHeader(transport: Transport) {
     ) {
         Text(
             "${transport.startTime} - ${transport.arriveTime}",
-            fontFamily = sfProDisplayFamily,
+            fontFamily = robotoFamily,
             color = PrimaryText,
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
@@ -154,7 +170,7 @@ private fun RouteCellHeader(transport: Transport) {
         ) {
             Text(
                 headerText,
-                fontFamily = sfProDisplayFamily,
+                fontFamily = robotoFamily,
                 color = transport.lateness.color(),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -212,7 +228,7 @@ fun SingleRoute(
                     )
                     Text(
                         "$busLine",
-                        fontFamily = sfProDisplayFamily,
+                        fontFamily = robotoFamily,
                         fontSize = 10.sp,
                         fontStyle = FontStyle.Normal,
                         color = Color.White,
@@ -236,7 +252,7 @@ fun SingleRoute(
                     Text(
                         "${String.format(Locale.US, "%.1f", distance.toFloat())} mi away",
                         color = MetadataGray,
-                        fontFamily = sfProTextFamily,
+                        fontFamily = robotoFamily,
                         fontSize = 10.sp,
                     )
 
@@ -268,26 +284,28 @@ fun SingleRoute(
         Text(
             stopName,
             color = PrimaryText,
-            fontFamily = sfProDisplayFamily,
+            fontFamily = robotoFamily,
             fontStyle = FontStyle.Normal,
             fontSize = 14.sp,
-            modifier = Modifier.constrainAs(startLoc) {
-                top.linkTo(parent.top, margin = 2.dp)
-                start.linkTo(startIcon.end, margin = 16.dp)
-                end.linkTo(parent.end, margin = 16.dp)
-                bottom.linkTo(if (distance == null || walkOnly) parent.bottom else dist.top)
-            })
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .width(200.dp)
+                .constrainAs(startLoc) {
+                    top.linkTo(parent.top)
+                    start.linkTo(startIcon.end, margin = 16.dp)
+                    end.linkTo(parent.end, margin = 16.dp)
+                })
 
         if (distance != null && !walkOnly) {
             Text(
                 "${String.format(Locale.US, "%.1f", distance.toFloat())} mi away",
                 color = MetadataGray,
-                fontFamily = sfProTextFamily,
+                fontFamily = robotoFamily,
                 fontSize = 10.sp,
                 modifier = Modifier.constrainAs(dist) {
                     start.linkTo(startLoc.start)
-                    top.linkTo(startLoc.bottom, margin = (-6).dp)
-                    bottom.linkTo(parent.bottom)
+                    top.linkTo(startLoc.bottom, margin = (2).dp)
                 })
         }
 
@@ -400,6 +418,7 @@ private fun PreviewRouteCellBusAndWalk() {
             arriveTime = "12:49AM",
             distance = "0.2",
             start = "Gates Hall",
+            end = "Upson Hall",
             timeToBoard = 7,
             lateness = BusLateness.NORMAL,
             directionList = listOf(
@@ -448,6 +467,7 @@ private fun PreviewRouteCellMultBusesAndWalk() {
             arriveTime = "12:49AM",
             distance = "0.2",
             start = "Gates Hall",
+            end = "Upson Hall",
             timeToBoard = 7,
             lateness = BusLateness.NORMAL,
             directionList = listOf(
@@ -509,9 +529,10 @@ private fun PreviewRouteCellWalkOnly() {
         Transport(
             startTime = "12:42AM",
             arriveTime = "12:49AM",
-            distance = "0.2",
+            distance = "0.1",
             lateness = BusLateness.NONE,
             start = "Gates Hall",
+            end = "Upson Hall",
             walkOnly = true,
             timeToBoard = 0,
             directionList = listOf(

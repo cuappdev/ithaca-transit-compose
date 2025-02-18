@@ -23,8 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.theme.TransitBlue
-import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
-
+import com.cornellappdev.transit.ui.theme.robotoFamily
 
 /**
  * Multi-size icon badge for bus routes on details screen
@@ -61,7 +60,7 @@ fun BusIcon(busNumber: Int, modifier: Modifier = Modifier, isSmall: Boolean = fa
             )
             Text(
                 text = busNumber.toString(),
-                fontFamily = sfProDisplayFamily,
+                fontFamily = robotoFamily,
                 fontSize = (if (isSmall) 10.sp else 18.sp),
                 fontWeight = FontWeight.Bold,
                 color = Color.White,

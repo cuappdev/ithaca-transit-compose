@@ -60,7 +60,6 @@ import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.theme.Style.heading4
 import com.cornellappdev.transit.ui.theme.TransitBlue
-import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
 import com.cornellappdev.transit.util.TimeUtils
 import java.text.SimpleDateFormat
 import java.util.Locale

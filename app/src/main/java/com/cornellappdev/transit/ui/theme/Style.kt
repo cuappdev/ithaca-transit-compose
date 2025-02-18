@@ -2,8 +2,6 @@ package com.cornellappdev.transit.ui.theme
 
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 
 /**
@@ -15,7 +13,7 @@ object Style {
      */
     val heading3 = TextStyle(
         fontSize = 14.sp,
-        fontFamily = sfProDisplayFamily,
+        fontFamily = robotoFamily,
         lineHeight = 16.sp,
         platformStyle = PlatformTextStyle(
             includeFontPadding = false
@@ -27,7 +25,7 @@ object Style {
      */
     val heading4 = TextStyle(
         fontSize = 12.sp,
-        fontFamily = sfProDisplayFamily,
+        fontFamily = robotoFamily,
         lineHeight = 14.sp,
         platformStyle = PlatformTextStyle(
             includeFontPadding = false
@@ -39,7 +37,7 @@ object Style {
      */
     val paragraph = TextStyle(
         fontSize = 10.sp,
-        fontFamily = sfProDisplayFamily,
+        fontFamily = robotoFamily,
         lineHeight = 12.sp,
         platformStyle = PlatformTextStyle(
             includeFontPadding = false

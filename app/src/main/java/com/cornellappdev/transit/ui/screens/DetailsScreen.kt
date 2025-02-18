@@ -45,9 +45,6 @@ import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.DirectionType
 import com.cornellappdev.transit.models.MapState
 import com.cornellappdev.transit.models.Route
-import com.cornellappdev.transit.models.toTransport
-import com.cornellappdev.transit.ui.components.SingleRoute
-import com.cornellappdev.transit.ui.components.TransitPolyline
 import com.cornellappdev.transit.ui.components.details.BusIcon
 import com.cornellappdev.transit.ui.components.details.DetailsSheet
 import com.cornellappdev.transit.ui.theme.DividerGray
@@ -56,7 +53,7 @@ import com.cornellappdev.transit.ui.theme.LiveGreen
 import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
-import com.cornellappdev.transit.ui.theme.sfProDisplayFamily
+import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.cornellappdev.transit.util.TimeUtils
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -68,6 +65,7 @@ import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import io.morfly.compose.bottomsheet.material3.BottomSheetScaffold
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetScaffoldState
@@ -145,9 +143,15 @@ private fun DrawableMap(
     ) {
         if (mapState.isShowing) {
             mapState.route?.directions?.forEach { direction ->
-                TransitPolyline(
-                    points = direction.path
+                Polyline(
+                    points = direction.path,
+                    color = if (direction.type == DirectionType.WALK) {
+                        Color.Gray
+                    } else {
+                        TransitBlue
+                    },
                 )
+
             }
         }
     }
@@ -263,7 +267,7 @@ private fun DetailsMainScreen(
             title = {
                 Text(
                     text = "Route Details",
-                    fontFamily = sfProDisplayFamily,
+                    fontFamily = robotoFamily,
                     fontStyle = FontStyle.Normal
                 )
             },
