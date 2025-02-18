@@ -38,7 +38,6 @@ import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.DirectionType
 import com.cornellappdev.transit.models.MapState
 import com.cornellappdev.transit.models.Route
-import com.cornellappdev.transit.ui.components.TransitPolyline
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
@@ -53,6 +52,7 @@ import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import io.morfly.compose.bottomsheet.material3.BottomSheetScaffold
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetScaffoldState
@@ -126,14 +126,15 @@ private fun DrawableMap(
     ) {
         if (mapState.isShowing) {
             mapState.route?.directions?.forEach { direction ->
-                TransitPolyline(
+                Polyline(
                     points = direction.path,
                     color = if (direction.type == DirectionType.WALK) {
                         Color.Gray
                     } else {
                         TransitBlue
-                    }
+                    },
                 )
+
             }
         }
     }
