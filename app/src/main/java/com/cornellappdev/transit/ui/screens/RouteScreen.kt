@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
@@ -582,7 +583,16 @@ private fun RouteList(
         }
 
         is ApiResponse.Pending -> {
-            Text("Pending")
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(32.dp),
+                    color = TransitBlue,
+                )
+            }
         }
 
         is ApiResponse.Success -> {
@@ -728,7 +738,6 @@ private fun RouteOptionsSearchSheet(
                         modifier = Modifier.clickable { routeViewModel.onQueryChange("") })
                 }
             )
-
             LazyColumn {
                 when (searchBarValue) {
                     is SearchBarUIState.RecentAndFavorites -> {
@@ -810,7 +819,13 @@ private fun RouteOptionsSearchSheet(
 
                             is ApiResponse.Pending -> {
                                 item {
-                                    Text("Pending")
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .align(Alignment.CenterHorizontally),
+                                        color = TransitBlue,
+                                    )
+
                                 }
                             }
 

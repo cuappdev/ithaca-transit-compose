@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
@@ -51,6 +53,7 @@ import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGray
+import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
 import com.cornellappdev.transit.util.StringUtils.toURLString
@@ -217,9 +220,20 @@ fun HomeScreen(
                         LazyColumn {
                             when (searchBarValue.searched) {
                                 is ApiResponse.Error -> {
+                                    item {
+                                        Text("error")
+                                    }
                                 }
 
                                 is ApiResponse.Pending -> {
+                                    item {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier
+                                                .size(32.dp)
+                                                .align(Alignment.CenterHorizontally),
+                                            color = TransitBlue,
+                                        )
+                                    }
                                 }
 
                                 is ApiResponse.Success -> {
