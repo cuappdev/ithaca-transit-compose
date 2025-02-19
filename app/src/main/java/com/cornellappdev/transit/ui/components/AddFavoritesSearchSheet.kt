@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
@@ -39,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.TextButtonGray
+import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
@@ -138,7 +141,13 @@ fun AddFavoritesSearchSheet(
                         }
 
                         is ApiResponse.Pending -> {
-
+                            
+                            item {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(32.dp),
+                                    color = TransitBlue,
+                                )
+                            }
                         }
 
                         is ApiResponse.Success -> {
