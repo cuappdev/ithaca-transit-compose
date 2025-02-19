@@ -18,6 +18,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.rounded.Place
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BottomSheetScaffold
@@ -44,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
@@ -54,6 +56,7 @@ import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.TransitBlue
+import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
 import com.cornellappdev.transit.util.StringUtils.toURLString
@@ -221,7 +224,22 @@ fun HomeScreen(
                             when (searchBarValue.searched) {
                                 is ApiResponse.Error -> {
                                     item {
-                                        Text("error")
+                                        Icon(
+                                            imageVector = Icons.Rounded.Place,
+                                            contentDescription = "",
+                                            tint = Color.Gray,
+                                            modifier = Modifier
+                                                .size(32.dp)
+                                                .align(Alignment.CenterHorizontally)
+                                        )
+                                    }
+                                    item {
+                                        Text(
+                                            text = "Location Not Found",
+                                            fontFamily = robotoFamily,
+                                            fontStyle = FontStyle.Normal,
+                                            color = Color.Gray
+                                        )
                                     }
                                 }
 

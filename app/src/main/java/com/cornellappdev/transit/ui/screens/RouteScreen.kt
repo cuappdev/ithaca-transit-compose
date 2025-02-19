@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.rounded.Place
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -77,7 +78,6 @@ import com.cornellappdev.transit.ui.viewmodels.LocationUIState
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
 import com.cornellappdev.transit.util.TimeUtils
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -88,10 +88,6 @@ import java.util.Date
  * Composable for the route screen, which specifies a location, destination, and routes between them
  */
 @RequiresApi(Build.VERSION_CODES.O)
-@OptIn(
-    ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
-    ExperimentalMaterialApi::class
-)
 @Composable
 fun RouteScreen(
     navController: NavController,
@@ -579,7 +575,17 @@ private fun RouteList(
 ) {
     when (lastRouteResponse) {
         is ApiResponse.Error -> {
-            Text("Error")
+            Text(
+                text = "No Routes Found",
+                fontFamily = robotoFamily,
+                fontWeight = FontWeight.Normal,
+                color = MetadataGray,
+                fontSize = 24.sp,
+                modifier = Modifier
+                    .padding(12.dp)
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
         }
 
         is ApiResponse.Pending -> {
@@ -813,7 +819,22 @@ private fun RouteOptionsSearchSheet(
                         when (searchBarValue.searched) {
                             is ApiResponse.Error -> {
                                 item {
-                                    Text("Error")
+                                    Icon(
+                                        imageVector = Icons.Rounded.Place,
+                                        contentDescription = "",
+                                        tint = Color.Gray,
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .align(Alignment.CenterHorizontally)
+                                    )
+                                }
+                                item {
+                                    Text(
+                                        text = "Location Not Found",
+                                        fontFamily = robotoFamily,
+                                        fontStyle = FontStyle.Normal,
+                                        color = Color.Gray
+                                    )
                                 }
                             }
 
