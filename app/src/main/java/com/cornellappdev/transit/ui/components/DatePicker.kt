@@ -5,7 +5,6 @@ import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.os.Build
 import android.widget.DatePicker
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -60,7 +59,6 @@ import java.util.Locale
  * @param disabled Whether the field is disabled
  * @param onDateChanged Callback called when the user changes the date selected.
  */
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DatePicker(

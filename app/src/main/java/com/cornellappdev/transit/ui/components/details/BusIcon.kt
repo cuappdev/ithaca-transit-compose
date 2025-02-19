@@ -19,6 +19,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.R
@@ -38,8 +39,8 @@ fun BusIcon(busNumber: Int, modifier: Modifier = Modifier, isSmall: Boolean = fa
                 color = TransitBlue,
                 shape = RoundedCornerShape(4.dp)
             )
-            .width(if (isSmall) 40.dp else 72.dp)
-            .height(if (isSmall) 24.dp else 36.dp)
+            .width(if (isSmall) 40.dp else 66.dp)
+            .height(if (isSmall) 20.dp else 36.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -62,12 +63,23 @@ fun BusIcon(busNumber: Int, modifier: Modifier = Modifier, isSmall: Boolean = fa
                 text = busNumber.toString(),
                 fontFamily = robotoFamily,
                 fontSize = (if (isSmall) 10.sp else 18.sp),
-                fontWeight = FontWeight.Bold,
+                fontWeight = if (isSmall) FontWeight.Normal else FontWeight.Bold,
                 color = Color.White,
-                modifier = Modifier.padding(vertical = if (isSmall) 3.dp else 0.dp),
                 style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
             )
 
         }
     }
+}
+
+@Preview
+@Composable
+fun PreviewBusIconLarge() {
+    BusIcon(30, isSmall = false)
+}
+
+@Preview
+@Composable
+fun PreviewBusIconSmall() {
+    BusIcon(30, isSmall = true)
 }

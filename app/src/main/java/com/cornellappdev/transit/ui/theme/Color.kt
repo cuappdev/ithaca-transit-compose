@@ -19,3 +19,6 @@ val DividerGray = Color(0xffeeeeee)
 val IconGray = Color(0xffbdbdbd)
 val LiveGreen = Color(0xff1BAF5D)
 val LateRed = Color(0xffD82D4D)
+
+val DetailsHeaderGray = Color(0xfff5f5f5)
+val DetailsDividerGray = Color(0xffc6c6c8)

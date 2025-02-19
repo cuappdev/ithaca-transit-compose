@@ -1,7 +1,6 @@
 package com.cornellappdev.transit.ui
 
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -20,7 +19,6 @@ import com.google.android.gms.maps.model.LatLng
 /**
  * The navigation controller for the app (parent of all screens)
  */
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationController(
     homeViewModel: HomeViewModel = hiltViewModel(),

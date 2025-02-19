@@ -2,9 +2,10 @@ package com.cornellappdev.transit.ui.screens
 
 import android.Manifest
 import android.os.Build
-import androidx.annotation.RequiresApi
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,6 +27,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,18 +49,18 @@ import androidx.navigation.NavHostController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.DirectionType
 import com.cornellappdev.transit.models.MapState
-import com.cornellappdev.transit.models.Route
 import com.cornellappdev.transit.ui.components.details.BusIcon
-import com.cornellappdev.transit.ui.components.details.DetailsSheet
+import com.cornellappdev.transit.ui.components.details.DirectionItem
+import com.cornellappdev.transit.ui.components.details.StopItem
+import com.cornellappdev.transit.ui.theme.DetailsHeaderGray
 import com.cornellappdev.transit.ui.theme.DividerGray
-import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.LiveGreen
 import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
+import com.cornellappdev.transit.ui.viewmodels.DirectionDetails
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
-import com.cornellappdev.transit.util.TimeUtils
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
@@ -77,7 +82,6 @@ private enum class SheetValue { Collapsed, PartiallyExpanded, Expanded }
 /**
  * Screen for showing a particular route
  */
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class,
     ExperimentalFoundationApi::class
@@ -90,6 +94,8 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
 
     //Map state
     val mapState = routeViewModel.mapState.collectAsState().value
+
+    val mapDetails = routeViewModel.detailsState.collectAsState().value
 
     //Map camera
     val cameraPositionState = rememberCameraPositionState {
@@ -117,7 +123,7 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
         sheetDragHandle = {},
         sheetContent = {
             // Bottom sheet content
-            DetailsBottomSheet(mapState.route)
+            DetailsBottomSheet(mapDetails, mapState.route?.totalDuration ?: 0)
         },
         content = {
             // Screen content
@@ -157,17 +163,14 @@ private fun DrawableMap(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+/**
+ * Wrapper of Route Details bottom sheet, including header
+ */
 @Composable
-private fun DetailsBottomSheet(route: Route?) {
+private fun DetailsBottomSheet(directionDetails: List<DirectionDetails>, totalDuration: Int) {
 
-    if (route == null) {
-        Text("No route selected")
-        return
-    }
-
-    val busDirection = route.directions.firstOrNull { dir ->
-        dir.routeId != null
+    val busDirection = directionDetails.firstOrNull { dir ->
+        dir.busNumber != ""
     }
 
     Column(modifier = Modifier.height(700.dp)) {
@@ -176,8 +179,9 @@ private fun DetailsBottomSheet(route: Route?) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = DividerGray)
-                .height(100.dp),
+                .background(color = DetailsHeaderGray)
+                .height(100.dp)
+                .padding(horizontal = 24.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -187,7 +191,7 @@ private fun DetailsBottomSheet(route: Route?) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (busDirection != null) {
-                    BusIcon(Integer.parseInt(busDirection.routeId!!))
+                    BusIcon(Integer.parseInt(busDirection.busNumber))
                 } else {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.walk),
@@ -212,11 +216,11 @@ private fun DetailsBottomSheet(route: Route?) {
                                     color = LiveGreen
                                 )
                             ) {
-                                append(TimeUtils.getHHMM(busDirection.startTime))
+                                append(busDirection.startTime)
                             }
                             append(" from ")
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                append(busDirection.name)
+                                append(busDirection.destination)
                             }
                         },
                         modifier = Modifier.padding(horizontal = 12.dp),
@@ -229,7 +233,7 @@ private fun DetailsBottomSheet(route: Route?) {
                         buildAnnotatedString {
                             append("Walk to ")
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                append(route.endName)
+                                append(directionDetails.last().destination)
                             }
                         },
                         modifier = Modifier.padding(horizontal = 12.dp),
@@ -239,16 +243,17 @@ private fun DetailsBottomSheet(route: Route?) {
                     )
                 }
                 Text(
-                    text = "Trip Duration: ${route.totalDuration} minute" + if (route.totalDuration != 1) "s" else "",
+                    text = "Trip Duration: ${totalDuration} minute" + if (totalDuration != 1) "s" else "",
                     style = Style.paragraph,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    color = MetadataGray
                 )
             }
 
         }
 
         // Route details
-        DetailsSheet(route)
+        DetailsSheet(directionDetails)
 
     }
 }
@@ -287,4 +292,72 @@ private fun DetailsMainScreen(
         DrawableMap(mapState, cameraPositionState, permissionState)
 
     }
+}
+
+/**
+ * Main component of Route Details bottom sheet
+ */
+@Composable
+fun DetailsSheet(directionDetails: List<DirectionDetails>) {
+
+    val expandedStops = remember { mutableStateListOf(*Array(directionDetails.size) { false }) }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
+            .padding(top = 8.dp, start = 8.dp, end = 8.dp)
+    ) {
+        itemsIndexed(directionDetails) { index, details ->
+
+            DirectionItem(
+                time = if (index == directionDetails.lastIndex && details.directionType == DirectionType.WALK)
+                    details.endTime else
+                    details.startTime,
+                movementDescription = details.movementDescription,
+                destination = details.destination,
+                directionType = details.directionType,
+                drawSegmentAbove = index != 0,
+                drawSegmentBelow = index != directionDetails.lastIndex || details.directionType == DirectionType.DEPART,
+                isFinalDestination = index == directionDetails.lastIndex && details.directionType == DirectionType.WALK,
+                busNumber = details.busNumber,
+                numStops = details.numStops,
+                modifier = Modifier.clickable {
+                    expandedStops[index] = !expandedStops[index]
+                },
+                duration = details.duration,
+                expandedStops = expandedStops[index],
+                colorAbove = if (index > 0 && directionDetails[index - 1].directionType == DirectionType.DEPART && details.directionType == DirectionType.DEPART && details.busTransfer) TransitBlue else MetadataGray,
+                colorBelow = if (details.directionType == DirectionType.DEPART) TransitBlue else MetadataGray
+            )
+
+            if (expandedStops[index]) {
+                // Drop first stop because it is already displayed before, and drop last stop because
+                // it will be displayed as "Get off at"
+                for (stop in details.stops.drop(1).dropLast(1)) {
+                    StopItem(stop.name, stop.latitude.toDouble(), stop.long.toDouble())
+                }
+            }
+
+            if (!(index < directionDetails.lastIndex && directionDetails[index + 1].busTransfer) && details.directionType == DirectionType.DEPART
+            ) {
+                DirectionItem(
+                    time = details.endTime,
+                    movementDescription = "Get off",
+                    destination = details.stops.last().name,
+                    directionType = details.directionType,
+                    drawSegmentAbove = true,
+                    drawSegmentBelow = index != directionDetails.lastIndex,
+                    isFinalDestination = index == directionDetails.lastIndex,
+                    busNumber = details.busNumber,
+                    isLastStop = true,
+                    colorAbove = TransitBlue
+
+                )
+            }
+
+        }
+    }
+
+
 }

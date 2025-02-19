@@ -1,7 +1,6 @@
 package com.cornellappdev.transit.ui.screens
 
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -86,7 +85,6 @@ import java.util.Date
 /**
  * Composable for the route screen, which specifies a location, destination, and routes between them
  */
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(
     ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
     ExperimentalMaterialApi::class
@@ -186,7 +184,6 @@ fun RouteScreen(
 /**
  * Bottom sheet to select Leave Now/Leave At/Arrive By
  */
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun ArriveByBottomSheet(
     routeViewModel: RouteViewModel,
@@ -302,7 +299,6 @@ private fun ArriveByBottomSheet(
 /**
  * Main menu of Route Options
  */
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 private fun RouteOptionsMainMenu(
@@ -570,7 +566,6 @@ private fun PaddedRouteCell(transport: Transport, onClick: () -> Unit) {
 /**
  * List of routes from a route query
  */
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun RouteList(
     lastRouteResponse: ApiResponse<RouteOptions>,
@@ -652,7 +647,6 @@ private fun RouteList(
 /**
  * Route options select sheet
  */
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RouteOptionsSearchSheet(
