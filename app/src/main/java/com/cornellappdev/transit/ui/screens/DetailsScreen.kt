@@ -327,7 +327,8 @@ fun DetailsSheet(directionDetails: List<DirectionDetails>) {
                 },
                 duration = details.duration,
                 expandedStops = expandedStops[index],
-                colorAbove = if (index > 0 && directionDetails[index - 1].directionType == DirectionType.DEPART && details.directionType == DirectionType.DEPART && details.busTransfer) TransitBlue else MetadataGray,
+                // If the previous direction was a bus that transfers onto this bus
+                colorAbove = if (details.directionType == DirectionType.DEPART && details.busTransfer) TransitBlue else MetadataGray,
                 colorBelow = if (details.directionType == DirectionType.DEPART) TransitBlue else MetadataGray
             )
 

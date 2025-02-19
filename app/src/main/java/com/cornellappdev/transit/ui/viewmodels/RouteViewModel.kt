@@ -222,7 +222,12 @@ class RouteViewModel @Inject constructor(
                                     direction.startTime
                                 ),
                                 endTime = TimeUtils.getHHMM(direction.endTime),
-                                movementDescription = if (direction.type == DirectionType.DEPART) (if (direction.stayOnBusForTransfer == true) "Bus becomes" else "Board") else "Walk to",
+                                movementDescription = if (direction.type == DirectionType.DEPART) {
+                                    (if (direction.stayOnBusForTransfer == true)
+                                        "Bus becomes" else "Board")
+                                } else {
+                                    "Walk to"
+                                },
                                 destination = direction.name,
                                 directionType = direction.type,
                                 busNumber = direction.routeId ?: "",
