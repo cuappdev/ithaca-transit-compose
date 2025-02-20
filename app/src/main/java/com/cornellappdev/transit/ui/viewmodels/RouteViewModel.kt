@@ -22,6 +22,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.Date
@@ -100,83 +102,78 @@ class RouteViewModel @Inject constructor(
     val searchBarUiState: StateFlow<SearchBarUIState> = _searchBarUiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            launch {
-                userPreferenceRepository.favoritesFlow.collect {
-                    if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
-                        _searchBarUiState.value =
-                            (_searchBarUiState.value as SearchBarUIState.RecentAndFavorites).copy(
-                                favorites = it
-                            )
-                    }
-                }
+        userPreferenceRepository.favoritesFlow.onEach {
+            if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
+                _searchBarUiState.value =
+                    (_searchBarUiState.value as SearchBarUIState.RecentAndFavorites).copy(
+                        favorites = it
+                    )
             }
-            launch {
-                userPreferenceRepository.recentsFlow.collect {
-                    if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
-                        _searchBarUiState.value =
-                            (_searchBarUiState.value as SearchBarUIState.RecentAndFavorites).copy(
-                                recents = it
-                            )
-                    }
-                }
-            }
-            launch {
-                routeRepository.placeFlow.collect {
-                    if (_searchBarUiState.value is SearchBarUIState.Query) {
-                        _searchBarUiState.value =
-                            (_searchBarUiState.value as SearchBarUIState.Query).copy(
-                                searched = it
-                            )
-                    }
-                }
-            }
-            launch {
-                currentLocation.collect {
-                    if (startPl.value is LocationUIState.CurrentLocation) {
-                        if (it != null) {
-                            routeRepository.setStartLocation(
-                                LocationUIState.CurrentLocation(
-                                    LatLng(it.latitude, it.longitude)
-                                )
-                            )
-                        }
-                    }
-                    if (destPl.value is LocationUIState.CurrentLocation) {
-                        if (it != null) {
-                            routeRepository.setEndLocation(
-                                LocationUIState.CurrentLocation(
-                                    LatLng(it.latitude, it.longitude)
-                                )
-                            )
-                        }
-                    }
-                }
-            }
+        }.launchIn(viewModelScope)
 
-            launch {
-                // Every time startPl, destPl, or arriveBy changes, make a route request
-                combine(startPl, destPl, arriveByFlow) { start, dest, arriveBy ->
-                    Triple(start, dest, arriveBy)
-                }.collect {
-                    val startState = it.first
-                    val endState = it.second
-                    val arriveByState = it.third
-                    getCoordinatesFromLocationState(it.second)?.let { end ->
-                        getCoordinatesFromLocationState(it.first)?.let { start ->
-                            getRoute(
-                                end = end,
-                                start = start,
-                                arriveBy = arriveByState is ArriveByUIState.ArriveBy,
-                                destinationName = if (endState is LocationUIState.Place) endState.name else "Current Location",
-                                originName = if (startState is LocationUIState.Place) startState.name else "Current Location",
-                                time = (arriveByState.date.time / 1000).toDouble()
-                            )
-                        }
+        userPreferenceRepository.recentsFlow.onEach {
+            if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
+                _searchBarUiState.value =
+                    (_searchBarUiState.value as SearchBarUIState.RecentAndFavorites).copy(
+                        recents = it
+                    )
+            }
+        }.launchIn(viewModelScope)
+        
+        routeRepository.placeFlow.onEach {
+            if (_searchBarUiState.value is SearchBarUIState.Query) {
+                _searchBarUiState.value =
+                    (_searchBarUiState.value as SearchBarUIState.Query).copy(
+                        searched = it
+                    )
+            }
+        }.launchIn(viewModelScope)
+
+        currentLocation.onEach {
+            if (startPl.value is LocationUIState.CurrentLocation) {
+                if (it != null) {
+                    routeRepository.setStartLocation(
+                        LocationUIState.CurrentLocation(
+                            LatLng(it.latitude, it.longitude)
+                        )
+                    )
+                }
+            }
+            if (destPl.value is LocationUIState.CurrentLocation) {
+                if (it != null) {
+                    routeRepository.setEndLocation(
+                        LocationUIState.CurrentLocation(
+                            LatLng(it.latitude, it.longitude)
+                        )
+                    )
+                }
+            }
+        }.launchIn(viewModelScope)
+
+        combine(startPl, destPl, arriveByFlow) { start, dest, arriveBy ->
+            Triple(start, dest, arriveBy)
+        }.onEach {
+            // Every time startPl, destPl, or arriveBy changes, make a route request
+            combine(startPl, destPl, arriveByFlow) { start, dest, arriveBy ->
+                Triple(start, dest, arriveBy)
+            }.collect {
+                val startState = it.first
+                val endState = it.second
+                val arriveByState = it.third
+                getCoordinatesFromLocationState(it.second)?.let { end ->
+                    getCoordinatesFromLocationState(it.first)?.let { start ->
+                        getRoute(
+                            end = end,
+                            start = start,
+                            arriveBy = arriveByState is ArriveByUIState.ArriveBy,
+                            destinationName = if (endState is LocationUIState.Place) endState.name else "Current Location",
+                            originName = if (startState is LocationUIState.Place) startState.name else "Current Location",
+                            time = (arriveByState.date.time / 1000).toDouble()
+                        )
                     }
                 }
             }
-        }
+        }.launchIn(viewModelScope)
     }
 
 
