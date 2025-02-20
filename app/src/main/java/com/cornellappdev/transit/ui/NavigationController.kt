@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -11,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import com.cornellappdev.transit.ui.screens.DetailsScreen
 import com.cornellappdev.transit.ui.screens.HomeScreen
 import com.cornellappdev.transit.ui.screens.RouteScreen
+import com.cornellappdev.transit.ui.screens.SettingsScreen
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.LocationUIState
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
@@ -69,5 +71,10 @@ fun NavigationController(
             RouteScreen(navController = navController, routeViewModel = routeViewModel)
         }
 
+        composable("settings") {
+            SettingsScreen(
+                LocalContext.current
+            )
+        }
     }
 }
