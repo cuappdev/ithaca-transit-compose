@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.RouteRepository
+import com.cornellappdev.transit.models.SelectedRouteRepository
 import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.networking.ApiResponse
 import com.google.android.gms.maps.model.LatLng
@@ -24,7 +25,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val routeRepository: RouteRepository,
     private val locationRepository: LocationRepository,
-    private val userPreferenceRepository: UserPreferenceRepository
+    private val userPreferenceRepository: UserPreferenceRepository,
+    private val selectedRouteRepository: SelectedRouteRepository
 ) : ViewModel() {
 
     /**
@@ -179,7 +181,7 @@ class HomeViewModel @Inject constructor(
      * Change end location
      */
     fun changeEndLocation(location: LocationUIState) {
-        routeRepository.setEndLocation(location)
+        selectedRouteRepository.setEndLocation(location)
     }
 
     /**

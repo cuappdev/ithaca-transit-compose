@@ -13,6 +13,7 @@ import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.MapState
 import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.RouteRepository
+import com.cornellappdev.transit.models.SelectedRouteRepository
 import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.util.TimeUtils
@@ -35,7 +36,8 @@ import javax.inject.Inject
 class RouteViewModel @Inject constructor(
     private val routeRepository: RouteRepository,
     private val locationRepository: LocationRepository,
-    private val userPreferenceRepository: UserPreferenceRepository
+    private val userPreferenceRepository: UserPreferenceRepository,
+    private val selectedRouteRepository: SelectedRouteRepository
 ) : ViewModel() {
 
     /**
@@ -46,13 +48,13 @@ class RouteViewModel @Inject constructor(
     /**
      * Pair of the name of the starting location and the coordinates
      */
-    val startPlace = routeRepository.startPlace
+    val startPlace = selectedRouteRepository.startPlace
 
 
     /**
      * Pair of the name of the ending location and the coordinates
      */
-    val destPlace = routeRepository.destPlace
+    val destPlace = selectedRouteRepository.destPlace
 
     /**
      * State of the arriveBy selector
@@ -132,7 +134,7 @@ class RouteViewModel @Inject constructor(
         currentLocation.onEach {
             if (startPlace.value is LocationUIState.CurrentLocation) {
                 if (it != null) {
-                    routeRepository.setStartLocation(
+                    selectedRouteRepository.setStartLocation(
                         LocationUIState.CurrentLocation(
                             LatLng(it.latitude, it.longitude)
                         )
@@ -141,7 +143,7 @@ class RouteViewModel @Inject constructor(
             }
             if (destPlace.value is LocationUIState.CurrentLocation) {
                 if (it != null) {
-                    routeRepository.setEndLocation(
+                    selectedRouteRepository.setEndLocation(
                         LocationUIState.CurrentLocation(
                             LatLng(it.latitude, it.longitude)
                         )
@@ -205,14 +207,14 @@ class RouteViewModel @Inject constructor(
      * Change start location
      */
     fun setStartLocation(location: LocationUIState) {
-        routeRepository.setStartLocation(location)
+        selectedRouteRepository.setStartLocation(location)
     }
 
     /**
      * Change end location
      */
     fun setEndLocation(location: LocationUIState) {
-        routeRepository.setEndLocation(location)
+        selectedRouteRepository.setEndLocation(location)
     }
 
     /**
@@ -274,8 +276,8 @@ class RouteViewModel @Inject constructor(
      */
     fun swapLocations() {
         val temp = startPlace.value
-        routeRepository.setStartLocation(destPlace.value)
-        routeRepository.setEndLocation(temp)
+        selectedRouteRepository.setStartLocation(destPlace.value)
+        selectedRouteRepository.setEndLocation(temp)
     }
 
 }
