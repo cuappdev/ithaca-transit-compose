@@ -193,7 +193,7 @@ fun HomeScreen(
                     Icon(
                         Icons.Outlined.Info,
                         "Info",
-                        Modifier.clickable { navController.navigate("info") })
+                        Modifier.clickable { navController.navigate("settings") })
                 },
                 placeholder = { Text(text = stringResource(R.string.search_placeholder)) }
 

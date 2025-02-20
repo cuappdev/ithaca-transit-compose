@@ -1,7 +1,5 @@
 package com.cornellappdev.transit.ui
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
@@ -73,14 +71,10 @@ fun NavigationController(
             RouteScreen(navController = navController, routeViewModel = routeViewModel)
         }
 
-        composable("info") { SettingsScreen(navController = navController) }
-
-        composable("privacyPolicy") {
-            val context = LocalContext.current
-            val intent =
-                Intent(Intent.ACTION_VIEW, Uri.parse("https://www.cornellappdev.com/privacy"))
-            context.startActivity(intent)
+        composable("settings") {
+            SettingsScreen(
+                LocalContext.current
+            )
         }
-
     }
 }

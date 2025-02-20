@@ -37,6 +37,6 @@ fun SettingsOption(name: String, onClick: () -> Unit) {
 
 @Preview
 @Composable
-fun SettingsOptionPreview() {
+private fun SettingsOptionPreview() {
     SettingsOption(name = "Privacy Policy", onClick = {})
 }
