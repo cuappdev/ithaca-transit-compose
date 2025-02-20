@@ -97,8 +97,8 @@ fun RouteScreen(
     routeViewModel: RouteViewModel
 ) {
 
-    val startLocation = routeViewModel.startPl.collectAsState().value
-    val endLocation = routeViewModel.destPl.collectAsState().value
+    val startLocation = routeViewModel.startPlace.collectAsState().value
+    val endLocation = routeViewModel.destPlace.collectAsState().value
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
