@@ -46,13 +46,13 @@ class RouteViewModel @Inject constructor(
     /**
      * Pair of the name of the starting location and the coordinates
      */
-    val startPl = routeRepository.startPl
+    val startPlace = routeRepository.startPlace
 
 
     /**
      * Pair of the name of the ending location and the coordinates
      */
-    val destPl = routeRepository.destPl
+    val destPlace = routeRepository.destPlace
 
     /**
      * State of the arriveBy selector
@@ -119,7 +119,7 @@ class RouteViewModel @Inject constructor(
                     )
             }
         }.launchIn(viewModelScope)
-        
+
         routeRepository.placeFlow.onEach {
             if (_searchBarUiState.value is SearchBarUIState.Query) {
                 _searchBarUiState.value =
@@ -130,7 +130,7 @@ class RouteViewModel @Inject constructor(
         }.launchIn(viewModelScope)
 
         currentLocation.onEach {
-            if (startPl.value is LocationUIState.CurrentLocation) {
+            if (startPlace.value is LocationUIState.CurrentLocation) {
                 if (it != null) {
                     routeRepository.setStartLocation(
                         LocationUIState.CurrentLocation(
@@ -139,7 +139,7 @@ class RouteViewModel @Inject constructor(
                     )
                 }
             }
-            if (destPl.value is LocationUIState.CurrentLocation) {
+            if (destPlace.value is LocationUIState.CurrentLocation) {
                 if (it != null) {
                     routeRepository.setEndLocation(
                         LocationUIState.CurrentLocation(
@@ -150,11 +150,11 @@ class RouteViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
 
-        combine(startPl, destPl, arriveByFlow) { start, dest, arriveBy ->
+        combine(startPlace, destPlace, arriveByFlow) { start, dest, arriveBy ->
             Triple(start, dest, arriveBy)
         }.onEach {
-            // Every time startPl, destPl, or arriveBy changes, make a route request
-            combine(startPl, destPl, arriveByFlow) { start, dest, arriveBy ->
+            // Every time startPlace, destPlace, or arriveBy changes, make a route request
+            combine(startPlace, destPlace, arriveByFlow) { start, dest, arriveBy ->
                 Triple(start, dest, arriveBy)
             }.collect {
                 val startState = it.first
@@ -273,8 +273,8 @@ class RouteViewModel @Inject constructor(
      * Swap start and destination locations
      */
     fun swapLocations() {
-        val temp = startPl.value
-        routeRepository.setStartLocation(destPl.value)
+        val temp = startPlace.value
+        routeRepository.setStartLocation(destPlace.value)
         routeRepository.setEndLocation(temp)
     }
 

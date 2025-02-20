@@ -35,11 +35,11 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
     private val _lastRouteFlow: MutableStateFlow<ApiResponse<RouteOptions>> =
         MutableStateFlow(ApiResponse.Pending)
 
-    private val _startPl: MutableStateFlow<LocationUIState> = MutableStateFlow(
+    private val _startPlace: MutableStateFlow<LocationUIState> = MutableStateFlow(
         LocationUIState.Place("Current Location", LatLng(42.44, -76.50))
     )
 
-    private val _destPl: MutableStateFlow<LocationUIState> = MutableStateFlow(
+    private val _destPlace: MutableStateFlow<LocationUIState> = MutableStateFlow(
         LocationUIState.Place("Current Location", LatLng(42.45, -76.51))
     )
 
@@ -65,12 +65,12 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
     /**
      * Pair of the name of the starting location and the coordinates
      */
-    val startPl = _startPl.asStateFlow()
+    val startPlace = _startPlace.asStateFlow()
 
     /**
      * Pair of the name of the ending location and the coordinates
      */
-    val destPl = _destPl.asStateFlow()
+    val destPlace = _destPlace.asStateFlow()
 
     /**
      * Makes a new call to backend for all stops.
@@ -146,14 +146,14 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
      * Change start location
      */
     fun setStartLocation(location: LocationUIState) {
-        _startPl.value = location
+        _startPlace.value = location
     }
 
     /**
      * Change end location
      */
     fun setEndLocation(location: LocationUIState) {
-        _destPl.value = location
+        _destPlace.value = location
     }
 
 }
