@@ -29,16 +29,18 @@ class SelectedRouteRepository @Inject constructor() {
     val destPlace = _destPlace.asStateFlow()
 
     /**
-     * Change start location
+     * Change the start location [_startPlace]
+     * @param location The new starting location as a LocationUIState
      */
-    fun setStartLocation(location: LocationUIState) {
+    fun setStartPlace(location: LocationUIState) {
         _startPlace.value = location
     }
 
     /**
-     * Change end location
+     * Change the destination location [_destPlace]
+     * @param location The new destination location as a LocationUIState
      */
-    fun setEndLocation(location: LocationUIState) {
+    fun setDestPlace(location: LocationUIState) {
         _destPlace.value = location
     }
 

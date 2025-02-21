@@ -134,7 +134,7 @@ class RouteViewModel @Inject constructor(
         currentLocation.onEach {
             if (startPlace.value is LocationUIState.CurrentLocation) {
                 if (it != null) {
-                    selectedRouteRepository.setStartLocation(
+                    selectedRouteRepository.setStartPlace(
                         LocationUIState.CurrentLocation(
                             LatLng(it.latitude, it.longitude)
                         )
@@ -143,7 +143,7 @@ class RouteViewModel @Inject constructor(
             }
             if (destPlace.value is LocationUIState.CurrentLocation) {
                 if (it != null) {
-                    selectedRouteRepository.setEndLocation(
+                    selectedRouteRepository.setDestPlace(
                         LocationUIState.CurrentLocation(
                             LatLng(it.latitude, it.longitude)
                         )
@@ -204,17 +204,19 @@ class RouteViewModel @Inject constructor(
     }
 
     /**
-     * Change start location
+     * Change the start location by calling [SelectedRouteRepository.setStartPlace]
+     * @param location The new starting location as a LocationUIState
      */
-    fun setStartLocation(location: LocationUIState) {
-        selectedRouteRepository.setStartLocation(location)
+    fun setStartPlace(location: LocationUIState) {
+        selectedRouteRepository.setStartPlace(location)
     }
 
     /**
-     * Change end location
+     * Change the start location by calling [SelectedRouteRepository.setDestPlace]
+     * @param location The new starting location as a LocationUIState
      */
-    fun setEndLocation(location: LocationUIState) {
-        selectedRouteRepository.setEndLocation(location)
+    fun setDestPlace(location: LocationUIState) {
+        selectedRouteRepository.setDestPlace(location)
     }
 
     /**
@@ -276,8 +278,8 @@ class RouteViewModel @Inject constructor(
      */
     fun swapLocations() {
         val temp = startPlace.value
-        selectedRouteRepository.setStartLocation(destPlace.value)
-        selectedRouteRepository.setEndLocation(temp)
+        selectedRouteRepository.setStartPlace(destPlace.value)
+        selectedRouteRepository.setDestPlace(temp)
     }
 
 }

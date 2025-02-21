@@ -181,7 +181,7 @@ class HomeViewModel @Inject constructor(
      * Change end location
      */
     fun changeEndLocation(location: LocationUIState) {
-        selectedRouteRepository.setEndLocation(location)
+        selectedRouteRepository.setDestPlace(location)
     }
 
     /**
