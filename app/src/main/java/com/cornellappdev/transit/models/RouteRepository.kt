@@ -1,6 +1,5 @@
 package com.cornellappdev.transit.models
 
-import android.util.Log
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.networking.NetworkApi
 import com.google.android.gms.maps.model.LatLng
@@ -53,7 +52,6 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
      * A StateFlow holding the last queried location
      */
     val placeFlow = _placeFlow.asStateFlow()
-
 
     /**
      * Makes a new call to backend for all stops.
