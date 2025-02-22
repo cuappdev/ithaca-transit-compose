@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -195,7 +196,12 @@ fun HomeScreen(
                     dividerColor = DividerGray,
                 ),
                 leadingIcon = { Icon(Icons.Outlined.Search, "Search") },
-                trailingIcon = { Icon(Icons.Outlined.Info, "Info") },
+                trailingIcon = {
+                    Icon(
+                        Icons.Outlined.Info,
+                        "Info",
+                        Modifier.clickable { navController.navigate("settings") })
+                },
                 placeholder = { Text(text = stringResource(R.string.search_placeholder)) }
 
             ) {
@@ -214,6 +220,9 @@ fun HomeScreen(
                                 homeViewModel.clearRecents()
                             },
                             navController = navController,
+                            changeEndLocation = { place ->
+                                homeViewModel.changeEndLocation(place)
+                            },
                             onStopPressed = { place ->
                                 homeViewModel.addRecent(place)
                             },
@@ -337,6 +346,9 @@ fun HomeScreen(
                     scope.launch {
                         favoritesSheetState.bottomSheetState.expand()
                     }
+                },
+                changeEndLocation = { place ->
+                    homeViewModel.changeEndLocation(place)
                 },
                 navController = navController
             )

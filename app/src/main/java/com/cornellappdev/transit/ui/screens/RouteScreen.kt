@@ -78,6 +78,7 @@ import com.cornellappdev.transit.ui.viewmodels.LocationUIState
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
 import com.cornellappdev.transit.util.TimeUtils
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -87,6 +88,10 @@ import java.util.Date
 /**
  * Composable for the route screen, which specifies a location, destination, and routes between them
  */
+@OptIn(
+    ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
+    ExperimentalMaterialApi::class
+)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RouteScreen(
@@ -94,8 +99,8 @@ fun RouteScreen(
     routeViewModel: RouteViewModel
 ) {
 
-    val startLocation = routeViewModel.startPl.collectAsState().value
-    val endLocation = routeViewModel.destPl.collectAsState().value
+    val startLocation = routeViewModel.startPlace.collectAsState().value
+    val endLocation = routeViewModel.destPlace.collectAsState().value
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -816,14 +821,14 @@ private fun RouteOptionsSearchSheet(
                                             sublabel = it.subLabel,
                                             onClick = {
                                                 if (isStart) {
-                                                    routeViewModel.changeStartLocation(
+                                                    routeViewModel.setStartPlace(
                                                         LocationUIState.Place(
                                                             it.name,
                                                             LatLng(it.latitude, it.longitude)
                                                         )
                                                     )
                                                 } else {
-                                                    routeViewModel.changeEndLocation(
+                                                    routeViewModel.setDestPlace(
                                                         LocationUIState.Place(
                                                             it.name,
                                                             LatLng(it.latitude, it.longitude)
@@ -860,14 +865,14 @@ private fun RouteOptionsSearchSheet(
                                 sublabel = it.subLabel,
                                 onClick = {
                                     if (isStart) {
-                                        routeViewModel.changeStartLocation(
+                                        routeViewModel.setStartPlace(
                                             LocationUIState.Place(
                                                 it.name,
                                                 LatLng(it.latitude, it.longitude)
                                             )
                                         )
                                     } else {
-                                        routeViewModel.changeEndLocation(
+                                        routeViewModel.setDestPlace(
                                             LocationUIState.Place(
                                                 it.name,
                                                 LatLng(it.latitude, it.longitude)
@@ -893,14 +898,14 @@ private fun RouteOptionsSearchSheet(
                                 sublabel = it.subLabel,
                                 onClick = {
                                     if (isStart) {
-                                        routeViewModel.changeStartLocation(
+                                        routeViewModel.setStartPlace(
                                             LocationUIState.Place(
                                                 it.name,
                                                 LatLng(it.latitude, it.longitude)
                                             )
                                         )
                                     } else {
-                                        routeViewModel.changeEndLocation(
+                                        routeViewModel.setDestPlace(
                                             LocationUIState.Place(
                                                 it.name,
                                                 LatLng(it.latitude, it.longitude)

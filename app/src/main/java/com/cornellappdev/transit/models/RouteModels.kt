@@ -1,7 +1,5 @@
 package com.cornellappdev.transit.models
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
 import com.cornellappdev.transit.ui.theme.LateRed
 import com.cornellappdev.transit.ui.theme.LiveGreen
@@ -47,7 +45,6 @@ data class Transport(
 /**
  * Create a Transport object from Route
  */
-@RequiresApi(Build.VERSION_CODES.O)
 fun Route.toTransport(): Transport {
 
     val containsBus = this.directions.any { dir ->

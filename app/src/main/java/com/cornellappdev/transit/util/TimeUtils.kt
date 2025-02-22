@@ -1,13 +1,13 @@
 package com.cornellappdev.transit.util
 
 import android.os.Build
-import androidx.annotation.RequiresApi
 
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import android.icu.text.SimpleDateFormat
+import java.time.Duration
 
 
 /**
@@ -38,7 +38,6 @@ object TimeUtils {
     /**
      * Convert ISO datetime string to hours, minutes, and AM/PM in format HH:MM AM
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getHHMM(isoString: String): String {
 
         // Parse the ISO string to Instant, then convert to the given timezone
@@ -49,4 +48,18 @@ object TimeUtils {
         val formatter = DateTimeFormatter.ofPattern("hh:mm a")
         return zonedDateTime.format(formatter)
     }
+
+    /**
+     * Calculate the minute difference between two ISO datetime strings. Returns a negative
+     * number if startString is more recent than endString
+     */
+    fun minuteDifference(startString: String, endString: String): Int {
+        val start = Instant.parse(startString)
+        val end = Instant.parse(endString)
+
+        val duration = Duration.between(start, end)
+
+        return duration.toMinutes().toInt()
+    }
+
 }
