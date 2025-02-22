@@ -6,7 +6,6 @@ import android.icu.text.SimpleDateFormat
 import android.os.Build
 import android.widget.DatePicker
 import android.widget.TimePicker
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,7 +47,6 @@ import java.util.*
  * @param disabled Whether the field is disabled
  * @param onTimeChanged Callback called when the user changes the time selected.
  */
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TimePicker(
     time: String,

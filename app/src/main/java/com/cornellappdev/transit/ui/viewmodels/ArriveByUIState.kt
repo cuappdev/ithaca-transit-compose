@@ -1,7 +1,6 @@
 package com.cornellappdev.transit.ui.viewmodels
 
 import android.os.Build
-import androidx.annotation.RequiresApi
 import com.cornellappdev.transit.util.TimeUtils
 import java.time.Instant
 import java.util.Date
@@ -9,7 +8,6 @@ import java.util.Date
 /**
  * Wrapper for state of the search bar in HomeScreen
  */
-@RequiresApi(Build.VERSION_CODES.O)
 sealed class ArriveByUIState {
 
     abstract val date: Date

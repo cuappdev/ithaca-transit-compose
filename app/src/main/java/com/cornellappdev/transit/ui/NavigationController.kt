@@ -1,7 +1,6 @@
 package com.cornellappdev.transit.ui
 
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -16,7 +15,6 @@ import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 /**
  * The navigation controller for the app (parent of all screens)
  */
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationController(
     homeViewModel: HomeViewModel = hiltViewModel(),

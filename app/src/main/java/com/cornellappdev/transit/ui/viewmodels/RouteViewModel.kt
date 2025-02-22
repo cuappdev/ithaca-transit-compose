@@ -2,13 +2,14 @@ package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cornellappdev.transit.models.Direction
+import com.cornellappdev.transit.models.DirectionType
 import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.MapState
 import com.cornellappdev.transit.models.RouteOptions
@@ -23,6 +24,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -30,7 +33,6 @@ import java.time.Instant
 import java.util.Date
 import javax.inject.Inject
 
-@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 class RouteViewModel @Inject constructor(
@@ -95,6 +97,26 @@ class RouteViewModel @Inject constructor(
      * Default map location
      */
     val defaultIthaca = LatLng(42.44, -76.50)
+
+    /**
+     * Emits whether a route should be showing on the map
+     */
+    val mapState: MutableStateFlow<MapState> =
+        MutableStateFlow(
+            MapState(
+                isShowing = false,
+                route = null
+            )
+        )
+
+    /**
+     * Emits details of a route
+     */
+    val detailsState: MutableStateFlow<List<DirectionDetails>> =
+        MutableStateFlow(
+            emptyList()
+        )
+
 
     /**
      * The current UI state of the search bar, as a MutableStateFlow
@@ -176,6 +198,38 @@ class RouteViewModel @Inject constructor(
                 }
             }
         }.launchIn(viewModelScope)
+
+        mapState.onEach {
+            if (it.route == null) {
+                detailsState.value = emptyList()
+            } else {
+                detailsState.value = it.route.directions.map { direction ->
+                    DirectionDetails(
+                        startTime = TimeUtils.getHHMM(
+                            direction.startTime
+                        ),
+                        endTime = TimeUtils.getHHMM(direction.endTime),
+                        movementDescription = if (direction.type == DirectionType.DEPART) {
+                            (if (direction.stayOnBusForTransfer == true)
+                                "Bus becomes" else "Board")
+                        } else {
+                            "Walk to"
+                        },
+                        destination = direction.name,
+                        directionType = direction.type,
+                        busNumber = direction.routeId ?: "",
+                        numStops = direction.stops.size - 1, // Ignore origin stop
+                        duration = TimeUtils.minuteDifference(
+                            direction.startTime,
+                            direction.endTime
+                        ),
+                        stops = direction.stops,
+                        busTransfer = direction.stayOnBusForTransfer ?: false
+                    )
+                }
+            }
+
+        }.launchIn(viewModelScope)
     }
 
 
@@ -254,17 +308,6 @@ class RouteViewModel @Inject constructor(
     fun changeArriveBy(arriveBy: ArriveByUIState) {
         arriveByFlow.value = arriveBy
     }
-
-    /**
-     * Emits whether a route should be showing on the map
-     */
-    val mapState: MutableStateFlow<MapState> =
-        MutableStateFlow(
-            MapState(
-                isShowing = false,
-                route = null
-            )
-        )
 
     /**
      * Set map state for home screen
