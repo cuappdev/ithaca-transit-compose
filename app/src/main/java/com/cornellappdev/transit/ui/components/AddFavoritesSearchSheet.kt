@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,6 +17,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.rounded.Place
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -134,14 +136,37 @@ fun AddFavoritesSearchSheet(
                 trailingIcon = { Icon(Icons.Outlined.Info, "Info") },
                 placeholder = { Text(text = "Search for a stop to add") }
             ) {
-                LazyColumn {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = if ((placeQueryResponse as? ApiResponse.Success)?.data?.isNotEmpty() == true)
+                        Arrangement.Top
+                    else Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     when (placeQueryResponse) {
                         is ApiResponse.Error -> {
-
+                            item {
+                                Icon(
+                                    imageVector = Icons.Rounded.Place,
+                                    contentDescription = "",
+                                    tint = Color.Gray,
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .align(Alignment.CenterHorizontally)
+                                )
+                            }
+                            item {
+                                Text(
+                                    text = "Location Not Found",
+                                    fontFamily = robotoFamily,
+                                    fontStyle = FontStyle.Normal,
+                                    color = Color.Gray
+                                )
+                            }
                         }
 
                         is ApiResponse.Pending -> {
-                            
+
                             item {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(32.dp),
@@ -163,6 +188,26 @@ fun AddFavoritesSearchSheet(
                                             keyboardController?.hide()
                                         }
                                     })
+                            }
+                            if (placeQueryResponse.data.isEmpty()) {
+                                item {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Place,
+                                        contentDescription = "",
+                                        tint = Color.Gray,
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .align(Alignment.CenterHorizontally)
+                                    )
+                                }
+                                item {
+                                    Text(
+                                        text = "Location Not Found",
+                                        fontFamily = robotoFamily,
+                                        fontStyle = FontStyle.Normal,
+                                        color = Color.Gray
+                                    )
+                                }
                             }
                         }
                     }

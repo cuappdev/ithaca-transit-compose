@@ -744,7 +744,18 @@ private fun RouteOptionsSearchSheet(
                         modifier = Modifier.clickable { routeViewModel.onQueryChange("") })
                 }
             )
-            LazyColumn {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = when {
+                    searchBarValue is SearchBarUIState.RecentAndFavorites ||
+                            (searchBarValue is SearchBarUIState.Query &&
+                                    searchBarValue.searched is ApiResponse.Success &&
+                                    searchBarValue.searched.data.isNotEmpty()) -> Arrangement.Top
+
+                    else -> Arrangement.Center
+                },
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 when (searchBarValue) {
                     is SearchBarUIState.RecentAndFavorites -> {
                         item {
@@ -875,6 +886,26 @@ private fun RouteOptionsSearchSheet(
                                             }
                                             onItemClicked()
                                         })
+                                }
+                                if (searchBarValue.searched.data.isEmpty()) {
+                                    item {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Place,
+                                            contentDescription = "",
+                                            tint = Color.Gray,
+                                            modifier = Modifier
+                                                .size(32.dp)
+                                                .align(Alignment.CenterHorizontally)
+                                        )
+                                    }
+                                    item {
+                                        Text(
+                                            text = "Location Not Found",
+                                            fontFamily = robotoFamily,
+                                            fontStyle = FontStyle.Normal,
+                                            color = Color.Gray
+                                        )
+                                    }
                                 }
                             }
                         }

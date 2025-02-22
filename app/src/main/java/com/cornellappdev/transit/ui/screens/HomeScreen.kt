@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.ui.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -220,7 +221,13 @@ fun HomeScreen(
                     }
 
                     is SearchBarUIState.Query -> {
-                        LazyColumn {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = if ((searchBarValue.searched as? ApiResponse.Success)?.data?.isNotEmpty() == true)
+                                Arrangement.Top
+                            else Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
                             when (searchBarValue.searched) {
                                 is ApiResponse.Error -> {
                                     item {
@@ -267,7 +274,24 @@ fun HomeScreen(
 
                                     }
                                     if (searchBarValue.searched.data.isEmpty()) {
-                                        item { Text("No search results") }
+                                        item {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Place,
+                                                contentDescription = "",
+                                                tint = Color.Gray,
+                                                modifier = Modifier
+                                                    .size(32.dp)
+                                                    .align(Alignment.CenterHorizontally)
+                                            )
+                                        }
+                                        item {
+                                            Text(
+                                                text = "Location Not Found",
+                                                fontFamily = robotoFamily,
+                                                fontStyle = FontStyle.Normal,
+                                                color = Color.Gray
+                                            )
+                                        }
                                     }
                                 }
                             }
