@@ -74,12 +74,12 @@ fun BusIcon(busNumber: Int, modifier: Modifier = Modifier, isSmall: Boolean = fa
 
 @Preview
 @Composable
-fun PreviewBusIconLarge() {
+private fun PreviewBusIconLarge() {
     BusIcon(30, isSmall = false)
 }
 
 @Preview
 @Composable
-fun PreviewBusIconSmall() {
+private fun PreviewBusIconSmall() {
     BusIcon(30, isSmall = true)
 }

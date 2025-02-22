@@ -394,7 +394,7 @@ private fun buildDirectionAnnotatedString(
 
 @Preview
 @Composable
-fun PreviewDirectionItem() {
+private fun PreviewDirectionItem() {
     DirectionItem(
         time = "12:51 PM",
         movementDescription = "Board",
@@ -415,7 +415,7 @@ fun PreviewDirectionItem() {
 
 @Preview
 @Composable
-fun PreviewStopItem() {
+private fun PreviewStopItem() {
     StopItem(
         name = "Risley Hall",
         latitude = 0.00,
