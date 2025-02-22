@@ -744,20 +744,107 @@ private fun RouteOptionsSearchSheet(
                         modifier = Modifier.clickable { routeViewModel.onQueryChange("") })
                 }
             )
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = when {
-                    searchBarValue is SearchBarUIState.RecentAndFavorites ||
-                            (searchBarValue is SearchBarUIState.Query &&
-                                    searchBarValue.searched is ApiResponse.Success &&
-                                    searchBarValue.searched.data.isNotEmpty()) -> Arrangement.Top
+            when (searchBarValue) {
+                is SearchBarUIState.Query -> {
+                    when (searchBarValue.searched) {
+                        ApiResponse.Error -> {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Place,
+                                    contentDescription = "",
+                                    tint = Color.Gray,
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .align(Alignment.CenterHorizontally)
+                                )
+                                Text(
+                                    text = "Location Not Found",
+                                    fontFamily = robotoFamily,
+                                    fontStyle = FontStyle.Normal,
+                                    color = Color.Gray
+                                )
 
-                    else -> Arrangement.Center
-                },
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                when (searchBarValue) {
-                    is SearchBarUIState.RecentAndFavorites -> {
+                            }
+                        }
+
+                        ApiResponse.Pending -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(32.dp),
+                                    color = TransitBlue,
+                                )
+                            }
+                        }
+
+                        is ApiResponse.Success -> {
+                            if (searchBarValue.searched.data.isEmpty()) {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Place,
+                                        contentDescription = "",
+                                        tint = Color.Gray,
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .align(Alignment.CenterHorizontally)
+                                    )
+                                    Text(
+                                        text = "Location Not Found",
+                                        fontFamily = robotoFamily,
+                                        fontStyle = FontStyle.Normal,
+                                        color = Color.Gray
+                                    )
+
+                                }
+                            } else {
+                                LazyColumn {
+                                    items(searchBarValue.searched.data) {
+                                        MenuItem(
+                                            type = it.type,
+                                            label = it.name,
+                                            sublabel = it.subLabel,
+                                            onClick = {
+                                                if (isStart) {
+                                                    routeViewModel.changeStartLocation(
+                                                        LocationUIState.Place(
+                                                            it.name,
+                                                            LatLng(it.latitude, it.longitude)
+                                                        )
+                                                    )
+                                                } else {
+                                                    routeViewModel.changeEndLocation(
+                                                        LocationUIState.Place(
+                                                            it.name,
+                                                            LatLng(it.latitude, it.longitude)
+                                                        )
+                                                    )
+                                                }
+                                                onItemClicked()
+                                            })
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                is SearchBarUIState.RecentAndFavorites -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         item {
                             Text(
                                 "Favorites",
@@ -825,95 +912,9 @@ private fun RouteOptionsSearchSheet(
                             )
                         }
                     }
-
-                    is SearchBarUIState.Query -> {
-                        when (searchBarValue.searched) {
-                            is ApiResponse.Error -> {
-                                item {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Place,
-                                        contentDescription = "",
-                                        tint = Color.Gray,
-                                        modifier = Modifier
-                                            .size(32.dp)
-                                            .align(Alignment.CenterHorizontally)
-                                    )
-                                }
-                                item {
-                                    Text(
-                                        text = "Location Not Found",
-                                        fontFamily = robotoFamily,
-                                        fontStyle = FontStyle.Normal,
-                                        color = Color.Gray
-                                    )
-                                }
-                            }
-
-                            is ApiResponse.Pending -> {
-                                item {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier
-                                            .size(32.dp)
-                                            .align(Alignment.CenterHorizontally),
-                                        color = TransitBlue,
-                                    )
-
-                                }
-                            }
-
-                            is ApiResponse.Success -> {
-
-                                items(searchBarValue.searched.data) {
-                                    MenuItem(
-                                        type = it.type,
-                                        label = it.name,
-                                        sublabel = it.subLabel,
-                                        onClick = {
-                                            if (isStart) {
-                                                routeViewModel.changeStartLocation(
-                                                    LocationUIState.Place(
-                                                        it.name,
-                                                        LatLng(it.latitude, it.longitude)
-                                                    )
-                                                )
-                                            } else {
-                                                routeViewModel.changeEndLocation(
-                                                    LocationUIState.Place(
-                                                        it.name,
-                                                        LatLng(it.latitude, it.longitude)
-                                                    )
-                                                )
-                                            }
-                                            onItemClicked()
-                                        })
-                                }
-                                if (searchBarValue.searched.data.isEmpty()) {
-                                    item {
-                                        Icon(
-                                            imageVector = Icons.Rounded.Place,
-                                            contentDescription = "",
-                                            tint = Color.Gray,
-                                            modifier = Modifier
-                                                .size(32.dp)
-                                                .align(Alignment.CenterHorizontally)
-                                        )
-                                    }
-                                    item {
-                                        Text(
-                                            text = "Location Not Found",
-                                            fontFamily = robotoFamily,
-                                            fontStyle = FontStyle.Normal,
-                                            color = Color.Gray
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
                 }
-
             }
         }
     }
+
 }

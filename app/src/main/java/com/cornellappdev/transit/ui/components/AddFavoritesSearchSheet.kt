@@ -136,16 +136,49 @@ fun AddFavoritesSearchSheet(
                 trailingIcon = { Icon(Icons.Outlined.Info, "Info") },
                 placeholder = { Text(text = "Search for a stop to add") }
             ) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = if ((placeQueryResponse as? ApiResponse.Success)?.data?.isNotEmpty() == true)
-                        Arrangement.Top
-                    else Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    when (placeQueryResponse) {
-                        is ApiResponse.Error -> {
-                            item {
+                when (placeQueryResponse) {
+                    is ApiResponse.Error -> {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Place,
+                                contentDescription = "",
+                                tint = Color.Gray,
+                                modifier = Modifier
+                                    .size(32.dp)
+                            )
+                            Text(
+                                text = "Location Not Found",
+                                fontFamily = robotoFamily,
+                                fontStyle = FontStyle.Normal,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+
+                    ApiResponse.Pending -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .size(32.dp),
+                                color = TransitBlue,
+                            )
+                        }
+                    }
+
+                    is ApiResponse.Success -> {
+                        if (placeQueryResponse.data.isEmpty()) {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
                                 Icon(
                                     imageVector = Icons.Rounded.Place,
                                     contentDescription = "",
@@ -154,29 +187,16 @@ fun AddFavoritesSearchSheet(
                                         .size(32.dp)
                                         .align(Alignment.CenterHorizontally)
                                 )
-                            }
-                            item {
                                 Text(
                                     text = "Location Not Found",
                                     fontFamily = robotoFamily,
                                     fontStyle = FontStyle.Normal,
                                     color = Color.Gray
                                 )
+
                             }
                         }
-
-                        is ApiResponse.Pending -> {
-
-                            item {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(32.dp),
-                                    color = TransitBlue,
-                                )
-                            }
-                        }
-
-                        is ApiResponse.Success -> {
-
+                        LazyColumn {
                             items(placeQueryResponse.data) {
                                 MenuItem(
                                     type = it.type,
@@ -188,26 +208,6 @@ fun AddFavoritesSearchSheet(
                                             keyboardController?.hide()
                                         }
                                     })
-                            }
-                            if (placeQueryResponse.data.isEmpty()) {
-                                item {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Place,
-                                        contentDescription = "",
-                                        tint = Color.Gray,
-                                        modifier = Modifier
-                                            .size(32.dp)
-                                            .align(Alignment.CenterHorizontally)
-                                    )
-                                }
-                                item {
-                                    Text(
-                                        text = "Location Not Found",
-                                        fontFamily = robotoFamily,
-                                        fontStyle = FontStyle.Normal,
-                                        color = Color.Gray
-                                    )
-                                }
                             }
                         }
                     }
