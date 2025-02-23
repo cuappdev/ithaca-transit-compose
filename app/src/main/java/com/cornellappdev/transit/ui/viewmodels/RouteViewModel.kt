@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.launchIn
@@ -236,33 +237,14 @@ class RouteViewModel @Inject constructor(
 
         }.launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            searchBarUiState.debounce(300L).distinctUntilChanged(areEquivalent = { old, new ->
-                when (old) {
-                    is SearchBarUIState.Query -> {
-                        if (new is SearchBarUIState.Query) {
-                            new.queryText == old.queryText
-                        } else {
-                            false
-                        }
-                    }
-
-                    is SearchBarUIState.RecentAndFavorites -> {
-                        new is SearchBarUIState.RecentAndFavorites
-                    }
-                }
-            }).collectLatest {
-                when (it) {
-                    is SearchBarUIState.Query -> {
-                        routeRepository.makeSearch(it.queryText)
-                    }
-
-                    is SearchBarUIState.RecentAndFavorites -> {
-
-                    }
-                }
-            }
-        }
+        searchBarUiState
+            .debounce(300L)
+            .filterIsInstance<SearchBarUIState.Query>()
+            .map { it.queryText }
+            .distinctUntilChanged()
+            .onEach {
+                routeRepository.makeSearch(it)
+            }.launchIn(viewModelScope)
     }
 
 
