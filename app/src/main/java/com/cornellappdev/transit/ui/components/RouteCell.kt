@@ -416,7 +416,7 @@ private fun PreviewRouteCellBusAndWalk() {
         Transport(
             startTime = "12:42AM",
             arriveTime = "12:49AM",
-            distance = "0.2",
+            distanceMeters = "0.2",
             start = "Gates Hall",
             end = "Upson Hall",
             timeToBoard = 7,
@@ -432,7 +432,7 @@ private fun PreviewRouteCellBusAndWalk() {
                     path = listOf(),
                     stops = listOf(),
                     endTime = "12:49AM",
-                    distance = "0.2",
+                    distanceMeters = "0.2",
                     startTime = "12:42AM",
                     directionType = "depart",
                     name = "Gates Hall"
@@ -447,7 +447,7 @@ private fun PreviewRouteCellBusAndWalk() {
                     path = listOf(),
                     stops = listOf(),
                     endTime = "12:49AM",
-                    distance = "0.2",
+                    distanceMeters = "0.2",
                     startTime = "12:42AM",
                     directionType = "walk",
                     name = "Duffield Hall"
@@ -465,7 +465,7 @@ private fun PreviewRouteCellMultBusesAndWalk() {
         Transport(
             startTime = "12:42AM",
             arriveTime = "12:49AM",
-            distance = "0.2",
+            distanceMeters = "0.2",
             start = "Gates Hall",
             end = "Upson Hall",
             timeToBoard = 7,
@@ -481,7 +481,7 @@ private fun PreviewRouteCellMultBusesAndWalk() {
                     path = listOf(),
                     stops = listOf(),
                     endTime = "12:49AM",
-                    distance = "0.2",
+                    distanceMeters = "0.2",
                     startTime = "12:42AM",
                     directionType = "depart",
                     name = "Gates Hall"
@@ -496,7 +496,7 @@ private fun PreviewRouteCellMultBusesAndWalk() {
                     path = listOf(),
                     stops = listOf(),
                     endTime = "12:49AM",
-                    distance = "0.2",
+                    distanceMeters = "0.2",
                     startTime = "12:42AM",
                     directionType = "walk",
                     name = "Phillips Hall"
@@ -511,7 +511,7 @@ private fun PreviewRouteCellMultBusesAndWalk() {
                     path = listOf(),
                     stops = listOf(),
                     endTime = "12:49AM",
-                    distance = "0.2",
+                    distanceMeters = "0.2",
                     startTime = "12:42AM",
                     directionType = "depart",
                     name = "Duffield Hall"
@@ -529,7 +529,7 @@ private fun PreviewRouteCellWalkOnly() {
         Transport(
             startTime = "12:42AM",
             arriveTime = "12:49AM",
-            distance = "0.1",
+            distanceMeters = "0.1",
             lateness = BusLateness.NONE,
             start = "Gates Hall",
             end = "Upson Hall",
@@ -546,7 +546,7 @@ private fun PreviewRouteCellWalkOnly() {
                     path = listOf(),
                     stops = listOf(),
                     endTime = "12:49AM",
-                    distance = "0.2",
+                    distanceMeters = "0.2",
                     startTime = "12:42AM",
                     directionType = "walk",
                     name = "Gates Hall"

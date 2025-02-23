@@ -34,13 +34,16 @@ data class Transport(
     val startTime: String,
     val arriveTime: String,
     val lateness: BusLateness,
-    val distance: String,
+    val distanceMeters: String,
     val start: String,
     val end: String,
     val walkOnly: Boolean,
     val timeToBoard: Int,
     val directionList: List<Direction>
-)
+) {
+    val distance: String
+        get() = "%.1f".format(distanceMeters.toDouble() / 1609.34)
+}
 
 /**
  * Create a Transport object from Route
@@ -54,7 +57,7 @@ fun Route.toTransport(): Transport {
     return Transport(
         startTime = TimeUtils.getHHMM(this.departureTime),
         arriveTime = TimeUtils.getHHMM(this.arrivalTime),
-        distance = String.format(Locale.US, "%.1f", this.travelDistance),
+        distanceMeters = String.format(Locale.US, "%.1f", this.travelDistance),
         start = this.startName,
         end = this.endName,
         walkOnly = !containsBus,
