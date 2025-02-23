@@ -1,6 +1,7 @@
 package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
@@ -14,6 +15,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -88,6 +92,39 @@ class HomeViewModel @Inject constructor(
                     }
                 }
             }
+
+            launch {
+                searchBarUiState.debounce(300L).distinctUntilChanged(areEquivalent = { old, new ->
+                    when (old) {
+                        is SearchBarUIState.Query -> {
+                            if (new is SearchBarUIState.Query) {
+                                new.queryText == old.queryText
+                            } else {
+                                false
+                            }
+                        }
+
+                        is SearchBarUIState.RecentAndFavorites -> {
+                            new is SearchBarUIState.RecentAndFavorites
+                        }
+                    }
+                }).collectLatest {
+                    when (it) {
+                        is SearchBarUIState.Query -> {
+                            routeRepository.makeSearch(it.queryText)
+                        }
+
+                        is SearchBarUIState.RecentAndFavorites -> {
+
+                        }
+                    }
+                }
+            }
+            launch {
+                addSearchQuery.debounce(300L).distinctUntilChanged().collectLatest {
+                    routeRepository.makeSearch(it)
+                }
+            }
         }
     }
 
@@ -112,7 +149,6 @@ class HomeViewModel @Inject constructor(
                 ApiResponse.Pending, query
             )
         }
-        routeRepository.makeSearch(query)
     }
 
     /**
@@ -120,7 +156,6 @@ class HomeViewModel @Inject constructor(
      */
     fun onAddQueryChange(query: String) {
         addSearchQuery.value = query
-        routeRepository.makeSearch(query)
     }
 
     /**

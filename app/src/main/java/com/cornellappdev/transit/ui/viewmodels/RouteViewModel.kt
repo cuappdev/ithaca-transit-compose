@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cornellappdev.transit.models.Direction
 import com.cornellappdev.transit.models.DirectionType
 import com.cornellappdev.transit.models.LocationRepository
@@ -20,10 +21,14 @@ import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.util.TimeUtils
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.launchIn
@@ -34,7 +39,7 @@ import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 class RouteViewModel @Inject constructor(
     private val routeRepository: RouteRepository,
     private val locationRepository: LocationRepository,
@@ -230,6 +235,34 @@ class RouteViewModel @Inject constructor(
             }
 
         }.launchIn(viewModelScope)
+
+        viewModelScope.launch {
+            searchBarUiState.debounce(300L).distinctUntilChanged(areEquivalent = { old, new ->
+                when (old) {
+                    is SearchBarUIState.Query -> {
+                        if (new is SearchBarUIState.Query) {
+                            new.queryText == old.queryText
+                        } else {
+                            false
+                        }
+                    }
+
+                    is SearchBarUIState.RecentAndFavorites -> {
+                        new is SearchBarUIState.RecentAndFavorites
+                    }
+                }
+            }).collectLatest {
+                when (it) {
+                    is SearchBarUIState.Query -> {
+                        routeRepository.makeSearch(it.queryText)
+                    }
+
+                    is SearchBarUIState.RecentAndFavorites -> {
+
+                    }
+                }
+            }
+        }
     }
 
 
@@ -247,7 +280,6 @@ class RouteViewModel @Inject constructor(
                 ApiResponse.Pending, query
             )
         }
-        routeRepository.makeSearch(query)
     }
 
     /**
