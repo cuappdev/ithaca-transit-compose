@@ -54,6 +54,7 @@ import com.cornellappdev.transit.ui.components.details.DirectionItem
 import com.cornellappdev.transit.ui.components.details.StopItem
 import com.cornellappdev.transit.ui.theme.DetailsHeaderGray
 import com.cornellappdev.transit.ui.theme.DividerGray
+import com.cornellappdev.transit.ui.theme.LateRed
 import com.cornellappdev.transit.ui.theme.LiveGreen
 import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.theme.Style
@@ -123,7 +124,11 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
         sheetDragHandle = {},
         sheetContent = {
             // Bottom sheet content
-            DetailsBottomSheet(mapDetails, mapState.route?.totalDuration ?: 0)
+            DetailsBottomSheet(
+                mapDetails,
+                mapState.route?.totalDuration ?: 0,
+                mapState.route?.busDelayed ?: false
+            )
         },
         content = {
             // Screen content
@@ -167,7 +172,11 @@ private fun DrawableMap(
  * Wrapper of Route Details bottom sheet, including header
  */
 @Composable
-private fun DetailsBottomSheet(directionDetails: List<DirectionDetails>, totalDuration: Int) {
+private fun DetailsBottomSheet(
+    directionDetails: List<DirectionDetails>,
+    totalDuration: Int,
+    isDelayed: Boolean
+) {
 
     val busDirection = directionDetails.firstOrNull { dir ->
         dir.busNumber != ""
@@ -213,7 +222,7 @@ private fun DetailsBottomSheet(directionDetails: List<DirectionDetails>, totalDu
                             withStyle(
                                 style = SpanStyle(
                                     fontWeight = FontWeight.Bold,
-                                    color = LiveGreen
+                                    color = if (isDelayed) LateRed else LiveGreen
                                 )
                             ) {
                                 append(busDirection.startTime)
