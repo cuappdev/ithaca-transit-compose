@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import com.cornellappdev.transit.ui.theme.LateRed
 import com.cornellappdev.transit.ui.theme.LiveGreen
 import com.cornellappdev.transit.util.TimeUtils
+import java.time.Instant
 import java.util.Locale
 
 /**
@@ -38,7 +39,7 @@ data class Transport(
     val start: String,
     val end: String,
     val walkOnly: Boolean,
-    val timeToBoard: Int,
+    val timeToBoard: String,
     val directionList: List<Direction>
 )
 
@@ -58,8 +59,19 @@ fun Route.toTransport(): Transport {
         start = this.startName,
         end = this.endName,
         walkOnly = !containsBus,
-        lateness = if (containsBus) BusLateness.LATE else BusLateness.NONE,
-        timeToBoard = 0,
+        lateness = if (containsBus) {
+            if (this.busDelayed) {
+                BusLateness.LATE
+            } else {
+                BusLateness.NORMAL
+            }
+        } else {
+            BusLateness.NONE
+        },
+        timeToBoard = TimeUtils.dayHourMinuteDifference(
+            Instant.now().toString(),
+            this.departureTime
+        ),
         directionList = this.directions
     )
 }

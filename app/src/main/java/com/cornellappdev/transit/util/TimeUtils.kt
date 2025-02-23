@@ -62,4 +62,30 @@ object TimeUtils {
         return duration.toMinutes().toInt()
     }
 
+    /**
+     * Return a string in the format "X d Y hr Z min" representing the day, hour, and minute difference between
+     * two ISO datetime strings. Returns absolute value difference.
+     */
+    fun dayHourMinuteDifference(startString: String, endString: String): String {
+        val start = Instant.parse(startString)
+        val end = Instant.parse(endString)
+
+        val duration = Duration.between(start, end).abs()
+
+        val days = duration.toDays()
+        val hours = (duration.toHours() % 24)
+        val minutes = (duration.toMinutes() % 60)
+
+        var diffString = ""
+
+        if (days > 0) {
+            diffString += "$days d "
+        }
+        if (hours > 0) {
+            diffString += "$hours hr "
+        }
+        diffString += "$minutes min"
+        return diffString
+    }
+
 }

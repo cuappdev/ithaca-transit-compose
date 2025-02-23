@@ -54,7 +54,12 @@ data class Route(
     @Json(name = "travelDistance") val travelDistance: Double,
     @Json(name = "startCoords") val startCoords: LatLng,
     @Json(name = "directions") val directions: List<Direction>,
-)
+) {
+    val busDelayed
+        get() = this.directions.firstOrNull { dir ->
+            dir.type == DirectionType.DEPART
+        }?.delay != null
+}
 
 /**
  * Data class wrapping all possible routes from a given start and end

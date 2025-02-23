@@ -324,6 +324,5 @@ class RouteViewModel @Inject constructor(
         selectedRouteRepository.setStartPlace(destPlace.value)
         selectedRouteRepository.setDestPlace(temp)
     }
-
 }
 

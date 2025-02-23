@@ -147,7 +147,7 @@ private fun RouteCellHeader(transport: Transport) {
     val headerText =
         if (transport.walkOnly)
             "Directions" else
-            "Board in ${transport.timeToBoard} min"
+            "Board in ${transport.timeToBoard}"
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
@@ -419,7 +419,7 @@ private fun PreviewRouteCellBusAndWalk() {
             distance = "0.2",
             start = "Gates Hall",
             end = "Upson Hall",
-            timeToBoard = 7,
+            timeToBoard = "5 min",
             lateness = BusLateness.NORMAL,
             directionList = listOf(
                 Direction(
@@ -468,7 +468,7 @@ private fun PreviewRouteCellMultBusesAndWalk() {
             distance = "0.2",
             start = "Gates Hall",
             end = "Upson Hall",
-            timeToBoard = 7,
+            timeToBoard = "1 min",
             lateness = BusLateness.NORMAL,
             directionList = listOf(
                 Direction(
@@ -534,7 +534,7 @@ private fun PreviewRouteCellWalkOnly() {
             start = "Gates Hall",
             end = "Upson Hall",
             walkOnly = true,
-            timeToBoard = 0,
+            timeToBoard = "2 hr 7 min",
             directionList = listOf(
                 Direction(
                     endLocation = LatLng(40.7128, -74.0060),
