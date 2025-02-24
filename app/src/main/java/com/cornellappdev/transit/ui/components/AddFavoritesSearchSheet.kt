@@ -6,18 +6,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.rounded.Place
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -43,7 +39,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.TextButtonGray
-import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
@@ -138,63 +133,16 @@ fun AddFavoritesSearchSheet(
             ) {
                 when (placeQueryResponse) {
                     is ApiResponse.Error -> {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Place,
-                                contentDescription = "",
-                                tint = Color.Gray,
-                                modifier = Modifier
-                                    .size(32.dp)
-                            )
-                            Text(
-                                text = "Location Not Found",
-                                fontFamily = robotoFamily,
-                                fontStyle = FontStyle.Normal,
-                                color = Color.Gray
-                            )
-                        }
+                        LocationNotFound()
                     }
 
                     ApiResponse.Pending -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .size(32.dp),
-                                color = TransitBlue,
-                            )
-                        }
+                        ProgressCircle()
                     }
 
                     is ApiResponse.Success -> {
                         if (placeQueryResponse.data.isEmpty()) {
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Place,
-                                    contentDescription = "",
-                                    tint = Color.Gray,
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .align(Alignment.CenterHorizontally)
-                                )
-                                Text(
-                                    text = "Location Not Found",
-                                    fontFamily = robotoFamily,
-                                    fontStyle = FontStyle.Normal,
-                                    color = Color.Gray
-                                )
-
-                            }
+                            LocationNotFound()
                         }
                         LazyColumn {
                             items(placeQueryResponse.data) {

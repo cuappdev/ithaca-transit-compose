@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
@@ -27,7 +26,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.rounded.Place
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -60,7 +58,9 @@ import com.cornellappdev.transit.models.Transport
 import com.cornellappdev.transit.models.toTransport
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.DatePicker
+import com.cornellappdev.transit.ui.components.LocationNotFound
 import com.cornellappdev.transit.ui.components.MenuItem
+import com.cornellappdev.transit.ui.components.ProgressCircle
 import com.cornellappdev.transit.ui.components.RouteCell
 import com.cornellappdev.transit.ui.components.SearchTextField
 import com.cornellappdev.transit.ui.components.TernarySelector
@@ -594,16 +594,7 @@ private fun RouteList(
         }
 
         is ApiResponse.Pending -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(32.dp),
-                    color = TransitBlue,
-                )
-            }
+            ProgressCircle()
         }
 
         is ApiResponse.Success -> {
@@ -753,65 +744,16 @@ private fun RouteOptionsSearchSheet(
                 is SearchBarUIState.Query -> {
                     when (searchBarValue.searched) {
                         ApiResponse.Error -> {
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Place,
-                                    contentDescription = "",
-                                    tint = Color.Gray,
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .align(Alignment.CenterHorizontally)
-                                )
-                                Text(
-                                    text = "Location Not Found",
-                                    fontFamily = robotoFamily,
-                                    fontStyle = FontStyle.Normal,
-                                    color = Color.Gray
-                                )
-
-                            }
+                            LocationNotFound()
                         }
 
                         ApiResponse.Pending -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .size(32.dp),
-                                    color = TransitBlue,
-                                )
-                            }
+                            ProgressCircle()
                         }
 
                         is ApiResponse.Success -> {
                             if (searchBarValue.searched.data.isEmpty()) {
-                                Column(
-                                    modifier = Modifier.fillMaxSize(),
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Place,
-                                        contentDescription = "",
-                                        tint = Color.Gray,
-                                        modifier = Modifier
-                                            .size(32.dp)
-                                            .align(Alignment.CenterHorizontally)
-                                    )
-                                    Text(
-                                        text = "Location Not Found",
-                                        fontFamily = robotoFamily,
-                                        fontStyle = FontStyle.Normal,
-                                        color = Color.Gray
-                                    )
-
-                                }
+                                LocationNotFound()
                             } else {
                                 LazyColumn {
                                     items(searchBarValue.searched.data) {

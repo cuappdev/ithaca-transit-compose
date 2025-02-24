@@ -1,7 +1,6 @@
 package com.cornellappdev.transit.ui.screens
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,18 +8,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.rounded.Place
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BottomSheetScaffold
@@ -47,18 +43,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
+import com.cornellappdev.transit.ui.components.LocationNotFound
 import com.cornellappdev.transit.ui.components.MenuItem
+import com.cornellappdev.transit.ui.components.ProgressCircle
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGray
-import com.cornellappdev.transit.ui.theme.TransitBlue
-import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
 import com.cornellappdev.transit.util.StringUtils.toURLString
@@ -232,58 +227,16 @@ fun HomeScreen(
                     is SearchBarUIState.Query -> {
                         when (searchBarValue.searched) {
                             is ApiResponse.Error -> {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "Location Not Found",
-                                        fontFamily = robotoFamily,
-                                        fontStyle = FontStyle.Normal,
-                                        color = Color.Gray,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
+                                LocationNotFound()
                             }
 
                             is ApiResponse.Pending -> {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier
-                                            .size(32.dp),
-                                        color = TransitBlue,
-                                    )
-                                }
+                                ProgressCircle()
                             }
 
                             is ApiResponse.Success -> {
                                 if (searchBarValue.searched.data.isEmpty()) {
-                                    Column(
-                                        modifier = Modifier.fillMaxSize(),
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Rounded.Place,
-                                            contentDescription = "",
-                                            tint = Color.Gray,
-                                            modifier = Modifier
-                                                .size(32.dp)
-
-                                        )
-
-                                        Text(
-                                            text = "Location Not Found",
-                                            fontFamily = robotoFamily,
-                                            fontStyle = FontStyle.Normal,
-                                            color = Color.Gray,
-                                        )
-                                    }
-
-
+                                    LocationNotFound()
                                 } else {
                                     LazyColumn {
                                         items(searchBarValue.searched.data) {
