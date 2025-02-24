@@ -11,11 +11,11 @@ import javax.inject.Singleton
 class SelectedRouteRepository @Inject constructor() {
 
     private val _startPlace: MutableStateFlow<LocationUIState> = MutableStateFlow(
-        LocationUIState.Place("Current Location", LatLng(42.44, -76.50))
+        LocationUIState.CurrentLocation
     )
 
     private val _destPlace: MutableStateFlow<LocationUIState> = MutableStateFlow(
-        LocationUIState.Place("Current Location", LatLng(42.45, -76.51))
+        LocationUIState.CurrentLocation
     )
 
     /**

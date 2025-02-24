@@ -1,13 +1,13 @@
 package com.cornellappdev.transit.ui.screens
 
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -57,6 +57,7 @@ import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.Transport
 import com.cornellappdev.transit.models.toTransport
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.components.CurrentLocationItem
 import com.cornellappdev.transit.ui.components.DatePicker
 import com.cornellappdev.transit.ui.components.LocationNotFound
 import com.cornellappdev.transit.ui.components.MenuItem
@@ -92,7 +93,6 @@ import java.util.Date
     ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
     ExperimentalMaterialApi::class
 )
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RouteScreen(
     navController: NavController,
@@ -188,7 +188,6 @@ fun RouteScreen(
 /**
  * Bottom sheet to select Leave Now/Leave At/Arrive By
  */
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun ArriveByBottomSheet(
     routeViewModel: RouteViewModel,
@@ -304,7 +303,6 @@ private fun ArriveByBottomSheet(
 /**
  * Main menu of Route Options
  */
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 private fun RouteOptionsMainMenu(
@@ -572,7 +570,6 @@ private fun PaddedRouteCell(transport: Transport, onClick: () -> Unit) {
 /**
  * List of routes from a route query
  */
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun RouteList(
     lastRouteResponse: ApiResponse<RouteOptions>,
@@ -664,7 +661,6 @@ private fun RouteList(
 /**
  * Route options select sheet
  */
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RouteOptionsSearchSheet(
@@ -792,6 +788,22 @@ private fun RouteOptionsSearchSheet(
                         verticalArrangement = Arrangement.Top,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        item {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            CurrentLocationItem {
+                                if (isStart) {
+                                    routeViewModel.setStartPlace(
+                                        LocationUIState.CurrentLocation
+                                    )
+                                } else {
+                                    routeViewModel.setDestPlace(
+                                        LocationUIState.CurrentLocation
+                                    )
+                                }
+                                onItemClicked()
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
                         item {
                             Text(
                                 "Favorites",

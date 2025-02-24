@@ -159,27 +159,6 @@ class RouteViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
 
-        currentLocation.onEach {
-            if (startPlace.value is LocationUIState.CurrentLocation) {
-                if (it != null) {
-                    selectedRouteRepository.setStartPlace(
-                        LocationUIState.CurrentLocation(
-                            LatLng(it.latitude, it.longitude)
-                        )
-                    )
-                }
-            }
-            if (destPlace.value is LocationUIState.CurrentLocation) {
-                if (it != null) {
-                    selectedRouteRepository.setDestPlace(
-                        LocationUIState.CurrentLocation(
-                            LatLng(it.latitude, it.longitude)
-                        )
-                    )
-                }
-            }
-        }.launchIn(viewModelScope)
-
         combine(startPlace, destPlace, arriveByFlow) { start, dest, arriveBy ->
             Triple(start, dest, arriveBy)
         }.onEach {
@@ -190,8 +169,8 @@ class RouteViewModel @Inject constructor(
                 val startState = it.first
                 val endState = it.second
                 val arriveByState = it.third
-                getCoordinatesFromLocationState(it.second)?.let { end ->
-                    getCoordinatesFromLocationState(it.first)?.let { start ->
+                getCoordinates(it.second)?.let { end ->
+                    getCoordinates(it.first)?.let { start ->
                         getRoute(
                             end = end,
                             start = start,
@@ -337,6 +316,28 @@ class RouteViewModel @Inject constructor(
         val temp = startPlace.value
         selectedRouteRepository.setStartPlace(destPlace.value)
         selectedRouteRepository.setDestPlace(temp)
+    }
+
+    /**
+     * Retrieve coordinates for a place or for the current location
+     */
+    private fun getCoordinates(location: LocationUIState): LatLng? {
+        when (location) {
+            is LocationUIState.CurrentLocation -> {
+                return currentLocation.value?.latitude?.let { lat ->
+                    currentLocation.value?.longitude?.let { long ->
+                        LatLng(
+                            lat,
+                            long
+                        )
+                    }
+                }
+            }
+
+            is LocationUIState.Place -> {
+                return location.coordinates
+            }
+        }
     }
 }
 
