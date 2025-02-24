@@ -24,6 +24,7 @@ fun SearchSuggestions(
     recents: List<Place>,
     onFavoriteAdd: () -> Unit,
     onRecentClear: () -> Unit,
+    changeStartLocation: (LocationUIState) -> Unit,
     changeEndLocation: (LocationUIState) -> Unit,
     navController: NavController,
     onStopPressed: (Place) -> Unit,
@@ -45,6 +46,9 @@ fun SearchSuggestions(
                 sublabel = it.subLabel,
                 onClick = {
                     onStopPressed(it)
+                    changeStartLocation(
+                        LocationUIState.CurrentLocation
+                    )
                     changeEndLocation(
                         LocationUIState.Place(
                             it.name,
@@ -71,6 +75,9 @@ fun SearchSuggestions(
                 sublabel = it.subLabel,
                 onClick = {
                     onStopPressed(it)
+                    changeStartLocation(
+                        LocationUIState.CurrentLocation
+                    )
                     changeEndLocation(
                         LocationUIState.Place(
                             it.name,

@@ -1,12 +1,14 @@
 package com.cornellappdev.transit.ui.screens
 
 import android.os.Build
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -51,11 +53,13 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.MapState
+import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.models.Route
 import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.Transport
 import com.cornellappdev.transit.models.toTransport
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.components.CurrentLocationItem
 import com.cornellappdev.transit.ui.components.DatePicker
 import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.RouteCell
@@ -726,6 +730,22 @@ private fun RouteOptionsSearchSheet(
             LazyColumn {
                 when (searchBarValue) {
                     is SearchBarUIState.RecentAndFavorites -> {
+                        item {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            CurrentLocationItem {
+                                if (isStart) {
+                                    routeViewModel.setStartPlace(
+                                        LocationUIState.CurrentLocation
+                                    )
+                                } else {
+                                    routeViewModel.setDestPlace(
+                                        LocationUIState.CurrentLocation
+                                    )
+                                }
+                                onItemClicked()
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
                         item {
                             Text(
                                 "Favorites",

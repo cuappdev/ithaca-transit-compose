@@ -178,6 +178,13 @@ class HomeViewModel @Inject constructor(
     val currentLocation = locationRepository.currentLocation
 
     /**
+     * Change start location
+     */
+    fun changeStartLocation(location: LocationUIState) {
+        selectedRouteRepository.setStartPlace(location)
+    }
+
+    /**
      * Change end location
      */
     fun changeEndLocation(location: LocationUIState) {

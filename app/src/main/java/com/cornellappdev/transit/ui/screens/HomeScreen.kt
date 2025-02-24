@@ -214,6 +214,9 @@ fun HomeScreen(
                                 homeViewModel.clearRecents()
                             },
                             navController = navController,
+                            changeStartLocation = {
+                                place -> homeViewModel.changeStartLocation(place)
+                            },
                             changeEndLocation = { place ->
                                 homeViewModel.changeEndLocation(place)
                             },
@@ -240,6 +243,9 @@ fun HomeScreen(
                                             sublabel = it.subLabel,
                                             onClick = {
                                                 homeViewModel.addRecent(it)
+                                                homeViewModel.changeStartLocation(
+                                                    LocationUIState.CurrentLocation
+                                                )
                                                 homeViewModel.changeEndLocation(
                                                     LocationUIState.Place(
                                                         it.name,
