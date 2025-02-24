@@ -19,7 +19,11 @@ object StringUtils {
     /**
      * Convert a string from a URL safe string to a normal string
      */
-    fun String.fromURLString() : String {
+    fun String.fromURLString(): String {
         return URLDecoder.decode(this, StandardCharsets.UTF_8.toString())
+    }
+
+    fun String.fromMetersToMiles(): String {
+        return "%.1f".format(this.toDouble() / 1609.34)
     }
 }

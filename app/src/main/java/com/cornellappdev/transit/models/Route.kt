@@ -1,8 +1,8 @@
 package com.cornellappdev.transit.models
 
+import com.cornellappdev.transit.util.StringUtils.fromMetersToMiles
 import com.google.android.gms.maps.model.LatLng
 import com.squareup.moshi.Json
-
 
 /**
  * Data class representing a stop in a list of directions
@@ -33,12 +33,14 @@ data class Direction(
     @Json(name = "type") private val directionType: String, // "walk" or "depart"
     @Json(name = "stops") val stops: List<DirectionStop>,
     @Json(name = "endTime") val endTime: String,
-    @Json(name = "distance") val distance: String,
+    @Json(name = "distance") val distanceMeters: String,
     @Json(name = "startTime") val startTime: String,
     @Json(name = "name") val name: String
 ) {
     val type
         get() = if (directionType == "walk") DirectionType.WALK else DirectionType.DEPART
+    val distance: String
+        get() = distanceMeters.fromMetersToMiles()
 }
 
 

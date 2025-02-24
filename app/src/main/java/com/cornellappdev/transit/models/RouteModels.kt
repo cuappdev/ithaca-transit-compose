@@ -3,6 +3,7 @@ package com.cornellappdev.transit.models
 import androidx.compose.ui.graphics.Color
 import com.cornellappdev.transit.ui.theme.LateRed
 import com.cornellappdev.transit.ui.theme.LiveGreen
+import com.cornellappdev.transit.util.StringUtils.fromMetersToMiles
 import com.cornellappdev.transit.util.TimeUtils
 import java.time.Instant
 import java.util.Locale
@@ -35,13 +36,16 @@ data class Transport(
     val startTime: String,
     val arriveTime: String,
     val lateness: BusLateness,
-    val distance: String,
+    val distanceMeters: String,
     val start: String,
     val end: String,
     val walkOnly: Boolean,
     val timeToBoard: String,
     val directionList: List<Direction>
-)
+) {
+    val distance: String
+        get() = distanceMeters.fromMetersToMiles()
+}
 
 /**
  * Create a Transport object from Route
@@ -55,7 +59,7 @@ fun Route.toTransport(): Transport {
     return Transport(
         startTime = TimeUtils.getHHMM(this.departureTime),
         arriveTime = TimeUtils.getHHMM(this.arrivalTime),
-        distance = String.format(Locale.US, "%.1f", this.travelDistance),
+        distanceMeters = String.format(Locale.US, "%.1f", this.travelDistance),
         start = this.startName,
         end = this.endName,
         walkOnly = !containsBus,
