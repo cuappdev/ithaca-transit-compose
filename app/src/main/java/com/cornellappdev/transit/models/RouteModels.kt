@@ -3,7 +3,7 @@ package com.cornellappdev.transit.models
 import androidx.compose.ui.graphics.Color
 import com.cornellappdev.transit.ui.theme.LateRed
 import com.cornellappdev.transit.ui.theme.LiveGreen
-import com.cornellappdev.transit.util.StringUtils.toMiles
+import com.cornellappdev.transit.util.StringUtils.fromMetersToMiles
 import com.cornellappdev.transit.util.TimeUtils
 import java.util.Locale
 
@@ -43,7 +43,7 @@ data class Transport(
     val directionList: List<Direction>
 ) {
     val distance: String
-        get() = distanceMeters.toMiles()
+        get() = distanceMeters.fromMetersToMiles()
 }
 
 /**

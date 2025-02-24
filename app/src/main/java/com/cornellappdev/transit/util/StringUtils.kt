@@ -23,7 +23,7 @@ object StringUtils {
         return URLDecoder.decode(this, StandardCharsets.UTF_8.toString())
     }
 
-    fun String.toMiles(): String {
+    fun String.fromMetersToMiles(): String {
         return "%.1f".format(this.toDouble() / 1609.34)
     }
 }

@@ -1,6 +1,6 @@
 package com.cornellappdev.transit.models
 
-import com.cornellappdev.transit.util.StringUtils.toMiles
+import com.cornellappdev.transit.util.StringUtils.fromMetersToMiles
 import com.google.android.gms.maps.model.LatLng
 import com.squareup.moshi.Json
 
@@ -40,7 +40,7 @@ data class Direction(
     val type
         get() = if (directionType == "walk") DirectionType.WALK else DirectionType.DEPART
     val distance: String
-        get() = distanceMeters.toMiles()
+        get() = distanceMeters.fromMetersToMiles()
 }
 
 
