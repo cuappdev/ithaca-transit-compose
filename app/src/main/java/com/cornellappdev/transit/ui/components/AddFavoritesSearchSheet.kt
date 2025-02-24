@@ -131,18 +131,20 @@ fun AddFavoritesSearchSheet(
                 trailingIcon = { Icon(Icons.Outlined.Info, "Info") },
                 placeholder = { Text(text = "Search for a stop to add") }
             ) {
-                LazyColumn {
-                    when (placeQueryResponse) {
-                        is ApiResponse.Error -> {
+                when (placeQueryResponse) {
+                    is ApiResponse.Error -> {
+                        LocationNotFound()
+                    }
 
+                    ApiResponse.Pending -> {
+                        ProgressCircle()
+                    }
+
+                    is ApiResponse.Success -> {
+                        if (placeQueryResponse.data.isEmpty()) {
+                            LocationNotFound()
                         }
-
-                        is ApiResponse.Pending -> {
-
-                        }
-
-                        is ApiResponse.Success -> {
-
+                        LazyColumn {
                             items(placeQueryResponse.data) {
                                 MenuItem(
                                     type = it.type,

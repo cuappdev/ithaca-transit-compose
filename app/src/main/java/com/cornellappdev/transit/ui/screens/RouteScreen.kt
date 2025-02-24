@@ -1,7 +1,6 @@
 package com.cornellappdev.transit.ui.screens
 
 import android.os.Build
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -53,7 +52,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.MapState
-import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.models.Route
 import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.Transport
@@ -61,7 +59,9 @@ import com.cornellappdev.transit.models.toTransport
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.CurrentLocationItem
 import com.cornellappdev.transit.ui.components.DatePicker
+import com.cornellappdev.transit.ui.components.LocationNotFound
 import com.cornellappdev.transit.ui.components.MenuItem
+import com.cornellappdev.transit.ui.components.ProgressCircle
 import com.cornellappdev.transit.ui.components.RouteCell
 import com.cornellappdev.transit.ui.components.SearchTextField
 import com.cornellappdev.transit.ui.components.TernarySelector
@@ -577,11 +577,21 @@ private fun RouteList(
 ) {
     when (lastRouteResponse) {
         is ApiResponse.Error -> {
-            Text("Error")
+            Text(
+                text = "No Routes Found",
+                fontFamily = robotoFamily,
+                fontWeight = FontWeight.Normal,
+                color = MetadataGray,
+                fontSize = 24.sp,
+                modifier = Modifier
+                    .padding(12.dp)
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
         }
 
         is ApiResponse.Pending -> {
-            Text("Pending")
+            ProgressCircle()
         }
 
         is ApiResponse.Success -> {
@@ -726,10 +736,58 @@ private fun RouteOptionsSearchSheet(
                         modifier = Modifier.clickable { routeViewModel.onQueryChange("") })
                 }
             )
+            when (searchBarValue) {
+                is SearchBarUIState.Query -> {
+                    when (searchBarValue.searched) {
+                        ApiResponse.Error -> {
+                            LocationNotFound()
+                        }
 
-            LazyColumn {
-                when (searchBarValue) {
-                    is SearchBarUIState.RecentAndFavorites -> {
+                        ApiResponse.Pending -> {
+                            ProgressCircle()
+                        }
+
+                        is ApiResponse.Success -> {
+                            if (searchBarValue.searched.data.isEmpty()) {
+                                LocationNotFound()
+                            } else {
+                                LazyColumn {
+                                    items(searchBarValue.searched.data) {
+                                        MenuItem(
+                                            type = it.type,
+                                            label = it.name,
+                                            sublabel = it.subLabel,
+                                            onClick = {
+                                                if (isStart) {
+                                                    routeViewModel.setStartPlace(
+                                                        LocationUIState.Place(
+                                                            it.name,
+                                                            LatLng(it.latitude, it.longitude)
+                                                        )
+                                                    )
+                                                } else {
+                                                    routeViewModel.setDestPlace(
+                                                        LocationUIState.Place(
+                                                            it.name,
+                                                            LatLng(it.latitude, it.longitude)
+                                                        )
+                                                    )
+                                                }
+                                                onItemClicked()
+                                            })
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                is SearchBarUIState.RecentAndFavorites -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         item {
                             Spacer(modifier = Modifier.height(12.dp))
                             CurrentLocationItem {
@@ -813,54 +871,9 @@ private fun RouteOptionsSearchSheet(
                             )
                         }
                     }
-
-                    is SearchBarUIState.Query -> {
-                        when (searchBarValue.searched) {
-                            is ApiResponse.Error -> {
-                                item {
-                                    Text("Error")
-                                }
-                            }
-
-                            is ApiResponse.Pending -> {
-                                item {
-                                    Text("Pending")
-                                }
-                            }
-
-                            is ApiResponse.Success -> {
-
-                                items(searchBarValue.searched.data) {
-                                    MenuItem(
-                                        type = it.type,
-                                        label = it.name,
-                                        sublabel = it.subLabel,
-                                        onClick = {
-                                            if (isStart) {
-                                                routeViewModel.setStartPlace(
-                                                    LocationUIState.Place(
-                                                        it.name,
-                                                        LatLng(it.latitude, it.longitude)
-                                                    )
-                                                )
-                                            } else {
-                                                routeViewModel.setDestPlace(
-                                                    LocationUIState.Place(
-                                                        it.name,
-                                                        LatLng(it.latitude, it.longitude)
-                                                    )
-                                                )
-                                            }
-                                            onItemClicked()
-                                        })
-                                }
-                            }
-                        }
-                    }
-
                 }
-
             }
         }
     }
+
 }
