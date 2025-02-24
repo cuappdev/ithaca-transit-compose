@@ -1,6 +1,7 @@
 package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
@@ -14,6 +15,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -57,38 +65,45 @@ class HomeViewModel @Inject constructor(
     val defaultIthaca = LatLng(42.44, -76.50)
 
     init {
-        viewModelScope.launch {
-            launch {
-                userPreferenceRepository.favoritesFlow.collect {
-                    if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
-                        _searchBarUiState.value =
-                            (_searchBarUiState.value as SearchBarUIState.RecentAndFavorites).copy(
-                                favorites = it
-                            )
-                    }
-                }
+        userPreferenceRepository.favoritesFlow.onEach {
+            if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
+                _searchBarUiState.value =
+                    (_searchBarUiState.value as SearchBarUIState.RecentAndFavorites).copy(
+                        favorites = it
+                    )
             }
-            launch {
-                userPreferenceRepository.recentsFlow.collect {
-                    if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
-                        _searchBarUiState.value =
-                            (_searchBarUiState.value as SearchBarUIState.RecentAndFavorites).copy(
-                                recents = it
-                            )
-                    }
-                }
+        }.launchIn(viewModelScope)
+
+        userPreferenceRepository.recentsFlow.onEach {
+            if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
+                _searchBarUiState.value =
+                    (_searchBarUiState.value as SearchBarUIState.RecentAndFavorites).copy(
+                        recents = it
+                    )
             }
-            launch {
-                routeRepository.placeFlow.collect {
-                    if (_searchBarUiState.value is SearchBarUIState.Query) {
-                        _searchBarUiState.value =
-                            (_searchBarUiState.value as SearchBarUIState.Query).copy(
-                                searched = it
-                            )
-                    }
-                }
+        }.launchIn(viewModelScope)
+
+        routeRepository.placeFlow.onEach {
+            if (_searchBarUiState.value is SearchBarUIState.Query) {
+                _searchBarUiState.value =
+                    (_searchBarUiState.value as SearchBarUIState.Query).copy(
+                        searched = it
+                    )
             }
-        }
+        }.launchIn(viewModelScope)
+
+        searchBarUiState
+            .debounce(300L)
+            .filterIsInstance<SearchBarUIState.Query>()
+            .map { it.queryText }
+            .distinctUntilChanged()
+            .onEach {
+                routeRepository.makeSearch(it)
+            }.launchIn(viewModelScope)
+
+        addSearchQuery.debounce(300L).distinctUntilChanged().onEach {
+            routeRepository.makeSearch(it)
+        }.launchIn(viewModelScope)
     }
 
     /**
@@ -112,7 +127,6 @@ class HomeViewModel @Inject constructor(
                 ApiResponse.Pending, query
             )
         }
-        routeRepository.makeSearch(query)
     }
 
     /**
@@ -120,7 +134,6 @@ class HomeViewModel @Inject constructor(
      */
     fun onAddQueryChange(query: String) {
         addSearchQuery.value = query
-        routeRepository.makeSearch(query)
     }
 
     /**

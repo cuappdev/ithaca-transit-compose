@@ -69,7 +69,7 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
     }
 
     /**
-     * Makes a new call to backend for all stops.
+     * Makes a new call to places related to a query string.
      */
     fun makeSearch(query: String) {
         _placeFlow.value = ApiResponse.Pending
