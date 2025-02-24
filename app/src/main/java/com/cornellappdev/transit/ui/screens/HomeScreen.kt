@@ -49,17 +49,18 @@ import com.cornellappdev.transit.R
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
+import com.cornellappdev.transit.ui.components.LocationNotFound
 import com.cornellappdev.transit.ui.components.MenuItem
+import com.cornellappdev.transit.ui.components.ProgressCircle
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
-import com.cornellappdev.transit.ui.viewmodels.LocationUIState
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
+import com.cornellappdev.transit.util.StringUtils.toURLString
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
@@ -224,37 +225,31 @@ fun HomeScreen(
                     }
 
                     is SearchBarUIState.Query -> {
-                        LazyColumn {
-                            when (searchBarValue.searched) {
-                                is ApiResponse.Error -> {
-                                }
+                        when (searchBarValue.searched) {
+                            is ApiResponse.Error -> {
+                                LocationNotFound()
+                            }
 
-                                is ApiResponse.Pending -> {
-                                }
+                            is ApiResponse.Pending -> {
+                                ProgressCircle()
+                            }
 
-                                is ApiResponse.Success -> {
-                                    items(searchBarValue.searched.data) {
-                                        MenuItem(
-                                            type = it.type,
-                                            label = it.name,
-                                            sublabel = it.subLabel,
-                                            onClick = {
-                                                homeViewModel.addRecent(it)
-                                                homeViewModel.changeEndLocation(
-                                                    LocationUIState.Place(
-                                                        it.name,
-                                                        LatLng(
-                                                            it.latitude,
-                                                            it.longitude
-                                                        )
-                                                    )
-                                                )
-                                                navController.navigate("route")
-                                            })
+                            is ApiResponse.Success -> {
+                                if (searchBarValue.searched.data.isEmpty()) {
+                                    LocationNotFound()
+                                } else {
+                                    LazyColumn {
+                                        items(searchBarValue.searched.data) {
+                                            MenuItem(
+                                                type = it.type,
+                                                label = it.name,
+                                                sublabel = it.subLabel,
+                                                onClick = {
+                                                    homeViewModel.addRecent(it)
+                                                    navController.navigate("route/${it.name.toURLString()}/${it.latitude}/${it.longitude}")
+                                                })
 
-                                    }
-                                    if (searchBarValue.searched.data.isEmpty()) {
-                                        item { Text("No search results") }
+                                        }
                                     }
                                 }
                             }

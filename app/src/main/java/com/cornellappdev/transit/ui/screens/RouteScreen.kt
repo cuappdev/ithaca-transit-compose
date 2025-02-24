@@ -1,6 +1,7 @@
 package com.cornellappdev.transit.ui.screens
 
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -57,7 +58,9 @@ import com.cornellappdev.transit.models.Transport
 import com.cornellappdev.transit.models.toTransport
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.DatePicker
+import com.cornellappdev.transit.ui.components.LocationNotFound
 import com.cornellappdev.transit.ui.components.MenuItem
+import com.cornellappdev.transit.ui.components.ProgressCircle
 import com.cornellappdev.transit.ui.components.RouteCell
 import com.cornellappdev.transit.ui.components.SearchTextField
 import com.cornellappdev.transit.ui.components.TernarySelector
@@ -89,6 +92,7 @@ import java.util.Date
     ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
     ExperimentalMaterialApi::class
 )
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RouteScreen(
     navController: NavController,
@@ -184,6 +188,7 @@ fun RouteScreen(
 /**
  * Bottom sheet to select Leave Now/Leave At/Arrive By
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun ArriveByBottomSheet(
     routeViewModel: RouteViewModel,
@@ -299,6 +304,7 @@ private fun ArriveByBottomSheet(
 /**
  * Main menu of Route Options
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 private fun RouteOptionsMainMenu(
@@ -566,6 +572,7 @@ private fun PaddedRouteCell(transport: Transport, onClick: () -> Unit) {
 /**
  * List of routes from a route query
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun RouteList(
     lastRouteResponse: ApiResponse<RouteOptions>,
@@ -573,11 +580,21 @@ private fun RouteList(
 ) {
     when (lastRouteResponse) {
         is ApiResponse.Error -> {
-            Text("Error")
+            Text(
+                text = "No Routes Found",
+                fontFamily = robotoFamily,
+                fontWeight = FontWeight.Normal,
+                color = MetadataGray,
+                fontSize = 24.sp,
+                modifier = Modifier
+                    .padding(12.dp)
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
         }
 
         is ApiResponse.Pending -> {
-            Text("Pending")
+            ProgressCircle()
         }
 
         is ApiResponse.Success -> {
@@ -647,6 +664,7 @@ private fun RouteList(
 /**
  * Route options select sheet
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RouteOptionsSearchSheet(
@@ -722,10 +740,58 @@ private fun RouteOptionsSearchSheet(
                         modifier = Modifier.clickable { routeViewModel.onQueryChange("") })
                 }
             )
+            when (searchBarValue) {
+                is SearchBarUIState.Query -> {
+                    when (searchBarValue.searched) {
+                        ApiResponse.Error -> {
+                            LocationNotFound()
+                        }
 
-            LazyColumn {
-                when (searchBarValue) {
-                    is SearchBarUIState.RecentAndFavorites -> {
+                        ApiResponse.Pending -> {
+                            ProgressCircle()
+                        }
+
+                        is ApiResponse.Success -> {
+                            if (searchBarValue.searched.data.isEmpty()) {
+                                LocationNotFound()
+                            } else {
+                                LazyColumn {
+                                    items(searchBarValue.searched.data) {
+                                        MenuItem(
+                                            type = it.type,
+                                            label = it.name,
+                                            sublabel = it.subLabel,
+                                            onClick = {
+                                                if (isStart) {
+                                                    routeViewModel.setStartPlace(
+                                                        LocationUIState.Place(
+                                                            it.name,
+                                                            LatLng(it.latitude, it.longitude)
+                                                        )
+                                                    )
+                                                } else {
+                                                    routeViewModel.setDestPlace(
+                                                        LocationUIState.Place(
+                                                            it.name,
+                                                            LatLng(it.latitude, it.longitude)
+                                                        )
+                                                    )
+                                                }
+                                                onItemClicked()
+                                            })
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                is SearchBarUIState.RecentAndFavorites -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         item {
                             Text(
                                 "Favorites",
@@ -793,54 +859,9 @@ private fun RouteOptionsSearchSheet(
                             )
                         }
                     }
-
-                    is SearchBarUIState.Query -> {
-                        when (searchBarValue.searched) {
-                            is ApiResponse.Error -> {
-                                item {
-                                    Text("Error")
-                                }
-                            }
-
-                            is ApiResponse.Pending -> {
-                                item {
-                                    Text("Pending")
-                                }
-                            }
-
-                            is ApiResponse.Success -> {
-
-                                items(searchBarValue.searched.data) {
-                                    MenuItem(
-                                        type = it.type,
-                                        label = it.name,
-                                        sublabel = it.subLabel,
-                                        onClick = {
-                                            if (isStart) {
-                                                routeViewModel.setStartPlace(
-                                                    LocationUIState.Place(
-                                                        it.name,
-                                                        LatLng(it.latitude, it.longitude)
-                                                    )
-                                                )
-                                            } else {
-                                                routeViewModel.setDestPlace(
-                                                    LocationUIState.Place(
-                                                        it.name,
-                                                        LatLng(it.latitude, it.longitude)
-                                                    )
-                                                )
-                                            }
-                                            onItemClicked()
-                                        })
-                                }
-                            }
-                        }
-                    }
-
                 }
-
             }
         }
     }
+
 }
