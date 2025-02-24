@@ -57,7 +57,6 @@ import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.LocationUIState
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
-import com.cornellappdev.transit.util.StringUtils.toURLString
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -217,8 +216,8 @@ fun HomeScreen(
                                 homeViewModel.clearRecents()
                             },
                             navController = navController,
-                            changeStartLocation = {
-                                place -> homeViewModel.changeStartLocation(place)
+                            changeStartLocation = { place ->
+                                homeViewModel.changeStartLocation(place)
                             },
                             changeEndLocation = { place ->
                                 homeViewModel.changeEndLocation(place)
