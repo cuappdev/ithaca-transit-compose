@@ -25,6 +25,12 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
     private suspend fun getRoute(request: RouteRequest): Payload<RouteOptions> =
         networkApi.getRoute(request)
 
+    private suspend fun getTracking(request: TrackingRequestList): Payload<BusLocation> =
+        networkApi.getTracking(request)
+
+    private suspend fun getDelay(request: DelayRequestList): Payload<DelayInfo> =
+        networkApi.getDelay(request)
+
     private val _stopFlow: MutableStateFlow<ApiResponse<List<Place>>> =
         MutableStateFlow(ApiResponse.Pending)
 
