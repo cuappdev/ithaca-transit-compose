@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,6 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.DividerGray
+import com.cornellappdev.transit.ui.theme.IconGray
+import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.theme.TextButtonGray
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
@@ -117,19 +120,31 @@ fun AddFavoritesSearchSheet(
             }
 
             DockedSearchBar(
-                query = addSearchBarValue,
-                onQueryChange = { s -> homeViewModel.onAddQueryChange(s) },
-                onSearch = { addSearchActive = false; homeViewModel.onSearch(it) },
-                active = addSearchActive,
-                onActiveChange = { b -> addSearchActive = b },
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        query = addSearchBarValue,
+                        onQueryChange = { s -> homeViewModel.onAddQueryChange(s) },
+                        onSearch = { addSearchActive = false; homeViewModel.onSearch(it) },
+                        expanded = addSearchActive,
+                        onExpandedChange = { b -> addSearchActive = b },
+                        placeholder = { Text(text = "Search for a stop to add") },
+                        leadingIcon = { Icon(Icons.Outlined.Search, "Search", tint = IconGray) },
+                        trailingIcon = { Icon(Icons.Outlined.Info, "Info", tint = IconGray) },
+                        colors = SearchBarDefaults.inputFieldColors(
+                            focusedTextColor = Color.Black,
+                            focusedPlaceholderColor = MetadataGray,
+                            unfocusedTextColor = Color.Black,
+                            unfocusedPlaceholderColor = MetadataGray
+                        ),
+                    )
+                },
+                expanded = addSearchActive,
+                onExpandedChange = { b -> addSearchActive = b },
                 shape = RoundedCornerShape(size = 8.dp),
                 colors = SearchBarDefaults.colors(
                     containerColor = Color.White,
                     dividerColor = DividerGray,
-                ),
-                leadingIcon = { Icon(Icons.Outlined.Search, "Search") },
-                trailingIcon = { Icon(Icons.Outlined.Info, "Info") },
-                placeholder = { Text(text = "Search for a stop to add") }
+                )
             ) {
                 when (placeQueryResponse) {
                     is ApiResponse.Error -> {
@@ -160,6 +175,7 @@ fun AddFavoritesSearchSheet(
                         }
                     }
                 }
+
             }
         }
     }
