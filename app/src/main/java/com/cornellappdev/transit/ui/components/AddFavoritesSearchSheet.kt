@@ -131,10 +131,12 @@ fun AddFavoritesSearchSheet(
                 ),
                 leadingIcon = { Icon(Icons.Outlined.Search, "Search") },
                 trailingIcon = {
-                    Icon(
-                        Icons.Outlined.Clear,
-                        "Clear",
-                        modifier = Modifier.clickable { homeViewModel.onAddQueryChange("") })
+                    if (addSearchBarValue.isNotEmpty()) {
+                        Icon(
+                            Icons.Outlined.Clear,
+                            "Clear",
+                            modifier = Modifier.clickable { homeViewModel.onAddQueryChange("") })
+                    }
                 },
                 placeholder = { Text(text = "Search for a stop to add") },
                 modifier = Modifier.border(
