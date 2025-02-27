@@ -182,7 +182,7 @@ private fun DetailsBottomSheet(
         dir.busNumber != ""
     }
 
-    Column(modifier = Modifier.height(700.dp)) {
+    Column(modifier = Modifier.height(700.dp).background(Color.White)) {
 
         // Header
         Row(
@@ -235,7 +235,8 @@ private fun DetailsBottomSheet(
                         modifier = Modifier.padding(horizontal = 12.dp),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
+                        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
+                        color = Color.Black
                     )
                 } else {
                     Text(
@@ -248,7 +249,8 @@ private fun DetailsBottomSheet(
                         modifier = Modifier.padding(horizontal = 12.dp),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
+                        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
+                        color = Color.Black
                     )
                 }
                 Text(
