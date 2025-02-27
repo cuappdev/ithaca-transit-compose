@@ -31,7 +31,7 @@ interface NetworkApi {
     @POST("/api/v3/tracking")
     suspend fun getTracking(@Body request: TrackingRequestList): Payload<BusLocation>
 
-    @POST("/api/v3/delay")
+    @POST("/api/v3/delays")
     suspend fun getDelay(@Body request: DelayRequestList): Payload<DelayInfo>
 
 }
