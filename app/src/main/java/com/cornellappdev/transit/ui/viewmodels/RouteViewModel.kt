@@ -165,7 +165,7 @@ class RouteViewModel @Inject constructor(
             // Every time startPlace, destPlace, or arriveBy changes, make a route request
             combine(startPlace, destPlace, arriveByFlow) { start, dest, arriveBy ->
                 Triple(start, dest, arriveBy)
-            }.collect {
+            }.debounce(50L).collect {
                 val startState = it.first
                 val endState = it.second
                 val arriveByState = it.third
