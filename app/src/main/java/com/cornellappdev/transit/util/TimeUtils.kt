@@ -34,7 +34,6 @@ object TimeUtils {
         SimpleDateFormat("MMM d, yyyy", Locale.US)
 
 
-
     /**
      * Convert ISO datetime string to hours, minutes, and AM/PM in format HH:MM AM
      */
@@ -86,6 +85,14 @@ object TimeUtils {
         }
         diffString += "$minutes min"
         return diffString
+    }
+
+    /**
+     * Return an ISO string representing an integer amount of minutes added t
+     * to an original date [isoString]
+     */
+    fun addMinutesToTime(isoString: String, seconds: Int): String {
+        return Instant.parse(isoString).plusSeconds(seconds.toLong()).toString()
     }
 
 }

@@ -60,7 +60,7 @@ data class Route(
     val busDelayed
         get() = this.directions.firstOrNull { dir ->
             dir.type == DirectionType.DEPART
-        }?.delay != null
+        }?.delay?.let { it > 0 } ?: false
 }
 
 /**
