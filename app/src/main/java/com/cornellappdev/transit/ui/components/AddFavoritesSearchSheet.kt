@@ -131,13 +131,25 @@ fun AddFavoritesSearchSheet(
                         onExpandedChange = { b -> addSearchActive = b },
                         placeholder = { Text(text = "Search for a stop to add") },
                         leadingIcon = { Icon(Icons.Outlined.Search, "Search", tint = IconGray) },
-                        trailingIcon = { Icon(Icons.Outlined.Info, "Info", tint = IconGray) },
                         colors = SearchBarDefaults.inputFieldColors(
                             focusedTextColor = Color.Black,
                             focusedPlaceholderColor = MetadataGray,
                             unfocusedTextColor = Color.Black,
                             unfocusedPlaceholderColor = MetadataGray
                         ),
+                        trailingIcon = {
+                            if (addSearchBarValue.isNotEmpty()) {
+                                Icon(
+                                    Icons.Outlined.Clear,
+                                    "Clear",
+                                    modifier = Modifier.clickable { homeViewModel.onAddQueryChange("") })
+                            }
+                        },
+                        modifier = Modifier.border(
+                            width = 2.dp,
+                            color = DividerGray,
+                            shape = RoundedCornerShape(size = 8.dp)
+                        )
                     )
                 },
                 expanded = addSearchActive,
