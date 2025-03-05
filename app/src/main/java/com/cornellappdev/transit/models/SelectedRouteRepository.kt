@@ -1,6 +1,7 @@
 package com.cornellappdev.transit.models
 
 import com.cornellappdev.transit.ui.viewmodels.LocationUIState
+import com.cornellappdev.transit.ui.viewmodels.SelectedRouteState
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,38 +11,48 @@ import javax.inject.Singleton
 @Singleton
 class SelectedRouteRepository @Inject constructor() {
 
-    private val _startPlace: MutableStateFlow<LocationUIState> = MutableStateFlow(
-        LocationUIState.CurrentLocation
+    private val _selectedRoute: MutableStateFlow<SelectedRouteState> = MutableStateFlow(
+        SelectedRouteState(
+            LocationUIState.CurrentLocation,
+            LocationUIState.CurrentLocation
+        )
     )
 
-    private val _destPlace: MutableStateFlow<LocationUIState> = MutableStateFlow(
-        LocationUIState.CurrentLocation
-    )
-
     /**
-     * Pair of the name of the starting location and the coordinates
+     * The selected route parameters in route options
      */
-    val startPlace = _startPlace.asStateFlow()
+    val selectedRoute = _selectedRoute.asStateFlow()
 
     /**
-     * Pair of the name of the ending location and the coordinates
-     */
-    val destPlace = _destPlace.asStateFlow()
-
-    /**
-     * Change the start location [_startPlace]
+     * Change the start location in [_selectedRoute]
      * @param location The new starting location as a LocationUIState
      */
     fun setStartPlace(location: LocationUIState) {
-        _startPlace.value = location
+        _selectedRoute.value = SelectedRouteState(
+            location,
+            _selectedRoute.value.endPlace
+        )
     }
 
     /**
-     * Change the destination location [_destPlace]
+     * Change the destination location in [_selectedRoute]
      * @param location The new destination location as a LocationUIState
      */
     fun setDestPlace(location: LocationUIState) {
-        _destPlace.value = location
+        _selectedRoute.value = SelectedRouteState(
+            _selectedRoute.value.startPlace,
+            location
+        )
+    }
+
+    /**
+     * Swap start and destination locations
+     */
+    fun swapPlaces() {
+        _selectedRoute.value = SelectedRouteState(
+            _selectedRoute.value.endPlace,
+            _selectedRoute.value.startPlace
+        )
     }
 
 }
