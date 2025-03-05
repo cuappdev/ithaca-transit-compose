@@ -54,15 +54,9 @@ class RouteViewModel @Inject constructor(
     val currentLocation = locationRepository.currentLocation
 
     /**
-     * Pair of the name of the starting location and the coordinates
+     * The starting and ending locations in route options
      */
-    val startPlace = selectedRouteRepository.startPlace
-
-
-    /**
-     * Pair of the name of the ending location and the coordinates
-     */
-    val destPlace = selectedRouteRepository.destPlace
+    val selectedRoute = selectedRouteRepository.selectedRoute
 
     /**
      * State of the arriveBy selector
@@ -159,27 +153,22 @@ class RouteViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
 
-        combine(startPlace, destPlace, arriveByFlow) { start, dest, arriveBy ->
-            Triple(start, dest, arriveBy)
+        combine(selectedRoute, arriveByFlow) { startAndEnd, arriveBy ->
+            startAndEnd to arriveBy
         }.onEach {
-            // Every time startPlace, destPlace, or arriveBy changes, make a route request
-            combine(startPlace, destPlace, arriveByFlow) { start, dest, arriveBy ->
-                Triple(start, dest, arriveBy)
-            }.debounce(50L).collect {
-                val startState = it.first
-                val endState = it.second
-                val arriveByState = it.third
-                getCoordinates(it.second)?.let { end ->
-                    getCoordinates(it.first)?.let { start ->
-                        getRoute(
-                            end = end,
-                            start = start,
-                            arriveBy = arriveByState is ArriveByUIState.ArriveBy,
-                            destinationName = if (endState is LocationUIState.Place) endState.name else "Current Location",
-                            originName = if (startState is LocationUIState.Place) startState.name else "Current Location",
-                            time = (arriveByState.date.time / 1000).toDouble()
-                        )
-                    }
+            val startState = it.first.startPlace
+            val endState = it.first.endPlace
+            val arriveByState = it.second
+            getCoordinates(endState)?.let { end ->
+                getCoordinates(startState)?.let { start ->
+                    getRoute(
+                        end = end,
+                        start = start,
+                        arriveBy = arriveByState is ArriveByUIState.ArriveBy,
+                        destinationName = if (endState is LocationUIState.Place) endState.name else "Current Location",
+                        originName = if (startState is LocationUIState.Place) startState.name else "Current Location",
+                        time = (arriveByState.date.time / 1000).toDouble()
+                    )
                 }
             }
         }.launchIn(viewModelScope)
@@ -313,9 +302,7 @@ class RouteViewModel @Inject constructor(
      * Swap start and destination locations
      */
     fun swapLocations() {
-        val temp = startPlace.value
-        selectedRouteRepository.setStartPlace(destPlace.value)
-        selectedRouteRepository.setDestPlace(temp)
+        selectedRouteRepository.swapPlaces()
     }
 
     /**

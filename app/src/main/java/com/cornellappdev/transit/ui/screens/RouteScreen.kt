@@ -99,8 +99,7 @@ fun RouteScreen(
     routeViewModel: RouteViewModel
 ) {
 
-    val startLocation = routeViewModel.startPlace.collectAsState().value
-    val endLocation = routeViewModel.destPlace.collectAsState().value
+    val selectedRoute = routeViewModel.selectedRoute.collectAsState().value
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -167,8 +166,8 @@ fun RouteScreen(
                 routeViewModel = routeViewModel,
                 navController = navController,
                 coroutineScope = coroutineScope,
-                startLocation = startLocation,
-                endLocation = endLocation,
+                startLocation = selectedRoute.startPlace,
+                endLocation = selectedRoute.endPlace,
                 lastRoute = lastRoute,
                 startSheetState = startSheetState,
                 destSheetState = destSheetState
