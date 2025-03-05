@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Ithaca Transit</string>
-    <string name="permission_dialog_text">Ithaca Transit requires location permissions to provide the best experience.</string>
+    <string name="permission_dialog_text">Ithaca Transit needs location access to provide
+        accurate routes and real-time transit updates. Please enable location services for the
+        best experience.</string>
     <string name="search_placeholder">Where to?</string>
 </resources>
