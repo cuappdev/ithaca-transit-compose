@@ -84,7 +84,7 @@ fun HomeScreen(
 ) {
     // Permissions dialog
     val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
-    var openDialog by remember { mutableStateOf(false) }
+    var openDialog by remember { mutableStateOf(true) }
 
     val scope = rememberCoroutineScope()
 
@@ -178,14 +178,8 @@ fun HomeScreen(
             properties = MapProperties(
                 isMyLocationEnabled = permissionState.status.isGranted
             ),
-            onMapClick = {
-                searchActive = false
-                openDialog = true
-            },
-            onMapLongClick = {
-                searchActive = false
-                openDialog = true
-            },
+            onMapClick = { searchActive = false },
+            onMapLongClick = { searchActive = false },
             uiSettings = MapUiSettings(zoomControlsEnabled = false)
         )
 
