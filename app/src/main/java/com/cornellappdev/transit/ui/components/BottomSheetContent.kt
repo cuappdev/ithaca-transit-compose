@@ -80,6 +80,18 @@ fun BottomSheetContent(
         }
 
         LazyRow(modifier = Modifier.padding(bottom = 20.dp)) {
+            item {
+                LocationItem(
+                    image = painterResource(id = R.drawable.ellipse),
+                    editImage = painterResource(id = R.drawable.add_icon),
+                    label = "Add",
+                    sublabel = "",
+                    editing = editState,
+                    {},
+                    addOnClick = addOnClick,
+                    removeOnClick = {}
+                )
+            }
             items(data) {
                 LocationItem(
                     image = painterResource(id = R.drawable.location_icon),
@@ -101,18 +113,6 @@ fun BottomSheetContent(
                     },
                     addOnClick = {},
                     removeOnClick = { favoritesViewModel.removeFavorite(it); removeOnClick() },
-                )
-            }
-            item {
-                LocationItem(
-                    image = painterResource(id = R.drawable.ellipse),
-                    editImage = painterResource(id = R.drawable.add_icon),
-                    label = "Add",
-                    sublabel = "",
-                    editing = editState,
-                    {},
-                    addOnClick = addOnClick,
-                    removeOnClick = {}
                 )
             }
         }
