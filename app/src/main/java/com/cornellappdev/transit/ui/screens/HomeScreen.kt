@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -115,10 +117,17 @@ fun HomeScreen(
                 modifier = Modifier
                     .wrapContentWidth()
                     .wrapContentHeight(),
-                shape = RoundedCornerShape(80.dp),
+                shape = RoundedCornerShape(20.dp),
                 tonalElevation = AlertDialogDefaults.TonalElevation
             ) {
                 Column(modifier = Modifier.padding(40.dp)) {
+                    Image(
+                        painter = painterResource(id = R.drawable.app_icon_rounded),
+                        contentDescription = stringResource(R.string.app_name),
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                    )
+                    Spacer(modifier = Modifier.height(30.dp))
                     Text(
                         text = stringResource(R.string.permission_dialog_text)
                     )
@@ -130,7 +139,7 @@ fun HomeScreen(
                         },
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
-                        Text("Allow")
+                        Text("Grant Permissions")
                     }
                 }
             }
