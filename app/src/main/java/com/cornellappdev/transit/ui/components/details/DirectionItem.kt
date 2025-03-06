@@ -29,9 +29,12 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,6 +48,7 @@ import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.theme.Style.heading4
 import com.cornellappdev.transit.ui.theme.TransitBlue
+import com.cornellappdev.transit.ui.theme.robotoFamily
 
 /**
  * Composable representing a direction item, one component of a Route
@@ -65,7 +69,8 @@ fun DirectionItem(
     duration: Int = 0,
     expandedStops: Boolean = false,
     colorAbove: Color = MetadataGray,
-    colorBelow: Color = MetadataGray
+    colorBelow: Color = MetadataGray,
+    delayedTime: String? = null,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -74,14 +79,35 @@ fun DirectionItem(
             .height(80.dp)
     ) {
         // Time Text
-        Text(
-            text = time,
-            color = Color.Black,
-            modifier = Modifier
-                .width(72.dp)
-                .padding(end = 8.dp),
-            style = heading4
-        )
+        Column(verticalArrangement = Arrangement.Center) {
+            Text(
+                text = time,
+                color = Color.Black,
+                modifier = Modifier
+                    .width(72.dp)
+                    .padding(end = 8.dp),
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontFamily = robotoFamily,
+                    lineHeight = 14.sp,
+                    platformStyle = PlatformTextStyle(
+                        includeFontPadding = false
+                    ),
+                    textDecoration = if (delayedTime != null) TextDecoration.LineThrough else TextDecoration.None
+                )
+            )
+            if (delayedTime != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = delayedTime,
+                    color = Color.Red,
+                    modifier = Modifier
+                        .width(72.dp)
+                        .padding(end = 8.dp),
+                    style = heading4
+                )
+            }
+        }
 
         // Direction Dot & Segments
         val segmentHeight = 32.dp

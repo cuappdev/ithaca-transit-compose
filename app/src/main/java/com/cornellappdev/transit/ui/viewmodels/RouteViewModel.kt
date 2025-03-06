@@ -198,7 +198,20 @@ class RouteViewModel @Inject constructor(
                             direction.endTime
                         ),
                         stops = direction.stops,
-                        busTransfer = direction.stayOnBusForTransfer ?: false
+                        busTransfer = direction.stayOnBusForTransfer ?: false,
+                        delay = direction.delay ?: 0,
+                        delayedStartTime = if (direction.delay != null && direction.delay > 0) TimeUtils.getHHMM(
+                            TimeUtils.addMinutesToTime(
+                                direction.startTime,
+                                direction.delay
+                            )
+                        ) else null,
+                        delayedEndTime = if (direction.delay != null && direction.delay > 0) TimeUtils.getHHMM(
+                            TimeUtils.addMinutesToTime(
+                                direction.endTime,
+                                direction.delay
+                            )
+                        ) else null
                     )
                 }
             }

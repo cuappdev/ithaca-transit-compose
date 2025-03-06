@@ -14,4 +14,7 @@ data class DirectionDetails(
     val duration: Int = 0,
     val stops: List<DirectionStop>,
     val busTransfer: Boolean,
+    val delay: Int = 0,
+    val delayedStartTime: String? = null,
+    val delayedEndTime: String? = null
 )
