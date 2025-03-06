@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,6 +57,8 @@ import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.ProgressCircle
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGray
+import com.cornellappdev.transit.ui.theme.IconGray
+import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.LocationUIState
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
@@ -189,26 +192,41 @@ fun HomeScreen(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+            //If query is blank, display recents and favorites
             DockedSearchBar(
-                query = (searchBarValue as? SearchBarUIState.Query)?.queryText ?: "",
-                onQueryChange = { s -> homeViewModel.onQueryChange(s) },
-                onSearch = { it -> searchActive = false; homeViewModel.onSearch(it) },
-                active = searchActive,
-                onActiveChange = { b -> searchActive = b },
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        query = (searchBarValue as? SearchBarUIState.Query)?.queryText ?: "",
+                        onQueryChange = { s -> homeViewModel.onQueryChange(s) },
+                        onSearch = { it -> searchActive = false; homeViewModel.onSearch(it) },
+                        expanded = searchActive,
+                        onExpandedChange = { b -> searchActive = b },
+                        placeholder = { Text(text = stringResource(R.string.search_placeholder)) },
+                        leadingIcon = { Icon(Icons.Outlined.Search, "Search", tint = IconGray) },
+                        trailingIcon = {
+                            Icon(
+                                Icons.Outlined.Info,
+                                "Info",
+                                Modifier.clickable { navController.navigate("settings") },
+                                tint = IconGray
+                            )
+                        },
+                        colors = SearchBarDefaults.inputFieldColors(
+                            focusedTextColor = Color.Black,
+                            focusedPlaceholderColor = MetadataGray,
+                            unfocusedTextColor = Color.Black,
+                            unfocusedPlaceholderColor = MetadataGray
+                        ),
+                    )
+                },
+                expanded = searchActive,
+                onExpandedChange = { b -> searchActive = b },
                 shape = RoundedCornerShape(size = 8.dp),
                 colors = SearchBarDefaults.colors(
                     containerColor = Color.White,
                     dividerColor = DividerGray,
-                ),
-                leadingIcon = { Icon(Icons.Outlined.Search, "Search") },
-                trailingIcon = {
-                    Icon(
-                        Icons.Outlined.Info,
-                        "Info",
-                        Modifier.clickable { navController.navigate("settings") })
-                },
-                placeholder = { Text(text = stringResource(R.string.search_placeholder)) }
-
+                )
             ) {
                 //If query is blank, display recents and favorites
                 when (searchBarValue) {

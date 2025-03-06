@@ -726,13 +726,16 @@ private fun RouteOptionsSearchSheet(
                     Icon(
                         Icons.Outlined.Search,
                         "Search",
+                        tint = IconGray
                     )
                 },
                 suffix = {
                     Icon(
                         Icons.Outlined.Clear,
                         "Clear",
-                        modifier = Modifier.clickable { routeViewModel.onQueryChange("") })
+                        modifier = Modifier.clickable { routeViewModel.onQueryChange("") },
+                        tint = IconGray
+                    )
                 }
             )
             when (searchBarValue) {
