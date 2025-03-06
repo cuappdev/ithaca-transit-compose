@@ -62,6 +62,7 @@ import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.DirectionDetails
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
+import com.cornellappdev.transit.util.TimeUtils
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
@@ -225,7 +226,7 @@ private fun DetailsBottomSheet(
                                     color = if (isDelayed) LateRed else LiveGreen
                                 )
                             ) {
-                                append(busDirection.startTime)
+                                append(busDirection.delayedStartTime ?: busDirection.startTime)
                             }
                             append(" from ")
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
@@ -340,7 +341,10 @@ fun DetailsSheet(directionDetails: List<DirectionDetails>) {
                 expandedStops = expandedStops[index],
                 // If the previous direction was a bus that transfers onto this bus
                 colorAbove = if (details.directionType == DirectionType.DEPART && details.busTransfer) TransitBlue else MetadataGray,
-                colorBelow = if (details.directionType == DirectionType.DEPART) TransitBlue else MetadataGray
+                colorBelow = if (details.directionType == DirectionType.DEPART) TransitBlue else MetadataGray,
+                delayedTime = if (index == directionDetails.lastIndex && details.directionType == DirectionType.WALK)
+                    details.delayedEndTime else
+                    details.delayedStartTime,
             )
 
             if (expandedStops[index]) {
@@ -363,8 +367,8 @@ fun DetailsSheet(directionDetails: List<DirectionDetails>) {
                     isFinalDestination = index == directionDetails.lastIndex,
                     busNumber = details.busNumber,
                     isLastStop = true,
-                    colorAbove = TransitBlue
-
+                    colorAbove = TransitBlue,
+                    delayedTime = details.delayedEndTime
                 )
             }
 
