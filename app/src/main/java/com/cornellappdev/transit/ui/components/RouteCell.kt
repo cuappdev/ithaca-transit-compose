@@ -95,7 +95,11 @@ fun RouteCell(transport: Transport) {
                     SingleRoute(
                         isBus = direction.type == DirectionType.DEPART,
                         walkOnly = transport.walkOnly,
-                        stopName = direction.name,
+                        stopName = when {
+                            index == 0 -> transport.start
+                            direction.type == DirectionType.WALK -> transport.directionList[index - 1].stops.last().name
+                            else -> direction.name
+                        },
                         distance = if (index == 0) direction.distance else null,
                         busLine = direction.routeId
 
