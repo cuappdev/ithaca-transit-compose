@@ -1,13 +1,11 @@
 package com.cornellappdev.transit.util
 
-import android.os.Build
-
+import android.icu.text.SimpleDateFormat
+import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import android.icu.text.SimpleDateFormat
-import java.time.Duration
 
 
 /**
@@ -91,7 +89,7 @@ object TimeUtils {
      * Return an ISO string representing an integer amount of minutes added t
      * to an original date [isoString]
      */
-    fun addMinutesToTime(isoString: String, seconds: Int): String {
+    fun addSecondsToTime(isoString: String, seconds: Int): String {
         return Instant.parse(isoString).plusSeconds(seconds.toLong()).toString()
     }
 

@@ -1,15 +1,12 @@
 package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
-import android.os.Build
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.cornellappdev.transit.models.Direction
 import com.cornellappdev.transit.models.DirectionType
 import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.MapState
@@ -25,14 +22,12 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -201,13 +196,13 @@ class RouteViewModel @Inject constructor(
                         busTransfer = direction.stayOnBusForTransfer ?: false,
                         delay = direction.delay ?: 0,
                         delayedStartTime = if (direction.delay != null && direction.delay > 0) TimeUtils.getHHMM(
-                            TimeUtils.addMinutesToTime(
+                            TimeUtils.addSecondsToTime(
                                 direction.startTime,
                                 direction.delay
                             )
                         ) else null,
                         delayedEndTime = if (direction.delay != null && direction.delay > 0) TimeUtils.getHHMM(
-                            TimeUtils.addMinutesToTime(
+                            TimeUtils.addSecondsToTime(
                                 direction.endTime,
                                 direction.delay
                             )
