@@ -211,7 +211,10 @@ fun HomeScreen(
                             Icon(
                                 Icons.Outlined.Info,
                                 "Info",
-                                Modifier.clickable { navController.navigate("settings") },
+                                Modifier.clickable {
+                                    homeViewModel.onQueryChange("")
+                                    navController.navigate("settings")
+                                },
                                 tint = IconGray
                             )
                         },
@@ -292,6 +295,7 @@ fun HomeScreen(
                                                             )
                                                         )
                                                     )
+                                                    homeViewModel.onQueryChange("")
                                                     navController.navigate("route")
                                                 })
 

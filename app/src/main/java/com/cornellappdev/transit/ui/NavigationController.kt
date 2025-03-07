@@ -39,7 +39,6 @@ fun NavigationController(
         }
 
         composable("route") {
-            homeViewModel.onQueryChange("")
             RouteScreen(navController = navController, routeViewModel = routeViewModel)
         }
 
