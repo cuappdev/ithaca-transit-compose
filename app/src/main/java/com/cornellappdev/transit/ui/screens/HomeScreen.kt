@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -170,6 +169,10 @@ fun HomeScreen(
 
     // Search bar active/inactive
     var searchActive by remember { mutableStateOf(false) }
+
+    if (!searchActive) {
+        homeViewModel.onQueryChange("")
+    }
 
     Box(
         modifier = Modifier
@@ -363,6 +366,7 @@ fun HomeScreen(
             ) {
                 scope.launch {
                     addSheetState.bottomSheetState.hide()
+                    homeViewModel.onAddQueryChange("")
                 }
             }
         },

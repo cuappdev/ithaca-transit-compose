@@ -1,6 +1,5 @@
 package com.cornellappdev.transit.ui
 
-import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,6 +39,7 @@ fun NavigationController(
         }
 
         composable("route") {
+            homeViewModel.onQueryChange("")
             RouteScreen(navController = navController, routeViewModel = routeViewModel)
         }
 
