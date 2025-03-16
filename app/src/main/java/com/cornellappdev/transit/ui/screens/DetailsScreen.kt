@@ -26,6 +26,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -67,11 +68,19 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.Dash
+import com.google.android.gms.maps.model.Dot
+import com.google.android.gms.maps.model.Gap
+import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import io.morfly.compose.bottomsheet.material3.BottomSheetScaffold
@@ -102,8 +111,20 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
     //Map camera
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
-            mapState.route?.startCoords ?: routeViewModel.defaultIthaca, 16.75f
+            routeViewModel.defaultIthaca, 15f
         )
+    }
+
+    // Update camera to fit both start & end points
+    LaunchedEffect(mapState.route?.startCoords, mapState.route?.directions?.last()?.endLocation) {
+        val startCoords = mapState.route?.startCoords
+        val endCoords = mapState.route?.directions?.last()?.endLocation
+
+        if (startCoords != null && endCoords != null) {
+            val bounds = routeViewModel.getLatLngBounds(startCoords, endCoords)
+            val padding = 180
+            cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+        }
     }
 
     // Using advanced-bottomsheet-compose from https://github.com/Morfly/advanced-bottomsheet-compose
@@ -133,7 +154,13 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
         },
         content = {
             // Screen content
-            DetailsMainScreen(mapState, cameraPositionState, permissionState, navController)
+            DetailsMainScreen(
+                mapState,
+                cameraPositionState,
+                permissionState,
+                navController,
+                routeViewModel
+            )
         }
     )
 }
@@ -143,7 +170,9 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
 private fun DrawableMap(
     mapState: MapState,
     cameraPositionState: CameraPositionState,
-    permissionState: PermissionState
+    permissionState: PermissionState,
+    lineSize: Float,
+    dotSize: Float
 ) {
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
@@ -153,18 +182,58 @@ private fun DrawableMap(
         ),
         uiSettings = MapUiSettings(zoomControlsEnabled = false)
     ) {
-        if (mapState.isShowing) {
-            mapState.route?.directions?.forEach { direction ->
-                Polyline(
-                    points = direction.path,
-                    color = if (direction.type == DirectionType.WALK) {
-                        Color.Gray
-                    } else {
-                        TransitBlue
-                    },
-                )
-
+        if (mapState.isShowing && mapState.route?.directions != null) {
+            mapState.route.directions.forEach { direction ->
+                TransitPolyline(direction.path, direction.type, lineSize, dotSize)
             }
+            Marker(
+                state = MarkerState(
+                    position = mapState.route.directions.last().endLocation
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun TransitPolyline(
+    points: List<LatLng>,
+    directionType: DirectionType,
+    lineSize: Float,
+    dotSize: Float
+) {
+
+    when (directionType) {
+        DirectionType.WALK -> {
+            Polyline(
+                points = points,
+                color = Color.Gray,
+                width = lineSize,
+                pattern = listOf(Dot(), Gap(10f)),
+            )
+        }
+
+        DirectionType.DEPART -> {
+            Polyline(
+                points = points,
+                color = TransitBlue,
+                width = lineSize,
+                pattern = listOf(Dash(1f))
+            )
+            Circle(
+                center = points.first(),
+                radius = dotSize.toDouble(),
+                fillColor = Color.White,
+                strokeColor = Color.Black,
+                strokeWidth = 6f
+            )
+            Circle(
+                center = points.last(),
+                radius = dotSize.toDouble(),
+                fillColor = Color.White,
+                strokeColor = Color.Black,
+                strokeWidth = 6f
+            )
         }
     }
 }
@@ -183,7 +252,11 @@ private fun DetailsBottomSheet(
         dir.busNumber != ""
     }
 
-    Column(modifier = Modifier.height(700.dp).background(Color.White)) {
+    Column(
+        modifier = Modifier
+            .height(700.dp)
+            .background(Color.White)
+    ) {
 
         // Header
         Row(
@@ -276,7 +349,8 @@ private fun DetailsMainScreen(
     mapState: MapState,
     cameraPositionState: CameraPositionState,
     permissionState: PermissionState,
-    navController: NavHostController
+    navController: NavHostController,
+    routeViewModel: RouteViewModel
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         //TODO make an AppBarColors class w/ the right colors and correct icon
@@ -301,7 +375,13 @@ private fun DetailsMainScreen(
 
         HorizontalDivider(thickness = 1.dp, color = DividerGray)
 
-        DrawableMap(mapState, cameraPositionState, permissionState)
+        DrawableMap(
+            mapState,
+            cameraPositionState,
+            permissionState,
+            routeViewModel.getLineSize(cameraPositionState.position.zoom),
+            routeViewModel.getDotSize(cameraPositionState.position.zoom)
+        )
 
     }
 }

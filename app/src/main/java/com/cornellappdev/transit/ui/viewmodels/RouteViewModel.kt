@@ -17,6 +17,7 @@ import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.util.TimeUtils
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -333,6 +334,35 @@ class RouteViewModel @Inject constructor(
                 return location.coordinates
             }
         }
+    }
+
+    /**
+     * Get map bounds for a start and end point
+     */
+    fun getLatLngBounds(start: LatLng, end: LatLng): LatLngBounds {
+        val bounds = LatLngBounds.builder().include(start).include(end).build()
+
+        return bounds
+    }
+
+    /**
+     * Function to calculate size of line based on zoom
+     */
+    fun getLineSize(zoomFactor: Float): Float {
+        // Linear scale upward as you zoom in more
+        val size = (zoomFactor * 3f / 2f) - 10f
+
+        return if (size > 0f) size else 0f
+    }
+
+    /**
+     * Function to calculate size of dot based on zoom
+     */
+    fun getDotSize(zoomFactor: Float): Float {
+        // Linear scale downward as you zoom in more
+        val size = (zoomFactor * -3f) + 60f
+
+        return if (size > 0f) size else 0f
     }
 }
 
