@@ -116,13 +116,10 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
     }
 
     // Update camera to fit both start & end points
-    LaunchedEffect(mapState.route?.startCoords, mapState.route?.directions?.last()?.endLocation) {
-        val startCoords = mapState.route?.startCoords
-        val endCoords = mapState.route?.directions?.last()?.endLocation
-
-        if (startCoords != null && endCoords != null) {
-            val bounds = routeViewModel.getLatLngBounds(startCoords, endCoords)
-            val padding = 180
+    LaunchedEffect(mapState.route) {
+        if (mapState.route != null) {
+            val bounds = routeViewModel.getLatLngBounds(mapState.route)
+            val padding = 80
             cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, padding))
         }
     }

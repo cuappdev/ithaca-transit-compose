@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.DirectionType
 import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.MapState
+import com.cornellappdev.transit.models.Route
 import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.Date
 import javax.inject.Inject
+import kotlin.math.pow
 
 @HiltViewModel
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
@@ -337,32 +339,42 @@ class RouteViewModel @Inject constructor(
     }
 
     /**
-     * Get map bounds for a start and end point
+     * Get map bounds for an entire route
      */
-    fun getLatLngBounds(start: LatLng, end: LatLng): LatLngBounds {
-        val bounds = LatLngBounds.builder().include(start).include(end).build()
+    fun getLatLngBounds(route: Route): LatLngBounds {
 
-        return bounds
+        var bounds = LatLngBounds.builder()
+
+        route.directions.forEach { direction ->
+            direction.path.forEach { latLng ->
+                bounds = bounds.include(latLng)
+            }
+        }
+
+        return bounds.build()
     }
 
     /**
-     * Function to calculate size of line based on zoom
+     * Function to calculate size of route lines on map based on zoom
      */
     fun getLineSize(zoomFactor: Float): Float {
         // Linear scale upward as you zoom in more
         val size = (zoomFactor * 3f / 2f) - 10f
-
-        return if (size > 0f) size else 0f
+        return if (size > 2f) size else 2f
     }
 
     /**
-     * Function to calculate size of dot based on zoom
+     * Function to calculate size of dots on map between bus stops based on zoom
      */
     fun getDotSize(zoomFactor: Float): Float {
-        // Linear scale downward as you zoom in more
-        val size = (zoomFactor * -3f) + 60f
-
-        return if (size > 0f) size else 0f
+        var positiveZoom = zoomFactor
+        if (positiveZoom <= 0f) {
+            positiveZoom = 0.01f
+        }
+        // Inverse scale as you zoom in more
+        // Floor at 2.0 radius
+        val size = 500f / positiveZoom - 22f
+        return if (size > 2f) size else 2f
     }
 }
 
