@@ -162,6 +162,9 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
     )
 }
 
+/**
+ * Background map and contents
+ */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun DrawableMap(
@@ -192,6 +195,9 @@ private fun DrawableMap(
     }
 }
 
+/**
+ * Polyline connecting points in a direction of a certain type [directionType]
+ */
 @Composable
 private fun TransitPolyline(
     points: List<LatLng>,
