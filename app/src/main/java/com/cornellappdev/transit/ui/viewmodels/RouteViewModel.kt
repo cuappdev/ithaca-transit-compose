@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.DirectionType
 import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.MapState
+import com.cornellappdev.transit.models.Route
 import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
@@ -17,6 +18,7 @@ import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.util.TimeUtils
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +35,7 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.Date
 import javax.inject.Inject
+import kotlin.math.pow
 
 @HiltViewModel
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
@@ -333,6 +336,22 @@ class RouteViewModel @Inject constructor(
                 return location.coordinates
             }
         }
+    }
+
+    /**
+     * Get map bounds for an entire route
+     */
+    fun getLatLngBounds(route: Route): LatLngBounds {
+
+        var bounds = LatLngBounds.builder()
+
+        route.directions.forEach { direction ->
+            direction.path.forEach { latLng ->
+                bounds = bounds.include(latLng)
+            }
+        }
+
+        return bounds.build()
     }
 }
 
