@@ -26,6 +26,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -67,11 +68,19 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.Dash
+import com.google.android.gms.maps.model.Dot
+import com.google.android.gms.maps.model.Gap
+import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import io.morfly.compose.bottomsheet.material3.BottomSheetScaffold
@@ -102,8 +111,17 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
     //Map camera
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
-            mapState.route?.startCoords ?: routeViewModel.defaultIthaca, 16.75f
+            routeViewModel.defaultIthaca, 15f
         )
+    }
+
+    // Update camera to fit all points of route
+    LaunchedEffect(mapState.route) {
+        if (mapState.route != null) {
+            val bounds = routeViewModel.getLatLngBounds(mapState.route)
+            val padding = 80
+            cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+        }
     }
 
     // Using advanced-bottomsheet-compose from https://github.com/Morfly/advanced-bottomsheet-compose
@@ -133,37 +151,118 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
         },
         content = {
             // Screen content
-            DetailsMainScreen(mapState, cameraPositionState, permissionState, navController)
+            DetailsMainScreen(
+                mapState,
+                cameraPositionState,
+                permissionState.status.isGranted,
+                onBackClick = { navController.popBackStack() },
+            )
         }
     )
 }
 
+/**
+ * Background map and contents
+ */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun DrawableMap(
     mapState: MapState,
     cameraPositionState: CameraPositionState,
-    permissionState: PermissionState
+    hasLocationPermission: Boolean
 ) {
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
         properties = MapProperties(
-            isMyLocationEnabled = permissionState.status.isGranted
+            isMyLocationEnabled = hasLocationPermission
         ),
         uiSettings = MapUiSettings(zoomControlsEnabled = false)
     ) {
-        if (mapState.isShowing) {
-            mapState.route?.directions?.forEach { direction ->
-                Polyline(
-                    points = direction.path,
-                    color = if (direction.type == DirectionType.WALK) {
-                        Color.Gray
-                    } else {
-                        TransitBlue
-                    },
+        mapState.route?.directions?.takeIf { mapState.isShowing }?.let { directions ->
+            directions.forEach { direction ->
+                TransitPolyline(direction.path, direction.type, cameraPositionState.position.zoom)
+            }
+            directions.lastOrNull()?.let {
+                Marker(
+                    state = MarkerState(
+                        position = it.endLocation
+                    )
                 )
+            }
+        }
+    }
+}
 
+/**
+ * Polyline connecting points in a direction of a certain type [directionType]
+ */
+@Composable
+private fun TransitPolyline(
+    points: List<LatLng>,
+    directionType: DirectionType,
+    zoomFactor: Float
+) {
+    /**
+     * Function to calculate size of route lines on map based on zoom
+     */
+    fun getLineSize(zoomFactor: Float): Float {
+        // Linear scale upward as you zoom in more
+        val size = (zoomFactor * 3f / 2f) - 10f
+        return if (size > 2f) size else 2f
+    }
+
+    /**
+     * Function to calculate size of dots on map between bus stops based on zoom
+     */
+    fun getDotSize(zoomFactor: Float): Float {
+        var positiveZoom = zoomFactor
+        if (positiveZoom <= 0f) {
+            positiveZoom = 0.01f
+        }
+        // Inverse scale as you zoom in more
+        // Floor at 2.0 radius
+        val size = 500f / positiveZoom - 22f
+        return if (size > 2f) size else 2f
+    }
+
+    val lineSize = getLineSize(zoomFactor)
+    val dotSize = getDotSize(zoomFactor)
+
+    when (directionType) {
+        DirectionType.WALK -> {
+            Polyline(
+                points = points,
+                color = Color.Gray,
+                width = lineSize,
+                pattern = listOf(Dot(), Gap(10f)),
+            )
+        }
+
+        DirectionType.DEPART -> {
+            Polyline(
+                points = points,
+                color = TransitBlue,
+                width = lineSize,
+                pattern = listOf(Dash(1f))
+            )
+            points.firstOrNull()?.let {
+                Circle(
+                    center = it,
+                    radius = dotSize.toDouble(),
+                    fillColor = Color.White,
+                    strokeColor = Color.Black,
+                    strokeWidth = 6f
+                )
+            }
+            points.lastOrNull()?.let {
+                Circle(
+                    center = it,
+                    radius = dotSize.toDouble(),
+                    fillColor = Color.White,
+                    strokeColor = Color.Black,
+                    strokeWidth = 6f
+                )
             }
         }
     }
@@ -183,7 +282,11 @@ private fun DetailsBottomSheet(
         dir.busNumber != ""
     }
 
-    Column(modifier = Modifier.height(700.dp).background(Color.White)) {
+    Column(
+        modifier = Modifier
+            .height(700.dp)
+            .background(Color.White)
+    ) {
 
         // Header
         Row(
@@ -244,7 +347,7 @@ private fun DetailsBottomSheet(
                         buildAnnotatedString {
                             append("Walk to ")
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                append(directionDetails.last().destination)
+                                directionDetails.lastOrNull()?.let { append(it.destination) }
                             }
                         },
                         modifier = Modifier.padding(horizontal = 12.dp),
@@ -270,13 +373,13 @@ private fun DetailsBottomSheet(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DetailsMainScreen(
     mapState: MapState,
     cameraPositionState: CameraPositionState,
-    permissionState: PermissionState,
-    navController: NavHostController
+    hasLocationPermission: Boolean,
+    onBackClick: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         //TODO make an AppBarColors class w/ the right colors and correct icon
@@ -289,7 +392,7 @@ private fun DetailsMainScreen(
                 )
             },
             navigationIcon = {
-                IconButton(onClick = { navController.popBackStack() }) {
+                IconButton(onClick = onBackClick) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
                         contentDescription = ""
@@ -301,7 +404,11 @@ private fun DetailsMainScreen(
 
         HorizontalDivider(thickness = 1.dp, color = DividerGray)
 
-        DrawableMap(mapState, cameraPositionState, permissionState)
+        DrawableMap(
+            mapState,
+            cameraPositionState,
+            hasLocationPermission
+        )
 
     }
 }
@@ -357,19 +464,21 @@ fun DetailsSheet(directionDetails: List<DirectionDetails>) {
 
             if (!(index < directionDetails.lastIndex && directionDetails[index + 1].busTransfer) && details.directionType == DirectionType.DEPART
             ) {
-                DirectionItem(
-                    time = details.endTime,
-                    movementDescription = "Get off",
-                    destination = details.stops.last().name,
-                    directionType = details.directionType,
-                    drawSegmentAbove = true,
-                    drawSegmentBelow = index != directionDetails.lastIndex,
-                    isFinalDestination = index == directionDetails.lastIndex,
-                    busNumber = details.busNumber,
-                    isLastStop = true,
-                    colorAbove = TransitBlue,
-                    delayedTime = details.delayedEndTime
-                )
+                details.stops.lastOrNull()?.let {
+                    DirectionItem(
+                        time = details.endTime,
+                        movementDescription = "Get off",
+                        destination = it.name,
+                        directionType = details.directionType,
+                        drawSegmentAbove = true,
+                        drawSegmentBelow = index != directionDetails.lastIndex,
+                        isFinalDestination = index == directionDetails.lastIndex,
+                        busNumber = details.busNumber,
+                        isLastStop = true,
+                        colorAbove = TransitBlue,
+                        delayedTime = details.delayedEndTime
+                    )
+                }
             }
 
         }
