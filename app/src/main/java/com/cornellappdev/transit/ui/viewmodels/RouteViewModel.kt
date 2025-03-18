@@ -353,28 +353,5 @@ class RouteViewModel @Inject constructor(
 
         return bounds.build()
     }
-
-    /**
-     * Function to calculate size of route lines on map based on zoom
-     */
-    fun getLineSize(zoomFactor: Float): Float {
-        // Linear scale upward as you zoom in more
-        val size = (zoomFactor * 3f / 2f) - 10f
-        return if (size > 2f) size else 2f
-    }
-
-    /**
-     * Function to calculate size of dots on map between bus stops based on zoom
-     */
-    fun getDotSize(zoomFactor: Float): Float {
-        var positiveZoom = zoomFactor
-        if (positiveZoom <= 0f) {
-            positiveZoom = 0.01f
-        }
-        // Inverse scale as you zoom in more
-        // Floor at 2.0 radius
-        val size = 500f / positiveZoom - 22f
-        return if (size > 2f) size else 2f
-    }
 }
 
