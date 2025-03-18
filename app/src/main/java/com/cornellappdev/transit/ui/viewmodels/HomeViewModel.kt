@@ -38,11 +38,6 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     /**
-     * Flow from backend of last route fetched
-     */
-    val lastRouteFlow = routeRepository.lastRouteFlow
-
-    /**
      * The current query in the add favorites search bar, as a StateFlow
      */
     val addSearchQuery: MutableStateFlow<String> = MutableStateFlow("")
@@ -104,13 +99,6 @@ class HomeViewModel @Inject constructor(
         addSearchQuery.debounce(300L).distinctUntilChanged().onEach {
             routeRepository.makeSearch(it)
         }.launchIn(viewModelScope)
-    }
-
-    /**
-     * Perform a search on the string [query]
-     */
-    fun onSearch(query: String) {
-
     }
 
     /**

@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
@@ -39,15 +40,11 @@ fun BottomSheetContent(
     editText: String,
     editState: Boolean,
     onClick: () -> Unit,
+    favoritesData: Set<Place>,
+    itemOnClick: (Place) -> Unit,
     addOnClick: () -> Unit,
-    removeOnClick: () -> Unit,
-    changeEndLocation: (LocationUIState) -> Unit,
-    favoritesViewModel: FavoritesViewModel = hiltViewModel(),
-    navController: NavController
+    removeOnClick: (Place) -> Unit,
 ) {
-
-    val data = favoritesViewModel.favoritesStops.collectAsState().value.toList()
-
     Column {
         Row(
             modifier = Modifier
@@ -91,27 +88,16 @@ fun BottomSheetContent(
                     removeOnClick = {}
                 )
             }
-            items(data) {
+            items(favoritesData.toList()) {
                 LocationItem(
                     image = painterResource(id = R.drawable.location_icon),
                     editImage = painterResource(id = R.drawable.location_icon_edit),
                     label = it.name,
                     sublabel = "",
                     editing = editState,
-                    {
-                        changeEndLocation(
-                            LocationUIState.Place(
-                                it.name,
-                                LatLng(
-                                    it.latitude,
-                                    it.longitude
-                                )
-                            )
-                        )
-                        navController.navigate("route")
-                    },
+                    itemOnClick = { itemOnClick(it) },
                     addOnClick = {},
-                    removeOnClick = { favoritesViewModel.removeFavorite(it); removeOnClick() },
+                    removeOnClick = { removeOnClick(it) },
                 )
             }
         }

@@ -52,21 +52,19 @@ import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 
 /**
  * Contents of AddFavorites BottomSheet
- * @param homeViewModel the homeViewModel used in the app
  * @param cancelOnClick The function to run when the cancel button is clicked
  * @param onItemClick The function to run when a menu item from a search is clicked
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddFavoritesSearchSheet(
-    homeViewModel: HomeViewModel,
+    addSearchBarValue: String,
+    placeQueryResponse: ApiResponse<List<Place>>,
+    onQueryChange: (String) -> Unit,
+    onClearChange: () -> Unit,
     cancelOnClick: () -> Unit,
     onItemClick: (Place) -> Unit,
 ) {
-
-    val addSearchBarValue = homeViewModel.addSearchQuery.collectAsState().value
-
-    val placeQueryResponse = homeViewModel.placeQueryFlow.collectAsState().value
 
     var addSearchActive by remember { mutableStateOf(false) }
 
@@ -125,10 +123,12 @@ fun AddFavoritesSearchSheet(
                 inputField = {
                     SearchBarDefaults.InputField(
                         query = addSearchBarValue,
-                        onQueryChange = { s -> homeViewModel.onAddQueryChange(s) },
-                        onSearch = { addSearchActive = false; homeViewModel.onSearch(it) },
+                        onQueryChange = { s -> onQueryChange(s) },
+                        onSearch = {},
                         expanded = addSearchActive,
-                        onExpandedChange = { b -> addSearchActive = b },
+                        onExpandedChange = { b ->
+                            addSearchActive = b
+                        },
                         placeholder = { Text(text = "Search for a stop to add") },
                         leadingIcon = { Icon(Icons.Outlined.Search, "Search", tint = IconGray) },
                         colors = SearchBarDefaults.inputFieldColors(
@@ -142,7 +142,7 @@ fun AddFavoritesSearchSheet(
                                 Icon(
                                     Icons.Outlined.Clear,
                                     "Clear",
-                                    modifier = Modifier.clickable { homeViewModel.onAddQueryChange("") })
+                                    modifier = Modifier.clickable { onClearChange() })
                             }
                         },
                         modifier = Modifier.border(

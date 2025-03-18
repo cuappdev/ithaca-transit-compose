@@ -78,7 +78,6 @@ import kotlinx.coroutines.launch
  */
 @OptIn(
     ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
-    ExperimentalMaterialApi::class
 )
 @Composable
 fun HomeScreen(
@@ -109,7 +108,6 @@ fun HomeScreen(
         homeViewModel.instantiateLocation(context)
     }
 
-    val favorites = favoritesViewModel.favoritesStops.collectAsState().value
 
     //SheetState for FavoritesBottomSheet
     val favoritesSheetState = rememberBottomSheetScaffoldState(
@@ -126,14 +124,27 @@ fun HomeScreen(
         bottomSheetState = SheetState(
             skipPartiallyExpanded = true,
             initialValue = SheetValue.Hidden,
-            density = LocalDensity.current
+            density = LocalDensity.current,
+            confirmValueChange = {
+                homeViewModel.onAddQueryChange("")
+                true
+            }
         )
     )
 
-    // Search bar flow
+    // Main search bar flow
     val searchBarValue = homeViewModel.searchBarUiState.collectAsState().value
 
-    // Search bar active/inactive
+    // Favorited locations
+    val favorites = favoritesViewModel.favoritesStops.collectAsState().value
+
+    // Add search bar
+    val addSearchBarValue = homeViewModel.addSearchQuery.collectAsState().value
+
+    // Add search bar query response
+    val placeQueryResponse = homeViewModel.placeQueryFlow.collectAsState().value
+
+    // Main search bar active/inactive
     var searchActive by remember { mutableStateOf(false) }
 
     if (!searchActive) {
@@ -170,7 +181,7 @@ fun HomeScreen(
             HomeScreenSearchBar(
                 searchBarValue,
                 onQueryChange = { s -> homeViewModel.onQueryChange(s) },
-                onSearch = { it -> searchActive = false; homeViewModel.onSearch(it) },
+                onSearch = {},
                 expanded = searchActive,
                 onExpandedChange = { b -> searchActive = b },
                 onInfoClick = {
@@ -223,6 +234,7 @@ fun HomeScreen(
             BottomSheetContent(
                 editText = editText,
                 editState = editState,
+                favoritesData = favorites,
                 onClick = {
                     editState = !editState
                     editText = if (editState) {
@@ -245,11 +257,20 @@ fun HomeScreen(
                     scope.launch {
                         favoritesSheetState.bottomSheetState.expand()
                     }
+                    favoritesViewModel.removeFavorite(it)
                 },
-                changeEndLocation = { place ->
-                    homeViewModel.changeEndLocation(place)
-                },
-                navController = navController
+                itemOnClick = {
+                    homeViewModel.changeEndLocation(
+                        LocationUIState.Place(
+                            it.name,
+                            LatLng(
+                                it.latitude,
+                                it.longitude
+                            )
+                        )
+                    )
+                    navController.navigate("route")
+                }
             )
         },
         content = {}
@@ -263,7 +284,8 @@ fun HomeScreen(
         sheetPeekHeight = 0.dp,
         sheetContent = {
             AddFavoritesSearchSheet(
-                homeViewModel = homeViewModel,
+                addSearchBarValue = addSearchBarValue,
+                placeQueryResponse = placeQueryResponse,
                 cancelOnClick = {
                     scope.launch {
                         addSheetState.bottomSheetState.hide()
@@ -277,11 +299,17 @@ fun HomeScreen(
                             homeViewModel.onAddQueryChange("")
                             favoritesViewModel.addFavorite(it)
                         } else {
-                            Toast.makeText(context, "${it.name} is already favorited!", Toast.LENGTH_SHORT)
+                            Toast.makeText(
+                                context,
+                                "${it.name} is already favorited!",
+                                Toast.LENGTH_SHORT
+                            )
                                 .show()
                         }
                     }
-                }
+                },
+                onQueryChange = { s -> homeViewModel.onAddQueryChange(s) },
+                onClearChange = { homeViewModel.onAddQueryChange("") }
             )
         },
         content = {}
