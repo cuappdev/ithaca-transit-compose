@@ -115,7 +115,7 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
         )
     }
 
-    // Update camera to fit both all points of route
+    // Update camera to fit all points of route
     LaunchedEffect(mapState.route) {
         if (mapState.route != null) {
             val bounds = routeViewModel.getLatLngBounds(mapState.route)
