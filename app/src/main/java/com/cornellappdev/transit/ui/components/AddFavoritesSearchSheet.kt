@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.IconGray
@@ -53,13 +54,14 @@ import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
  * Contents of AddFavorites BottomSheet
  * @param homeViewModel the homeViewModel used in the app
  * @param cancelOnClick The function to run when the cancel button is clicked
+ * @param onItemClick The function to run when a menu item from a search is clicked
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddFavoritesSearchSheet(
     homeViewModel: HomeViewModel,
-    favoritesViewModel: FavoritesViewModel = hiltViewModel(),
     cancelOnClick: () -> Unit,
+    onItemClick: (Place) -> Unit,
 ) {
 
     val addSearchBarValue = homeViewModel.addSearchQuery.collectAsState().value
@@ -67,8 +69,6 @@ fun AddFavoritesSearchSheet(
     val placeQueryResponse = homeViewModel.placeQueryFlow.collectAsState().value
 
     var addSearchActive by remember { mutableStateOf(false) }
-
-    val favorites = favoritesViewModel.favoritesStops.collectAsState().value
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -160,36 +160,10 @@ fun AddFavoritesSearchSheet(
                     dividerColor = DividerGray,
                 )
             ) {
-                when (placeQueryResponse) {
-                    is ApiResponse.Error -> {
-                        LocationNotFound()
-                    }
-
-                    ApiResponse.Pending -> {
-                        ProgressCircle()
-                    }
-
-                    is ApiResponse.Success -> {
-                        if (placeQueryResponse.data.isEmpty()) {
-                            LocationNotFound()
-                        }
-                        LazyColumn {
-                            items(placeQueryResponse.data) {
-                                MenuItem(
-                                    type = it.type,
-                                    label = it.name,
-                                    sublabel = it.subLabel,
-                                    onClick = {
-                                        if (it !in favorites) {
-                                            favoritesViewModel.addFavorite(it)
-                                            keyboardController?.hide()
-                                        }
-                                    })
-                            }
-                        }
-                    }
-                }
-
+                LoadingLocationItems(
+                    placeQueryResponse,
+                    onClick = { onItemClick(it); keyboardController?.hide() }
+                )
             }
         }
     }

@@ -1,6 +1,9 @@
 package com.cornellappdev.transit.ui.screens
 
+import android.Manifest
+import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,8 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
@@ -46,18 +47,18 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
-import com.cornellappdev.transit.ui.components.LocationNotFound
-import com.cornellappdev.transit.ui.components.MenuItem
-import com.cornellappdev.transit.ui.components.ProgressCircle
+import com.cornellappdev.transit.ui.components.LoadingLocationItems
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.MetadataGray
+import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.LocationUIState
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
@@ -83,12 +84,32 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     homeViewModel: HomeViewModel,
     navController: NavController,
+    favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
     // Permissions dialog
-    val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
+    val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     var openDialog by remember { mutableStateOf(true) }
 
-    val scope = rememberCoroutineScope()
+    if (openDialog && !permissionState.status.isGranted) {
+        LocationPermissionDialog(
+            onDismissRequest = {
+                openDialog = false
+            },
+            onClickNext = {
+                permissionState.launchPermissionRequest()
+                openDialog = false
+            }
+        )
+    }
+
+    if (permissionState.status.isGranted) {
+        homeViewModel.instantiateLocation(context)
+    }
+
+    val favorites = favoritesViewModel.favoritesStops.collectAsState().value
 
     //SheetState for FavoritesBottomSheet
     val favoritesSheetState = rememberBottomSheetScaffoldState(
@@ -109,63 +130,8 @@ fun HomeScreen(
         )
     )
 
-    if (openDialog && !permissionState.status.isGranted) {
-        AlertDialog(
-            onDismissRequest = {
-                openDialog = false
-            }
-        ) {
-            Surface(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .wrapContentHeight(),
-                shape = RoundedCornerShape(20.dp),
-                tonalElevation = AlertDialogDefaults.TonalElevation
-            ) {
-                Column(modifier = Modifier.padding(40.dp)) {
-                    Image(
-                        painter = painterResource(id = R.drawable.app_icon_rounded),
-                        contentDescription = stringResource(R.string.app_name),
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                    )
-                    Spacer(modifier = Modifier.height(30.dp))
-                    Text(
-                        text = stringResource(R.string.permission_dialog_text)
-                    )
-                    Spacer(modifier = Modifier.height(30.dp))
-                    TextButton(
-                        onClick = {
-                            permissionState.launchPermissionRequest()
-                            openDialog = false
-                        },
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    ) {
-                        Text("Grant Permissions")
-                    }
-                }
-            }
-        }
-    }
-
-    val context = LocalContext.current
-
-    if (permissionState.status.isGranted) {
-        homeViewModel.instantiateLocation(context)
-    }
-
-    val currentLocationValue = homeViewModel.currentLocation.collectAsState().value
-
     // Search bar flow
     val searchBarValue = homeViewModel.searchBarUiState.collectAsState().value
-
-    //Collect flow of route through API
-    val routeApiResponse = homeViewModel.lastRouteFlow.collectAsState().value
-
-    //Map camera
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(homeViewModel.defaultIthaca, 12f)
-    }
 
     // Search bar active/inactive
     var searchActive by remember { mutableStateOf(false) }
@@ -174,6 +140,12 @@ fun HomeScreen(
         homeViewModel.onQueryChange("")
     }
 
+    //Map camera
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(homeViewModel.defaultIthaca, 12f)
+    }
+
+    // Main Screen
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -195,118 +167,42 @@ fun HomeScreen(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            //If query is blank, display recents and favorites
-            DockedSearchBar(
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        query = (searchBarValue as? SearchBarUIState.Query)?.queryText ?: "",
-                        onQueryChange = { s -> homeViewModel.onQueryChange(s) },
-                        onSearch = { it -> searchActive = false; homeViewModel.onSearch(it) },
-                        expanded = searchActive,
-                        onExpandedChange = { b -> searchActive = b },
-                        placeholder = { Text(text = stringResource(R.string.search_placeholder)) },
-                        leadingIcon = { Icon(Icons.Outlined.Search, "Search", tint = IconGray) },
-                        trailingIcon = {
-                            Icon(
-                                Icons.Outlined.Info,
-                                "Info",
-                                Modifier.clickable {
-                                    homeViewModel.onQueryChange("")
-                                    navController.navigate("settings")
-                                },
-                                tint = IconGray
-                            )
-                        },
-                        colors = SearchBarDefaults.inputFieldColors(
-                            focusedTextColor = Color.Black,
-                            focusedPlaceholderColor = MetadataGray,
-                            unfocusedTextColor = Color.Black,
-                            unfocusedPlaceholderColor = MetadataGray
-                        ),
-                    )
-                },
+            HomeScreenSearchBar(
+                searchBarValue,
+                onQueryChange = { s -> homeViewModel.onQueryChange(s) },
+                onSearch = { it -> searchActive = false; homeViewModel.onSearch(it) },
                 expanded = searchActive,
                 onExpandedChange = { b -> searchActive = b },
-                shape = RoundedCornerShape(size = 8.dp),
-                colors = SearchBarDefaults.colors(
-                    containerColor = Color.White,
-                    dividerColor = DividerGray,
-                )
-            ) {
-                //If query is blank, display recents and favorites
-                when (searchBarValue) {
-                    is SearchBarUIState.RecentAndFavorites -> {
-                        SearchSuggestions(
-                            favorites = searchBarValue.favorites,
-                            recents = searchBarValue.recents,
-                            onFavoriteAdd = {
-                                scope.launch {
-                                    addSheetState.bottomSheetState.expand()
-                                }
-                            },
-                            onRecentClear = {
-                                homeViewModel.clearRecents()
-                            },
-                            navController = navController,
-                            changeStartLocation = { place ->
-                                homeViewModel.changeStartLocation(place)
-                            },
-                            changeEndLocation = { place ->
-                                homeViewModel.changeEndLocation(place)
-                            },
-                            onStopPressed = { place ->
-                                homeViewModel.addRecent(place)
-                            },
+                onInfoClick = {
+                    homeViewModel.onQueryChange("")
+                    navController.navigate("settings")
+                },
+                onFavoriteAdd = {
+                    scope.launch {
+                        addSheetState.bottomSheetState.expand()
+                    }
+                },
+                onRecentClear = {
+                    homeViewModel.clearRecents()
+                },
+                onItemClick = {
+                    homeViewModel.addRecent(it)
+                    homeViewModel.changeStartLocation(
+                        LocationUIState.CurrentLocation
+                    )
+                    homeViewModel.changeEndLocation(
+                        LocationUIState.Place(
+                            it.name,
+                            LatLng(
+                                it.latitude,
+                                it.longitude
+                            )
                         )
-                    }
-
-                    is SearchBarUIState.Query -> {
-                        when (searchBarValue.searched) {
-                            is ApiResponse.Error -> {
-                                LocationNotFound()
-                            }
-
-                            is ApiResponse.Pending -> {
-                                ProgressCircle()
-                            }
-
-                            is ApiResponse.Success -> {
-                                if (searchBarValue.searched.data.isEmpty()) {
-                                    LocationNotFound()
-                                } else {
-                                    LazyColumn {
-                                        items(searchBarValue.searched.data) {
-                                            MenuItem(
-                                                type = it.type,
-                                                label = it.name,
-                                                sublabel = it.subLabel,
-                                                onClick = {
-                                                    homeViewModel.addRecent(it)
-                                                    homeViewModel.changeStartLocation(
-                                                        LocationUIState.CurrentLocation
-                                                    )
-                                                    homeViewModel.changeEndLocation(
-                                                        LocationUIState.Place(
-                                                            it.name,
-                                                            LatLng(
-                                                                it.latitude,
-                                                                it.longitude
-                                                            )
-                                                        )
-                                                    )
-                                                    homeViewModel.onQueryChange("")
-                                                    navController.navigate("route")
-                                                })
-
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    )
+                    homeViewModel.onQueryChange("")
+                    navController.navigate("route")
                 }
-            }
+            )
         }
     }
 
@@ -327,7 +223,7 @@ fun HomeScreen(
             BottomSheetContent(
                 editText = editText,
                 editState = editState,
-                onclick = {
+                onClick = {
                     editState = !editState
                     editText = if (editState) {
                         "Done"
@@ -355,8 +251,9 @@ fun HomeScreen(
                 },
                 navController = navController
             )
-        }
-    ) {}
+        },
+        content = {}
+    )
 
     // AddFavorites BottomSheet
     BottomSheetScaffold(
@@ -367,13 +264,149 @@ fun HomeScreen(
         sheetContent = {
             AddFavoritesSearchSheet(
                 homeViewModel = homeViewModel,
-            ) {
-                scope.launch {
-                    addSheetState.bottomSheetState.hide()
-                    homeViewModel.onAddQueryChange("")
+                cancelOnClick = {
+                    scope.launch {
+                        addSheetState.bottomSheetState.hide()
+                        homeViewModel.onAddQueryChange("")
+                    }
+                },
+                onItemClick = {
+                    scope.launch {
+                        if (it !in favorites) {
+                            addSheetState.bottomSheetState.hide()
+                            homeViewModel.onAddQueryChange("")
+                            favoritesViewModel.addFavorite(it)
+                        } else {
+                            Toast.makeText(context, "${it.name} is already favorited!", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
+                }
+            )
+        },
+        content = {}
+    )
+}
+
+/**
+ * Pop-up dialog to prompt for location permissions
+ */
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun LocationPermissionDialog(onDismissRequest: () -> Unit, onClickNext: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest
+    ) {
+        Surface(
+            modifier = Modifier
+                .wrapContentWidth()
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(20.dp),
+            tonalElevation = AlertDialogDefaults.TonalElevation
+        ) {
+            Column(modifier = Modifier.padding(40.dp)) {
+                Image(
+                    painter = painterResource(id = R.drawable.app_icon_rounded),
+                    contentDescription = stringResource(R.string.app_name),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                )
+                Spacer(modifier = Modifier.height(30.dp))
+                Text(
+                    text = stringResource(R.string.permission_dialog_text)
+                )
+                Spacer(modifier = Modifier.height(30.dp))
+                TextButton(
+                    onClick = onClickNext,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text("Grant Permissions")
                 }
             }
-        },
+        }
+    }
+}
 
-        ) {}
+/**
+ * Search bar containing queried places or favorites/recents
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HomeScreenSearchBar(
+    searchBarValue: SearchBarUIState,
+    onQueryChange: (String) -> Unit,
+    onSearch: (String) -> Unit,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onInfoClick: () -> Unit,
+    onFavoriteAdd: () -> Unit,
+    onRecentClear: () -> Unit,
+    onItemClick: (Place) -> Unit
+) {
+
+    //If query is blank, display recents and favorites
+    DockedSearchBar(
+        inputField = {
+            SearchBarDefaults.InputField(
+                query = (searchBarValue as? SearchBarUIState.Query)?.queryText ?: "",
+                onQueryChange = onQueryChange,
+                onSearch = onSearch,
+                expanded = expanded,
+                onExpandedChange = onExpandedChange,
+                placeholder = { Text(text = stringResource(R.string.search_placeholder)) },
+                leadingIcon = { Icon(Icons.Outlined.Search, "Search", tint = IconGray) },
+                trailingIcon = {
+                    Icon(
+                        Icons.Outlined.Info,
+                        "Info",
+                        Modifier.clickable {
+                            onInfoClick()
+                        },
+                        tint = IconGray
+                    )
+                },
+                colors = SearchBarDefaults.inputFieldColors(
+                    focusedTextColor = Color.Black,
+                    focusedPlaceholderColor = MetadataGray,
+                    unfocusedTextColor = Color.Black,
+                    unfocusedPlaceholderColor = MetadataGray
+                ),
+            )
+        },
+        expanded = expanded,
+        onExpandedChange = onExpandedChange,
+        shape = RoundedCornerShape(size = 8.dp),
+        colors = SearchBarDefaults.colors(
+            containerColor = Color.White,
+            dividerColor = DividerGray,
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(400.dp)
+                .background(Color.White)
+        ) {
+            //If query is blank, display recents and favorites
+            when (searchBarValue) {
+                is SearchBarUIState.RecentAndFavorites -> {
+                    SearchSuggestions(
+                        favorites = searchBarValue.favorites,
+                        recents = searchBarValue.recents,
+                        onFavoriteAdd = onFavoriteAdd,
+                        onRecentClear = onRecentClear,
+                        onItemClick = onItemClick,
+                    )
+                }
+
+                is SearchBarUIState.Query -> {
+                    LoadingLocationItems(
+                        searchBarValue.searched,
+                        onClick = onItemClick
+                    )
+                }
+            }
+        }
+
+    }
 }
