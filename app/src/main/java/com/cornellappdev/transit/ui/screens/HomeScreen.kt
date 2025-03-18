@@ -51,6 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
+import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.BottomSheetContent
 import com.cornellappdev.transit.ui.components.LoadingLocationItems
@@ -87,6 +88,7 @@ fun HomeScreen(
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val localDensity = LocalDensity.current
 
     // Permissions dialog
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -111,25 +113,29 @@ fun HomeScreen(
 
     //SheetState for FavoritesBottomSheet
     val favoritesSheetState = rememberBottomSheetScaffoldState(
-        bottomSheetState = SheetState(
-            skipPartiallyExpanded = false,
-            initialValue = SheetValue.Expanded,
-            skipHiddenState = true,
-            density = LocalDensity.current
-        )
+        bottomSheetState = remember {
+            SheetState(
+                skipPartiallyExpanded = false,
+                initialValue = SheetValue.Expanded,
+                skipHiddenState = true,
+                density = localDensity
+            )
+        }
     )
 
     //sheetState for AddFavorites BottomSheet
     val addSheetState = rememberBottomSheetScaffoldState(
-        bottomSheetState = SheetState(
-            skipPartiallyExpanded = true,
-            initialValue = SheetValue.Hidden,
-            density = LocalDensity.current,
-            confirmValueChange = {
-                homeViewModel.onAddQueryChange("")
-                true
-            }
-        )
+        bottomSheetState = remember {
+            SheetState(
+                skipPartiallyExpanded = true,
+                initialValue = SheetValue.Hidden,
+                density = localDensity,
+                confirmValueChange = {
+                    homeViewModel.onAddQueryChange("")
+                    true
+                }
+            )
+        }
     )
 
     // Main search bar flow
