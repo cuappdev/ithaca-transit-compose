@@ -6,7 +6,7 @@ import java.time.Instant
 import java.util.Date
 
 /**
- * Wrapper for state of the search bar in HomeScreen
+ * Wrapper for state of the arrive by selector in Route Options
  */
 sealed class ArriveByUIState {
 

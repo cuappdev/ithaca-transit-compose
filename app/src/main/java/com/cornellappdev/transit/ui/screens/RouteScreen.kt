@@ -59,6 +59,7 @@ import com.cornellappdev.transit.models.toTransport
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.components.CurrentLocationItem
 import com.cornellappdev.transit.ui.components.DatePicker
+import com.cornellappdev.transit.ui.components.LoadingLocationItems
 import com.cornellappdev.transit.ui.components.LocationNotFound
 import com.cornellappdev.transit.ui.components.MenuItem
 import com.cornellappdev.transit.ui.components.ProgressCircle
@@ -740,48 +741,27 @@ private fun RouteOptionsSearchSheet(
             )
             when (searchBarValue) {
                 is SearchBarUIState.Query -> {
-                    when (searchBarValue.searched) {
-                        ApiResponse.Error -> {
-                            LocationNotFound()
-                        }
-
-                        ApiResponse.Pending -> {
-                            ProgressCircle()
-                        }
-
-                        is ApiResponse.Success -> {
-                            if (searchBarValue.searched.data.isEmpty()) {
-                                LocationNotFound()
+                    LoadingLocationItems(
+                        searchBarValue.searched,
+                        onClick = {
+                            if (isStart) {
+                                routeViewModel.setStartPlace(
+                                    LocationUIState.Place(
+                                        it.name,
+                                        LatLng(it.latitude, it.longitude)
+                                    )
+                                )
                             } else {
-                                LazyColumn {
-                                    items(searchBarValue.searched.data) {
-                                        MenuItem(
-                                            type = it.type,
-                                            label = it.name,
-                                            sublabel = it.subLabel,
-                                            onClick = {
-                                                if (isStart) {
-                                                    routeViewModel.setStartPlace(
-                                                        LocationUIState.Place(
-                                                            it.name,
-                                                            LatLng(it.latitude, it.longitude)
-                                                        )
-                                                    )
-                                                } else {
-                                                    routeViewModel.setDestPlace(
-                                                        LocationUIState.Place(
-                                                            it.name,
-                                                            LatLng(it.latitude, it.longitude)
-                                                        )
-                                                    )
-                                                }
-                                                onItemClicked()
-                                            })
-                                    }
-                                }
+                                routeViewModel.setDestPlace(
+                                    LocationUIState.Place(
+                                        it.name,
+                                        LatLng(it.latitude, it.longitude)
+                                    )
+                                )
                             }
+                            onItemClicked()
                         }
-                    }
+                    )
                 }
 
                 is SearchBarUIState.RecentAndFavorites -> {
