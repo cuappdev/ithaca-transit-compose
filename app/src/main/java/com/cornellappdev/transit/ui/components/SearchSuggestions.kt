@@ -25,6 +25,8 @@ fun SearchSuggestions(
     onFavoriteAdd: () -> Unit,
     onRecentClear: () -> Unit,
     onItemClick: (Place) -> Unit,
+    maxFavorites: Int = 4,
+    maxRecents: Int = 4
 ) {
     Column(
         modifier = Modifier
@@ -36,7 +38,7 @@ fun SearchSuggestions(
             buttonText = "Add",
             onClick = onFavoriteAdd
         )
-        favorites.take(minOf(4, favorites.size)).forEach {
+        favorites.take(minOf(maxFavorites, favorites.size)).forEach {
             MenuItem(
                 type = it.type,
                 label = it.name,
@@ -52,7 +54,7 @@ fun SearchSuggestions(
             buttonText = "Clear",
             onClick = onRecentClear
         )
-        recents.take(minOf(4, recents.size)).forEach {
+        recents.take(minOf(maxRecents, recents.size)).forEach {
             MenuItem(
                 type = it.type,
                 label = it.name,

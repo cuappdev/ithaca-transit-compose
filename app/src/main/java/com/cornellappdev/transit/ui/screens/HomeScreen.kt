@@ -187,9 +187,9 @@ fun HomeScreen(
             HomeScreenSearchBar(
                 searchBarValue,
                 onQueryChange = { s -> homeViewModel.onQueryChange(s) },
-                onSearch = {},
+                onSearch = {}, // Search occurs automatically when typing
                 expanded = searchActive,
-                onExpandedChange = { b -> searchActive = b },
+                onExpandedChange = { isExpanded -> searchActive = isExpanded },
                 onInfoClick = {
                     homeViewModel.onQueryChange("")
                     navController.navigate("settings")
@@ -203,20 +203,7 @@ fun HomeScreen(
                     homeViewModel.clearRecents()
                 },
                 onItemClick = {
-                    homeViewModel.addRecent(it)
-                    homeViewModel.changeStartLocation(
-                        LocationUIState.CurrentLocation
-                    )
-                    homeViewModel.changeEndLocation(
-                        LocationUIState.Place(
-                            it.name,
-                            LatLng(
-                                it.latitude,
-                                it.longitude
-                            )
-                        )
-                    )
-                    homeViewModel.onQueryChange("")
+                    homeViewModel.beginRouteOptions(it)
                     navController.navigate("route")
                 }
             )
@@ -241,7 +228,7 @@ fun HomeScreen(
                 editText = editText,
                 editState = editState,
                 favoritesData = favorites,
-                onClick = {
+                onEditToggleClick = {
                     editState = !editState
                     editText = if (editState) {
                         "Done"
@@ -266,15 +253,7 @@ fun HomeScreen(
                     favoritesViewModel.removeFavorite(it)
                 },
                 itemOnClick = {
-                    homeViewModel.changeEndLocation(
-                        LocationUIState.Place(
-                            it.name,
-                            LatLng(
-                                it.latitude,
-                                it.longitude
-                            )
-                        )
-                    )
+                    homeViewModel.beginRouteOptions(it)
                     navController.navigate("route")
                 }
             )

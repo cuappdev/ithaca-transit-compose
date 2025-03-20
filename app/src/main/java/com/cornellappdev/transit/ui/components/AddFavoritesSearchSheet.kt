@@ -123,11 +123,11 @@ fun AddFavoritesSearchSheet(
                 inputField = {
                     SearchBarDefaults.InputField(
                         query = addSearchBarValue,
-                        onQueryChange = { s -> onQueryChange(s) },
-                        onSearch = {},
+                        onQueryChange = onQueryChange,
+                        onSearch = {}, // Search occurs automatically when typing
                         expanded = addSearchActive,
-                        onExpandedChange = { b ->
-                            addSearchActive = b
+                        onExpandedChange = { isExpanded ->
+                            addSearchActive = isExpanded
                         },
                         placeholder = { Text(text = "Search for a stop to add") },
                         leadingIcon = { Icon(Icons.Outlined.Search, "Search", tint = IconGray) },
@@ -153,7 +153,7 @@ fun AddFavoritesSearchSheet(
                     )
                 },
                 expanded = addSearchActive,
-                onExpandedChange = { b -> addSearchActive = b },
+                onExpandedChange = { isExpanded -> addSearchActive = isExpanded },
                 shape = RoundedCornerShape(size = 8.dp),
                 colors = SearchBarDefaults.colors(
                     containerColor = Color.White,

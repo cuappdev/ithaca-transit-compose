@@ -199,4 +199,25 @@ class HomeViewModel @Inject constructor(
         locationRepository.instantiate(context)
     }
 
+    /**
+     * Prepares the ViewModel to navigate from the current location to [place].
+     * Adds the place to recents and resets search fields
+     */
+    fun beginRouteOptions(place: Place) {
+        addRecent(place)
+        changeStartLocation(
+            LocationUIState.CurrentLocation
+        )
+        changeEndLocation(
+            LocationUIState.Place(
+                place.name,
+                LatLng(
+                    place.latitude,
+                    place.longitude
+                )
+            )
+        )
+        onQueryChange("")
+    }
+
 }

@@ -33,13 +33,13 @@ import com.google.android.gms.maps.model.LatLng
  * Contents of BottomSheet in HomeScreen
  * @param editText The text in the edit/done button
  * @param editState The state of the lazyRow, whether it's currently being edited or not
- * @param onClick The Function to run when the edit/done button is clicked
+ * @param onEditToggleClick The Function to run when the edit/done button is clicked
  */
 @Composable
 fun BottomSheetContent(
     editText: String,
     editState: Boolean,
-    onClick: () -> Unit,
+    onEditToggleClick: () -> Unit,
     favoritesData: Set<Place>,
     itemOnClick: (Place) -> Unit,
     addOnClick: () -> Unit,
@@ -66,7 +66,7 @@ fun BottomSheetContent(
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = editText,
-                modifier = Modifier.clickable(onClick = onClick),
+                modifier = Modifier.clickable(onClick = onEditToggleClick),
                 color = TransitBlue,
                 textAlign = TextAlign.Right,
                 fontSize = 14.sp,
