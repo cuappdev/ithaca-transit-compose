@@ -38,7 +38,7 @@ fun SearchSuggestions(
             buttonText = "Add",
             onClick = onFavoriteAdd
         )
-        favorites.take(minOf(maxFavorites, favorites.size)).forEach {
+        favorites.take(maxFavorites).forEach {
             MenuItem(
                 type = it.type,
                 label = it.name,
@@ -54,7 +54,7 @@ fun SearchSuggestions(
             buttonText = "Clear",
             onClick = onRecentClear
         )
-        recents.take(minOf(maxRecents, recents.size)).forEach {
+        recents.take(maxRecents).forEach {
             MenuItem(
                 type = it.type,
                 label = it.name,
