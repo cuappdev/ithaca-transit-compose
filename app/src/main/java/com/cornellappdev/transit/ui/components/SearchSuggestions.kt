@@ -24,10 +24,9 @@ fun SearchSuggestions(
     recents: List<Place>,
     onFavoriteAdd: () -> Unit,
     onRecentClear: () -> Unit,
-    changeStartLocation: (LocationUIState) -> Unit,
-    changeEndLocation: (LocationUIState) -> Unit,
-    navController: NavController,
-    onStopPressed: (Place) -> Unit,
+    onItemClick: (Place) -> Unit,
+    maxFavorites: Int = 4,
+    maxRecents: Int = 4
 ) {
     Column(
         modifier = Modifier
@@ -39,26 +38,13 @@ fun SearchSuggestions(
             buttonText = "Add",
             onClick = onFavoriteAdd
         )
-        favorites.take(minOf(5, favorites.size)).forEach {
+        favorites.take(maxFavorites).forEach {
             MenuItem(
                 type = it.type,
                 label = it.name,
                 sublabel = it.subLabel,
                 onClick = {
-                    onStopPressed(it)
-                    changeStartLocation(
-                        LocationUIState.CurrentLocation
-                    )
-                    changeEndLocation(
-                        LocationUIState.Place(
-                            it.name,
-                            LatLng(
-                                it.latitude,
-                                it.longitude
-                            )
-                        )
-                    )
-                    navController.navigate("route")
+                    onItemClick(it)
                 }
             )
         }
@@ -68,26 +54,13 @@ fun SearchSuggestions(
             buttonText = "Clear",
             onClick = onRecentClear
         )
-        recents.forEach {
+        recents.take(maxRecents).forEach {
             MenuItem(
                 type = it.type,
                 label = it.name,
                 sublabel = it.subLabel,
                 onClick = {
-                    onStopPressed(it)
-                    changeStartLocation(
-                        LocationUIState.CurrentLocation
-                    )
-                    changeEndLocation(
-                        LocationUIState.Place(
-                            it.name,
-                            LatLng(
-                                it.latitude,
-                                it.longitude
-                            )
-                        )
-                    )
-                    navController.navigate("route")
+                    onItemClick(it)
                 }
             )
         }

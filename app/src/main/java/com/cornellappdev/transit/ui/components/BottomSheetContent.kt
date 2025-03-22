@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
@@ -32,23 +33,18 @@ import com.google.android.gms.maps.model.LatLng
  * Contents of BottomSheet in HomeScreen
  * @param editText The text in the edit/done button
  * @param editState The state of the lazyRow, whether it's currently being edited or not
- * @param data The data the lazyRow contains
- * @param onclick The Function to run when the edit/done button is clicked
+ * @param onEditToggleClick The Function to run when the edit/done button is clicked
  */
 @Composable
 fun BottomSheetContent(
     editText: String,
     editState: Boolean,
-    onclick: () -> Unit,
+    onEditToggleClick: () -> Unit,
+    favoritesData: Set<Place>,
+    itemOnClick: (Place) -> Unit,
     addOnClick: () -> Unit,
-    removeOnClick: () -> Unit,
-    changeEndLocation: (LocationUIState) -> Unit,
-    favoritesViewModel: FavoritesViewModel = hiltViewModel(),
-    navController: NavController
+    removeOnClick: (Place) -> Unit,
 ) {
-
-    val data = favoritesViewModel.favoritesStops.collectAsState().value.toList()
-
     Column {
         Row(
             modifier = Modifier
@@ -70,7 +66,7 @@ fun BottomSheetContent(
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = editText,
-                modifier = Modifier.clickable(onClick = onclick),
+                modifier = Modifier.clickable(onClick = onEditToggleClick),
                 color = TransitBlue,
                 textAlign = TextAlign.Right,
                 fontSize = 14.sp,
@@ -79,7 +75,7 @@ fun BottomSheetContent(
             )
         }
 
-        LazyRow(modifier = Modifier.padding(bottom = 20.dp)) {
+        LazyRow(modifier = Modifier.padding(bottom = 12.dp)) {
             item {
                 LocationItem(
                     image = painterResource(id = R.drawable.ellipse),
@@ -92,27 +88,16 @@ fun BottomSheetContent(
                     removeOnClick = {}
                 )
             }
-            items(data) {
+            items(favoritesData.toList()) {
                 LocationItem(
                     image = painterResource(id = R.drawable.location_icon),
                     editImage = painterResource(id = R.drawable.location_icon_edit),
                     label = it.name,
                     sublabel = "",
                     editing = editState,
-                    {
-                        changeEndLocation(
-                            LocationUIState.Place(
-                                it.name,
-                                LatLng(
-                                    it.latitude,
-                                    it.longitude
-                                )
-                            )
-                        )
-                        navController.navigate("route")
-                    },
+                    itemOnClick = { itemOnClick(it) },
                     addOnClick = {},
-                    removeOnClick = { favoritesViewModel.removeFavorite(it); removeOnClick() },
+                    removeOnClick = { removeOnClick(it) },
                 )
             }
         }

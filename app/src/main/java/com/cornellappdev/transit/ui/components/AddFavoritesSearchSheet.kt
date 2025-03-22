@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.IconGray
@@ -51,24 +52,21 @@ import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 
 /**
  * Contents of AddFavorites BottomSheet
- * @param homeViewModel the homeViewModel used in the app
  * @param cancelOnClick The function to run when the cancel button is clicked
+ * @param onItemClick The function to run when a menu item from a search is clicked
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddFavoritesSearchSheet(
-    homeViewModel: HomeViewModel,
-    favoritesViewModel: FavoritesViewModel = hiltViewModel(),
+    addSearchBarValue: String,
+    placeQueryResponse: ApiResponse<List<Place>>,
+    onQueryChange: (String) -> Unit,
+    onClearChange: () -> Unit,
     cancelOnClick: () -> Unit,
+    onItemClick: (Place) -> Unit,
 ) {
 
-    val addSearchBarValue = homeViewModel.addSearchQuery.collectAsState().value
-
-    val placeQueryResponse = homeViewModel.placeQueryFlow.collectAsState().value
-
     var addSearchActive by remember { mutableStateOf(false) }
-
-    val favorites = favoritesViewModel.favoritesStops.collectAsState().value
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -125,10 +123,12 @@ fun AddFavoritesSearchSheet(
                 inputField = {
                     SearchBarDefaults.InputField(
                         query = addSearchBarValue,
-                        onQueryChange = { s -> homeViewModel.onAddQueryChange(s) },
-                        onSearch = { addSearchActive = false; homeViewModel.onSearch(it) },
+                        onQueryChange = onQueryChange,
+                        onSearch = {}, // Search occurs automatically when typing
                         expanded = addSearchActive,
-                        onExpandedChange = { b -> addSearchActive = b },
+                        onExpandedChange = { isExpanded ->
+                            addSearchActive = isExpanded
+                        },
                         placeholder = { Text(text = "Search for a stop to add") },
                         leadingIcon = { Icon(Icons.Outlined.Search, "Search", tint = IconGray) },
                         colors = SearchBarDefaults.inputFieldColors(
@@ -142,7 +142,7 @@ fun AddFavoritesSearchSheet(
                                 Icon(
                                     Icons.Outlined.Clear,
                                     "Clear",
-                                    modifier = Modifier.clickable { homeViewModel.onAddQueryChange("") })
+                                    modifier = Modifier.clickable { onClearChange() })
                             }
                         },
                         modifier = Modifier.border(
@@ -153,43 +153,17 @@ fun AddFavoritesSearchSheet(
                     )
                 },
                 expanded = addSearchActive,
-                onExpandedChange = { b -> addSearchActive = b },
+                onExpandedChange = { isExpanded -> addSearchActive = isExpanded },
                 shape = RoundedCornerShape(size = 8.dp),
                 colors = SearchBarDefaults.colors(
                     containerColor = Color.White,
                     dividerColor = DividerGray,
                 )
             ) {
-                when (placeQueryResponse) {
-                    is ApiResponse.Error -> {
-                        LocationNotFound()
-                    }
-
-                    ApiResponse.Pending -> {
-                        ProgressCircle()
-                    }
-
-                    is ApiResponse.Success -> {
-                        if (placeQueryResponse.data.isEmpty()) {
-                            LocationNotFound()
-                        }
-                        LazyColumn {
-                            items(placeQueryResponse.data) {
-                                MenuItem(
-                                    type = it.type,
-                                    label = it.name,
-                                    sublabel = it.subLabel,
-                                    onClick = {
-                                        if (it !in favorites) {
-                                            favoritesViewModel.addFavorite(it)
-                                            keyboardController?.hide()
-                                        }
-                                    })
-                            }
-                        }
-                    }
-                }
-
+                LoadingLocationItems(
+                    placeQueryResponse,
+                    onClick = { onItemClick(it); keyboardController?.hide() }
+                )
             }
         }
     }
