@@ -3,17 +3,27 @@ package com.cornellappdev.transit.ui.screens
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.components.SettingsOption
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
@@ -23,25 +33,93 @@ fun SettingsScreen(context: Context) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     )
     {
         Text(
             text = "Settings",
             fontSize = 32.sp,
+            modifier = Modifier.padding(top = 16.dp, start = 16.dp),
             fontWeight = FontWeight.Bold,
             fontFamily = robotoFamily,
             fontStyle = FontStyle.Normal,
             color = TransitBlue,
         )
+
         SettingsOption(
-            name = "Privacy Policy",
+            name = "About Transit",
+            description = "Learn more about the team behind the app",
+            icon = R.drawable.appdev_gray,
+            onClick = {})
+
+        HorizontalDivider(thickness = 0.5.dp)
+
+        SettingsOption(
+            name = "Show Onboarding",
+            description = "Need a refresher? See how to use the app",
+            icon = R.drawable.lightbulb,
+            onClick = {})
+
+        HorizontalDivider(thickness = 0.5.dp)
+
+        SettingsOption(
+            name = "Favorites",
+            description = "Manage your favorite stops",
+            icon = R.drawable.favorites,
+            onClick = {})
+
+        HorizontalDivider(thickness = 0.5.dp)
+
+        SettingsOption(
+            name = "App Icon",
+            description = "Choose your adventure",
+            icon = R.drawable.bus,
+            onClick = {})
+
+        HorizontalDivider(thickness = 0.5.dp)
+
+        SettingsOption(
+            name = "Notifications and Privacy",
+            description = "Manage permissions and analytics",
+            icon = R.drawable.lock,
             onClick = {
                 val intent =
                     Intent(Intent.ACTION_VIEW, Uri.parse("https://www.cornellappdev.com/privacy"))
                 context.startActivity(intent)
             }
         )
+
+        HorizontalDivider(thickness = 0.5.dp)
+
+        SettingsOption(
+            name = "Support",
+            description = "Report issues and contact us",//Todo: check this
+            icon = R.drawable.help_outline,
+            onClick = {},
+        )
+
     }
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        Image(
+            painter = painterResource(R.drawable.clock_tower),
+            contentDescription = "Clock Tower",
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .graphicsLayer(
+                    scaleX = 1.8f,
+                    scaleY = 1.8f,
+                    transformOrigin = TransformOrigin(1f, 1f)
+                )
+            //alignment = Alignment.BottomEnd,
+        )
+
+    }
+}
+
+@Preview
+@Composable
+private fun SettingsScreenPreview() {
+    SettingsScreen(context = LocalContext.current)
 }
