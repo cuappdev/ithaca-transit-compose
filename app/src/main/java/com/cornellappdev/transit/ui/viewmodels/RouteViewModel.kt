@@ -117,13 +117,6 @@ class RouteViewModel @Inject constructor(
         )
 
     /**
-     * StateFlow that updates when the route screen refreshes
-     */
-    val refreshTrigger: MutableStateFlow<Boolean> = MutableStateFlow(
-        false
-    )
-
-    /**
      * The current UI state of the search bar, as a MutableStateFlow
      */
     private val _searchBarUiState: MutableStateFlow<SearchBarUIState> =
@@ -159,7 +152,7 @@ class RouteViewModel @Inject constructor(
         }.launchIn(viewModelScope)
 
 
-        combine(selectedRoute, arriveByFlow, refreshTrigger) { startAndEnd, arriveBy, _ ->
+        combine(selectedRoute, arriveByFlow) { startAndEnd, arriveBy ->
             val startState = startAndEnd.startPlace
             val endState = startAndEnd.endPlace
             getCoordinates(endState)?.let { end ->
@@ -280,7 +273,7 @@ class RouteViewModel @Inject constructor(
      * @param arriveBy Whether the route must complete by a certain time
      * @param originName The name of the origin
      */
-    fun getRoute(
+    private fun getRoute(
         end: LatLng,
         time: Double,
         destinationName: String,
@@ -363,7 +356,20 @@ class RouteViewModel @Inject constructor(
      * Triggers a refresh for route options
      */
     fun refreshOptions() {
-        refreshTrigger.value = !refreshTrigger.value
+        val startState = selectedRoute.value.startPlace
+        val endState = selectedRoute.value.endPlace
+        getCoordinates(endState)?.let { end ->
+            getCoordinates(startState)?.let { start ->
+                getRoute(
+                    end = end,
+                    start = start,
+                    arriveBy = arriveByFlow.value is ArriveByUIState.ArriveBy,
+                    destinationName = if (endState is LocationUIState.Place) endState.name else "Current Location",
+                    originName = if (startState is LocationUIState.Place) startState.name else "Current Location",
+                    time = (arriveByFlow.value.date.time / 1000).toDouble()
+                )
+            }
+        }
     }
 }
 
