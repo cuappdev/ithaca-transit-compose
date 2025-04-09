@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -38,7 +39,7 @@ import javax.inject.Inject
 import kotlin.math.pow
 
 @HiltViewModel
-@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
+@OptIn(FlowPreview::class)
 class RouteViewModel @Inject constructor(
     private val routeRepository: RouteRepository,
     private val locationRepository: LocationRepository,
@@ -115,6 +116,12 @@ class RouteViewModel @Inject constructor(
             emptyList()
         )
 
+    /**
+     * StateFlow that updates when the route screen refreshes
+     */
+    val refreshTrigger: MutableStateFlow<Boolean> = MutableStateFlow(
+        false
+    )
 
     /**
      * The current UI state of the search bar, as a MutableStateFlow
@@ -151,21 +158,19 @@ class RouteViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
 
-        combine(selectedRoute, arriveByFlow) { startAndEnd, arriveBy ->
-            startAndEnd to arriveBy
-        }.onEach {
-            val startState = it.first.startPlace
-            val endState = it.first.endPlace
-            val arriveByState = it.second
+
+        combine(selectedRoute, arriveByFlow, refreshTrigger) { startAndEnd, arriveBy, _ ->
+            val startState = startAndEnd.startPlace
+            val endState = startAndEnd.endPlace
             getCoordinates(endState)?.let { end ->
                 getCoordinates(startState)?.let { start ->
                     getRoute(
                         end = end,
                         start = start,
-                        arriveBy = arriveByState is ArriveByUIState.ArriveBy,
+                        arriveBy = arriveBy is ArriveByUIState.ArriveBy,
                         destinationName = if (endState is LocationUIState.Place) endState.name else "Current Location",
                         originName = if (startState is LocationUIState.Place) startState.name else "Current Location",
-                        time = (arriveByState.date.time / 1000).toDouble()
+                        time = (arriveBy.date.time / 1000).toDouble()
                     )
                 }
             }
@@ -352,6 +357,13 @@ class RouteViewModel @Inject constructor(
         }
 
         return bounds.build()
+    }
+
+    /**
+     * Triggers a refresh for route options
+     */
+    fun refreshOptions() {
+        refreshTrigger.value = !refreshTrigger.value
     }
 }
 
