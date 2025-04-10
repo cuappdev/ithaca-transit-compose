@@ -10,6 +10,7 @@ import com.cornellappdev.transit.ui.screens.DetailsScreen
 import com.cornellappdev.transit.ui.screens.HomeScreen
 import com.cornellappdev.transit.ui.screens.RouteScreen
 import com.cornellappdev.transit.ui.screens.SettingsScreen
+import com.cornellappdev.transit.ui.screens.settings.AboutScreen
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 
@@ -44,8 +45,12 @@ fun NavigationController(
 
         composable("settings") {
             SettingsScreen(
-                LocalContext.current
+                LocalContext.current, navController = navController
             )
+        }
+
+        composable("about") {
+            AboutScreen(LocalContext.current)
         }
     }
 }

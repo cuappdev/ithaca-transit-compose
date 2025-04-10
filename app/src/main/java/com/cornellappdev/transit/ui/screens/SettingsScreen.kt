@@ -23,13 +23,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.components.SettingsOption
+import com.cornellappdev.transit.ui.screens.settings.AboutScreen
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
 @Composable
-fun SettingsScreen(context: Context) {
+fun SettingsScreen(context: Context, navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -51,7 +53,7 @@ fun SettingsScreen(context: Context) {
             name = "About Transit",
             description = "Learn more about the team behind the app",
             icon = R.drawable.appdev_gray,
-            onClick = {})
+            onClick = {navController.navigate("about")})
 
         HorizontalDivider(thickness = 0.5.dp)
 
@@ -112,14 +114,13 @@ fun SettingsScreen(context: Context) {
                     scaleY = 1.8f,
                     transformOrigin = TransformOrigin(1f, 1f)
                 )
-            //alignment = Alignment.BottomEnd,
         )
 
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun SettingsScreenPreview() {
-    SettingsScreen(context = LocalContext.current)
+    SettingsScreen(context = LocalContext.current, navController = NavController(LocalContext.current) )
 }
