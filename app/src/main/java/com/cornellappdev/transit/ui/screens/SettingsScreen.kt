@@ -86,9 +86,7 @@ fun SettingsScreen(context: Context, navController: NavController) {
             description = "Manage permissions and analytics",
             icon = R.drawable.lock,
             onClick = {
-                val intent =
-                    Intent(Intent.ACTION_VIEW, Uri.parse("https://www.cornellappdev.com/privacy"))
-                context.startActivity(intent)
+                navController.navigate("notifs_privacy")
             }
         )
 
