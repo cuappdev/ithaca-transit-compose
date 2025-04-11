@@ -4,11 +4,16 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
+import android.os.Looper
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.cornellappdev.transit.networking.NetworkApi
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
@@ -35,12 +40,6 @@ class LocationRepository @Inject constructor(private val networkApi: NetworkApi)
      * Starts updating [currentLocation] to the user's current location.
      */
     fun instantiate(context: Context) {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-        updateLocation(context)
-    }
-
-
-    fun updateLocation(context: Context) {
         if (ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -52,9 +51,22 @@ class LocationRepository @Inject constructor(private val networkApi: NetworkApi)
             return
         }
 
-        fusedLocationClient.lastLocation.addOnSuccessListener {
-            _currentLocation.value = it
+        val locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                super.onLocationResult(locationResult)
+                _currentLocation.value = locationResult.lastLocation
+            }
         }
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+        fusedLocationClient.requestLocationUpdates(
+            LocationRequest.Builder(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                5000L //Update location every 5 seconds
+            ).build(),
+            locationCallback,
+            Looper.getMainLooper()
+        )
     }
 
 }

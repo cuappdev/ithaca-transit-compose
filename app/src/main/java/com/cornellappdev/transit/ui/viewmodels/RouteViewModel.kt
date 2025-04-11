@@ -244,13 +244,6 @@ class RouteViewModel @Inject constructor(
     }
 
     /**
-     * Update emitted location from [locationRepository]
-     */
-    fun updateLocation(context: Context) {
-        locationRepository.updateLocation(context)
-    }
-
-    /**
      * Change the start location by calling [SelectedRouteRepository.setStartPlace]
      * @param location The new starting location as a LocationUIState
      */
