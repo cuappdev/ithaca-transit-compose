@@ -69,6 +69,7 @@ import com.cornellappdev.transit.ui.components.RouteCell
 import com.cornellappdev.transit.ui.components.SearchTextField
 import com.cornellappdev.transit.ui.components.TernarySelector
 import com.cornellappdev.transit.ui.components.TimePicker
+import com.cornellappdev.transit.ui.components.TransitPullToRefreshBox
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.MetadataGray
@@ -584,7 +585,7 @@ private fun RouteList(
     onClick: (Route) -> Unit,
     onRefresh: () -> Unit,
 ) {
-    PullToRefreshBox(
+    TransitPullToRefreshBox(
         isRefreshing = lastRouteResponse is ApiResponse.Pending,
         onRefresh = onRefresh
     ) {
@@ -611,9 +612,11 @@ private fun RouteList(
                     }
 
                 }
+
                 is ApiResponse.Pending -> {
                     //PullToRefreshBox provides the loading circle
                 }
+
                 is ApiResponse.Success -> {
                     lastRouteResponse.data.fromStop?.let {
                         items(it) { item ->

@@ -155,18 +155,7 @@ class RouteViewModel @Inject constructor(
         combine(selectedRoute, arriveByFlow) { startAndEnd, arriveBy ->
             val startState = startAndEnd.startPlace
             val endState = startAndEnd.endPlace
-            getCoordinates(endState)?.let { end ->
-                getCoordinates(startState)?.let { start ->
-                    getRoute(
-                        end = end,
-                        start = start,
-                        arriveBy = arriveBy is ArriveByUIState.ArriveBy,
-                        destinationName = if (endState is LocationUIState.Place) endState.name else "Current Location",
-                        originName = if (startState is LocationUIState.Place) startState.name else "Current Location",
-                        time = (arriveBy.date.time / 1000).toDouble()
-                    )
-                }
-            }
+            getLatestOptions(startState, endState, arriveBy)
         }.launchIn(viewModelScope)
 
         mapState.onEach {
@@ -353,23 +342,38 @@ class RouteViewModel @Inject constructor(
     }
 
     /**
-     * Triggers a refresh for route options
+     * Get latest route options given start location, end location, and arrive by information
      */
-    fun refreshOptions() {
-        val startState = selectedRoute.value.startPlace
-        val endState = selectedRoute.value.endPlace
+    private fun getLatestOptions(
+        startState: LocationUIState,
+        endState: LocationUIState,
+        arriveByState: ArriveByUIState
+    ) {
         getCoordinates(endState)?.let { end ->
             getCoordinates(startState)?.let { start ->
                 getRoute(
                     end = end,
                     start = start,
-                    arriveBy = arriveByFlow.value is ArriveByUIState.ArriveBy,
+                    arriveBy = arriveByState is ArriveByUIState.ArriveBy,
                     destinationName = if (endState is LocationUIState.Place) endState.name else "Current Location",
                     originName = if (startState is LocationUIState.Place) startState.name else "Current Location",
-                    time = (arriveByFlow.value.date.time / 1000).toDouble()
+                    time = (arriveByState.date.time / 1000).toDouble()
                 )
             }
         }
     }
+
+    /**
+     * Refresh route options on UI
+     */
+    fun refreshOptions() {
+        getLatestOptions(
+            selectedRoute.value.startPlace,
+            selectedRoute.value.endPlace,
+            arriveByFlow.value
+        )
+    }
+
+
 }
 
