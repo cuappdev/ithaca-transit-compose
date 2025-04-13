@@ -43,7 +43,7 @@ fun SettingsOption(name: String, description: String, icon: Int, onClick: () -> 
         Column(modifier = Modifier.align(Alignment.CenterVertically)) {
             Text(
                 text = name,
-                fontSize = 24.sp,
+                fontSize = 20.sp,
                 fontFamily = robotoFamily,
                 fontStyle = FontStyle.Normal,
             )

@@ -30,6 +30,7 @@ import com.cornellappdev.transit.ui.components.MemberList
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import kotlin.random.Random
+import androidx.core.net.toUri
 
 @Composable
 fun AboutScreen(context: Context) {
@@ -166,7 +167,7 @@ fun AboutScreen(context: Context) {
                 .align(Alignment.CenterHorizontally)
                 .clickable {
                     val intent =
-                        Intent(Intent.ACTION_VIEW, Uri.parse("https://www.cornellappdev.com/"))
+                        Intent(Intent.ACTION_VIEW, "https://www.cornellappdev.com/".toUri())
                     context.startActivity(intent)
                 }
         ) {

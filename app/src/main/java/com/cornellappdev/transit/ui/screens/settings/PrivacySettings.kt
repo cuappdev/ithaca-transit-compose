@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cornellappdev.transit.ui.components.FAQ
 import com.cornellappdev.transit.ui.components.PrivacyItem
 import com.cornellappdev.transit.ui.components.SwitchItem
 import com.cornellappdev.transit.ui.theme.TransitBlue
@@ -60,7 +61,7 @@ fun PrivacySettings(context: Context) {
         PrivacyItem(
             text = "Location Access",
             subtext = "Used to find eateries near you",
-            onclick = { /* TODO: Handle click */ },
+            onclick = {},
             icon = Icons.Outlined.ArrowForward
         )
         PrivacyItem(
@@ -86,7 +87,12 @@ fun PrivacySettings(context: Context) {
 
         SwitchItem("Share with Cornell AppDev", "Help us improve products and services", {})
 
-
+        PrivacyItem(
+            text = "Privacy Policy",
+            subtext = "",
+            onclick = {},
+            icon = Icons.Outlined.ArrowForward
+        )
 
     }
 

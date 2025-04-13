@@ -1,8 +1,6 @@
 package com.cornellappdev.transit.ui.screens
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,7 +24,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.components.SettingsOption
-import com.cornellappdev.transit.ui.screens.settings.AboutScreen
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
@@ -53,7 +50,7 @@ fun SettingsScreen(context: Context, navController: NavController) {
             name = "About Transit",
             description = "Learn more about the team behind the app",
             icon = R.drawable.appdev_gray,
-            onClick = {navController.navigate("about")})
+            onClick = { navController.navigate("about") })
 
         HorizontalDivider(thickness = 0.5.dp)
 
@@ -65,7 +62,8 @@ fun SettingsScreen(context: Context, navController: NavController) {
 
         HorizontalDivider(thickness = 0.5.dp)
 
-        SettingsOption(
+        //TODO: Will be implemented after rebranding
+        /*SettingsOption(
             name = "Favorites",
             description = "Manage your favorite stops",
             icon = R.drawable.favorites,
@@ -77,7 +75,7 @@ fun SettingsScreen(context: Context, navController: NavController) {
             name = "App Icon",
             description = "Choose your adventure",
             icon = R.drawable.bus,
-            onClick = {})
+            onClick = {})*/
 
         HorizontalDivider(thickness = 0.5.dp)
 
@@ -94,9 +92,9 @@ fun SettingsScreen(context: Context, navController: NavController) {
 
         SettingsOption(
             name = "Support",
-            description = "Report issues and contact us",//Todo: check this
+            description = "Report issues and contact us",
             icon = R.drawable.help_outline,
-            onClick = {},
+            onClick = { navController.navigate("support") },
         )
 
     }
@@ -120,5 +118,8 @@ fun SettingsScreen(context: Context, navController: NavController) {
 @Preview(showBackground = true)
 @Composable
 private fun SettingsScreenPreview() {
-    SettingsScreen(context = LocalContext.current, navController = NavController(LocalContext.current) )
+    SettingsScreen(
+        context = LocalContext.current,
+        navController = NavController(LocalContext.current)
+    )
 }

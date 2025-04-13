@@ -11,8 +11,10 @@ import com.cornellappdev.transit.ui.screens.HomeScreen
 import com.cornellappdev.transit.ui.screens.RouteScreen
 import com.cornellappdev.transit.ui.screens.SettingsScreen
 import com.cornellappdev.transit.ui.screens.settings.AboutScreen
+import com.cornellappdev.transit.ui.screens.settings.FavoritesScreen
 import com.cornellappdev.transit.ui.screens.settings.NotifsAndPrivacyScreen
 import com.cornellappdev.transit.ui.screens.settings.PrivacySettings
+import com.cornellappdev.transit.ui.screens.settings.SupportScreen
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
 
@@ -61,6 +63,14 @@ fun NavigationController(
 
         composable("privacy_settings") {
             PrivacySettings(LocalContext.current)
+        }
+
+        composable("favorites") {
+            FavoritesScreen()
+        }
+
+        composable("support") {
+            SupportScreen(LocalContext.current)
         }
     }
 }
