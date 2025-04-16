@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+//TODO: No FAQs are on the app at the moment
 @Composable
 fun FAQ(
     title: String,
@@ -36,7 +37,7 @@ fun FAQ(
         PrivacyItem(
             title,
             "",
-            {},
+            { expanded = !expanded },
             if (expanded) Icons.Outlined.KeyboardArrowUp else Icons.Outlined.KeyboardArrowDown
         )
 

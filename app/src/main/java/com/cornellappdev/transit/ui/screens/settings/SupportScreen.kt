@@ -109,24 +109,16 @@ fun SupportScreen(context: Context) {
 
         }
 
-        Text(
+        /*Text(
             text = "Frequently Asked Questions",
             fontSize = 28.sp,
             modifier = Modifier.padding(top = 16.dp, start = 16.dp),
             fontWeight = FontWeight.Bold,
             fontFamily = robotoFamily,
             fontStyle = FontStyle.Normal,
-        )
+        )*/
 
-        //TODO: dropdowns not working
-        FAQ(
-            title = "How do I use this?",
-            dropdownText = "Click here to learn more about how to use this feature."
-        )
-        FAQ(
-            title = "How do I use this?",
-            dropdownText = "Click here to learn more about how to use this feature."
-        )
+
     }
 }
 

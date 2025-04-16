@@ -18,11 +18,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.net.toUri
 import com.cornellappdev.transit.ui.components.PrivacyItem
 import com.cornellappdev.transit.ui.components.SwitchItem
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
+import android.provider.Settings
 
 @Composable
 fun PrivacySettings(context: Context) {
@@ -33,7 +35,6 @@ fun PrivacySettings(context: Context) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     )
     {
-        //TODO: onclick functions
         Text(
             text = "Privacy",
             fontSize = 32.sp,
@@ -62,13 +63,19 @@ fun PrivacySettings(context: Context) {
         PrivacyItem(
             text = "Location Access",
             subtext = "Used to find eateries near you",
-            onclick = {},
+            onclick = {
+                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                context.startActivity(intent)
+            },
             icon = Icons.Outlined.ArrowForward
         )
         PrivacyItem(
             text = "Notification Access",
             subtext = "Used to send device notifications",
-            onclick = {},
+            onclick = {
+                val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                context.startActivity(intent)
+            },
             icon = Icons.Outlined.ArrowForward
         )
 

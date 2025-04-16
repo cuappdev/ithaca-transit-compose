@@ -85,35 +85,6 @@ fun NotifsAndPrivacyScreen(context: Context, navController: NavController) {
             icon = Icons.Outlined.KeyboardArrowRight
         )
 
-        Text(
-            text = "Legal",
-            fontSize = 28.sp,
-            modifier = Modifier.padding(top = 16.dp, start = 16.dp),
-            fontWeight = FontWeight.Bold,
-            fontFamily = robotoFamily,
-            fontStyle = FontStyle.Normal,
-        )
-
-        PrivacyItem(
-            text = "Privacy Policy",
-            subtext = "",
-            onclick = {
-                val intent = Intent(Intent.ACTION_VIEW).apply {
-                    data = "https://www.cornellappdev.com/privacy".toUri()
-                }
-                context.startActivity(intent)
-            },
-            icon = Icons.Outlined.ArrowForward
-        )
-
-        //Todo: find the t&c
-        PrivacyItem(
-            text = "Terms and Conditions",
-            subtext = "",
-            onclick = {},
-            icon = Icons.Outlined.ArrowForward
-        )
-
     }
 
 }
