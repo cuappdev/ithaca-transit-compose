@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -109,13 +111,16 @@ fun AboutScreen(context: Context) {
         )
     )
 
-    names = names.entries.shuffled(Random).associate { it.toPair() }
+    val shuffledNames = remember {
+        names.entries.shuffled().associate { it.toPair() }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
     )
+
     {
         Text(
             text = "About Transit",
@@ -170,22 +175,39 @@ fun AboutScreen(context: Context) {
             fontFamily = robotoFamily,
         )
 
-        MemberList(
-            "Pod Leads",
-            listOf(
-                "Anvi Savant",
-                "Cindy Liang",
-                "Maxwell Pang",
-                "Amanda He",
-                "Connor Reinhold",
-                "Omar Rasheed",
-                "Maya Frai",
-                "Matt Barker"
+        Row {
+            Text(
+                text = "Pod Leads",
+                modifier = Modifier
+                    .padding(start = 8.dp, end = 8.dp)
+                    .align(Alignment.CenterVertically)
+                    .width(80.dp)
             )
-        )
+            MemberList(
+                listOf(
+                    "Anvi Savant",
+                    "Cindy Liang",
+                    "Maxwell Pang",
+                    "Amanda He",
+                    "Connor Reinhold",
+                    "Omar Rasheed",
+                    "Maya Frai",
+                    "Matt Barker"
+                )
+            )
+        }
 
-        for ((team, members) in names) {
-            MemberList(team, members)
+        for ((team, members) in shuffledNames) {
+            Row {
+                Text(
+                    text = team,
+                    modifier = Modifier
+                        .padding(start = 8.dp, end = 8.dp)
+                        .align(Alignment.CenterVertically)
+                        .width(80.dp)
+                )
+                MemberList(members)
+            }
         }
 
         Card(

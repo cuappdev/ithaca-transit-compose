@@ -4,12 +4,9 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.animateScrollBy
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,24 +16,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.cornellappdev.transit.R
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun MemberList(team: String, names: List<String>) {
+fun MemberList(names: List<String>) {
     var scrolled by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
     val screenDensity = configuration.densityDpi / 160f
     val totalItems = 1000
-    val itemsPerGroup = 1 + names.size
+    val itemsPerGroup = names.size
     val totalVisibleItems = totalItems * itemsPerGroup
 
     LaunchedEffect(Unit) {
@@ -62,24 +56,8 @@ fun MemberList(team: String, names: List<String>) {
             }
         }
         items(totalVisibleItems) { index ->
-            val posInGroup = index % itemsPerGroup
-            if (posInGroup == 0) {
-                Row {
-                    Icon(
-                        painter = painterResource(id = R.drawable.small_star),
-                        contentDescription = null,
-                        tint = Color.Gray,
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    )
-                    Text(
-                        text = team,
-                        modifier = Modifier.padding(start = 8.dp, end = 8.dp)
-                    )
-                }
-            } else {
-                val memberIndex = (posInGroup - 1) % names.size
-                MemberItem(name = names[memberIndex])
-            }
+            val memberIndex = index % names.size
+            MemberItem(name = names[memberIndex])
         }
     }
 }
@@ -88,7 +66,6 @@ fun MemberList(team: String, names: List<String>) {
 @Composable
 private fun PreviewMemberList() {
     MemberList(
-        team = "Design",
         names = listOf("Alice", "Bob", "Charlie", "David", "Eve")
     )
 }
