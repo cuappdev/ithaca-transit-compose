@@ -40,7 +40,9 @@ fun SettingsOption(name: String, description: String, icon: Int, onClick: () -> 
                 .size(36.dp)
                 .align(Alignment.CenterVertically)
         )
+
         Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+
             Text(
                 text = name,
                 fontSize = 20.sp,
@@ -56,7 +58,6 @@ fun SettingsOption(name: String, description: String, icon: Int, onClick: () -> 
                 fontStyle = FontStyle.Normal,
             )
         }
-
     }
 }
 

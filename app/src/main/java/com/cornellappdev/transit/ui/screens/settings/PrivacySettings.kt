@@ -1,13 +1,13 @@
 package com.cornellappdev.transit.ui.screens.settings
 
 import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowForward
-import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.cornellappdev.transit.ui.components.FAQ
+import androidx.core.net.toUri
 import com.cornellappdev.transit.ui.components.PrivacyItem
 import com.cornellappdev.transit.ui.components.SwitchItem
 import com.cornellappdev.transit.ui.theme.TransitBlue
@@ -33,6 +33,7 @@ fun PrivacySettings(context: Context) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     )
     {
+        //TODO: onclick functions
         Text(
             text = "Privacy",
             fontSize = 32.sp,
@@ -70,12 +71,7 @@ fun PrivacySettings(context: Context) {
             onclick = {},
             icon = Icons.Outlined.ArrowForward
         )
-        PrivacyItem(
-            text = "Notification Settings",
-            subtext = "",
-            onclick = {},
-            icon = Icons.Outlined.KeyboardArrowRight
-        )
+
         Text(
             text = "Legal",
             fontSize = 28.sp,
@@ -90,7 +86,12 @@ fun PrivacySettings(context: Context) {
         PrivacyItem(
             text = "Privacy Policy",
             subtext = "",
-            onclick = {},
+            onclick = {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = "https://www.cornellappdev.com/privacy".toUri()
+                }
+                context.startActivity(intent)
+            },
             icon = Icons.Outlined.ArrowForward
         )
 

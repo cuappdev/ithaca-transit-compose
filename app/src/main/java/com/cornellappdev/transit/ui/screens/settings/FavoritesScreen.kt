@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
+//TODO: Will be fully implemented after ecosystem is finalized
 @Composable
 fun FavoritesScreen() {
     Column(
@@ -33,8 +34,6 @@ fun FavoritesScreen() {
             fontStyle = FontStyle.Normal,
             color = TransitBlue,
         )
-
-
     }
 }
 

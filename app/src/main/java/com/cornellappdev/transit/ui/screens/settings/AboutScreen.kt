@@ -2,16 +2,16 @@ package com.cornellappdev.transit.ui.screens.settings
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,17 +20,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.components.MemberList
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import kotlin.random.Random
-import androidx.core.net.toUri
 
 @Composable
 fun AboutScreen(context: Context) {
@@ -131,12 +134,40 @@ fun AboutScreen(context: Context) {
             fontStyle = FontStyle.Normal,
             color = Color.Gray
         )
+
         Image(
-            painter = painterResource(id = R.drawable.design_dev),
+            painter = painterResource(id = R.drawable.appdev_gray),
             contentDescription = "Cornell AppDev Logo",
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .padding(top = 24.dp, bottom = 24.dp)
+                .padding(top = 24.dp)
+                .size(30.dp)
+        )
+
+        Text(
+            "DESIGNED AND DEVELOPED BY",
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 6.dp),
+            fontSize = 12.sp,
+            fontFamily = robotoFamily,
+            fontStyle = FontStyle.Normal,
+            color = Color.Gray,
+        )
+
+
+        Text(
+            buildAnnotatedString {
+                append("Cornell")
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("AppDev")
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 4.dp, bottom = 6.dp),
+            fontSize = 36.sp,
+            fontFamily = robotoFamily,
         )
 
         MemberList(
@@ -158,13 +189,14 @@ fun AboutScreen(context: Context) {
         }
 
         Card(
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFFEFF1F4),
-            ),
+            shape = RoundedCornerShape(32.dp),
             modifier = Modifier
                 .padding(16.dp)
                 .align(Alignment.CenterHorizontally)
+                .background(
+                    color = Color.Gray,
+                    shape = RoundedCornerShape(32.dp)
+                )
                 .clickable {
                     val intent =
                         Intent(Intent.ACTION_VIEW, "https://www.cornellappdev.com/".toUri())
@@ -185,7 +217,6 @@ fun AboutScreen(context: Context) {
                         .padding(12.dp)
                 )
             }
-
         }
     }
 }

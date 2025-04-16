@@ -52,7 +52,8 @@ fun SettingsScreen(context: Context, navController: NavController) {
             icon = R.drawable.appdev_gray,
             onClick = { navController.navigate("about") })
 
-        HorizontalDivider(thickness = 0.5.dp)
+        //TODO: Will be implemented after rebranding ecosystem is done
+        /*HorizontalDivider(thickness = 0.5.dp)
 
         SettingsOption(
             name = "Show Onboarding",
@@ -62,8 +63,7 @@ fun SettingsScreen(context: Context, navController: NavController) {
 
         HorizontalDivider(thickness = 0.5.dp)
 
-        //TODO: Will be implemented after rebranding
-        /*SettingsOption(
+        SettingsOption(
             name = "Favorites",
             description = "Manage your favorite stops",
             icon = R.drawable.favorites,
@@ -96,10 +96,8 @@ fun SettingsScreen(context: Context, navController: NavController) {
             icon = R.drawable.help_outline,
             onClick = { navController.navigate("support") },
         )
-
     }
     Box(modifier = Modifier.fillMaxSize()) {
-
         Image(
             painter = painterResource(R.drawable.clock_tower),
             contentDescription = "Clock Tower",
@@ -111,7 +109,6 @@ fun SettingsScreen(context: Context, navController: NavController) {
                     transformOrigin = TransformOrigin(1f, 1f)
                 )
         )
-
     }
 }
 

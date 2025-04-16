@@ -58,7 +58,7 @@ fun NavigationController(
         }
 
         composable("notifs_privacy") {
-            NotifsAndPrivacyScreen(LocalContext.current)
+            NotifsAndPrivacyScreen(LocalContext.current, navController = navController)
         }
 
         composable("privacy_settings") {

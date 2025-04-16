@@ -1,9 +1,9 @@
 package com.cornellappdev.transit.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -22,10 +22,14 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
 
 @Composable
 fun PrivacyItem(text: String, subtext: String, onclick: () -> Unit, icon: ImageVector) {
-    Row(modifier = Modifier
-        .padding(top = 8.dp, bottom = 8.dp)
-        .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier
+            .padding(top = 8.dp, bottom = 8.dp)
+            .fillMaxWidth()
+            .clickable { onclick() },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
         Column {
             Text(
                 text = text,
@@ -47,6 +51,7 @@ fun PrivacyItem(text: String, subtext: String, onclick: () -> Unit, icon: ImageV
             }
 
         }
+
         Spacer(modifier = Modifier.weight(1f))
 
         Icon(icon, "", tint = TransitBlue)

@@ -9,14 +9,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,11 +32,6 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
 
 @Composable
 fun SupportScreen(context: Context) {
-    val coroutineScope = rememberCoroutineScope()
-    val modalBottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true,
-    )
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -126,11 +118,15 @@ fun SupportScreen(context: Context) {
             fontStyle = FontStyle.Normal,
         )
 
+        //TODO: dropdowns not working
         FAQ(
             title = "How do I use this?",
             dropdownText = "Click here to learn more about how to use this feature."
         )
-
+        FAQ(
+            title = "How do I use this?",
+            dropdownText = "Click here to learn more about how to use this feature."
+        )
     }
 }
 

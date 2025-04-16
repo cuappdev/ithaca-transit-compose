@@ -47,9 +47,14 @@ fun SwitchItem(text: String, subtext: String, onclick: () -> Unit) {
 
         }
         Spacer(modifier = Modifier.weight(1f))
+
+        //TODO: Change switch border
         Switch(
             checked = isChecked,
-            onCheckedChange = { isChecked = it },
+            onCheckedChange = {
+                isChecked = it
+                onclick()
+            },
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Color.White,
                 checkedTrackColor = Color(0xFFEFF1F4),
