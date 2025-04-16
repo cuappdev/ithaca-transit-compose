@@ -35,8 +35,11 @@ import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.components.MemberList
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
-import kotlin.random.Random
 
+
+/**
+ * Composable for the About Screen of the app, which displays information about team behind it.
+ */
 @Composable
 fun AboutScreen(context: Context) {
     var names = mapOf(

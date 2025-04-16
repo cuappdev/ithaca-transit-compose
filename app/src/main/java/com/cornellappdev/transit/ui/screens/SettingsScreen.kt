@@ -27,6 +27,9 @@ import com.cornellappdev.transit.ui.components.SettingsOption
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
+/**
+ * Composable for Settings Screen, which displays a list of settings options and app information.
+ * **/
 @Composable
 fun SettingsScreen(context: Context, navController: NavController) {
     Column(

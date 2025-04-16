@@ -20,6 +20,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 //TODO: No FAQs are on the app at the moment
+/**
+ *Compose function to display a FAQ item with a title and expandable content.
+ * @param title The title of the FAQ item.
+ * @param dropdownText The content to be displayed when the FAQ item is expanded.
+ * **/
 @Composable
 fun FAQ(
     title: String,

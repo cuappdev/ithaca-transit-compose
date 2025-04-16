@@ -16,6 +16,9 @@ import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
 //TODO: Will be fully implemented after ecosystem is finalized
+/**
+ * Composable for Favorites Screen, which displays a list of users favorite stops.
+ * **/
 @Composable
 fun FavoritesScreen() {
     Column(

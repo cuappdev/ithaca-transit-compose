@@ -18,6 +18,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
+/**
+ * Compose function to display a switch item with a title and subtext. The item is clickable and can
+ * be turned on or off.
+ * @param text The title of the switch item.
+ * @param subtext The subtext of the switch item.
+ * @param onclick The callback function to be executed when the switch is toggled.
+ * **/
 @Composable
 fun SwitchItem(text: String, subtext: String, onclick: () -> Unit) {
     var isChecked = false

@@ -21,7 +21,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
-
+/**
+ * Compose function to display a list of member items in a horizontal scrolling row.
+ * * @param names The list of member names to be displayed.
+ * **/
 @Composable
 fun MemberList(names: List<String>) {
     var scrolled by remember { mutableStateOf(false) }

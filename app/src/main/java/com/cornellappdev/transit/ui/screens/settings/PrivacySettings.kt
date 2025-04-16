@@ -26,6 +26,10 @@ import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import android.provider.Settings
 
+/**
+ * Composable function for the Privacy Settings screen, which displays a list of privacy settings
+ * and links to privacy policy.
+ */
 @Composable
 fun PrivacySettings(context: Context) {
     Column(

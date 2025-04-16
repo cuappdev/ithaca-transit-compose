@@ -20,6 +20,14 @@ import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
+/**
+ * Compose function to display a clickable settings option (displayed on the main settings page)
+ * with a title, description, and an icon.
+ * @param name The title of the settings option.
+ * @param description The description of the settings option.
+ * @param icon The resource ID of the icon to be displayed.
+ * @param onClick The callback function to be executed when the option is clicked.
+ * **/
 @Composable
 fun SettingsOption(name: String, description: String, icon: Int, onClick: () -> Unit) {
     Row(

@@ -20,6 +20,13 @@ import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
+/**
+ * Compose function to display a clickable privacy item with a title, subtext, and an icon.
+ * @param text The title of the privacy item.
+ * @param subtext The subtext of the privacy item.
+ * @param onclick The callback function to be executed when the item is clicked.
+ * @param icon The icon to be displayed next to the item.
+ * **/
 @Composable
 fun PrivacyItem(text: String, subtext: String, onclick: () -> Unit, icon: ImageVector) {
     Row(

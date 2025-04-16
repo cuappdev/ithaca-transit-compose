@@ -30,6 +30,10 @@ import com.cornellappdev.transit.ui.components.FAQ
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
+/**
+ * Composable function for the Support screen, which displays a list of support options and links to
+ * report issues.
+ */
 @Composable
 fun SupportScreen(context: Context) {
     Column(
