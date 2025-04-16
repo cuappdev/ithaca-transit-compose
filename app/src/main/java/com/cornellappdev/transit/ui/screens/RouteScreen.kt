@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
@@ -67,6 +69,7 @@ import com.cornellappdev.transit.ui.components.RouteCell
 import com.cornellappdev.transit.ui.components.SearchTextField
 import com.cornellappdev.transit.ui.components.TernarySelector
 import com.cornellappdev.transit.ui.components.TimePicker
+import com.cornellappdev.transit.ui.components.TransitPullToRefreshBox
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.MetadataGray
@@ -107,7 +110,7 @@ fun RouteScreen(
     val lastRoute = routeViewModel.lastRouteFlow.collectAsState().value
 
     val startSheetState =
-        androidx.compose.material.rememberModalBottomSheetState(
+        rememberModalBottomSheetState(
             ModalBottomSheetValue.Hidden,
             skipHalfExpanded = true,
             confirmValueChange = {
@@ -117,7 +120,7 @@ fun RouteScreen(
         )
 
     val destSheetState =
-        androidx.compose.material.rememberModalBottomSheetState(
+        rememberModalBottomSheetState(
             ModalBottomSheetValue.Hidden,
             skipHalfExpanded = true,
             confirmValueChange = {
@@ -319,7 +322,7 @@ private fun RouteOptionsMainMenu(
 
     //SheetState for Arrive By Route Options
     val arriveBySheetState =
-        androidx.compose.material.rememberModalBottomSheetState(
+        rememberModalBottomSheetState(
             ModalBottomSheetValue.Hidden,
             skipHalfExpanded = true
         )
@@ -375,14 +378,16 @@ private fun RouteOptionsMainMenu(
                 ConstraintLayout(modifier = Modifier.heightIn(max = 68.dp)) {
                     val (fromText, fromStop, toText, toStop, line) = createRefs()
 
-                    Text(text = "From", color = PrimaryText,
+                    Text(
+                        text = "From", color = PrimaryText,
                         fontFamily = robotoFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 14.sp, modifier = Modifier.constrainAs(fromText) {
                             top.linkTo(parent.top, margin = 3.dp)
                         })
 
-                    Icon(imageVector = ImageVector.vectorResource(id = R.drawable.boarding_stop),
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.boarding_stop),
                         contentDescription = "",
                         tint = IconGray,
                         modifier = Modifier
@@ -549,7 +554,9 @@ private fun RouteOptionsMainMenu(
                 }
             }
 
-            RouteList(lastRoute, onClick)
+            RouteList(lastRoute, onClick, onRefresh = {
+                routeViewModel.refreshOptions()
+            })
         }
     }
 
@@ -560,9 +567,10 @@ private fun RouteOptionsMainMenu(
  */
 @Composable
 private fun PaddedRouteCell(transport: Transport, onClick: () -> Unit) {
-    Row(modifier = Modifier
-        .padding(12.dp)
-        .clickable { onClick() }) {
+    Row(
+        modifier = Modifier
+            .padding(12.dp)
+            .clickable { onClick() }) {
         RouteCell(transport)
     }
 }
@@ -570,91 +578,104 @@ private fun PaddedRouteCell(transport: Transport, onClick: () -> Unit) {
 /**
  * List of routes from a route query
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RouteList(
     lastRouteResponse: ApiResponse<RouteOptions>,
-    onClick: (Route) -> Unit
+    onClick: (Route) -> Unit,
+    onRefresh: () -> Unit,
 ) {
-    when (lastRouteResponse) {
-        is ApiResponse.Error -> {
-            Text(
-                text = "No Routes Found",
-                fontFamily = robotoFamily,
-                fontWeight = FontWeight.Normal,
-                color = MetadataGray,
-                fontSize = 24.sp,
-                modifier = Modifier
-                    .padding(12.dp)
-                    .fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-        }
-
-        is ApiResponse.Pending -> {
-            ProgressCircle()
-        }
-
-        is ApiResponse.Success -> {
-            LazyColumn(
-                modifier = Modifier
-                    .background(color = DividerGray)
-                    .fillMaxSize()
-            ) {
-                lastRouteResponse.data.fromStop?.let {
-                    items(it) { item ->
-                        PaddedRouteCell(item.toTransport()) {
-                            onClick(
-                                item
-                            )
-                        }
-                    }
-                }
-                if (lastRouteResponse.data.boardingSoon?.isNotEmpty() == true) {
+    TransitPullToRefreshBox(
+        isRefreshing = lastRouteResponse is ApiResponse.Pending,
+        onRefresh = onRefresh
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .background(color = DividerGray)
+                .fillMaxSize()
+        ) {
+            when (lastRouteResponse) {
+                is ApiResponse.Error -> {
                     item {
+                        Spacer(modifier = Modifier.height(80.dp))
                         Text(
-                            "Boarding Soon From Nearby Stops",
-                            style = Style.heading4,
+                            text = "No Routes Found",
+                            fontFamily = robotoFamily,
+                            fontWeight = FontWeight.Normal,
                             color = MetadataGray,
-                            modifier = Modifier.padding(
-                                start = 12.dp,
-                                top = if (lastRouteResponse.data.fromStop?.isEmpty() == true) 12.dp else 0.dp
-                            )
+                            fontSize = 24.sp,
+                            modifier = Modifier
+                                .padding(12.dp)
+                                .fillMaxWidth(),
+                            textAlign = TextAlign.Center
                         )
                     }
+
                 }
-                lastRouteResponse.data.boardingSoon?.let {
-                    items(it) { item ->
-                        PaddedRouteCell(item.toTransport()) {
-                            onClick(
-                                item
+
+                is ApiResponse.Pending -> {
+                    //PullToRefreshBox provides the loading circle
+                }
+
+                is ApiResponse.Success -> {
+                    lastRouteResponse.data.fromStop?.let {
+                        items(it) { item ->
+                            PaddedRouteCell(item.toTransport()) {
+                                onClick(
+                                    item
+                                )
+                            }
+                        }
+                    }
+                    if (lastRouteResponse.data.boardingSoon?.isNotEmpty() == true) {
+                        item {
+                            Text(
+                                "Boarding Soon From Nearby Stops",
+                                style = Style.heading4,
+                                color = MetadataGray,
+                                modifier = Modifier.padding(
+                                    start = 12.dp,
+                                    top = if (lastRouteResponse.data.fromStop?.isEmpty() == true) 12.dp else 0.dp
+                                )
                             )
                         }
                     }
-                }
-                if (lastRouteResponse.data.walking?.isNotEmpty() == true) {
-                    item {
-                        Text(
-                            "By Walking",
-                            style = Style.heading4,
-                            color = MetadataGray,
-                            modifier = Modifier.padding(
-                                start = 12.dp,
-                                top = if (lastRouteResponse.data.boardingSoon?.isEmpty() == true) 12.dp else 0.dp
-                            )
-                        )
+                    lastRouteResponse.data.boardingSoon?.let {
+                        items(it) { item ->
+                            PaddedRouteCell(item.toTransport()) {
+                                onClick(
+                                    item
+                                )
+                            }
+                        }
                     }
-                }
-                lastRouteResponse.data.walking?.let {
-                    items(it) { item ->
-                        PaddedRouteCell(item.toTransport()) {
-                            onClick(
-                                item
+                    if (lastRouteResponse.data.walking?.isNotEmpty() == true) {
+                        item {
+                            Text(
+                                "By Walking",
+                                style = Style.heading4,
+                                color = MetadataGray,
+                                modifier = Modifier.padding(
+                                    start = 12.dp,
+                                    top = if (lastRouteResponse.data.boardingSoon?.isEmpty() == true) 12.dp else 0.dp
+                                )
                             )
                         }
                     }
+                    lastRouteResponse.data.walking?.let {
+                        items(it) { item ->
+                            PaddedRouteCell(item.toTransport()) {
+                                onClick(
+                                    item
+                                )
+                            }
+                        }
+                    }
+
                 }
             }
         }
+
     }
 }
 
