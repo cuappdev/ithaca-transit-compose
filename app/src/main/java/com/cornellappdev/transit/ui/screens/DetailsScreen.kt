@@ -1,13 +1,11 @@
 package com.cornellappdev.transit.ui.screens
 
 import android.Manifest
-import android.os.Build
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,8 +42,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.DirectionType
@@ -63,9 +59,7 @@ import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.DirectionDetails
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
-import com.cornellappdev.transit.util.TimeUtils
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -88,7 +82,7 @@ import io.morfly.compose.bottomsheet.material3.rememberBottomSheetScaffoldState
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetState
 
 
-private enum class SheetValue { Collapsed, PartiallyExpanded, Expanded }
+private enum class DetailsSheetValue { Collapsed, PartiallyExpanded, Expanded }
 
 /**
  * Screen for showing a particular route
@@ -126,13 +120,13 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
 
     // Using advanced-bottomsheet-compose from https://github.com/Morfly/advanced-bottomsheet-compose
     val sheetState = rememberBottomSheetState(
-        initialValue = SheetValue.Collapsed,
+        initialValue = DetailsSheetValue.Collapsed,
         defineValues = {
-            SheetValue.Collapsed at height(100.dp)
+            DetailsSheetValue.Collapsed at height(100.dp)
             // Bottom sheet offset is 50%, i.e. it takes 50% of the screen
-            SheetValue.PartiallyExpanded at offset(percent = 50)
+            DetailsSheetValue.PartiallyExpanded at offset(percent = 50)
             // Wrap full height
-            SheetValue.Expanded at offset(percent = 10)
+            DetailsSheetValue.Expanded at offset(percent = 10)
         }
     )
 

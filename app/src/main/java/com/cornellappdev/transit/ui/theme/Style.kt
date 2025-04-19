@@ -2,6 +2,7 @@ package com.cornellappdev.transit.ui.theme
 
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 /**
@@ -42,5 +43,18 @@ object Style {
         platformStyle = PlatformTextStyle(
             includeFontPadding = false
         )
+    )
+
+    /**
+     * TextStyle for Card headers
+     */
+    val cardH1 = TextStyle(
+        fontSize = 16.sp,
+        fontFamily = robotoFamily,
+        lineHeight = 18.sp,
+        platformStyle = PlatformTextStyle(
+            includeFontPadding = false
+        ),
+        fontWeight = FontWeight(500)
     )
 }
