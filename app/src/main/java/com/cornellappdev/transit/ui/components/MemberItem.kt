@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,25 +25,20 @@ fun MemberItem(name: String) {
         Icon(
             painter = painterResource(id = R.drawable.small_star),
             contentDescription = null,
-            tint = Color.Gray,
+            tint = Color.LightGray,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
         )
-        Card(
-            shape = RoundedCornerShape(32.dp),
+        Text(
+            text = name,
             modifier = Modifier
                 .padding(8.dp)
                 .background(
-                    color = Color.Gray,
+                    color = Color.LightGray,
                     shape = RoundedCornerShape(32.dp)
                 )
-        ) {
-            Text(
-                text = name,
-                modifier = Modifier
-                    .padding(12.dp)
-            )
-        }
+                .padding(12.dp)
+        )
     }
 }
 

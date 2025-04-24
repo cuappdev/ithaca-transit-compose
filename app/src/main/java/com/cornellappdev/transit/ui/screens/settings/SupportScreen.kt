@@ -1,6 +1,5 @@
 package com.cornellappdev.transit.ui.screens.settings
 
-import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,14 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.ui.components.FAQ
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
@@ -35,7 +32,8 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
  * report issues.
  */
 @Composable
-fun SupportScreen(context: Context) {
+fun SupportScreen() {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -49,7 +47,6 @@ fun SupportScreen(context: Context) {
             modifier = Modifier.padding(top = 16.dp, start = 16.dp),
             fontWeight = FontWeight.Bold,
             fontFamily = robotoFamily,
-            fontStyle = FontStyle.Normal,
             color = TransitBlue,
         )
         Text(
@@ -57,7 +54,6 @@ fun SupportScreen(context: Context) {
             fontSize = 16.sp,
             modifier = Modifier.padding(start = 16.dp),
             fontFamily = robotoFamily,
-            fontStyle = FontStyle.Normal,
             color = Color.Gray
         )
 
@@ -67,7 +63,6 @@ fun SupportScreen(context: Context) {
             modifier = Modifier.padding(top = 16.dp, start = 16.dp),
             fontWeight = FontWeight.Bold,
             fontFamily = robotoFamily,
-            fontStyle = FontStyle.Normal,
         )
 
         Text(
@@ -75,8 +70,7 @@ fun SupportScreen(context: Context) {
             fontSize = 12.sp,
             modifier = Modifier.padding(start = 16.dp),
             fontFamily = robotoFamily,
-            fontStyle = FontStyle.Normal,
-            color = Color.LightGray
+            color = Color.Gray
         )
 
         Button(
@@ -107,22 +101,9 @@ fun SupportScreen(context: Context) {
                     fontSize = 16.sp,
                     modifier = Modifier.padding(start = 16.dp),
                     fontFamily = robotoFamily,
-                    fontStyle = FontStyle.Normal,
                 )
             }
-
         }
-
-        /*Text(
-            text = "Frequently Asked Questions",
-            fontSize = 28.sp,
-            modifier = Modifier.padding(top = 16.dp, start = 16.dp),
-            fontWeight = FontWeight.Bold,
-            fontFamily = robotoFamily,
-            fontStyle = FontStyle.Normal,
-        )*/
-
-
     }
 }
 
@@ -130,5 +111,5 @@ fun SupportScreen(context: Context) {
 @Preview(showBackground = true)
 @Composable
 fun SupportScreenPreview() {
-    SupportScreen(LocalContext.current)
+    SupportScreen()
 }

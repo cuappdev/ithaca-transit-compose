@@ -9,13 +9,18 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
 /**
@@ -23,11 +28,16 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
  * be turned on or off.
  * @param text The title of the switch item.
  * @param subtext The subtext of the switch item.
- * @param onclick The callback function to be executed when the switch is toggled.
+ * @param onClick The callback function to be executed when the switch is toggled.
  * **/
 @Composable
-fun SwitchItem(text: String, subtext: String, onclick: () -> Unit) {
-    var isChecked = false
+fun SwitchItem(
+    text: String,
+    subtext: String = "",
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    //var isChecked by remember { mutableStateOf(true) }
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -40,7 +50,6 @@ fun SwitchItem(text: String, subtext: String, onclick: () -> Unit) {
                 modifier = Modifier.padding(start = 16.dp),
                 fontWeight = FontWeight.Bold,
                 fontFamily = robotoFamily,
-                fontStyle = FontStyle.Normal,
             )
             if (subtext.isNotEmpty()) {
                 Text(
@@ -48,29 +57,39 @@ fun SwitchItem(text: String, subtext: String, onclick: () -> Unit) {
                     fontSize = 12.sp,
                     modifier = Modifier.padding(start = 16.dp),
                     fontFamily = robotoFamily,
-                    fontStyle = FontStyle.Normal,
                 )
             }
 
         }
         Spacer(modifier = Modifier.weight(1f))
 
-        //TODO: Change switch border
         Switch(
             checked = isChecked,
-            onCheckedChange = {
-                isChecked = it
-                onclick()
-            },
+            onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Color.White,
-                checkedTrackColor = Color(0xFFEFF1F4),
+                checkedTrackColor = TransitBlue,
                 uncheckedThumbColor = Color.White,
-                uncheckedTrackColor = Color(0xFFEFF1F4)
+                uncheckedTrackColor = Color.LightGray,
+                uncheckedBorderColor = Color.LightGray
+
             ),
             modifier = Modifier
                 .padding(8.dp)
         )
     }
+}
 
+@Preview(showBackground = true)
+@Composable
+fun SwitchItemPreview() {
+
+    var isSwitchChecked by remember { mutableStateOf(false) }
+
+    SwitchItem(
+        text = "Switch Item",
+        subtext = "This is a switch item",
+        isChecked = isSwitchChecked,
+        onCheckedChange = { isSwitchChecked = it }
+    )
 }

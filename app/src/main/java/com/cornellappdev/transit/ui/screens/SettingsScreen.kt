@@ -1,6 +1,5 @@
 package com.cornellappdev.transit.ui.screens
 
-import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,14 +15,13 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.ui.components.SettingsOption
+import com.cornellappdev.transit.ui.components.SettingsPageItem
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
@@ -31,7 +29,7 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
  * Composable for Settings Screen, which displays a list of settings options and app information.
  * **/
 @Composable
-fun SettingsScreen(context: Context, navController: NavController) {
+fun SettingsScreen(onNavigate: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -45,59 +43,30 @@ fun SettingsScreen(context: Context, navController: NavController) {
             modifier = Modifier.padding(top = 16.dp, start = 16.dp),
             fontWeight = FontWeight.Bold,
             fontFamily = robotoFamily,
-            fontStyle = FontStyle.Normal,
             color = TransitBlue,
         )
 
-        SettingsOption(
+        SettingsPageItem(
             name = "About Transit",
             description = "Learn more about the team behind the app",
             icon = R.drawable.appdev_gray,
-            onClick = { navController.navigate("about") })
-
-        //TODO: Will be implemented after rebranding ecosystem is done
-        /*HorizontalDivider(thickness = 0.5.dp)
-
-        SettingsOption(
-            name = "Show Onboarding",
-            description = "Need a refresher? See how to use the app",
-            icon = R.drawable.lightbulb,
-            onClick = {})
-
+            onClick = { onNavigate("about") })
         HorizontalDivider(thickness = 0.5.dp)
 
-        SettingsOption(
-            name = "Favorites",
-            description = "Manage your favorite stops",
-            icon = R.drawable.favorites,
-            onClick = {})
-
-        HorizontalDivider(thickness = 0.5.dp)
-
-        SettingsOption(
-            name = "App Icon",
-            description = "Choose your adventure",
-            icon = R.drawable.bus,
-            onClick = {})*/
-
-        HorizontalDivider(thickness = 0.5.dp)
-
-        SettingsOption(
+        SettingsPageItem(
             name = "Notifications and Privacy",
             description = "Manage permissions and analytics",
             icon = R.drawable.lock,
-            onClick = {
-                navController.navigate("notifs_privacy")
-            }
+            onClick = { onNavigate("notifs_privacy") }
         )
 
         HorizontalDivider(thickness = 0.5.dp)
 
-        SettingsOption(
+        SettingsPageItem(
             name = "Support",
             description = "Report issues and contact us",
             icon = R.drawable.help_outline,
-            onClick = { navController.navigate("support") },
+            onClick = { onNavigate("support") },
         )
     }
     Box(modifier = Modifier.fillMaxSize()) {
@@ -118,8 +87,8 @@ fun SettingsScreen(context: Context, navController: NavController) {
 @Preview(showBackground = true)
 @Composable
 private fun SettingsScreenPreview() {
-    SettingsScreen(
-        context = LocalContext.current,
-        navController = NavController(LocalContext.current)
-    )
+    val navController = NavController(LocalContext.current)
+    SettingsScreen { route ->
+        navController.navigate(route)
+    }
 }

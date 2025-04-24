@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,7 +28,7 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
  * @param onClick The callback function to be executed when the option is clicked.
  * **/
 @Composable
-fun SettingsOption(name: String, description: String, icon: Int, onClick: () -> Unit) {
+fun SettingsPageItem(name: String, description: String, icon: Int, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .padding(top = 8.dp, bottom = 8.dp)
@@ -41,7 +40,7 @@ fun SettingsOption(name: String, description: String, icon: Int, onClick: () -> 
     {
         Icon(
             painter = painterResource(id = icon),
-            contentDescription = "",
+            contentDescription = null,
             tint = Color.Gray,
             modifier = Modifier
                 .padding(start = 16.dp, end = 16.dp)
@@ -55,7 +54,6 @@ fun SettingsOption(name: String, description: String, icon: Int, onClick: () -> 
                 text = name,
                 fontSize = 20.sp,
                 fontFamily = robotoFamily,
-                fontStyle = FontStyle.Normal,
             )
 
             Text(
@@ -63,7 +61,6 @@ fun SettingsOption(name: String, description: String, icon: Int, onClick: () -> 
                 fontSize = 14.sp,
                 fontFamily = robotoFamily,
                 color = Color.Gray,
-                fontStyle = FontStyle.Normal,
             )
         }
     }
@@ -71,8 +68,8 @@ fun SettingsOption(name: String, description: String, icon: Int, onClick: () -> 
 
 @Preview
 @Composable
-private fun SettingsOptionPreview() {
-    SettingsOption(
+private fun SettingsPageItemPreview() {
+    SettingsPageItem(
         name = "About Transit",
         description = "Learn more about the team behind the app",
         icon = R.drawable.appdev_gray,

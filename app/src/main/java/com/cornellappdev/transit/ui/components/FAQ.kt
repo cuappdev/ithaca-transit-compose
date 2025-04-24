@@ -39,7 +39,7 @@ fun FAQ(
             .padding(12.dp)
     ) {
 
-        PrivacyItem(
+        PrivacyOptionItem(
             title,
             "",
             { expanded = !expanded },

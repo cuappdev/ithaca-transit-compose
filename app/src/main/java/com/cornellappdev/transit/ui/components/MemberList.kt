@@ -1,7 +1,6 @@
 package com.cornellappdev.transit.ui.components
 
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.padding
@@ -28,16 +27,23 @@ import kotlinx.coroutines.launch
 @Composable
 fun MemberList(names: List<String>) {
     var scrolled by remember { mutableStateOf(false) }
+
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+
+    // Get the screen density and calculate the scroll distance
     val configuration = LocalConfiguration.current
     val screenDensity = configuration.densityDpi / 160f
-    val totalItems = 1000
-    val itemsPerGroup = names.size
-    val totalVisibleItems = totalItems * itemsPerGroup
+    val screenWidth = configuration.screenWidthDp.toFloat() * screenDensity
+    val scrollDist = ((screenWidth / 2 + (Math.random() * screenWidth)) * .65).toFloat() * 50000
 
+    // Calculate the total number of items to be displayed to simulate infinite scrolling
+    val nameRepeatCount = 1000
+    val totalItems = nameRepeatCount * names.size
+
+    // Scroll to the middle of the list on first composition
     LaunchedEffect(Unit) {
-        listState.scrollToItem(totalVisibleItems / 2)
+        listState.scrollToItem(totalItems / 2)
     }
 
     LazyRow(
@@ -45,20 +51,17 @@ fun MemberList(names: List<String>) {
         verticalAlignment = Alignment.CenterVertically,
         state = listState,
     ) {
+        // Trigger animated scroll only once
         if (!scrolled) {
-            val screenWidth = configuration.screenWidthDp.toFloat() * screenDensity
-            val scrollDist = ((screenWidth / 2 + (Math.random() * screenWidth)) * .65).toFloat()
-            val multFactor = 50000
             coroutineScope.launch {
-                listState.animateScrollBy(5000.0f, snap(0))
                 scrolled = true
                 listState.animateScrollBy(
-                    scrollDist * multFactor,
-                    tween(5000 * multFactor, 0, LinearEasing)
+                    scrollDist,
+                    tween(250000000, 0, LinearEasing)
                 )
             }
         }
-        items(totalVisibleItems) { index ->
+        items(totalItems) { index ->
             val memberIndex = index % names.size
             MemberItem(name = names[memberIndex])
         }
