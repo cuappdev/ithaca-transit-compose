@@ -28,7 +28,8 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
  * be turned on or off.
  * @param text The title of the switch item.
  * @param subtext The subtext of the switch item.
- * @param onClick The callback function to be executed when the switch is toggled.
+ * @param isChecked The current state of the switch (on/off).
+ * @param onCheckedChange The callback function to be called when the switch is toggled.
  * **/
 @Composable
 fun SwitchItem(
