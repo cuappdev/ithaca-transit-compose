@@ -47,9 +47,10 @@ fun NavigationController(
         }
 
         composable("settings") {
-            SettingsScreen { route ->
-                navController.navigate(route)
-            }
+            SettingsScreen (
+                onAboutClick = {navController.navigate("about")},
+                onSupportClick = {navController.navigate("support")},
+                onNotificationsAndPrivacyClick = {navController.navigate("notifs_privacy")})
         }
 
         composable("about") {
@@ -57,8 +58,8 @@ fun NavigationController(
         }
 
         composable("notifs_privacy") {
-            NotifsAndPrivacyScreen { route ->
-                navController.navigate(route)
+            NotifsAndPrivacyScreen {
+                navController.navigate("privacy_settings")
             }
         }
 

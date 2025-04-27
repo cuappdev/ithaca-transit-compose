@@ -29,7 +29,7 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
  * notification settings and links to privacy settings
  * **/
 @Composable
-fun NotifsAndPrivacyScreen(onNavigate: (String) -> Unit) {
+fun NotifsAndPrivacyScreen(onPrivacyCLick: () -> Unit) {
 
     var pauseAllNotifs by remember { mutableStateOf(false) }
     var busNotifs by remember { mutableStateOf(false) }
@@ -92,7 +92,7 @@ fun NotifsAndPrivacyScreen(onNavigate: (String) -> Unit) {
         PrivacyOptionItem(
             text = "Privacy Settings",
             subtext = "",
-            onClick = { onNavigate("privacy_settings") },
+            onClick = { onPrivacyCLick() },
             icon = Icons.Outlined.KeyboardArrowRight
         )
 
@@ -104,8 +104,5 @@ fun NotifsAndPrivacyScreen(onNavigate: (String) -> Unit) {
 @Preview(showBackground = true)
 @Composable
 private fun NotifsAndPrivacyScreenPreview() {
-    val navController = NavController(LocalContext.current)
-    NotifsAndPrivacyScreen { route ->
-        navController.navigate(route)
-    }
+    NotifsAndPrivacyScreen {}
 }

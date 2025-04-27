@@ -38,7 +38,6 @@ fun SwitchItem(
     isChecked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    //var isChecked by remember { mutableStateOf(true) }
     Row(
         modifier = Modifier
             .fillMaxWidth(),

@@ -67,7 +67,7 @@ fun PrivacyOptionItem(text: String, subtext: String = "", onClick: () -> Unit = 
 
 @Preview(showBackground = true)
 @Composable
-fun PrivacyOptionItemPreview() {
+private fun PrivacyOptionItemPreview() {
     PrivacyOptionItem(
         text = "Privacy Policy",
         subtext = "Learn more about how we handle your data",

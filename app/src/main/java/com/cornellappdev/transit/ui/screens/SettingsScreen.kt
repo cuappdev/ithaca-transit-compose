@@ -29,7 +29,9 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
  * Composable for Settings Screen, which displays a list of settings options and app information.
  * **/
 @Composable
-fun SettingsScreen(onNavigate: (String) -> Unit) {
+fun SettingsScreen(onSupportClick: () -> Unit,
+                   onAboutClick: () -> Unit,
+                   onNotificationsAndPrivacyClick: () -> Unit ){
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -50,14 +52,14 @@ fun SettingsScreen(onNavigate: (String) -> Unit) {
             name = "About Transit",
             description = "Learn more about the team behind the app",
             icon = R.drawable.appdev_gray,
-            onClick = { onNavigate("about") })
+            onClick = { onAboutClick() })
         HorizontalDivider(thickness = 0.5.dp)
 
         SettingsPageItem(
             name = "Notifications and Privacy",
             description = "Manage permissions and analytics",
             icon = R.drawable.lock,
-            onClick = { onNavigate("notifs_privacy") }
+            onClick = { onNotificationsAndPrivacyClick() }
         )
 
         HorizontalDivider(thickness = 0.5.dp)
@@ -66,7 +68,7 @@ fun SettingsScreen(onNavigate: (String) -> Unit) {
             name = "Support",
             description = "Report issues and contact us",
             icon = R.drawable.help_outline,
-            onClick = { onNavigate("support") },
+            onClick = { onSupportClick() },
         )
     }
     Box(modifier = Modifier.fillMaxSize()) {
@@ -87,8 +89,5 @@ fun SettingsScreen(onNavigate: (String) -> Unit) {
 @Preview(showBackground = true)
 @Composable
 private fun SettingsScreenPreview() {
-    val navController = NavController(LocalContext.current)
-    SettingsScreen { route ->
-        navController.navigate(route)
-    }
+    SettingsScreen({}, {}, {})
 }
