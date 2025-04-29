@@ -58,9 +58,9 @@ fun NavigationController(
         }
 
         composable("notifs_privacy") {
-            NotifsAndPrivacyScreen {
-                navController.navigate("privacy_settings")
-            }
+            NotifsAndPrivacyScreen (
+                onPrivacyClick = {navController.navigate("privacy_settings")}
+            )
         }
 
         composable("privacy_settings") {

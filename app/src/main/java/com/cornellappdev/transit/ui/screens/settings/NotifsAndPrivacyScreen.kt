@@ -13,12 +13,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.cornellappdev.transit.ui.components.PrivacyOptionItem
 import com.cornellappdev.transit.ui.components.SwitchItem
 import com.cornellappdev.transit.ui.theme.TransitBlue
@@ -29,7 +27,7 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
  * notification settings and links to privacy settings
  * **/
 @Composable
-fun NotifsAndPrivacyScreen(onPrivacyCLick: () -> Unit) {
+fun NotifsAndPrivacyScreen(onPrivacyClick: () -> Unit) {
 
     var pauseAllNotifs by remember { mutableStateOf(false) }
     var busNotifs by remember { mutableStateOf(false) }
@@ -92,7 +90,7 @@ fun NotifsAndPrivacyScreen(onPrivacyCLick: () -> Unit) {
         PrivacyOptionItem(
             text = "Privacy Settings",
             subtext = "",
-            onClick = { onPrivacyCLick() },
+            onClick = { onPrivacyClick() },
             icon = Icons.Outlined.KeyboardArrowRight
         )
 

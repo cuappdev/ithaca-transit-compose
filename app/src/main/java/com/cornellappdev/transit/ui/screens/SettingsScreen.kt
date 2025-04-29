@@ -52,14 +52,14 @@ fun SettingsScreen(onSupportClick: () -> Unit,
             name = "About Transit",
             description = "Learn more about the team behind the app",
             icon = R.drawable.appdev_gray,
-            onClick = { onAboutClick() })
+            onClick = onAboutClick)
         HorizontalDivider(thickness = 0.5.dp)
 
         SettingsPageItem(
             name = "Notifications and Privacy",
             description = "Manage permissions and analytics",
             icon = R.drawable.lock,
-            onClick = { onNotificationsAndPrivacyClick() }
+            onClick = onNotificationsAndPrivacyClick
         )
 
         HorizontalDivider(thickness = 0.5.dp)
@@ -68,7 +68,7 @@ fun SettingsScreen(onSupportClick: () -> Unit,
             name = "Support",
             description = "Report issues and contact us",
             icon = R.drawable.help_outline,
-            onClick = { onSupportClick() },
+            onClick = onSupportClick
         )
     }
     Box(modifier = Modifier.fillMaxSize()) {
