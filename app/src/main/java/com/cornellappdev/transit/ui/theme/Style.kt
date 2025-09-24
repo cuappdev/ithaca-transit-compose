@@ -21,6 +21,16 @@ object Style {
         ),
     )
 
+    val heading3Emphasized = TextStyle(
+        fontSize = 14.sp,
+        fontFamily = robotoFamily,
+        lineHeight = 16.sp,
+        platformStyle = PlatformTextStyle(
+            includeFontPadding = false
+        ),
+        fontWeight = FontWeight(500)
+    )
+
     /**
      * TextStyle for headers of route types
      */

@@ -1,6 +1,7 @@
 package com.cornellappdev.transit.ui.screens
 
 import android.os.Build
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

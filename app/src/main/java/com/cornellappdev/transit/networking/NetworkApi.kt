@@ -23,7 +23,10 @@ interface NetworkApi {
     suspend fun getAllStops(): Payload<List<Place>>
 
     @POST("/api/v2/appleSearch")
-    suspend fun appleSearch(@Body request: SearchQuery): Payload<QueryResult>
+    suspend fun v2AppleSearch(@Body request: SearchQuery): Payload<QueryResult>
+
+    @POST("/api/v3/appleSearch")
+    suspend fun v3AppleSearch(@Body request: SearchQuery): Payload<QueryResult>
 
     @POST("/api/v3/route")
     suspend fun getRoute(@Body request: RouteRequest): RouteOptions
@@ -33,11 +36,4 @@ interface NetworkApi {
 
     @POST("/api/v3/delays")
     suspend fun getDelay(@Body request: DelayRequestList): Payload<DelayInfo>
-
-    @GET("/api/v1/printers")
-    suspend fun getPrinters(): Payload<List<Printer>>
-
-    @GET("/api/v1/libraries")
-    suspend fun getLibraries(): Payload<List<Library>>
-
 }

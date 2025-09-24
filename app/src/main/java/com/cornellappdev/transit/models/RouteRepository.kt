@@ -2,13 +2,14 @@ package com.cornellappdev.transit.models
 
 import android.util.Log
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.networking.EcosystemNetworkApi
 import com.cornellappdev.transit.networking.NetworkApi
+import com.cornellappdev.transit.util.ECOSYSTEM_FLAG
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,12 +18,20 @@ import javax.inject.Singleton
  * Repository for data related to routes
  */
 @Singleton
-class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
+class RouteRepository @Inject constructor(
+    private val networkApi: NetworkApi,
+    private val ecosystemNetworkApi: EcosystemNetworkApi
+) {
 
     private suspend fun getAllStops(): Payload<List<Place>> = networkApi.getAllStops()
 
-    private suspend fun appleSearch(query: SearchQuery): Payload<QueryResult> =
-        networkApi.appleSearch(query)
+    private suspend fun appleSearch(query: SearchQuery): Payload<QueryResult> {
+        if (ECOSYSTEM_FLAG) {
+            return networkApi.v2AppleSearch(query)
+        } else {
+            return networkApi.v3AppleSearch(query)
+        }
+    }
 
     private suspend fun getRoute(request: RouteRequest): RouteOptions =
         networkApi.getRoute(request)
@@ -34,10 +43,10 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
         networkApi.getDelay(request)
 
     private suspend fun getPrinters(): Payload<List<Printer>> =
-        networkApi.getPrinters()
+        ecosystemNetworkApi.getPrinters()
 
     private suspend fun getLibraries(): Payload<List<Library>> =
-        networkApi.getLibraries()
+        ecosystemNetworkApi.getLibraries()
 
     private val _stopFlow: MutableStateFlow<ApiResponse<List<Place>>> =
         MutableStateFlow(ApiResponse.Pending)
@@ -56,8 +65,10 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
 
     init {
         fetchAllStops()
-        fetchAllPrinters()
-        fetchAllLibraries()
+        if (ECOSYSTEM_FLAG) {
+            fetchAllPrinters()
+            fetchAllLibraries()
+        }
     }
 
     /**
@@ -181,7 +192,6 @@ class RouteRepository @Inject constructor(private val networkApi: NetworkApi) {
                 )
                 _lastRouteFlow.value = ApiResponse.Success(routeResponse)
             } catch (e: Exception) {
-                Log.d("HIHIHIHI", e.message.toString())
                 _lastRouteFlow.value = ApiResponse.Error
             }
         }

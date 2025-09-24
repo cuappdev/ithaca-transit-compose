@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
 /**
@@ -64,27 +65,36 @@ fun BottomSheetFilterItem(
         }
         Text(
             label,
-            fontSize = 14.sp,
             color = Color.Black,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 8.dp, bottom = 4.dp),
-            fontWeight = if (isActive) FontWeight.SemiBold else FontWeight(400),
-            fontFamily = robotoFamily,
+            style = if (isActive) Style.heading3Emphasized else Style.heading3,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun PreviewBottomSheetFilterItem() {
+private fun PreviewBottomSheetFilterItem() {
     BottomSheetFilterItem(
         image = painterResource(id = R.drawable.eatery_icon),
         label = "Eateries",
         isActive = true
+    ) {}
+
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun InactivePreviewBottomSheetFilterItem() {
+    BottomSheetFilterItem(
+        image = painterResource(id = R.drawable.eatery_icon),
+        label = "Eateries",
+        isActive = false
     ) {}
 
 }

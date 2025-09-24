@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.PlaceType
+import com.cornellappdev.transit.models.Printer
 import com.cornellappdev.transit.models.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.robotoFamily
@@ -159,6 +160,12 @@ private fun BottomSheetFilteredContent(
         }
     }
 }
+
+@Composable
+private fun PrinterListResponse(apiResponse: ApiResponse<List<Printer>>) {
+
+}
+
 
 @Preview
 @Composable

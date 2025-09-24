@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.Place
-import com.cornellappdev.transit.models.Printer
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
 import com.cornellappdev.transit.models.StaticPlaces

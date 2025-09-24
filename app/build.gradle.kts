@@ -34,12 +34,20 @@ android {
     }
 
     buildTypes {
+        create("ecosystem") {
+            buildConfigField("boolean", "ECOSYSTEM_FLAG", "true")
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        debug {
+            buildConfigField("boolean", "ECOSYSTEM_FLAG", "false")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("boolean", "ECOSYSTEM_FLAG", "false")
         }
     }
     compileOptions {

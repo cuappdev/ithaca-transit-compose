@@ -1,11 +1,12 @@
 package com.cornellappdev.transit.ui.viewmodels
 
+import androidx.annotation.DrawableRes
 import com.cornellappdev.transit.R
 
 /**
  * Enumeration of different states of the bottom sheet filter
  */
-enum class FilterState(val iconId: Int, val label: String) {
+enum class FilterState(@DrawableRes val iconId: Int, val label: String) {
     FAVORITES(iconId = R.drawable.favorites_icon, label = "Favorites"),
     PRINTERS(iconId = R.drawable.printer_icon, label = "Printers"),
     GYMS(iconId = R.drawable.gym_icon, label = "Gyms"),
