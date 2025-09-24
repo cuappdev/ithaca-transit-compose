@@ -29,7 +29,7 @@ interface NetworkApi {
     suspend fun v3AppleSearch(@Body request: SearchQuery): Payload<QueryResult>
 
     @POST("/api/v3/route")
-    suspend fun getRoute(@Body request: RouteRequest): RouteOptions
+    suspend fun getRoute(@Body request: RouteRequest): Payload<RouteOptions>
 
     @POST("/api/v3/tracking")
     suspend fun getTracking(@Body request: TrackingRequestList): Payload<BusLocation>

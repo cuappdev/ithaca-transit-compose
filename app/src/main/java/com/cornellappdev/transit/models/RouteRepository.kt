@@ -33,7 +33,7 @@ class RouteRepository @Inject constructor(
         }
     }
 
-    private suspend fun getRoute(request: RouteRequest): RouteOptions =
+    private suspend fun getRoute(request: RouteRequest): Payload<RouteOptions> =
         networkApi.getRoute(request)
 
     private suspend fun getTracking(request: TrackingRequestList): Payload<BusLocation> =
@@ -190,7 +190,7 @@ class RouteRepository @Inject constructor(
                         originName = originName
                     )
                 )
-                _lastRouteFlow.value = ApiResponse.Success(routeResponse)
+                _lastRouteFlow.value = ApiResponse.Success(routeResponse.unwrap())
             } catch (e: Exception) {
                 _lastRouteFlow.value = ApiResponse.Error
             }
