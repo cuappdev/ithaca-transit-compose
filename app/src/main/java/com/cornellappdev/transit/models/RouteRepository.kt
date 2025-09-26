@@ -131,7 +131,6 @@ class RouteRepository @Inject constructor(
      */
     private fun fetchAllLibraries() {
         _libraryFlow.value = ApiResponse.Pending
-        Log.d("LIBRARIES", "LIBRARY)")
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val libraryResponse = getLibraries()

@@ -67,7 +67,7 @@ fun EcosystemBottomSheetContent(
         LazyRow {
             items(filters) {
                 BottomSheetFilterItem(
-                    image = painterResource(it.iconId),
+                    imageResId = it.iconId,
                     label = it.label,
                     isActive = activeFilter == it
                 ) {
@@ -160,12 +160,6 @@ private fun BottomSheetFilteredContent(
         }
     }
 }
-
-@Composable
-private fun PrinterListResponse(apiResponse: ApiResponse<List<Printer>>) {
-
-}
-
 
 @Preview
 @Composable

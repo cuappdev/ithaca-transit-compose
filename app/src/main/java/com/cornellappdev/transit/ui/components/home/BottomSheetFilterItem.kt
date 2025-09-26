@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.ui.components.home
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -15,17 +16,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.theme.Style
-import com.cornellappdev.transit.ui.theme.robotoFamily
 
 /**
  * Card for each filter on home bottom sheet
@@ -35,7 +32,7 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
  */
 @Composable
 fun BottomSheetFilterItem(
-    image: Painter,
+    @DrawableRes imageResId: Int,
     label: String,
     isActive: Boolean,
     itemOnClick: () -> Unit,
@@ -55,7 +52,7 @@ fun BottomSheetFilterItem(
                 .align(Alignment.CenterHorizontally)
         ) {
             Image(
-                image,
+                painterResource(id = imageResId),
                 contentDescription = label,
                 modifier = Modifier
                     .size(64.dp)
@@ -81,7 +78,7 @@ fun BottomSheetFilterItem(
 @Composable
 private fun PreviewBottomSheetFilterItem() {
     BottomSheetFilterItem(
-        image = painterResource(id = R.drawable.eatery_icon),
+        imageResId = R.drawable.eatery_icon,
         label = "Eateries",
         isActive = true
     ) {}
@@ -92,7 +89,7 @@ private fun PreviewBottomSheetFilterItem() {
 @Composable
 private fun InactivePreviewBottomSheetFilterItem() {
     BottomSheetFilterItem(
-        image = painterResource(id = R.drawable.eatery_icon),
+        imageResId = R.drawable.eatery_icon,
         label = "Eateries",
         isActive = false
     ) {}
