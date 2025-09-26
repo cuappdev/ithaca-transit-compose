@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.cornellappdev.transit.networking.NetworkApi
 import com.google.android.gms.location.FusedLocationProviderClient

@@ -1,6 +1,5 @@
 package com.cornellappdev.transit.ui.screens
 
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,7 +33,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
@@ -93,10 +91,6 @@ import java.util.Date
 /**
  * Composable for the route screen, which specifies a location, destination, and routes between them
  */
-@OptIn(
-    ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
-    ExperimentalMaterialApi::class
-)
 @Composable
 fun RouteScreen(
     navController: NavController,

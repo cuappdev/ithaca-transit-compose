@@ -1,27 +1,29 @@
 package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
+import com.cornellappdev.transit.models.StaticPlaces
 import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.networking.ApiResponse
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -58,6 +60,28 @@ class HomeViewModel @Inject constructor(
      * Default map location
      */
     val defaultIthaca = LatLng(42.44, -76.50)
+
+    val filterList = listOf(
+        FilterState.FAVORITES,
+        FilterState.GYMS,
+        FilterState.EATERIES,
+        FilterState.LIBRARIES,
+        FilterState.PRINTERS
+    )
+
+    val filterState: MutableStateFlow<FilterState> = MutableStateFlow(FilterState.FAVORITES)
+
+    val staticPlacesFlow =
+        combine(routeRepository.printerFlow, routeRepository.libraryFlow) { printers, libraries ->
+            StaticPlaces(
+                printers,
+                libraries
+            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = StaticPlaces(ApiResponse.Pending, ApiResponse.Pending)
+        )
 
     init {
         userPreferenceRepository.favoritesFlow.onEach {

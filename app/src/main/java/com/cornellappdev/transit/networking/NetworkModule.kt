@@ -2,6 +2,7 @@ package com.cornellappdev.transit.networking
 
 import android.util.Log
 import com.cornellappdev.transit.BuildConfig
+import com.cornellappdev.transit.util.ECOSYSTEM_FLAG
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -15,7 +16,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -60,4 +60,8 @@ object NetworkModule {
     @Provides
     fun provideNetworkApi(retrofit: Retrofit): NetworkApi =
         retrofit.create(NetworkApi::class.java)
+
+    @Provides
+    fun provideEcosystemNetworkApi(retrofit: Retrofit): EcosystemNetworkApi =
+        retrofit.create(EcosystemNetworkApi::class.java)
 }
