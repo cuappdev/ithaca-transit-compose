@@ -1,6 +1,5 @@
 package com.cornellappdev.transit.models
 
-import android.util.Log
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.networking.EcosystemNetworkApi
 import com.cornellappdev.transit.networking.NetworkApi
