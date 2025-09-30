@@ -95,8 +95,6 @@ class HomeViewModel @Inject constructor(
             )
         )
 
-    val eateryFlow: StateFlow<ApiResponse<List<Eatery>>> = eateryRepository.eateryFlow
-
     init {
         userPreferenceRepository.favoritesFlow.onEach {
             if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
