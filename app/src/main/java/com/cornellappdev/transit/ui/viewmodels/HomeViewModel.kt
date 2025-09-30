@@ -9,6 +9,8 @@ import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
 import com.cornellappdev.transit.models.StaticPlaces
 import com.cornellappdev.transit.models.UserPreferenceRepository
+import com.cornellappdev.transit.models.ecosystem.Eatery
+import com.cornellappdev.transit.models.ecosystem.EateryRepository
 import com.cornellappdev.transit.networking.ApiResponse
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,6 +37,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val routeRepository: RouteRepository,
     private val locationRepository: LocationRepository,
+    private val eateryRepository: EateryRepository,
     private val userPreferenceRepository: UserPreferenceRepository,
     private val selectedRouteRepository: SelectedRouteRepository
 ) : ViewModel() {
@@ -72,16 +75,27 @@ class HomeViewModel @Inject constructor(
     val filterState: MutableStateFlow<FilterState> = MutableStateFlow(FilterState.FAVORITES)
 
     val staticPlacesFlow =
-        combine(routeRepository.printerFlow, routeRepository.libraryFlow) { printers, libraries ->
+        combine(
+            routeRepository.printerFlow,
+            routeRepository.libraryFlow,
+            eateryRepository.eateryFlow
+        ) { printers, libraries, eateries ->
             StaticPlaces(
                 printers,
-                libraries
+                libraries,
+                eateries
             )
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = StaticPlaces(ApiResponse.Pending, ApiResponse.Pending)
+            initialValue = StaticPlaces(
+                ApiResponse.Pending,
+                ApiResponse.Pending,
+                ApiResponse.Pending
+            )
         )
+
+    val eateryFlow: StateFlow<ApiResponse<List<Eatery>>> = eateryRepository.eateryFlow
 
     init {
         userPreferenceRepository.favoritesFlow.onEach {

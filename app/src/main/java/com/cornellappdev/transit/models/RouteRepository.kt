@@ -2,7 +2,7 @@ package com.cornellappdev.transit.models
 
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.networking.EcosystemNetworkApi
-import com.cornellappdev.transit.networking.NetworkApi
+import com.cornellappdev.transit.networking.RoutesNetworkApi
 import com.cornellappdev.transit.util.ECOSYSTEM_FLAG
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineScope
@@ -18,28 +18,28 @@ import javax.inject.Singleton
  */
 @Singleton
 class RouteRepository @Inject constructor(
-    private val networkApi: NetworkApi,
+    private val routesNetworkApi: RoutesNetworkApi,
     private val ecosystemNetworkApi: EcosystemNetworkApi
 ) {
 
-    private suspend fun getAllStops(): Payload<List<Place>> = networkApi.getAllStops()
+    private suspend fun getAllStops(): Payload<List<Place>> = routesNetworkApi.getAllStops()
 
     private suspend fun appleSearch(query: SearchQuery): Payload<QueryResult> {
         if (ECOSYSTEM_FLAG) {
-            return networkApi.v2AppleSearch(query)
+            return routesNetworkApi.v2AppleSearch(query)
         } else {
-            return networkApi.v3AppleSearch(query)
+            return routesNetworkApi.v3AppleSearch(query)
         }
     }
 
     private suspend fun getRoute(request: RouteRequest): Payload<RouteOptions> =
-        networkApi.getRoute(request)
+        routesNetworkApi.getRoute(request)
 
     private suspend fun getTracking(request: TrackingRequestList): Payload<BusLocation> =
-        networkApi.getTracking(request)
+        routesNetworkApi.getTracking(request)
 
     private suspend fun getDelay(request: DelayRequestList): Payload<DelayInfo> =
-        networkApi.getDelay(request)
+        routesNetworkApi.getDelay(request)
 
     private suspend fun getPrinters(): Payload<List<Printer>> =
         ecosystemNetworkApi.getPrinters()
