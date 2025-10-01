@@ -13,14 +13,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.PlaceType
-import com.cornellappdev.transit.models.Printer
 import com.cornellappdev.transit.models.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.robotoFamily
@@ -134,7 +132,24 @@ private fun BottomSheetFilteredContent(
             }
 
             FilterState.EATERIES -> {
-                //TODO
+                when (staticPlaces.eateries) {
+                    is ApiResponse.Error -> {
+                    }
+
+                    is ApiResponse.Pending -> {
+                    }
+
+                    is ApiResponse.Success -> {
+                        items(staticPlaces.eateries.data) {
+                            BottomSheetLocationCard(
+                                title = it.name,
+                                subtitle1 = it.location.orEmpty()
+                            ) {
+                                //TODO: Eatery
+                            }
+                        }
+                    }
+                }
             }
 
             FilterState.LIBRARIES -> {
@@ -174,7 +189,7 @@ private fun PreviewEcosystemBottomSheet() {
         ),
         activeFilter = FilterState.PRINTERS,
         onFilterClick = {},
-        staticPlaces = StaticPlaces(ApiResponse.Pending, ApiResponse.Pending),
+        staticPlaces = StaticPlaces(ApiResponse.Pending, ApiResponse.Pending, ApiResponse.Pending),
         modifier = Modifier
     ) { }
 }

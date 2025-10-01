@@ -6,7 +6,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
 import androidx.core.app.ActivityCompat
-import com.cornellappdev.transit.networking.NetworkApi
+import com.cornellappdev.transit.networking.RoutesNetworkApi
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -22,7 +22,7 @@ import javax.inject.Singleton
  * Repository for current user locations
  */
 @Singleton
-class LocationRepository @Inject constructor(private val networkApi: NetworkApi) {
+class LocationRepository @Inject constructor(private val routesNetworkApi: RoutesNetworkApi) {
 
     //Source: Uplift
 

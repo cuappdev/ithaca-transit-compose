@@ -2,7 +2,6 @@ package com.cornellappdev.transit.networking
 
 import android.util.Log
 import com.cornellappdev.transit.BuildConfig
-import com.cornellappdev.transit.util.ECOSYSTEM_FLAG
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -16,6 +15,15 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.inject.Qualifier
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class RoutesRetrofit
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class EateryRetrofit
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -48,7 +56,8 @@ object NetworkModule {
         .build()
 
     @Provides
-    fun provideRetrofit(
+    @RoutesRetrofit
+    fun provideRoutesRetrofit(
         okHttpClient: OkHttpClient,
         moshi: Moshi
     ): Retrofit = Retrofit.Builder()
@@ -58,10 +67,25 @@ object NetworkModule {
         .build()
 
     @Provides
-    fun provideNetworkApi(retrofit: Retrofit): NetworkApi =
-        retrofit.create(NetworkApi::class.java)
+    @EateryRetrofit
+    fun provideEateryRetrofit(
+        okHttpClient: OkHttpClient,
+        moshi: Moshi
+    ): Retrofit = Retrofit.Builder()
+        .baseUrl(BuildConfig.EATERY_URL)
+        .client(okHttpClient)
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .build()
 
     @Provides
-    fun provideEcosystemNetworkApi(retrofit: Retrofit): EcosystemNetworkApi =
+    fun provideRoutesNetworkApi(@RoutesRetrofit retrofit: Retrofit): RoutesNetworkApi =
+        retrofit.create(RoutesNetworkApi::class.java)
+
+    @Provides
+    fun provideEcosystemNetworkApi(@RoutesRetrofit retrofit: Retrofit): EcosystemNetworkApi =
         retrofit.create(EcosystemNetworkApi::class.java)
+
+    @Provides
+    fun provideEateryNetworkApi(@EateryRetrofit retrofit: Retrofit): EateryNetworkApi =
+        retrofit.create(EateryNetworkApi::class.java)
 }
