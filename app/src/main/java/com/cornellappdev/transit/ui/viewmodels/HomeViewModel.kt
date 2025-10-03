@@ -9,8 +9,8 @@ import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
 import com.cornellappdev.transit.models.StaticPlaces
 import com.cornellappdev.transit.models.UserPreferenceRepository
-import com.cornellappdev.transit.models.ecosystem.Eatery
-import com.cornellappdev.transit.models.ecosystem.EateryRepository
+import com.cornellappdev.transit.models.ecosystem.eatery.EateryRepository
+import com.cornellappdev.transit.models.ecosystem.gym.GymRepository
 import com.cornellappdev.transit.networking.ApiResponse
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,6 +38,7 @@ class HomeViewModel @Inject constructor(
     private val routeRepository: RouteRepository,
     private val locationRepository: LocationRepository,
     private val eateryRepository: EateryRepository,
+    private val gymRepository: GymRepository,
     private val userPreferenceRepository: UserPreferenceRepository,
     private val selectedRouteRepository: SelectedRouteRepository
 ) : ViewModel() {
@@ -78,17 +79,20 @@ class HomeViewModel @Inject constructor(
         combine(
             routeRepository.printerFlow,
             routeRepository.libraryFlow,
-            eateryRepository.eateryFlow
-        ) { printers, libraries, eateries ->
+            eateryRepository.eateryFlow,
+            gymRepository.gymFlow
+        ) { printers, libraries, eateries, gyms ->
             StaticPlaces(
                 printers,
                 libraries,
-                eateries
+                eateries,
+                gyms
             )
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
             initialValue = StaticPlaces(
+                ApiResponse.Pending,
                 ApiResponse.Pending,
                 ApiResponse.Pending,
                 ApiResponse.Pending
