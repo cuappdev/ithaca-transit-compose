@@ -70,7 +70,7 @@ fun SettingsPageItem(name: String, description: String, icon: Int, onClick: () -
 @Composable
 private fun SettingsPageItemPreview() {
     SettingsPageItem(
-        name = "About Transit",
+        name = "About Navi",
         description = "Learn more about the team behind the app",
         icon = R.drawable.appdev_gray,
         onClick = {})

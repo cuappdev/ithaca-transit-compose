@@ -410,7 +410,7 @@ private fun LocationPermissionDialog(onDismissRequest: () -> Unit, onClickNext: 
         ) {
             Column(modifier = Modifier.padding(40.dp)) {
                 Image(
-                    painter = painterResource(id = R.drawable.app_icon_rounded),
+                    painter = painterResource(id = R.drawable.navi_icon_rounded),
                     contentDescription = stringResource(R.string.app_name),
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
