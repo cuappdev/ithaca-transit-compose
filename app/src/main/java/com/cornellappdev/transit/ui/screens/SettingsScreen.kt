@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,6 +25,7 @@ import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.components.SettingsPageItem
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
+import com.cornellappdev.transit.util.NOTIFICATIONS_ENABLED
 
 /**
  * Composable for Settings Screen, which displays a list of settings options and app information.
@@ -49,20 +51,23 @@ fun SettingsScreen(onSupportClick: () -> Unit,
         )
 
         SettingsPageItem(
-            name = "About Transit",
+            name = stringResource(R.string.about_text),
             description = "Learn more about the team behind the app",
             icon = R.drawable.appdev_gray,
             onClick = onAboutClick)
         HorizontalDivider(thickness = 0.5.dp)
 
-        SettingsPageItem(
-            name = "Notifications and Privacy",
-            description = "Manage permissions and analytics",
-            icon = R.drawable.lock,
-            onClick = onNotificationsAndPrivacyClick
-        )
+        // Disable Notifications until implemented
 
-        HorizontalDivider(thickness = 0.5.dp)
+        if (NOTIFICATIONS_ENABLED) {
+            SettingsPageItem(
+                name = "Notifications and Privacy",
+                description = "Manage permissions and analytics",
+                icon = R.drawable.lock,
+                onClick = onNotificationsAndPrivacyClick
+            )
+            HorizontalDivider(thickness = 0.5.dp)
+        }
 
         SettingsPageItem(
             name = "Support",

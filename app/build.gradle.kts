@@ -24,8 +24,8 @@ android {
     defaultConfig {
         applicationId = "com.cornellappdev.transit"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 4
+        targetSdk = 35
+        versionCode = 9
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

@@ -1,7 +1,10 @@
 <resources>
-    <string name="app_name">Ithaca Transit</string>
-    <string name="permission_dialog_text">Ithaca Transit needs location access to provide
+    <string name="app_name">Navi</string>
+    <string name="permission_dialog_text">Navi needs location access to provide
         accurate routes and real-time transit updates. Please enable location services for the
         best experience.</string>
     <string name="search_placeholder">Where to?</string>
+    <string name="about_text">About Navi</string>
+    <string name="support_title">Make Navi Better</string>
+    <string name="support_subtitle">Help us improve Navi by letting us know what\'s wrong</string>
 </resources>
