@@ -34,7 +34,7 @@ data class UpliftGym(
      *
      * If the list itself is null, that indicates bowling is not offered by this gym.
      */
-    val imageUrl: String,
+    val imageUrl: String?,
     val upliftCapacity: UpliftCapacity?,
     val latitude: Double,
     val longitude: Double,

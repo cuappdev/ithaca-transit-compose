@@ -13,7 +13,7 @@ import com.cornellappdev.transit.models.ecosystem.gym.UpliftGym
  * Parses the output of [pullHours] for a NONE input.
  */
 fun List<List<Pair<TimeInterval, String>>?>.toTimeInterval(): List<List<TimeInterval>?> {
-    return this.map { it?.map { it.first } }
+    return this.map { list -> list?.map { pair -> pair.first } }
 }
 
 /**
@@ -34,8 +34,7 @@ fun GymListQuery.GetAllGym.toUpliftGyms(): List<UpliftGym> {
             facilityId = facility.facilityFields.id,
             // Need replace because there's a typo with the single quote.
             imageUrl = gymFields.imageUrl?.replace("'", "")
-                ?.replace("toni-morrison-outside", "toni_morrison_outside")
-                ?: defaultGymUrl,
+                ?.replace("toni-morrison-outside", "toni_morrison_outside"),
             hours = pullHours(facility.facilityFields.hours?.map { it?.openHoursFields }).toTimeInterval(),
             upliftCapacity = pullCapacity(facility),
             latitude = gymFields.latitude,

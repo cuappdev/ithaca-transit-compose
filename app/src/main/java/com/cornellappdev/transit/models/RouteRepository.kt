@@ -25,11 +25,7 @@ class RouteRepository @Inject constructor(
     private suspend fun getAllStops(): Payload<List<Place>> = routesNetworkApi.getAllStops()
 
     private suspend fun appleSearch(query: SearchQuery): Payload<QueryResult> {
-        if (ECOSYSTEM_FLAG) {
-            return routesNetworkApi.v2AppleSearch(query)
-        } else {
-            return routesNetworkApi.v3AppleSearch(query)
-        }
+        return routesNetworkApi.v3AppleSearch(query)
     }
 
     private suspend fun getRoute(request: RouteRequest): Payload<RouteOptions> =

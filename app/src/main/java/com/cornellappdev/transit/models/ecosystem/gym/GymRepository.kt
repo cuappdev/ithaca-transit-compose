@@ -3,12 +3,10 @@ package com.cornellappdev.transit.models.ecosystem.gym
 import android.util.Log
 import com.apollographql.apollo.ApolloClient
 import com.cornellappdev.transit.GymListQuery
-import com.cornellappdev.transit.models.ecosystem.eatery.Eatery
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.util.ECOSYSTEM_FLAG
 import com.cornellappdev.transit.util.ecosystem.toUpliftGyms
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -27,6 +25,7 @@ import javax.inject.Singleton
 @Singleton
 class GymRepository @Inject constructor(
     private val apolloClient: ApolloClient,
+    private val coroutineScope: CoroutineScope
 ) {
 
     private val gymQuery = apolloClient.query(GymListQuery())
@@ -46,21 +45,21 @@ class GymRepository @Inject constructor(
         if (::activeGymJob.isInitialized)
             activeGymJob.cancel()
 
-        activeGymJob = CoroutineScope(Dispatchers.IO).launch {
-            gymQuery.toFlowV3().cancellable()
+        activeGymJob = coroutineScope.launch {
+            gymQuery.toFlow().cancellable()
                 .map {
                     val gymList = it.data?.getAllGyms?.filterNotNull()
                     if (gymList == null) {
                         ApiResponse.Error
                     } else {
-                        ApiResponse.Success(gymList.map { query -> query.toUpliftGyms() }.flatten())
+                        ApiResponse.Success(gymList.flatMap { query -> query.toUpliftGyms() })
                     }
                 }
                 .catch {
                     Log.e("NetworkRequest", it.stackTraceToString())
                     emit(ApiResponse.Error)
                 }.stateIn(
-                    CoroutineScope(Dispatchers.Main),
+                    coroutineScope,
                     SharingStarted.Eagerly,
                     ApiResponse.Pending
                 ).collect {

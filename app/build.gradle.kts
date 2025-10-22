@@ -6,7 +6,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("kotlinx-serialization")
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
-    id("com.apollographql.apollo") version "4.1.1"
+    id("com.apollographql.apollo") version "4.3.3"
 }
 
 secrets {
@@ -137,7 +137,7 @@ dependencies {
     implementation("io.morfly.compose:advanced-bottomsheet-material3:0.1.0")
 
     //Apollo GraphQL
-    implementation("com.apollographql.apollo:apollo-runtime:4.1.1")
+    implementation("com.apollographql.apollo:apollo-runtime:4.3.3")
 
 }
 
