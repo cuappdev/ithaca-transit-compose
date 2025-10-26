@@ -1,6 +1,8 @@
 package com.cornellappdev.transit.networking
 
 import android.util.Log
+import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.network.okHttpClient
 import com.cornellappdev.transit.BuildConfig
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -76,6 +78,14 @@ object NetworkModule {
         .client(okHttpClient)
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
+
+    @Provides
+    fun provideGymApolloClient(okHttpClient: OkHttpClient): ApolloClient {
+        return ApolloClient.Builder()
+            .serverUrl(BuildConfig.UPLIFT_URL)
+            .okHttpClient(okHttpClient)
+            .build()
+    }
 
     @Provides
     fun provideRoutesNetworkApi(@RoutesRetrofit retrofit: Retrofit): RoutesNetworkApi =

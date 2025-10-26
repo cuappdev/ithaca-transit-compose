@@ -1,4 +1,4 @@
-package com.cornellappdev.transit.models.ecosystem
+package com.cornellappdev.transit.models.ecosystem.eatery
 
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.networking.EateryNetworkApi
@@ -44,8 +44,8 @@ class EateryRepository @Inject constructor(
         _eateryFlow.value = ApiResponse.Pending
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val rideResponse = getEateries()
-                _eateryFlow.value = ApiResponse.Success(rideResponse)
+                val eateryResponse = getEateries()
+                _eateryFlow.value = ApiResponse.Success(eateryResponse)
             } catch (e: Exception) {
                 _eateryFlow.value = ApiResponse.Error
             }

@@ -128,7 +128,24 @@ private fun BottomSheetFilteredContent(
             }
 
             FilterState.GYMS -> {
-                //TODO
+                when (staticPlaces.gyms) {
+                    is ApiResponse.Error -> {
+                    }
+
+                    is ApiResponse.Pending -> {
+                    }
+
+                    is ApiResponse.Success -> {
+                        items(staticPlaces.gyms.data) {
+                            BottomSheetLocationCard(
+                                title = it.name,
+                                subtitle1 = it.id
+                            ) {
+                                //TODO: Eatery
+                            }
+                        }
+                    }
+                }
             }
 
             FilterState.EATERIES -> {
@@ -189,7 +206,12 @@ private fun PreviewEcosystemBottomSheet() {
         ),
         activeFilter = FilterState.PRINTERS,
         onFilterClick = {},
-        staticPlaces = StaticPlaces(ApiResponse.Pending, ApiResponse.Pending, ApiResponse.Pending),
+        staticPlaces = StaticPlaces(
+            ApiResponse.Pending,
+            ApiResponse.Pending,
+            ApiResponse.Pending,
+            ApiResponse.Pending
+        ),
         modifier = Modifier
     ) { }
 }

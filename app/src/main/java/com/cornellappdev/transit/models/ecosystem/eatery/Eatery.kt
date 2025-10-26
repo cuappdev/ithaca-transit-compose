@@ -1,4 +1,4 @@
-package com.cornellappdev.transit.models.ecosystem
+package com.cornellappdev.transit.models.ecosystem.eatery
 
 import com.squareup.moshi.Json
 

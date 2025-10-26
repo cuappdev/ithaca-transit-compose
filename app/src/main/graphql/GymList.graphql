@@ -1,0 +1,62 @@
+fragment capacityFields on Capacity {
+    count
+    percent
+    updated
+}
+
+fragment openHoursFields on OpenHours {
+    courtType
+    endTime
+    isShallow
+    isSpecial
+    isWomen
+    startTime
+}
+
+fragment facilityFields on Facility {
+    id
+    capacity {
+        ...capacityFields
+    }
+    facilityType
+    hours {
+        ...openHoursFields
+    }
+    name
+    equipment {
+        ...equipmentFields
+    }
+}
+fragment equipmentFields on Equipment {
+    id
+    name
+    muscleGroups
+    cleanName
+    facilityId
+    quantity
+    accessibility
+}
+
+fragment gymFields on Gym {
+    id
+    address
+    amenities {
+        type
+    }
+    facilities {
+        ...facilityFields
+    }
+    hours {
+        ...openHoursFields
+    }
+    imageUrl
+    latitude
+    longitude
+    name
+}
+
+query GymList {
+    getAllGyms {
+        ...gymFields
+    }
+}

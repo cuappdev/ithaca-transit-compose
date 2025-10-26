@@ -1,6 +1,7 @@
 package com.cornellappdev.transit.models
 
-import com.cornellappdev.transit.models.ecosystem.Eatery
+import com.cornellappdev.transit.models.ecosystem.eatery.Eatery
+import com.cornellappdev.transit.models.ecosystem.gym.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
 import com.squareup.moshi.Json
 
@@ -10,7 +11,8 @@ import com.squareup.moshi.Json
 data class StaticPlaces(
     val printers: ApiResponse<List<Printer>>,
     val libraries: ApiResponse<List<Library>>,
-    val eateries: ApiResponse<List<Eatery>>
+    val eateries: ApiResponse<List<Eatery>>,
+    val gyms: ApiResponse<List<UpliftGym>>,
 )
 
 /**
