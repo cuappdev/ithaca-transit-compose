@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
@@ -17,9 +18,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.PlaceType
-import com.cornellappdev.transit.models.StaticPlaces
+import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
+import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FilterState
@@ -39,8 +42,12 @@ fun EcosystemBottomSheetContent(
     activeFilter: FilterState,
     onFilterClick: (FilterState) -> Unit,
     staticPlaces: StaticPlaces,
+    favorites: Set<Place>,
     modifier: Modifier = Modifier,
-    navigateToPlace: (Place) -> Unit
+    navigateToPlace: (Place) -> Unit,
+    navigateToDetails: (DetailedEcosystemPlace) -> Unit,
+    addFavorite: (Place) -> Unit,
+    removeFavorite: (Place) -> Unit
 ) {
     Column(modifier = modifier) {
         Row(
@@ -77,7 +84,11 @@ fun EcosystemBottomSheetContent(
         BottomSheetFilteredContent(
             currentFilter = activeFilter,
             staticPlaces = staticPlaces,
-            navigateToPlace = navigateToPlace
+            favorites = favorites,
+            navigateToPlace = navigateToPlace,
+            navigateToDetails = navigateToDetails,
+            addFavorite = addFavorite,
+            removeFavorite = removeFavorite
         )
     }
 }
@@ -86,7 +97,11 @@ fun EcosystemBottomSheetContent(
 private fun BottomSheetFilteredContent(
     currentFilter: FilterState,
     staticPlaces: StaticPlaces,
-    navigateToPlace: (Place) -> Unit
+    favorites: Set<Place>,
+    navigateToPlace: (Place) -> Unit,
+    navigateToDetails: (DetailedEcosystemPlace) -> Unit,
+    addFavorite: (Place) -> Unit,
+    removeFavorite: (Place) -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(bottom = 90.dp),
@@ -94,99 +109,183 @@ private fun BottomSheetFilteredContent(
     ) {
         when (currentFilter) {
             FilterState.FAVORITES -> {
-                //TODO
+                favoriteList(favorites, navigateToPlace)
             }
 
             FilterState.PRINTERS -> {
-                when (staticPlaces.printers) {
-                    is ApiResponse.Error -> {
-                    }
-
-                    is ApiResponse.Pending -> {
-                    }
-
-                    is ApiResponse.Success -> {
-                        items(staticPlaces.printers.data) {
-                            BottomSheetLocationCard(
-                                title = it.location,
-                                subtitle1 = it.description
-                            ) {
-                                navigateToPlace(
-                                    Place(
-                                        latitude = it.latitude,
-                                        longitude = it.longitude,
-                                        name = it.location,
-                                        detail = it.description,
-                                        type = PlaceType.APPLE_PLACE
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-
+                printerList(staticPlaces, navigateToPlace)
             }
 
             FilterState.GYMS -> {
-                when (staticPlaces.gyms) {
-                    is ApiResponse.Error -> {
-                    }
-
-                    is ApiResponse.Pending -> {
-                    }
-
-                    is ApiResponse.Success -> {
-                        items(staticPlaces.gyms.data) {
-                            BottomSheetLocationCard(
-                                title = it.name,
-                                subtitle1 = it.id
-                            ) {
-                                //TODO: Eatery
-                            }
-                        }
-                    }
-                }
+                gymList(staticPlaces, navigateToPlace)
             }
 
             FilterState.EATERIES -> {
-                when (staticPlaces.eateries) {
-                    is ApiResponse.Error -> {
-                    }
-
-                    is ApiResponse.Pending -> {
-                    }
-
-                    is ApiResponse.Success -> {
-                        items(staticPlaces.eateries.data) {
-                            BottomSheetLocationCard(
-                                title = it.name,
-                                subtitle1 = it.location.orEmpty()
-                            ) {
-                                //TODO: Eatery
-                            }
-                        }
-                    }
-                }
+                eateryList(staticPlaces, navigateToPlace)
             }
 
             FilterState.LIBRARIES -> {
-                when (staticPlaces.libraries) {
-                    is ApiResponse.Error -> {
-                    }
+                libraryList(
+                    staticPlaces,
+                    navigateToPlace,
+                    navigateToDetails,
+                    favorites,
+                    addFavorite,
+                    removeFavorite
+                )
+            }
+        }
+    }
+}
 
-                    is ApiResponse.Pending -> {
-                    }
+/**
+ * LazyList scoped enumeration of favorites for bottom sheet
+ */
+private fun LazyListScope.favoriteList(
+    favorites: Set<Place>,
+    navigateToPlace: (Place) -> Unit
+) {
+    items(favorites.toList()) {
+        BottomSheetLocationCard(
+            title = it.name,
+            subtitle1 = it.subLabel
+        ) {
+            //TODO: Eatery
+        }
+    }
+}
 
-                    is ApiResponse.Success -> {
-                        items(staticPlaces.libraries.data) {
-                            BottomSheetLocationCard(
-                                title = it.location,
-                                subtitle1 = it.address
-                            ) {
-                                //TODO: Navigate to library specific card
-                            }
+/**
+ * LazyList scoped enumeration of gyms for bottom sheet
+ */
+private fun LazyListScope.gymList(
+    staticPlaces: StaticPlaces,
+    navigateToPlace: (Place) -> Unit
+) {
+    when (staticPlaces.gyms) {
+        is ApiResponse.Error -> {
+        }
+
+        is ApiResponse.Pending -> {
+        }
+
+        is ApiResponse.Success -> {
+            items(staticPlaces.gyms.data) {
+                BottomSheetLocationCard(
+                    title = it.name,
+                    subtitle1 = it.id
+                ) {
+                    //TODO: Eatery
+                }
+            }
+        }
+    }
+}
+
+/**
+ * LazyList scoped enumeration of printers for bottom sheet
+ */
+private fun LazyListScope.printerList(
+    staticPlaces: StaticPlaces,
+    navigateToPlace: (Place) -> Unit
+) {
+    when (staticPlaces.printers) {
+        is ApiResponse.Error -> {
+        }
+
+        is ApiResponse.Pending -> {
+        }
+
+        is ApiResponse.Success -> {
+            items(staticPlaces.printers.data) {
+                BottomSheetLocationCard(
+                    title = it.location,
+                    subtitle1 = it.description
+                ) {
+                    navigateToPlace(
+                        Place(
+                            latitude = it.latitude,
+                            longitude = it.longitude,
+                            name = it.location,
+                            detail = it.description,
+                            type = PlaceType.APPLE_PLACE
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * LazyList scoped enumeration of eateries for bottom sheet
+ */
+private fun LazyListScope.eateryList(
+    staticPlaces: StaticPlaces,
+    navigateToPlace: (Place) -> Unit
+) {
+    when (staticPlaces.eateries) {
+        is ApiResponse.Error -> {
+        }
+
+        is ApiResponse.Pending -> {
+        }
+
+        is ApiResponse.Success -> {
+            items(staticPlaces.eateries.data) {
+                BottomSheetLocationCard(
+                    title = it.name,
+                    subtitle1 = it.location.orEmpty()
+                ) {
+                    //TODO: Eatery
+                }
+            }
+        }
+    }
+}
+
+/**
+ * LazyList scoped enumeration of libraries for bottom sheet
+ */
+private fun LazyListScope.libraryList(
+    staticPlaces: StaticPlaces,
+    navigateToPlace: (Place) -> Unit,
+    navigateToDetails: (DetailedEcosystemPlace) -> Unit,
+    favorites: Set<Place>,
+    addFavorite: (Place) -> Unit,
+    removeFavorite: (Place) -> Unit
+) {
+    when (staticPlaces.libraries) {
+        is ApiResponse.Error -> {
+        }
+
+        is ApiResponse.Pending -> {
+        }
+
+        is ApiResponse.Success -> {
+            items(staticPlaces.libraries.data) {
+                val place = Place(
+                    latitude = it.latitude,
+                    longitude = it.longitude,
+                    name = it.location,
+                    detail = it.address,
+                    type = PlaceType.APPLE_PLACE
+                )
+
+                RoundedImagePlaceCard(
+                    imageRes = R.drawable.olin_library,
+                    title = it.location,
+                    subtitle = it.address,
+                    isFavorite = place in favorites,
+                    onFavoriteClick = {
+                        if (place !in favorites) {
+                            addFavorite(place)
+                        } else {
+                            removeFavorite(place)
                         }
                     }
+                ) {
+                    navigateToDetails(it)
                 }
             }
         }
@@ -212,6 +311,11 @@ private fun PreviewEcosystemBottomSheet() {
             ApiResponse.Pending,
             ApiResponse.Pending
         ),
-        modifier = Modifier
-    ) { }
+        favorites = emptySet(),
+        modifier = Modifier,
+        addFavorite = {},
+        navigateToPlace = {},
+        navigateToDetails = {},
+        removeFavorite = {}
+    )
 }

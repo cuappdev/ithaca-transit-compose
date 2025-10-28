@@ -1,4 +1,4 @@
-package com.cornellappdev.transit.models.ecosystem.eatery
+package com.cornellappdev.transit.models.ecosystem
 
 import com.squareup.moshi.Json
 
@@ -18,4 +18,4 @@ data class Eatery(
     @Json(name = "payment_accepts_meal_swipes") var paymentAcceptsMealSwipes: Boolean?,
     @Json(name = "payment_accepts_brbs") var paymentAcceptsBrbs: Boolean?,
     @Json(name = "payment_accepts_cash") var paymentAcceptsCash: Boolean?,
-    )
+    ) : DetailedEcosystemPlace

@@ -1,4 +1,4 @@
-package com.cornellappdev.transit.models.ecosystem.gym
+package com.cornellappdev.transit.models.ecosystem
 
 import android.icu.util.Calendar
 import kotlin.math.roundToInt
@@ -38,9 +38,7 @@ data class UpliftGym(
     val upliftCapacity: UpliftCapacity?,
     val latitude: Double,
     val longitude: Double,
-) {
-
-}
+) : DetailedEcosystemPlace
 
 /**
  * A gym's capacity.

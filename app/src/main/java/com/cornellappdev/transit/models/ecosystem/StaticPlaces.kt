@@ -1,7 +1,5 @@
-package com.cornellappdev.transit.models
+package com.cornellappdev.transit.models.ecosystem
 
-import com.cornellappdev.transit.models.ecosystem.eatery.Eatery
-import com.cornellappdev.transit.models.ecosystem.gym.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
 import com.squareup.moshi.Json
 
@@ -35,4 +33,4 @@ data class Library(
     @Json(name = "address") var address: String,
     @Json(name = "latitude") var latitude: Double,
     @Json(name = "longitude") var longitude: Double
-)
+) : DetailedEcosystemPlace
