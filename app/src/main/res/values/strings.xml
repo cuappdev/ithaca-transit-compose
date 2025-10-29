@@ -7,4 +7,6 @@
     <string name="about_text">About Navi</string>
     <string name="support_title">Make Navi Better</string>
     <string name="support_subtitle">Help us improve Navi by letting us know what\'s wrong</string>
+    <string name="library_about_placeholder">Covers humanities and social sciences with circulation and reference services.</string>
+    <string name="library_reserve">Reserve a room</string>
 </resources>

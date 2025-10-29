@@ -7,10 +7,10 @@ import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
-import com.cornellappdev.transit.models.StaticPlaces
+import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.models.UserPreferenceRepository
-import com.cornellappdev.transit.models.ecosystem.eatery.EateryRepository
-import com.cornellappdev.transit.models.ecosystem.gym.GymRepository
+import com.cornellappdev.transit.models.ecosystem.EateryRepository
+import com.cornellappdev.transit.models.ecosystem.GymRepository
 import com.cornellappdev.transit.networking.ApiResponse
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel

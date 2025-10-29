@@ -36,6 +36,8 @@ android {
 
     buildTypes {
         create("ecosystem") {
+            initWith(getByName("debug"))
+            isDebuggable = true
             buildConfigField("boolean", "ECOSYSTEM_FLAG", "true")
             signingConfig = signingConfigs.getByName("debug")
         }
@@ -91,6 +93,7 @@ dependencies {
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.11.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
+    "ecosystemImplementation"("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")

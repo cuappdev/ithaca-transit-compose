@@ -1,5 +1,7 @@
 package com.cornellappdev.transit.models
 
+import com.cornellappdev.transit.models.ecosystem.Library
+import com.cornellappdev.transit.models.ecosystem.Printer
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.networking.EcosystemNetworkApi
 import com.cornellappdev.transit.networking.RoutesNetworkApi

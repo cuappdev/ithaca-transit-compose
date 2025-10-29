@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.ui.theme
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -9,6 +10,39 @@ import androidx.compose.ui.unit.sp
  * High fidelity text styles
  */
 object Style {
+
+    val detailHeading = TextStyle(
+        fontFamily = robotoFamily,
+        fontSize = 24.sp,
+        lineHeight = 24.sp,
+        fontWeight = FontWeight(500),
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
+    )
+
+    val detailSubtitle = TextStyle(
+        fontFamily = robotoFamily,
+        fontSize = 20.sp,
+        lineHeight = 24.sp,
+        fontWeight = FontWeight(500),
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
+    )
+
+    val detailBody = TextStyle(
+        fontFamily = robotoFamily,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
+    )
+
+    val heading2 = TextStyle(
+        fontFamily = robotoFamily,
+        fontSize = 16.sp,
+        lineHeight = 20.sp,
+        fontWeight = FontWeight(600),
+        color = Color.White,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
+    )
+
     /**
      * TextStyle for Card titles, On time/Late, and Board time
      */
