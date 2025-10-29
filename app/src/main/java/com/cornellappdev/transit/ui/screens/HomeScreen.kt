@@ -55,9 +55,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
-import com.cornellappdev.transit.models.ecosystem.Eatery
-import com.cornellappdev.transit.models.ecosystem.Library
-import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.ui.components.home.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.home.BottomSheetContent
 import com.cornellappdev.transit.ui.components.LoadingLocationItems
@@ -72,6 +69,7 @@ import com.cornellappdev.transit.ui.viewmodels.EcosystemSheetState
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
+import com.cornellappdev.transit.util.BOTTOM_SHEET_MAX_HEIGHT_PERCENT
 import com.cornellappdev.transit.util.ECOSYSTEM_FLAG
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -162,7 +160,7 @@ fun HomeScreen(
             // Bottom sheet offset is 50%, i.e. it takes 50% of the screen
             HomeSheetValue.PartiallyExpanded at offset(percent = 50)
             // Wrap full height
-            HomeSheetValue.Expanded at offset(percent = 10)
+            HomeSheetValue.Expanded at offset(percent = 100 - BOTTOM_SHEET_MAX_HEIGHT_PERCENT)
         }
     )
 
@@ -306,6 +304,9 @@ fun HomeScreen(
                     is EcosystemSheetState.Details -> {
                         DetailedPlaceSheetContent(
                             state.place,
+                            favorites = favorites,
+                            addFavorite = { favoritesViewModel.addFavorite(it) },
+                            removeFavorite = { favoritesViewModel.removeFavorite(it) },
                             navigateToTabs = { ecosystemSheetState = EcosystemSheetState.Tabs },
                             navigateToPlace = {
                                 homeViewModel.beginRouteOptions(it)

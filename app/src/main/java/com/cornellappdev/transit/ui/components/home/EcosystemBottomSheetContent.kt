@@ -26,6 +26,7 @@ import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FilterState
+import com.cornellappdev.transit.util.ecosystem.toPlace
 
 
 /**
@@ -203,13 +204,7 @@ private fun LazyListScope.printerList(
                     subtitle1 = it.description
                 ) {
                     navigateToPlace(
-                        Place(
-                            latitude = it.latitude,
-                            longitude = it.longitude,
-                            name = it.location,
-                            detail = it.description,
-                            type = PlaceType.APPLE_PLACE
-                        )
+                        it.toPlace()
                     )
                 }
             }

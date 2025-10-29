@@ -11,6 +11,29 @@ import androidx.compose.ui.unit.sp
  */
 object Style {
 
+    val detailHeading = TextStyle(
+        fontFamily = robotoFamily,
+        fontSize = 24.sp,
+        lineHeight = 24.sp,
+        fontWeight = FontWeight(500),
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
+    )
+
+    val detailSubtitle = TextStyle(
+        fontFamily = robotoFamily,
+        fontSize = 20.sp,
+        lineHeight = 24.sp,
+        fontWeight = FontWeight(500),
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
+    )
+
+    val detailBody = TextStyle(
+        fontFamily = robotoFamily,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
+    )
+
     val heading2 = TextStyle(
         fontFamily = robotoFamily,
         fontSize = 16.sp,
