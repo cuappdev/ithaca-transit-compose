@@ -305,9 +305,10 @@ fun HomeScreen(
                         DetailedPlaceSheetContent(
                             state.place,
                             favorites = favorites,
-                            addFavorite = { favoritesViewModel.addFavorite(it) },
-                            removeFavorite = { favoritesViewModel.removeFavorite(it) },
-                            navigateToTabs = { ecosystemSheetState = EcosystemSheetState.Tabs },
+                            onFavoriteStarClick = favoritesViewModel::toggleFavorite,
+                            onBackButtonPressed = {
+                                ecosystemSheetState = EcosystemSheetState.Tabs
+                            },
                             navigateToPlace = {
                                 homeViewModel.beginRouteOptions(it)
                                 navController.navigate("route")
@@ -320,9 +321,7 @@ fun HomeScreen(
                         EcosystemBottomSheetContent(
                             filters = homeViewModel.filterList,
                             activeFilter = filterStateValue,
-                            onFilterClick = {
-                                homeViewModel.filterState.value = it
-                            },
+                            onFilterClick = homeViewModel::setCategoryFilter,
                             modifier = Modifier.onTapDisableSearch(),
                             staticPlaces = staticPlaces,
                             favorites = favorites,
@@ -330,11 +329,10 @@ fun HomeScreen(
                                 homeViewModel.beginRouteOptions(it)
                                 navController.navigate("route")
                             },
-                            navigateToDetails = {
+                            onDetailsClick = {
                                 ecosystemSheetState = EcosystemSheetState.Details(it)
                             },
-                            addFavorite = { favoritesViewModel.addFavorite(it) },
-                            removeFavorite = { favoritesViewModel.removeFavorite(it) }
+                            onFavoriteStarClick = favoritesViewModel::toggleFavorite
                         )
                     }
                 }
@@ -404,9 +402,9 @@ fun HomeScreen(
                 },
                 onItemClick = {
                     scope.launch {
-                        if (it !in favorites) {
+                        if (!favoritesViewModel.isFavorite(it)) {
                             addSheetState.bottomSheetState.hide()
-                            homeViewModel.onAddQueryChange("")
+                            homeViewModel.clearAddQuery()
                             favoritesViewModel.addFavorite(it)
                         } else {
                             Toast.makeText(
@@ -418,8 +416,8 @@ fun HomeScreen(
                         }
                     }
                 },
-                onQueryChange = { s -> homeViewModel.onAddQueryChange(s) },
-                onClearChange = { homeViewModel.onAddQueryChange("") }
+                onQueryChange = homeViewModel::onAddQueryChange,
+                onClearChange = homeViewModel::clearAddQuery
             )
         },
         content = {}

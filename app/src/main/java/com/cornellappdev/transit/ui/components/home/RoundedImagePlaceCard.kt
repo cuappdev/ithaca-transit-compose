@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.ui.components.home
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,7 +43,7 @@ import com.cornellappdev.transit.ui.theme.Style
 
 @Composable
 fun RoundedImagePlaceCard(
-    imageRes: Int,
+    @DrawableRes imageRes: Int,
     title: String,
     subtitle: String,
     isFavorite: Boolean,
@@ -76,7 +77,6 @@ fun RoundedImagePlaceCard(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                // Text content
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterStart),
@@ -103,13 +103,13 @@ fun RoundedImagePlaceCard(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (leftAnnotatedString != null) {
+                        leftAnnotatedString?.let {
                             Text(
                                 text = leftAnnotatedString
                             )
                         }
                         Spacer(modifier = Modifier.weight(1f))
-                        if (rightAnnotatedString != null) {
+                        rightAnnotatedString?.let {
                             Text(
                                 text = rightAnnotatedString
                             )
@@ -117,23 +117,7 @@ fun RoundedImagePlaceCard(
                     }
                 }
 
-                // Star
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .size(24.dp)
-                        .clickable { onFavoriteClick() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = if (isFavorite) Icons.Default.Star else ImageVector.vectorResource(
-                            R.drawable.baseline_star_outline_20
-                        ),
-                        contentDescription = null,
-                        tint = if (isFavorite) FavoritesYellow else Color.Gray,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
+                FavoritesStar(onFavoriteClick = onFavoriteClick, isFavorite = isFavorite)
             }
 
         }

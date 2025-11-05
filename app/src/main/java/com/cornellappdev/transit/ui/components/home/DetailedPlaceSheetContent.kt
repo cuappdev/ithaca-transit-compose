@@ -1,13 +1,10 @@
 package com.cornellappdev.transit.ui.components.home
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,22 +16,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
@@ -43,8 +34,6 @@ import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.Library
 import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.ui.theme.DividerGray
-import com.cornellappdev.transit.ui.theme.FavoritesYellow
-import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
@@ -55,10 +44,9 @@ import com.cornellappdev.transit.util.ecosystem.toPlace
 fun DetailedPlaceSheetContent(
     ecosystemPlace: DetailedEcosystemPlace,
     favorites: Set<Place>,
-    navigateToTabs: () -> Unit,
+    onBackButtonPressed: () -> Unit,
     navigateToPlace: (Place) -> Unit,
-    addFavorite: (Place) -> Unit,
-    removeFavorite: (Place) -> Unit,
+    onFavoriteStarClick: (Place) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -76,7 +64,7 @@ fun DetailedPlaceSheetContent(
                     top = 2.dp
                 )
                 .clickable {
-                    navigateToTabs()
+                    onBackButtonPressed()
                 },
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -111,11 +99,7 @@ fun DetailedPlaceSheetContent(
                         ecosystemPlace,
                         isFavorite = ecosystemPlace.toPlace() in favorites,
                         onFavoriteClick = {
-                            if (ecosystemPlace.toPlace() !in favorites) {
-                                addFavorite(ecosystemPlace.toPlace())
-                            } else {
-                                removeFavorite(ecosystemPlace.toPlace())
-                            }
+                            onFavoriteStarClick(ecosystemPlace.toPlace())
                         })
 
                 }
@@ -193,151 +177,21 @@ fun DetailedPlaceSheetContent(
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-fun LibraryDetailsContent(
-    library: Library,
-    isFavorite: Boolean,
-    onFavoriteClick: () -> Unit,
-    leftAnnotatedString: AnnotatedString? = null,
-    rightAnnotatedString: AnnotatedString? = null,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = 20.dp,
-                end = 20.dp,
-            )
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.olin_library),
-            contentDescription = library.location,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(112.dp)
-                .clip(RoundedCornerShape(12.dp))
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 24.dp)
-        ) {
-            // Text content
-            Column(
-                modifier = Modifier
-                    .align(Alignment.CenterStart),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = library.location,
-                    style = Style.detailHeading,
-                    color = PrimaryText,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(end = 32.dp, bottom = 12.dp)
-                )
-                Text(
-                    text = library.address,
-                    style = Style.heading3,
-                    color = SecondaryText,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(end = 32.dp)
-
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (leftAnnotatedString != null) {
-                        Text(
-                            text = leftAnnotatedString
-                        )
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                    if (rightAnnotatedString != null) {
-                        Text(
-                            text = rightAnnotatedString
-                        )
-                    }
-                }
-            }
-
-            // Star
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .size(24.dp)
-                    .clickable { onFavoriteClick() },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = if (isFavorite) Icons.Default.Star else ImageVector.vectorResource(
-                        R.drawable.baseline_star_outline_20
-                    ),
-                    contentDescription = null,
-                    tint = if (isFavorite) FavoritesYellow else Color.Gray,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        HorizontalDivider(thickness = 1.dp, color = DividerGray)
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "About",
-            style = Style.detailSubtitle,
-            color = PrimaryText,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        Text(
-            text = stringResource(R.string.library_about_placeholder),
-            style = Style.detailBody,
-            color = SecondaryText,
-            modifier = Modifier.padding(bottom = 15.dp)
-        )
-
-        Text(
-            text = stringResource(R.string.library_reserve),
-            style = Style.heading2,
-            color = TransitBlue
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        HorizontalDivider(thickness = 1.dp, color = DividerGray)
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painterResource(R.drawable.location_pin_gray),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(20.dp)
-            )
-            Text(
-                text = library.location,
-                style = Style.detailBody,
-                color = SecondaryText,
-                modifier = Modifier.padding(start = 15.dp)
-            )
-
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        HorizontalDivider(thickness = 1.dp, color = DividerGray)
-
-        // TODO: Hours
-        Spacer(modifier = Modifier.height(300.dp))
-
-    }
+private fun DetailedPlaceSheetContentPreview() {
+    DetailedPlaceSheetContent(
+        Library(
+            id = 1,
+            location = "Olin Library",
+            address = "Ho Plaza",
+            latitude = 1.0,
+            longitude = 1.0
+        ),
+        favorites = emptySet(),
+        onBackButtonPressed = {},
+        navigateToPlace = {},
+        onFavoriteStarClick = {},
+        modifier = Modifier.background(Color.White)
+    )
 }

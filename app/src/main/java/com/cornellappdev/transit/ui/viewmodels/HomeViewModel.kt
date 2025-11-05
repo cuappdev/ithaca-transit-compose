@@ -158,6 +158,13 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
+     * Clear the query in the add favorites search bar
+     */
+    fun clearAddQuery() {
+        onAddQueryChange("")
+    }
+
+    /**
      * Change the query in the add favorites search bar and update search results
      */
     fun onAddQueryChange(query: String) {
@@ -258,6 +265,13 @@ class HomeViewModel @Inject constructor(
             )
         )
         onQueryChange("")
+    }
+
+    /**
+     * Set the filter selected on the bottom sheet for categories of places
+     */
+    fun setCategoryFilter(filterState: FilterState) {
+        this.filterState.value = filterState
     }
 
 }

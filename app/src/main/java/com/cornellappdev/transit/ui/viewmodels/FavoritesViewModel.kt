@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.UserPreferenceRepository
+import com.cornellappdev.transit.util.ecosystem.toPlace
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,6 +50,24 @@ class FavoritesViewModel @Inject constructor(
                 userPreferenceRepository.setFavorites(currentFavorites.toSet())
             }
         }
+    }
+
+    /**
+     * If a location is already favorited, remove it, otherwise add it
+     */
+    fun toggleFavorite(stop: Place) {
+        if (stop !in favoritesStops.value) {
+            addFavorite(stop)
+        } else {
+            removeFavorite(stop)
+        }
+    }
+
+    /**
+     * Check if a place is a favorite
+     */
+    fun isFavorite(stop: Place): Boolean {
+        return stop in favoritesStops.value
     }
 
 }

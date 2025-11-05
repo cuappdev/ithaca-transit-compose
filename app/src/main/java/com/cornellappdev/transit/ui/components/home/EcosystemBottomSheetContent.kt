@@ -46,9 +46,8 @@ fun EcosystemBottomSheetContent(
     favorites: Set<Place>,
     modifier: Modifier = Modifier,
     navigateToPlace: (Place) -> Unit,
-    navigateToDetails: (DetailedEcosystemPlace) -> Unit,
-    addFavorite: (Place) -> Unit,
-    removeFavorite: (Place) -> Unit
+    onDetailsClick: (DetailedEcosystemPlace) -> Unit,
+    onFavoriteStarClick: (Place) -> Unit
 ) {
     Column(modifier = modifier) {
         Row(
@@ -87,9 +86,8 @@ fun EcosystemBottomSheetContent(
             staticPlaces = staticPlaces,
             favorites = favorites,
             navigateToPlace = navigateToPlace,
-            navigateToDetails = navigateToDetails,
-            addFavorite = addFavorite,
-            removeFavorite = removeFavorite
+            onDetailsClick = onDetailsClick,
+            onFavoriteStarClick = onFavoriteStarClick
         )
     }
 }
@@ -100,9 +98,8 @@ private fun BottomSheetFilteredContent(
     staticPlaces: StaticPlaces,
     favorites: Set<Place>,
     navigateToPlace: (Place) -> Unit,
-    navigateToDetails: (DetailedEcosystemPlace) -> Unit,
-    addFavorite: (Place) -> Unit,
-    removeFavorite: (Place) -> Unit
+    onDetailsClick: (DetailedEcosystemPlace) -> Unit,
+    onFavoriteStarClick: (Place) -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(bottom = 90.dp),
@@ -129,10 +126,9 @@ private fun BottomSheetFilteredContent(
                 libraryList(
                     staticPlaces,
                     navigateToPlace,
-                    navigateToDetails,
+                    onDetailsClick,
                     favorites,
-                    addFavorite,
-                    removeFavorite
+                    onFavoriteStarClick,
                 )
             }
         }
@@ -247,8 +243,7 @@ private fun LazyListScope.libraryList(
     navigateToPlace: (Place) -> Unit,
     navigateToDetails: (DetailedEcosystemPlace) -> Unit,
     favorites: Set<Place>,
-    addFavorite: (Place) -> Unit,
-    removeFavorite: (Place) -> Unit
+    onFavoriteStarClick: (Place) -> Unit
 ) {
     when (staticPlaces.libraries) {
         is ApiResponse.Error -> {
@@ -259,25 +254,13 @@ private fun LazyListScope.libraryList(
 
         is ApiResponse.Success -> {
             items(staticPlaces.libraries.data) {
-                val place = Place(
-                    latitude = it.latitude,
-                    longitude = it.longitude,
-                    name = it.location,
-                    detail = it.address,
-                    type = PlaceType.APPLE_PLACE
-                )
-
                 RoundedImagePlaceCard(
                     imageRes = R.drawable.olin_library,
                     title = it.location,
                     subtitle = it.address,
-                    isFavorite = place in favorites,
+                    isFavorite = it.toPlace() in favorites,
                     onFavoriteClick = {
-                        if (place !in favorites) {
-                            addFavorite(place)
-                        } else {
-                            removeFavorite(place)
-                        }
+                        onFavoriteStarClick(it.toPlace())
                     }
                 ) {
                     navigateToDetails(it)
@@ -308,9 +291,8 @@ private fun PreviewEcosystemBottomSheet() {
         ),
         favorites = emptySet(),
         modifier = Modifier,
-        addFavorite = {},
         navigateToPlace = {},
-        navigateToDetails = {},
-        removeFavorite = {}
+        onDetailsClick = {},
+        onFavoriteStarClick = {}
     )
 }
