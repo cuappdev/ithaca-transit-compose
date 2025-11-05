@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.ecosystem.Library
 import com.cornellappdev.transit.ui.theme.DividerGray
+import com.cornellappdev.transit.ui.theme.Gray05
 import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
@@ -145,7 +146,7 @@ fun LibraryDetailsContent(
                 contentDescription = null,
                 modifier = Modifier
                     .size(20.dp),
-                tint = Color.Gray
+                tint = Gray05
             )
             Text(
                 text = library.location,

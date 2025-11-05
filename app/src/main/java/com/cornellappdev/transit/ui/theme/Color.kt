@@ -24,3 +24,5 @@ val DetailsHeaderGray = Color(0xfff5f5f5)
 val DetailsDividerGray = Color(0xffc6c6c8)
 
 val FavoritesYellow = Color(0xFFFEC50E)
+
+val Gray05 = Color(0xFF586069)

@@ -16,6 +16,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.theme.FavoritesYellow
+import com.cornellappdev.transit.ui.theme.Gray05
 
 @Composable
 fun BoxScope.FavoritesStar(onFavoriteClick: () -> Unit, isFavorite: Boolean) {
@@ -31,7 +32,7 @@ fun BoxScope.FavoritesStar(onFavoriteClick: () -> Unit, isFavorite: Boolean) {
                 R.drawable.baseline_star_outline_20
             ),
             contentDescription = null,
-            tint = if (isFavorite) FavoritesYellow else Color.Gray,
+            tint = if (isFavorite) FavoritesYellow else Gray05,
             modifier = Modifier.size(20.dp)
         )
     }
