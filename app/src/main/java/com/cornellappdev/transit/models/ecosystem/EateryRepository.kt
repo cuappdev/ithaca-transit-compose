@@ -1,4 +1,4 @@
-package com.cornellappdev.transit.models.ecosystem.eatery
+package com.cornellappdev.transit.models.ecosystem
 
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.networking.EateryNetworkApi

@@ -59,14 +59,17 @@ import com.cornellappdev.transit.ui.components.home.AddFavoritesSearchSheet
 import com.cornellappdev.transit.ui.components.home.BottomSheetContent
 import com.cornellappdev.transit.ui.components.LoadingLocationItems
 import com.cornellappdev.transit.ui.components.SearchSuggestions
+import com.cornellappdev.transit.ui.components.home.DetailedPlaceSheetContent
 import com.cornellappdev.transit.ui.components.home.EcosystemBottomSheetContent
 import com.cornellappdev.transit.ui.theme.DetailsHeaderGray
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.MetadataGray
+import com.cornellappdev.transit.ui.viewmodels.EcosystemSheetState
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
+import com.cornellappdev.transit.util.BOTTOM_SHEET_MAX_HEIGHT_PERCENT
 import com.cornellappdev.transit.util.ECOSYSTEM_FLAG
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -151,13 +154,13 @@ fun HomeScreen(
     val filterSheetState = rememberBottomSheetState(
         initialValue = HomeSheetValue.Collapsed,
         defineValues = {
-            HomeSheetValue.Collapsed at height(90.dp)
+            HomeSheetValue.Collapsed at height(200.dp)
 
             //Peek to show filters
             // Bottom sheet offset is 50%, i.e. it takes 50% of the screen
             HomeSheetValue.PartiallyExpanded at offset(percent = 50)
             // Wrap full height
-            HomeSheetValue.Expanded at offset(percent = 10)
+            HomeSheetValue.Expanded at offset(percent = 100 - BOTTOM_SHEET_MAX_HEIGHT_PERCENT)
         }
     )
 
@@ -276,6 +279,12 @@ fun HomeScreen(
 
     // Favorites BottomSheet (Filters BottomSheet for ecosystem)
     if (ECOSYSTEM_FLAG) {
+        var ecosystemSheetState by remember {
+            mutableStateOf<EcosystemSheetState>(
+                EcosystemSheetState.Tabs
+            )
+        }
+
         io.morfly.compose.bottomsheet.material3.BottomSheetScaffold(
             scaffoldState = filterScaffoldState,
             sheetSwipeEnabled = true,
@@ -291,19 +300,42 @@ fun HomeScreen(
                 }
             },
             sheetContent = {
-                EcosystemBottomSheetContent(
-                    filters = homeViewModel.filterList,
-                    activeFilter = filterStateValue,
-                    onFilterClick = {
-                        homeViewModel.filterState.value = it
-                    },
-                    modifier = Modifier.onTapDisableSearch(),
-                    staticPlaces = staticPlaces,
-                    navigateToPlace = {
-                        homeViewModel.beginRouteOptions(it)
-                        navController.navigate("route")
+                when (val state = ecosystemSheetState) {
+                    is EcosystemSheetState.Details -> {
+                        DetailedPlaceSheetContent(
+                            state.place,
+                            favorites = favorites,
+                            onFavoriteStarClick = favoritesViewModel::toggleFavorite,
+                            onBackButtonPressed = {
+                                ecosystemSheetState = EcosystemSheetState.Tabs
+                            },
+                            navigateToPlace = {
+                                homeViewModel.beginRouteOptions(it)
+                                navController.navigate("route")
+                            },
+                            modifier = Modifier.onTapDisableSearch()
+                        )
                     }
-                )
+
+                    is EcosystemSheetState.Tabs -> {
+                        EcosystemBottomSheetContent(
+                            filters = homeViewModel.filterList,
+                            activeFilter = filterStateValue,
+                            onFilterClick = homeViewModel::setCategoryFilter,
+                            modifier = Modifier.onTapDisableSearch(),
+                            staticPlaces = staticPlaces,
+                            favorites = favorites,
+                            navigateToPlace = {
+                                homeViewModel.beginRouteOptions(it)
+                                navController.navigate("route")
+                            },
+                            onDetailsClick = {
+                                ecosystemSheetState = EcosystemSheetState.Details(it)
+                            },
+                            onFavoriteStarClick = favoritesViewModel::toggleFavorite
+                        )
+                    }
+                }
             },
             content = {}
         )
@@ -350,46 +382,46 @@ fun HomeScreen(
             },
             content = {}
         )
-
-        // AddFavorites BottomSheet
-        BottomSheetScaffold(
-            sheetShape = RoundedCornerShape(16.dp),
-            scaffoldState = addSheetState,
-            sheetContainerColor = Color.White,
-            sheetPeekHeight = 0.dp,
-            sheetContent = {
-                AddFavoritesSearchSheet(
-                    addSearchBarValue = addSearchBarValue,
-                    placeQueryResponse = placeQueryResponse,
-                    cancelOnClick = {
-                        scope.launch {
-                            addSheetState.bottomSheetState.hide()
-                            homeViewModel.onAddQueryChange("")
-                        }
-                    },
-                    onItemClick = {
-                        scope.launch {
-                            if (it !in favorites) {
-                                addSheetState.bottomSheetState.hide()
-                                homeViewModel.onAddQueryChange("")
-                                favoritesViewModel.addFavorite(it)
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    "${it.name} is already favorited!",
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
-                            }
-                        }
-                    },
-                    onQueryChange = { s -> homeViewModel.onAddQueryChange(s) },
-                    onClearChange = { homeViewModel.onAddQueryChange("") }
-                )
-            },
-            content = {}
-        )
     }
+
+    // AddFavorites BottomSheet
+    BottomSheetScaffold(
+        sheetShape = RoundedCornerShape(16.dp),
+        scaffoldState = addSheetState,
+        sheetContainerColor = Color.White,
+        sheetPeekHeight = 0.dp,
+        sheetContent = {
+            AddFavoritesSearchSheet(
+                addSearchBarValue = addSearchBarValue,
+                placeQueryResponse = placeQueryResponse,
+                cancelOnClick = {
+                    scope.launch {
+                        addSheetState.bottomSheetState.hide()
+                        homeViewModel.onAddQueryChange("")
+                    }
+                },
+                onItemClick = {
+                    scope.launch {
+                        if (!favoritesViewModel.isFavorite(it)) {
+                            addSheetState.bottomSheetState.hide()
+                            homeViewModel.clearAddQuery()
+                            favoritesViewModel.addFavorite(it)
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "${it.name} is already favorited!",
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
+                        }
+                    }
+                },
+                onQueryChange = homeViewModel::onAddQueryChange,
+                onClearChange = homeViewModel::clearAddQuery
+            )
+        },
+        content = {}
+    )
 }
 
 /**

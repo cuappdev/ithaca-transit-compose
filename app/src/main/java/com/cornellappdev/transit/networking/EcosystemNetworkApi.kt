@@ -1,8 +1,8 @@
 package com.cornellappdev.transit.networking
 
-import com.cornellappdev.transit.models.Library
+import com.cornellappdev.transit.models.ecosystem.Library
 import com.cornellappdev.transit.models.Payload
-import com.cornellappdev.transit.models.Printer
+import com.cornellappdev.transit.models.ecosystem.Printer
 import retrofit2.http.GET
 
 interface EcosystemNetworkApi {

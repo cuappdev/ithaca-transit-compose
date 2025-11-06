@@ -4,10 +4,10 @@ import android.icu.util.Calendar
 import com.cornellappdev.transit.GymListQuery
 import com.cornellappdev.transit.fragment.GymFields
 import com.cornellappdev.transit.fragment.OpenHoursFields
-import com.cornellappdev.transit.models.ecosystem.gym.TimeInterval
-import com.cornellappdev.transit.models.ecosystem.gym.TimeOfDay
-import com.cornellappdev.transit.models.ecosystem.gym.UpliftCapacity
-import com.cornellappdev.transit.models.ecosystem.gym.UpliftGym
+import com.cornellappdev.transit.models.ecosystem.TimeInterval
+import com.cornellappdev.transit.models.ecosystem.TimeOfDay
+import com.cornellappdev.transit.models.ecosystem.UpliftCapacity
+import com.cornellappdev.transit.models.ecosystem.UpliftGym
 
 /**
  * Parses the output of [pullHours] for a NONE input.

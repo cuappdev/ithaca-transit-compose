@@ -7,10 +7,10 @@ import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
-import com.cornellappdev.transit.models.StaticPlaces
+import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.models.UserPreferenceRepository
-import com.cornellappdev.transit.models.ecosystem.eatery.EateryRepository
-import com.cornellappdev.transit.models.ecosystem.gym.GymRepository
+import com.cornellappdev.transit.models.ecosystem.EateryRepository
+import com.cornellappdev.transit.models.ecosystem.GymRepository
 import com.cornellappdev.transit.networking.ApiResponse
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -158,6 +158,13 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
+     * Clear the query in the add favorites search bar
+     */
+    fun clearAddQuery() {
+        onAddQueryChange("")
+    }
+
+    /**
      * Change the query in the add favorites search bar and update search results
      */
     fun onAddQueryChange(query: String) {
@@ -258,6 +265,13 @@ class HomeViewModel @Inject constructor(
             )
         )
         onQueryChange("")
+    }
+
+    /**
+     * Set the filter selected on the bottom sheet for categories of places
+     */
+    fun setCategoryFilter(filterState: FilterState) {
+        this.filterState.value = filterState
     }
 
 }

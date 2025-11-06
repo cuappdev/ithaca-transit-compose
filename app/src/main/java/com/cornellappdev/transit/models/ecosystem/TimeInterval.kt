@@ -1,4 +1,4 @@
-package com.cornellappdev.transit.models.ecosystem.gym
+package com.cornellappdev.transit.models.ecosystem
 
 import android.icu.util.Calendar
 
