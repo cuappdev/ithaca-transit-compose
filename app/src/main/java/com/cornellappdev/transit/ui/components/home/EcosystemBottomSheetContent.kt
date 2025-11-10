@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
-import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
@@ -119,7 +118,13 @@ private fun BottomSheetFilteredContent(
             }
 
             FilterState.EATERIES -> {
-                eateryList(staticPlaces, navigateToPlace)
+                eateryList(
+                    staticPlaces,
+                    navigateToPlace,
+                    onDetailsClick,
+                    favorites,
+                    onFavoriteStarClick,
+                )
             }
 
             FilterState.LIBRARIES -> {
@@ -213,7 +218,10 @@ private fun LazyListScope.printerList(
  */
 private fun LazyListScope.eateryList(
     staticPlaces: StaticPlaces,
-    navigateToPlace: (Place) -> Unit
+    navigateToPlace: (Place) -> Unit,
+    navigateToDetails: (DetailedEcosystemPlace) -> Unit,
+    favorites: Set<Place>,
+    onFavoriteStarClick: (Place) -> Unit
 ) {
     when (staticPlaces.eateries) {
         is ApiResponse.Error -> {
@@ -224,11 +232,17 @@ private fun LazyListScope.eateryList(
 
         is ApiResponse.Success -> {
             items(staticPlaces.eateries.data) {
-                BottomSheetLocationCard(
+                RoundedImagePlaceCard(
+                    imageUrl = it.imageUrl,
                     title = it.name,
-                    subtitle1 = it.location.orEmpty()
+                    subtitle = it.location ?: "",
+                    isFavorite = it.toPlace() in favorites,
+                    onFavoriteClick = {
+                        onFavoriteStarClick(it.toPlace())
+                    },
+                    placeholderRes = R.drawable.olin_library,
                 ) {
-                    //TODO: Eatery
+                    navigateToDetails(it)
                 }
             }
         }
@@ -255,7 +269,7 @@ private fun LazyListScope.libraryList(
         is ApiResponse.Success -> {
             items(staticPlaces.libraries.data) {
                 RoundedImagePlaceCard(
-                    imageRes = R.drawable.olin_library,
+                    placeholderRes = R.drawable.olin_library,
                     title = it.location,
                     subtitle = it.address,
                     isFavorite = it.toPlace() in favorites,

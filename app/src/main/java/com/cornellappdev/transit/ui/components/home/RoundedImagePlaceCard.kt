@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.ui.components.home
 
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,45 +13,43 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.PlatformTextStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.ui.theme.FavoritesYellow
 import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
 
+/**
+ * Card for a place with a rounded image on top
+ */
 @Composable
 fun RoundedImagePlaceCard(
-    @DrawableRes imageRes: Int,
+    imageUrl: String? = null,
     title: String,
     subtitle: String,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
     leftAnnotatedString: AnnotatedString? = null,
     rightAnnotatedString: AnnotatedString? = null,
-    onClick: () -> Unit
+    @DrawableRes placeholderRes: Int,
+    onClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -62,15 +61,7 @@ fun RoundedImagePlaceCard(
                 .fillMaxWidth()
                 .background(Color.White, shape = RoundedCornerShape(12.dp))
         ) {
-            Image(
-                painter = painterResource(id = imageRes),
-                contentDescription = title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(112.dp)
-                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
-            )
+            PlaceCardImage(imageUrl, placeholderRes)
 
             Box(
                 modifier = Modifier
@@ -124,11 +115,44 @@ fun RoundedImagePlaceCard(
     }
 }
 
+@Composable
+fun PlaceCardImage(imageUrl: String?, @DrawableRes placeholderRes: Int) {
+    val imageModifier = Modifier
+        .fillMaxWidth()
+        .height(112.dp)
+        .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+
+    if (imageUrl.isNullOrBlank()) {
+        Image(
+            painter = painterResource(id = placeholderRes),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = imageModifier
+        )
+    } else {
+        Log.d("RoundedImagePlaceCard", imageUrl.toString())
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(imageUrl)
+                .crossfade(true)
+                .build(),
+            placeholder = painterResource(placeholderRes),
+            error = painterResource(placeholderRes),
+            onError = {
+                Log.d("RoundedImagePlaceCard", it.toString())
+            },
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = imageModifier
+        )
+    }
+}
+
 @Preview
 @Composable
 fun RoundedImagePlaceCardPreview() {
     RoundedImagePlaceCard(
-        imageRes = R.drawable.olin_library,
+        placeholderRes = R.drawable.olin_library,
         title = "Olin Library",
         subtitle = "Ho Plaza",
         isFavorite = true,
