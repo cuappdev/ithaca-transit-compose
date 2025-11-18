@@ -14,17 +14,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
+import com.cornellappdev.transit.models.ecosystem.OperatingHours
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FilterState
+import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.util.ecosystem.toPlace
 
 
@@ -93,6 +97,7 @@ fun EcosystemBottomSheetContent(
 
 @Composable
 private fun BottomSheetFilteredContent(
+    homeViewModel: HomeViewModel = hiltViewModel(),
     currentFilter: FilterState,
     staticPlaces: StaticPlaces,
     favorites: Set<Place>,
@@ -119,11 +124,11 @@ private fun BottomSheetFilteredContent(
 
             FilterState.EATERIES -> {
                 eateryList(
-                    staticPlaces,
-                    navigateToPlace,
-                    onDetailsClick,
-                    favorites,
-                    onFavoriteStarClick,
+                    staticPlaces = staticPlaces,
+                    onDetailsClick = onDetailsClick,
+                    favorites = favorites,
+                    onFavoriteStarClick = onFavoriteStarClick,
+                    operatingHoursToString = homeViewModel::isOpenAnnotatedStringFromOperatingHours
                 )
             }
 
@@ -218,16 +223,19 @@ private fun LazyListScope.printerList(
  */
 private fun LazyListScope.eateryList(
     staticPlaces: StaticPlaces,
-    navigateToPlace: (Place) -> Unit,
-    navigateToDetails: (DetailedEcosystemPlace) -> Unit,
+    onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     favorites: Set<Place>,
-    onFavoriteStarClick: (Place) -> Unit
+    onFavoriteStarClick: (Place) -> Unit,
+    operatingHoursToString: (OperatingHours) -> AnnotatedString
 ) {
     when (staticPlaces.eateries) {
         is ApiResponse.Error -> {
         }
 
         is ApiResponse.Pending -> {
+            item {
+                CenteredSpinningIndicator()
+            }
         }
 
         is ApiResponse.Success -> {
@@ -241,8 +249,11 @@ private fun LazyListScope.eateryList(
                         onFavoriteStarClick(it.toPlace())
                     },
                     placeholderRes = R.drawable.olin_library,
+                    leftAnnotatedString = operatingHoursToString(
+                        it.formatOperatingHours()
+                    )
                 ) {
-                    navigateToDetails(it)
+                    onDetailsClick(it)
                 }
             }
         }

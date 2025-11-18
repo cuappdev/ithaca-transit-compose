@@ -90,8 +90,13 @@ fun DetailedPlaceSheetContent(
             // Main Content
             when (ecosystemPlace) {
                 is Eatery -> {
-                    //TODO
-                    Text(ecosystemPlace.name)
+                    EateryDetailsContent(
+                        eatery = ecosystemPlace,
+                        isFavorite = ecosystemPlace.toPlace() in favorites,
+                        onFavoriteClick = {
+                            onFavoriteStarClick(ecosystemPlace.toPlace())
+                        }
+                    )
                 }
 
                 is Library -> {
@@ -131,7 +136,9 @@ fun DetailedPlaceSheetContent(
                         .clickable {
                             when (ecosystemPlace) {
                                 is Eatery -> {
-                                    //TODO
+                                    navigateToPlace(
+                                        ecosystemPlace.toPlace()
+                                    )
                                 }
 
                                 is Library -> {
