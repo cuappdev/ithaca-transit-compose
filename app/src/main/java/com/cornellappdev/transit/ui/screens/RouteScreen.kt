@@ -175,7 +175,7 @@ fun RouteScreen(
                         true,
                         route
                     )
-                ); navController.navigate("details")
+                );navController.navigate("details")
             }
         }
     }
