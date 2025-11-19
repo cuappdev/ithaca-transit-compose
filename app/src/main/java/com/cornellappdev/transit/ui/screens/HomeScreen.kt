@@ -93,8 +93,8 @@ private enum class HomeSheetValue { Collapsed, PartiallyExpanded, Expanded }
 )
 @Composable
 fun HomeScreen(
-    homeViewModel: HomeViewModel,
     navController: NavController,
+    homeViewModel: HomeViewModel = hiltViewModel(),
     favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
