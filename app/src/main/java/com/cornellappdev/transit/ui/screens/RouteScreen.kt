@@ -49,7 +49,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.MapState
@@ -176,7 +175,7 @@ fun RouteScreen(
                         true,
                         route
                     )
-                );navController.navigate("details")
+                ); navController.navigate("details")
             }
         }
     }
