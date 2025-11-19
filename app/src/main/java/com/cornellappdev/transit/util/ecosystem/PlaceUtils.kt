@@ -2,6 +2,7 @@ package com.cornellappdev.transit.util.ecosystem
 
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.PlaceType
+import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.Library
 import com.cornellappdev.transit.models.ecosystem.Printer
 
@@ -25,5 +26,16 @@ fun Printer.toPlace(): Place = Place(
     longitude = this.longitude,
     name = this.location,
     detail = this.description,
+    type = PlaceType.APPLE_PLACE
+)
+
+/**
+ * Predefined mapping from eatery to generic place. Nullable latitudes and longitudes default to 0
+ */
+fun Eatery.toPlace(): Place = Place(
+    latitude = this.latitude ?: 0.0,
+    longitude = this.longitude ?: 0.0,
+    name = this.name,
+    detail = this.location,
     type = PlaceType.APPLE_PLACE
 )
