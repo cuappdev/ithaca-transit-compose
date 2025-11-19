@@ -121,9 +121,10 @@ fun EateryDetailsContent(
 
         HorizontalDivider(thickness = 1.dp, color = DividerGray)
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        OperatingHoursList(homeViewModel.rotateOperatingHours(eatery.formatOperatingHours()))
+        ExpandableOperatingHoursList(
+            homeViewModel.isOpenAnnotatedStringFromOperatingHours(eatery.formatOperatingHours()),
+            homeViewModel.rotateOperatingHours(eatery.formatOperatingHours())
+        )
 
     }
 }
