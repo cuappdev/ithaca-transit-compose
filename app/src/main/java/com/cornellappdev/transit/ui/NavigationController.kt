@@ -22,7 +22,6 @@ import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
  */
 @Composable
 fun NavigationController(
-    homeViewModel: HomeViewModel = hiltViewModel(),
     routeViewModel: RouteViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
@@ -32,14 +31,12 @@ fun NavigationController(
         startDestination = "home",
     ) {
         composable("home") {
-            HomeScreen(homeViewModel = homeViewModel, navController = navController)
+            HomeScreen(navController = navController)
         }
 
         composable("details") {
             DetailsScreen(
-                navController = navController,
-                routeViewModel = routeViewModel,
-            )
+                navController = navController, routeViewModel = routeViewModel)
         }
 
         composable("route") {
