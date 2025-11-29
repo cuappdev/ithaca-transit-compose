@@ -61,6 +61,7 @@ import com.cornellappdev.transit.ui.components.LoadingLocationItems
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.components.home.DetailedPlaceSheetContent
 import com.cornellappdev.transit.ui.components.home.EcosystemBottomSheetContent
+import com.cornellappdev.transit.ui.components.home.HomeScreenMarkers
 import com.cornellappdev.transit.ui.theme.DetailsHeaderGray
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.IconGray
@@ -225,7 +226,9 @@ fun HomeScreen(
                 isMyLocationEnabled = permissionState.status.isGranted
             ),
             uiSettings = MapUiSettings(zoomControlsEnabled = false)
-        )
+        ) {
+            HomeScreenMarkers(filterStateValue, favorites, staticPlaces)
+        }
 
         // Overlay transparent box to intercept clicks to disable search
         if (searchActive) {
