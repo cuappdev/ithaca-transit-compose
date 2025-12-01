@@ -25,14 +25,14 @@ fun HomeScreenMarkers(filterState: FilterState, favorites: Set<Place>, staticPla
     when (filterState) {
         FilterState.FAVORITES -> {
             favorites.forEach {
-                LocationMarker(it.latitude, it.longitude, R.drawable.favorite_pin)
+                LocationMarker(LatLng(it.latitude, it.longitude), R.drawable.favorite_pin)
             }
         }
 
         FilterState.PRINTERS -> {
             if (staticPlaces.printers is ApiResponse.Success) {
                 staticPlaces.printers.data.forEach {
-                    LocationMarker(it.latitude, it.longitude, R.drawable.printer_pin)
+                    LocationMarker(LatLng(it.latitude, it.longitude), R.drawable.printer_pin)
                 }
             }
         }
@@ -40,7 +40,7 @@ fun HomeScreenMarkers(filterState: FilterState, favorites: Set<Place>, staticPla
         FilterState.GYMS -> {
             if (staticPlaces.gyms is ApiResponse.Success) {
                 staticPlaces.gyms.data.forEach {
-                    LocationMarker(it.latitude, it.longitude, R.drawable.gym_pin)
+                    LocationMarker(LatLng(it.latitude, it.longitude), R.drawable.gym_pin)
                 }
             }
         }
@@ -50,7 +50,7 @@ fun HomeScreenMarkers(filterState: FilterState, favorites: Set<Place>, staticPla
                 staticPlaces.eateries.data.forEach { eatery ->
                     eatery.latitude?.let { latitude ->
                         eatery.longitude?.let { longitude ->
-                            LocationMarker(latitude, longitude, R.drawable.eatery_pin)
+                            LocationMarker(LatLng(latitude, longitude), R.drawable.eatery_pin)
                         }
                     }
                 }
@@ -60,7 +60,7 @@ fun HomeScreenMarkers(filterState: FilterState, favorites: Set<Place>, staticPla
         FilterState.LIBRARIES -> {
             if (staticPlaces.libraries is ApiResponse.Success) {
                 staticPlaces.libraries.data.forEach {
-                    LocationMarker(it.latitude, it.longitude, R.drawable.library_pin)
+                    LocationMarker(LatLng(it.latitude, it.longitude), R.drawable.library_pin)
                 }
             }
         }
@@ -69,13 +69,12 @@ fun HomeScreenMarkers(filterState: FilterState, favorites: Set<Place>, staticPla
 
 @Composable
 private fun LocationMarker(
-    latitude: Double,
-    longitude: Double,
+    position: LatLng,
     @DrawableRes iconRes: Int
 ) {
     MarkerComposable(
         state = rememberMarkerState(
-            position = LatLng(latitude, longitude)
+            position = position
         )
     ) {
         Icon(
