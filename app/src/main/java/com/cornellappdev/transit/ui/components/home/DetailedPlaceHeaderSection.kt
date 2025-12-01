@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.SecondaryText
@@ -79,4 +80,15 @@ fun DetailedPlaceHeaderSection(
 
         FavoritesStar(onFavoriteClick, isFavorite)
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DetailedPlaceHeaderSectionPreview() {
+    DetailedPlaceHeaderSection(
+        title = "Atrium Cafe",
+        subtitle = "Sage Hall",
+        onFavoriteClick = {},
+        isFavorite = false
+    )
 }

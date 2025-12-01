@@ -14,14 +14,15 @@ import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.models.UserPreferenceRepository
+import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 import com.cornellappdev.transit.models.ecosystem.EateryRepository
 import com.cornellappdev.transit.models.ecosystem.GymRepository
-import com.cornellappdev.transit.models.ecosystem.OperatingHours
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.LateRed
 import com.cornellappdev.transit.ui.theme.LiveGreen
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style.cardSubtitle
+import com.cornellappdev.transit.util.TimeUtils.toPascalCaseString
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -295,14 +296,13 @@ class HomeViewModel @Inject constructor(
      * @param operatingHours A list of pairs mapping the first value day string to second value list of hours open
      */
     fun rotateOperatingHours(
-        operatingHours: OperatingHours,
+        operatingHours: List<DayOperatingHours>,
         currentDate: LocalDate = LocalDate.now()
-    ): OperatingHours {
-        val today = currentDate.dayOfWeek.name.lowercase()
-            .replaceFirstChar { it.uppercase() }
+    ): List<DayOperatingHours> {
+        val today = currentDate.dayOfWeek.toPascalCaseString()
 
         val todayIndex = operatingHours.indexOfFirst {
-            it.first.equals(today, ignoreCase = true)
+            it.dayOfWeek.equals(today, ignoreCase = true)
         }
 
         // Defensive programming only if [operatingHours] is missing a day
@@ -314,9 +314,9 @@ class HomeViewModel @Inject constructor(
     /**
      * Find the next time a place is open if it is closed for the day
      */
-    private fun findOpenNextDay(operatingHours: OperatingHours): OpenStatus {
+    private fun findOpenNextDay(operatingHours: List<DayOperatingHours>): OpenStatus {
         // Check day after
-        val dayAfter = operatingHours[1].second
+        val dayAfter = operatingHours[1].hours
         if (!dayAfter.any { it.equals("Closed", ignoreCase = true) }) {
             val firstOpenTime = parseTimeRange(dayAfter[0])?.first
             if (firstOpenTime != null) {
@@ -328,9 +328,9 @@ class HomeViewModel @Inject constructor(
         }
         // Find next open day
         for (i in 2 until operatingHours.size) {
-            val currDay = operatingHours[i].second
+            val currDay = operatingHours[i].hours
             if (!currDay.any { it.equals("Closed", ignoreCase = true) }) {
-                val dayName = operatingHours[i].first
+                val dayName = operatingHours[i].dayOfWeek
                 return OpenStatus(
                     false,
                     "until $dayName"
@@ -347,12 +347,12 @@ class HomeViewModel @Inject constructor(
      * @param operatingHours A list of pairs mapping the first value day string to second value list of hours open
      */
     private fun getOpenStatus(
-        operatingHours: OperatingHours,
+        operatingHours: List<DayOperatingHours>,
         currentDateTime: LocalDateTime = LocalDateTime.now()
     ): OpenStatus {
 
         val currentTime = currentDateTime.toLocalTime()
-        val todaySchedule = operatingHours[0].second // First day should be today after rotation
+        val todaySchedule = operatingHours[0].hours // First day should be today after rotation
 
         // Check if closed today
         if (todaySchedule.any { it.equals("Closed", ignoreCase = true) }) {
@@ -436,7 +436,7 @@ class HomeViewModel @Inject constructor(
     /**
      * Rotate operating hours to current day, then determine if place is open, then format string
      */
-    fun isOpenAnnotatedStringFromOperatingHours(operatingHours: OperatingHours): AnnotatedString {
+    fun isOpenAnnotatedStringFromOperatingHours(operatingHours: List<DayOperatingHours>): AnnotatedString {
         return getOpenStatusAnnotatedString(
             getOpenStatus(
                 rotateOperatingHours(operatingHours)

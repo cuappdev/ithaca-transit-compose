@@ -22,18 +22,24 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.models.ecosystem.OperatingHours
+import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.Gray05
 import com.cornellappdev.transit.ui.theme.Style
+import com.cornellappdev.transit.util.sampleHours
 
 /**
  *
  */
 @Composable
-fun ExpandableOperatingHoursList(annotatedString: AnnotatedString, operatingHours: OperatingHours) {
+fun ExpandableOperatingHoursList(
+    annotatedString: AnnotatedString,
+    operatingHours: List<DayOperatingHours>
+) {
 
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -70,10 +76,21 @@ fun ExpandableOperatingHoursList(annotatedString: AnnotatedString, operatingHour
             }
         }
 
-        if(isExpanded) {
+        if (isExpanded) {
             OperatingHoursList(operatingHours)
         }
         HorizontalDivider(thickness = 1.dp, color = DividerGray)
     }
 
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ExpandableOperatingHoursListPreview() {
+    ExpandableOperatingHoursList(
+        annotatedString = buildAnnotatedString {
+            append("Open")
+        },
+        operatingHours = sampleHours
+    )
 }

@@ -22,8 +22,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
+import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
-import com.cornellappdev.transit.models.ecosystem.OperatingHours
+import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.robotoFamily
@@ -124,7 +125,7 @@ private fun BottomSheetFilteredContent(
 
             FilterState.EATERIES -> {
                 eateryList(
-                    staticPlaces = staticPlaces,
+                    eateriesApiResponse = staticPlaces.eateries,
                     onDetailsClick = onDetailsClick,
                     favorites = favorites,
                     onFavoriteStarClick = onFavoriteStarClick,
@@ -222,13 +223,13 @@ private fun LazyListScope.printerList(
  * LazyList scoped enumeration of eateries for bottom sheet
  */
 private fun LazyListScope.eateryList(
-    staticPlaces: StaticPlaces,
+    eateriesApiResponse: ApiResponse<List<Eatery>>,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     favorites: Set<Place>,
     onFavoriteStarClick: (Place) -> Unit,
-    operatingHoursToString: (OperatingHours) -> AnnotatedString
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString
 ) {
-    when (staticPlaces.eateries) {
+    when (eateriesApiResponse) {
         is ApiResponse.Error -> {
         }
 
@@ -239,7 +240,7 @@ private fun LazyListScope.eateryList(
         }
 
         is ApiResponse.Success -> {
-            items(staticPlaces.eateries.data) {
+            items(eateriesApiResponse.data) {
                 RoundedImagePlaceCard(
                     imageUrl = it.imageUrl,
                     title = it.name,

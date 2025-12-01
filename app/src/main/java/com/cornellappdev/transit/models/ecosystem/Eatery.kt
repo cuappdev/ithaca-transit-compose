@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.models.ecosystem
 
+import com.cornellappdev.transit.util.TimeUtils.toPascalCaseString
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.time.DayOfWeek
@@ -45,20 +46,20 @@ data class Eatery(
      * and the corresponding times that an eatery is open. The list is sorted
      * by day with the custom dayOrder (Sunday first).
      */
-    fun formatOperatingHours(): OperatingHours {
+    fun formatOperatingHours(): List<DayOperatingHours> {
         val dailyHours = operatingHours()
 
         // Convert map to list and sort by custom day order
         return dailyHours.entries
             .sortedBy { entry ->
                 val dayName =
-                    entry.key.name.take(1).uppercase() + entry.key.name.drop(1).lowercase()
+                    entry.key.toPascalCaseString()
                 dayOrder[dayName] ?: Int.MAX_VALUE
             }
             .map { entry ->
                 val dayName =
-                    entry.key.name.take(1).uppercase() + entry.key.name.drop(1).lowercase()
-                dayName to entry.value
+                    entry.key.toPascalCaseString()
+                DayOperatingHours(dayName, entry.value)
             }
     }
 
@@ -80,7 +81,7 @@ data class Eatery(
             }
         }
 
-        DayOfWeek.values().forEach { dayOfWeek ->
+        DayOfWeek.entries.forEach { dayOfWeek ->
             dailyHours.computeIfAbsent(dayOfWeek) { mutableListOf("Closed") }
         }
 

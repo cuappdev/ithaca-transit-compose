@@ -1,6 +1,5 @@
 package com.cornellappdev.transit.ui.components.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,22 +7,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.cornellappdev.transit.models.ecosystem.OperatingHours
+import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style.heading3
 import com.cornellappdev.transit.ui.theme.Style.heading3Semibold
+import com.cornellappdev.transit.util.sampleHours
 
 /**
  * Composable that displays operating hours for an eatery
@@ -33,7 +31,7 @@ import com.cornellappdev.transit.ui.theme.Style.heading3Semibold
  */
 @Composable
 fun OperatingHoursList(
-    operatingHours: OperatingHours,
+    operatingHours: List<DayOperatingHours>,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -67,10 +65,16 @@ private fun OperatingHoursRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Top
     ) {
-        Row (horizontalArrangement = Arrangement.Start,
-            modifier = Modifier.weight(0.6f)) {
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier.weight(0.6f)
+        ) {
             if (isHighlighted) {
-                VerticalDivider(color = PrimaryText, thickness = 2.dp, modifier = Modifier.height(16.dp))
+                VerticalDivider(
+                    color = PrimaryText,
+                    thickness = 2.dp,
+                    modifier = Modifier.height(16.dp)
+                )
                 Spacer(Modifier.width(12.dp))
             } else {
                 Spacer(Modifier.width(14.dp))
@@ -100,25 +104,9 @@ private fun OperatingHoursRow(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun OperatingHoursPreview() {
-    val sampleHours = listOf(
-        "Tuesday" to listOf("10:00 AM - 10:00 PM"),
-        "Wednesday" to listOf("10:00 AM - 5:00 PM"),
-        "Thursday" to listOf("Closed"),
-        "Friday" to listOf("10:00 AM - 5:00 PM"),
-        "Saturday" to listOf(
-            "8:00 AM - 9:30 AM",
-            "10:30 AM - 2:00 PM",
-            "5:00 PM - 8:00 PM"
-        ),
-        "Sunday" to listOf(
-            "10:00 AM - 2:00 PM",
-            "5:00 PM - 8:30 PM"
-        ),
-        "Monday" to listOf("10:00 AM - 10:00 PM")
-    )
 
     OperatingHoursList(operatingHours = sampleHours)
 }
