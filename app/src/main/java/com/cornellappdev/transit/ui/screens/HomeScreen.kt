@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -61,6 +62,7 @@ import com.cornellappdev.transit.ui.components.LoadingLocationItems
 import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.components.home.DetailedPlaceSheetContent
 import com.cornellappdev.transit.ui.components.home.EcosystemBottomSheetContent
+import com.cornellappdev.transit.ui.components.home.HomeScreenMarkers
 import com.cornellappdev.transit.ui.theme.DetailsHeaderGray
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.IconGray
@@ -71,6 +73,7 @@ import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
 import com.cornellappdev.transit.util.BOTTOM_SHEET_MAX_HEIGHT_PERCENT
 import com.cornellappdev.transit.util.ECOSYSTEM_FLAG
+import com.cornellappdev.transit.util.orZeroIfUnspecified
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -80,6 +83,7 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetState
+import io.morfly.compose.bottomsheet.material3.sheetVisibleHeightDp
 import kotlinx.coroutines.launch
 
 private enum class HomeSheetValue { Collapsed, PartiallyExpanded, Expanded }
@@ -224,8 +228,13 @@ fun HomeScreen(
             properties = MapProperties(
                 isMyLocationEnabled = permissionState.status.isGranted
             ),
-            uiSettings = MapUiSettings(zoomControlsEnabled = false)
-        )
+            uiSettings = MapUiSettings(zoomControlsEnabled = false, mapToolbarEnabled = false),
+            contentPadding = PaddingValues(
+                bottom = filterSheetState.sheetVisibleHeightDp.orZeroIfUnspecified()
+            )
+        ) {
+            HomeScreenMarkers(filterStateValue, favorites, staticPlaces)
+        }
 
         // Overlay transparent box to intercept clicks to disable search
         if (searchActive) {
