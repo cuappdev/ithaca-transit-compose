@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -59,6 +60,7 @@ import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.DirectionDetails
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
+import com.cornellappdev.transit.util.orZeroIfUnspecified
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -78,8 +80,10 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import io.morfly.compose.bottomsheet.material3.BottomSheetScaffold
+import io.morfly.compose.bottomsheet.material3.BottomSheetState
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetScaffoldState
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetState
+import io.morfly.compose.bottomsheet.material3.sheetVisibleHeightDp
 
 
 private enum class DetailsSheetValue { Collapsed, PartiallyExpanded, Expanded }
@@ -147,6 +151,7 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
             // Screen content
             DetailsMainScreen(
                 mapState,
+                sheetState,
                 cameraPositionState,
                 permissionState.status.isGranted,
                 onBackClick = { navController.popBackStack() },
@@ -158,10 +163,11 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
 /**
  * Background map and contents
  */
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DrawableMap(
     mapState: MapState,
+    sheetState: BottomSheetState<DetailsSheetValue>,
     cameraPositionState: CameraPositionState,
     hasLocationPermission: Boolean
 ) {
@@ -171,7 +177,10 @@ private fun DrawableMap(
         properties = MapProperties(
             isMyLocationEnabled = hasLocationPermission
         ),
-        uiSettings = MapUiSettings(zoomControlsEnabled = false)
+        uiSettings = MapUiSettings(zoomControlsEnabled = false, mapToolbarEnabled = false),
+        contentPadding = PaddingValues(
+            bottom = sheetState.sheetVisibleHeightDp.orZeroIfUnspecified()
+        )
     ) {
         mapState.route?.directions?.takeIf { mapState.isShowing }?.let { directions ->
             directions.forEach { direction ->
@@ -367,10 +376,11 @@ private fun DetailsBottomSheet(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun DetailsMainScreen(
     mapState: MapState,
+    sheetState: BottomSheetState<DetailsSheetValue>,
     cameraPositionState: CameraPositionState,
     hasLocationPermission: Boolean,
     onBackClick: () -> Unit,
@@ -400,6 +410,7 @@ private fun DetailsMainScreen(
 
         DrawableMap(
             mapState,
+            sheetState,
             cameraPositionState,
             hasLocationPermission
         )
