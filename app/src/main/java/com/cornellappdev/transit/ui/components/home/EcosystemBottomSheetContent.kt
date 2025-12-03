@@ -26,11 +26,13 @@ import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
 import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
+import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FilterState
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.util.ecosystem.toPlace
+import com.cornellappdev.transit.util.getGymLocationString
 
 
 /**
@@ -120,7 +122,12 @@ private fun BottomSheetFilteredContent(
             }
 
             FilterState.GYMS -> {
-                gymList(staticPlaces, navigateToPlace)
+                gymList(
+                    gymsApiResponse = staticPlaces.gyms,
+                    onDetailsClick = onDetailsClick,
+                    favorites = favorites,
+                    onFavoriteStarClick = onFavoriteStarClick,
+                )
             }
 
             FilterState.EATERIES -> {
@@ -167,23 +174,34 @@ private fun LazyListScope.favoriteList(
  * LazyList scoped enumeration of gyms for bottom sheet
  */
 private fun LazyListScope.gymList(
-    staticPlaces: StaticPlaces,
-    navigateToPlace: (Place) -> Unit
+    gymsApiResponse: ApiResponse<List<UpliftGym>>,
+    onDetailsClick: (DetailedEcosystemPlace) -> Unit,
+    favorites: Set<Place>,
+    onFavoriteStarClick: (Place) -> Unit,
 ) {
-    when (staticPlaces.gyms) {
+    when (gymsApiResponse) {
         is ApiResponse.Error -> {
         }
 
         is ApiResponse.Pending -> {
+            item {
+                CenteredSpinningIndicator()
+            }
         }
 
         is ApiResponse.Success -> {
-            items(staticPlaces.gyms.data) {
-                BottomSheetLocationCard(
+            items(gymsApiResponse.data) {
+                RoundedImagePlaceCard(
+                    imageUrl = it.imageUrl,
                     title = it.name,
-                    subtitle1 = it.id
+                    subtitle = getGymLocationString(it.name),
+                    isFavorite = it.toPlace() in favorites,
+                    onFavoriteClick = {
+                        onFavoriteStarClick(it.toPlace())
+                    },
+                    placeholderRes = R.drawable.olin_library,
                 ) {
-                    //TODO: Eatery
+                    onDetailsClick(it)
                 }
             }
         }

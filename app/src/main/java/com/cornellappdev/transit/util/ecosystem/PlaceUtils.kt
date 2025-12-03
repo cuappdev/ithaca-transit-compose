@@ -5,6 +5,8 @@ import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.Library
 import com.cornellappdev.transit.models.ecosystem.Printer
+import com.cornellappdev.transit.models.ecosystem.UpliftGym
+import com.cornellappdev.transit.util.getGymLocationString
 
 
 /**
@@ -37,5 +39,16 @@ fun Eatery.toPlace(): Place = Place(
     longitude = this.longitude ?: 0.0,
     name = this.name,
     detail = this.location,
+    type = PlaceType.APPLE_PLACE
+)
+
+/**
+ * Predefined mapping from gym to generic place.
+ */
+fun UpliftGym.toPlace(): Place = Place(
+    latitude = this.latitude,
+    longitude = this.longitude,
+    name = this.name,
+    detail = getGymLocationString(this.name),
     type = PlaceType.APPLE_PLACE
 )

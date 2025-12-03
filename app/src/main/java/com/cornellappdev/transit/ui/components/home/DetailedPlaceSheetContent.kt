@@ -110,8 +110,13 @@ fun DetailedPlaceSheetContent(
                 }
 
                 is UpliftGym -> {
-                    //TODO
-                    Text(ecosystemPlace.name)
+                    GymDetailsContent(
+                        gym = ecosystemPlace,
+                        isFavorite = ecosystemPlace.toPlace() in favorites,
+                        onFavoriteClick = {
+                            onFavoriteStarClick(ecosystemPlace.toPlace())
+                        }
+                    )
                 }
             }
         }
@@ -148,7 +153,9 @@ fun DetailedPlaceSheetContent(
                                 }
 
                                 is UpliftGym -> {
-                                    //TODO
+                                    navigateToPlace(
+                                        ecosystemPlace.toPlace()
+                                    )
                                 }
                             }
                         }

@@ -1,11 +1,13 @@
 package com.cornellappdev.transit.util
 
+import android.adservices.adid.AdId
+
 
 /**
  * Temporary mapping for about content
  */
 fun getAboutContent(key: String): String {
-    val aboutContent = buildMap<String, String> {
+    val aboutContent = buildMap {
         put("104West!", "Cornell's kosher and multicultural dining room is STAR-K and STAR-D certified.")
         put("Becker House Dining Room", "Dining room located in Carl Becker House on West Campus. Open only to residents from 6-7pm Wednesdays for House Dinners.")
         put("Cook House Dining Room", "Dining room located in Alice Cook House on West Campus. Open only to residents from 6-7pm Wednesdays for House Dinners.")
@@ -19,4 +21,20 @@ fun getAboutContent(key: String): String {
     }
 
     return aboutContent.getOrDefault(key, "")
+}
+
+/**
+ * Mapping gym names to location descriptions
+ */
+fun getGymLocationString(key: String): String {
+    val locationStrings = buildMap {
+        put("Helen Newman", "Helen Newman Hall")
+        put("Toni Morrison", "Toni Morrison Hall")
+        put("Noyes", "Noyes Community Recreation Center")
+        put("Teagle Up", "Teagle Hall")
+        put("Teagle Down", "Teagle Hall")
+
+    }
+
+    return locationStrings.getOrDefault(key, "")
 }
