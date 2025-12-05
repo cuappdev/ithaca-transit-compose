@@ -31,7 +31,6 @@ import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FilterState
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
-import com.cornellappdev.transit.util.ecosystem.toPlace
 import com.cornellappdev.transit.util.getGymLocationString
 
 
@@ -127,6 +126,7 @@ private fun BottomSheetFilteredContent(
                     onDetailsClick = onDetailsClick,
                     favorites = favorites,
                     onFavoriteStarClick = onFavoriteStarClick,
+                    operatingHoursToString = homeViewModel::isOpenAnnotatedStringFromOperatingHours
                 )
             }
 
@@ -178,6 +178,7 @@ private fun LazyListScope.gymList(
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     favorites: Set<Place>,
     onFavoriteStarClick: (Place) -> Unit,
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString
 ) {
     when (gymsApiResponse) {
         is ApiResponse.Error -> {
@@ -199,6 +200,9 @@ private fun LazyListScope.gymList(
                     onFavoriteClick = {
                         onFavoriteStarClick(it.toPlace())
                     },
+                    leftAnnotatedString = operatingHoursToString(
+                        it.operatingHours()
+                    ),
                     placeholderRes = R.drawable.olin_library,
                 ) {
                     onDetailsClick(it)
@@ -269,7 +273,7 @@ private fun LazyListScope.eateryList(
                     },
                     placeholderRes = R.drawable.olin_library,
                     leftAnnotatedString = operatingHoursToString(
-                        it.formatOperatingHours()
+                        it.operatingHours()
                     )
                 ) {
                     onDetailsClick(it)

@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.UserPreferenceRepository
-import com.cornellappdev.transit.util.ecosystem.toPlace
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

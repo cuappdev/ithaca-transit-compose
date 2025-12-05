@@ -38,7 +38,6 @@ import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.util.BOTTOM_SHEET_MAX_HEIGHT_PERCENT
-import com.cornellappdev.transit.util.ecosystem.toPlace
 
 @Composable
 fun DetailedPlaceSheetContent(

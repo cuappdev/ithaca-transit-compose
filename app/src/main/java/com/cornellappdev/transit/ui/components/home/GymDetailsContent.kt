@@ -54,7 +54,10 @@ fun GymDetailsContent(
             gym.name,
             getGymLocationString(gym.name),
             onFavoriteClick = onFavoriteClick,
-            isFavorite = isFavorite
+            isFavorite = isFavorite,
+            leftAnnotatedString = homeViewModel.isOpenAnnotatedStringFromOperatingHours(
+                gym.operatingHours()
+            )
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -109,6 +112,11 @@ fun GymDetailsContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         HorizontalDivider(thickness = 1.dp, color = DividerGray)
+
+        ExpandableOperatingHoursList(
+            homeViewModel.isOpenAnnotatedStringFromOperatingHours(gym.operatingHours()),
+            homeViewModel.rotateOperatingHours(gym.operatingHours())
+        )
 
     }
 }
