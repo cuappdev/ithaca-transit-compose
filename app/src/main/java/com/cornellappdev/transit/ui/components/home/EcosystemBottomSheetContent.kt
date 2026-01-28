@@ -81,6 +81,9 @@ fun EcosystemBottomSheetContent(
             }
         }
 
+        //TODO: Add onClick functionality
+        AddFavoriteButton(onAddFavoriteClick = {})
+
         BottomSheetFilteredContent(
             currentFilter = activeFilter,
             staticPlaces = staticPlaces,
