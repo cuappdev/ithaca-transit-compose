@@ -341,7 +341,11 @@ fun HomeScreen(
                             onDetailsClick = {
                                 ecosystemSheetState = EcosystemSheetState.Details(it)
                             },
-                            onFavoriteStarClick = favoritesViewModel::toggleFavorite
+                            onFavoriteStarClick = favoritesViewModel::toggleFavorite,
+                            onAddFavoriteClick = { scope.launch {
+                                addSheetState.bottomSheetState.expand()
+                            } }
+
                         )
                     }
                 }

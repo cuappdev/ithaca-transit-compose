@@ -21,7 +21,7 @@ fun AddFavoriteButton(
         colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 20.dp)
+            .padding(horizontal = 12.dp, vertical = 20.dp)
     ) {
         Text("Add Favorite")
     }

@@ -27,6 +27,7 @@ import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FilterState
 import com.cornellappdev.transit.util.ecosystem.toPlace
+import kotlinx.coroutines.launch
 
 
 /**
@@ -47,7 +48,8 @@ fun EcosystemBottomSheetContent(
     modifier: Modifier = Modifier,
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
-    onFavoriteStarClick: (Place) -> Unit
+    onFavoriteStarClick: (Place) -> Unit,
+    onAddFavoriteClick: () -> Unit
 ) {
     Column(modifier = modifier) {
         Row(
@@ -82,7 +84,7 @@ fun EcosystemBottomSheetContent(
         }
 
         //TODO: Add onClick functionality
-        AddFavoriteButton(onAddFavoriteClick = {})
+        AddFavoriteButton(onAddFavoriteClick = onAddFavoriteClick)
 
         BottomSheetFilteredContent(
             currentFilter = activeFilter,
@@ -296,6 +298,7 @@ private fun PreviewEcosystemBottomSheet() {
         modifier = Modifier,
         navigateToPlace = {},
         onDetailsClick = {},
-        onFavoriteStarClick = {}
+        onFavoriteStarClick = {},
+        onAddFavoriteClick = {}
     )
 }
