@@ -83,7 +83,7 @@ fun EcosystemBottomSheetContent(
             }
         }
 
-        //TODO: Add onClick functionality
+        //TODO: Create a separate screen for the search to add favorites
         AddFavoriteButton(onAddFavoriteClick = onAddFavoriteClick)
 
         BottomSheetFilteredContent(
