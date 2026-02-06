@@ -40,7 +40,7 @@ class DateTimeAdapter {
         try {
             val instant = Instant.ofEpochSecond(dateTime)
             return LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
-        } catch (e: ParseException) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
         return LocalDateTime.MIN

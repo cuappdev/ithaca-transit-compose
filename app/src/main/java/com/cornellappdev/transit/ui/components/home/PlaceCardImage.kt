@@ -27,7 +27,6 @@ fun PlaceCardImage(imageUrl: String?, @DrawableRes placeholderRes: Int, shouldCl
             else Modifier.clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)))
         .fillMaxWidth()
         .height(112.dp)
-        .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
         .background(MetadataGray)
 
     if (imageUrl.isNullOrBlank()) {

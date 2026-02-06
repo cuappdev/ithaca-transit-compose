@@ -1,8 +1,5 @@
 package com.cornellappdev.transit.models.ecosystem
 
-import com.cornellappdev.transit.models.Place
-import com.cornellappdev.transit.models.PlaceType
-import com.cornellappdev.transit.util.TimeUtils.dayOrder
 import com.cornellappdev.transit.util.TimeUtils.toPascalCaseString
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -31,8 +28,8 @@ data class Eatery(
 ) : DetailedEcosystemPlace {
 
     /**
-     * @Return a list of pairs representing each day of the week
-     * and the corresponding times that an eatery is open. The list is sorted
+     * @Return a list of associated dayOfWeek and hours pairs in [DayOperatingHours] representing
+     * each day of the week and the corresponding times that an eatery is open. The list is sorted
      * by day with the custom dayOrder (Sunday first).
      */
     override fun operatingHours(): List<DayOperatingHours> {

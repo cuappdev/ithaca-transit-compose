@@ -21,7 +21,6 @@ import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.LateRed
 import com.cornellappdev.transit.ui.theme.LiveGreen
 import com.cornellappdev.transit.ui.theme.SecondaryText
-import com.cornellappdev.transit.ui.theme.Style.cardSubtitle
 import com.cornellappdev.transit.util.TimeUtils.toPascalCaseString
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel

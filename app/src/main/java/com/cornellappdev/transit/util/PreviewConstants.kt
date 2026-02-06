@@ -2,7 +2,7 @@ package com.cornellappdev.transit.util
 
 import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 
-val sampleHours = listOf(
+internal val sampleHours = listOf(
     DayOperatingHours("Tuesday", listOf("10:00 AM - 10:00 PM")),
     DayOperatingHours("Wednesday", listOf("10:00 AM - 5:00 PM")),
     DayOperatingHours("Thursday", listOf("Closed")),

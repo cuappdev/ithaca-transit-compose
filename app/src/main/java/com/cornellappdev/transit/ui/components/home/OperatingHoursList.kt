@@ -26,7 +26,7 @@ import com.cornellappdev.transit.util.sampleHours
 /**
  * Composable that displays operating hours for an eatery
  *
- * @param operatingHours List of pairs where first is the day name and second is list of time ranges
+ * @param operatingHours List of associated dayOfWeek and hours pairs in the [DayOperatingHours] class
  * @param modifier Modifier for the component
  */
 @Composable
