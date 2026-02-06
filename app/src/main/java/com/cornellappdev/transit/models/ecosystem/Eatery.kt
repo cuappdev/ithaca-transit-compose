@@ -42,8 +42,8 @@ data class Eatery(
     )
 
     /**
-     * @Return a list of pairs representing each day of the week
-     * and the corresponding times that an eatery is open. The list is sorted
+     * @Return a list of associated dayOfWeek and hours pairs in [DayOperatingHours] representing
+     * each day of the week and the corresponding times that an eatery is open. The list is sorted
      * by day with the custom dayOrder (Sunday first).
      */
     fun formatOperatingHours(): List<DayOperatingHours> {
