@@ -20,7 +20,9 @@ interface EcosystemPlace {
 sealed interface DetailedEcosystemPlace: EcosystemPlace {
 
     /**
-     * Return the operating hours starting from Sunday
+     * @Return a list of associated dayOfWeek and hours pairs in [DayOperatingHours] representing
+     * each day of the week and the corresponding times that an eatery is open. The list is sorted
+     * by day with the custom dayOrder (Sunday first).
      */
     fun operatingHours(): List<DayOperatingHours>
 }
