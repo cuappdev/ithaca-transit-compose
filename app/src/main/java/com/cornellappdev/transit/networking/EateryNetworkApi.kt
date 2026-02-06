@@ -4,7 +4,7 @@ import com.cornellappdev.transit.models.ecosystem.Eatery
 import retrofit2.http.GET
 
 interface EateryNetworkApi {
-    @GET("/eatery/simple")
+    @GET("/eatery/")
     suspend fun getEateries(): List<Eatery>
 
 }
