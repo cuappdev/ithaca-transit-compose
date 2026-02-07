@@ -3,13 +3,16 @@ package com.cornellappdev.transit.ui.components.home
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -142,6 +145,20 @@ private fun LazyListScope.favoriteList(
     favorites: Set<Place>,
     navigateToPlace: (Place) -> Unit
 ) {
+    item{
+        Spacer(modifier = Modifier.height(20.dp))
+    }
+
+    item {
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp))
+    }
+
+    item{
+        Spacer(modifier = Modifier.height(20.dp))
+    }
+    item{
+        Text("This will be the filter button!") //TODO: Replace with filter button!
+    }
     items(favorites.toList()) {
         BottomSheetLocationCard(
             title = it.name,
