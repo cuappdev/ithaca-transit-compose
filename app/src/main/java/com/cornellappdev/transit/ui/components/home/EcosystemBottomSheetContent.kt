@@ -145,19 +145,11 @@ private fun LazyListScope.favoriteList(
     favorites: Set<Place>,
     navigateToPlace: (Place) -> Unit
 ) {
-    item{
-        Spacer(modifier = Modifier.height(20.dp))
-    }
-
     item {
-        HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp))
-    }
-
-    item{
-        Spacer(modifier = Modifier.height(20.dp))
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp))
     }
     item{
-        Text("This will be the filter button!") //TODO: Replace with filter button!
+        FilterButton(onFilterClick = {})
     }
     items(favorites.toList()) {
         BottomSheetLocationCard(
