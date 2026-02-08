@@ -22,6 +22,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.ui.theme.MetadataGray
+import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.Style
 
 /**
@@ -62,7 +64,7 @@ fun BottomSheetFilterItem(
         }
         Text(
             label,
-            color = Color.Black,
+            color = if(isActive) PrimaryText else MetadataGray,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
