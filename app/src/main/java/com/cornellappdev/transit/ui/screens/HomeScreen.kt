@@ -191,6 +191,9 @@ fun HomeScreen(
     // Main search bar active/inactive
     var searchActive by remember { mutableStateOf(false) }
 
+    // Favorite filter bottom sheet state
+    val showFilterSheet by homeViewModel.showFilterSheet.collectAsState()
+
     // Intercept clicks outside of search bar and disable search
     @Composable
     fun Modifier.onTapDisableSearch(): Modifier {
@@ -341,7 +344,10 @@ fun HomeScreen(
                             onDetailsClick = {
                                 ecosystemSheetState = EcosystemSheetState.Details(it)
                             },
-                            onFavoriteStarClick = favoritesViewModel::toggleFavorite
+                            onFavoriteStarClick = favoritesViewModel::toggleFavorite,
+                            showFilterSheet = showFilterSheet,
+                            onFilterSheetDismiss = { homeViewModel.toggleFilterSheet(false) },
+                            onFilterSheetShow = { homeViewModel.toggleFilterSheet(true) }
                         )
                     }
                 }

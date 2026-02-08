@@ -75,6 +75,13 @@ class HomeViewModel @Inject constructor(
 
     val filterState: MutableStateFlow<FilterState> = MutableStateFlow(FilterState.FAVORITES)
 
+    private val _showFilterSheet = MutableStateFlow(false)
+    val showFilterSheet: StateFlow<Boolean> = _showFilterSheet.asStateFlow()
+
+    fun toggleFilterSheet(show: Boolean) {
+        _showFilterSheet.value = show
+    }
+
     val staticPlacesFlow =
         combine(
             routeRepository.printerFlow,

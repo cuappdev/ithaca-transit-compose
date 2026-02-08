@@ -57,9 +57,11 @@ fun EcosystemBottomSheetContent(
     modifier: Modifier = Modifier,
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
-    onFavoriteStarClick: (Place) -> Unit
+    onFavoriteStarClick: (Place) -> Unit,
+    showFilterSheet: Boolean,
+    onFilterSheetDismiss: () -> Unit,
+    onFilterSheetShow: () -> Unit,
 ) {
-    var showFilterSheet by remember { mutableStateOf(false)}
     Column(modifier = modifier) {
         Row(
             modifier = Modifier
@@ -99,18 +101,18 @@ fun EcosystemBottomSheetContent(
             navigateToPlace = navigateToPlace,
             onDetailsClick = onDetailsClick,
             onFavoriteStarClick = onFavoriteStarClick,
-            onFilterButtonClick = { showFilterSheet = true}
+            onFilterButtonClick = onFilterSheetShow
         )
     }
 
     if(showFilterSheet) {
         ModalBottomSheet(
-            onDismissRequest = { showFilterSheet = false},
+            onDismissRequest = onFilterSheetDismiss,
             dragHandle = null
         ) {
             FilterBottomSheet(
-                onCancelClicked = { showFilterSheet = false },
-                onApplyClicked = { showFilterSheet = false }
+                onCancelClicked  = onFilterSheetDismiss,
+                onApplyClicked = onFilterSheetDismiss
             )
         }
     }
@@ -325,6 +327,9 @@ private fun PreviewEcosystemBottomSheet() {
         modifier = Modifier,
         navigateToPlace = {},
         onDetailsClick = {},
-        onFavoriteStarClick = {}
+        onFavoriteStarClick = {},
+        showFilterSheet = true,
+        onFilterSheetDismiss = {},
+        onFilterSheetShow = {}
     )
 }
