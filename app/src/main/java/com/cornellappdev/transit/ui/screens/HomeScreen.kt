@@ -342,6 +342,7 @@ fun HomeScreen(
                                 ecosystemSheetState = EcosystemSheetState.Details(it)
                             },
                             onFavoriteStarClick = favoritesViewModel::toggleFavorite,
+                            //TODO: Refactor direct call and put into viewmodel (?)
                             onAddFavoriteClick = { scope.launch {
                                 addSheetState.bottomSheetState.expand()
                             } }

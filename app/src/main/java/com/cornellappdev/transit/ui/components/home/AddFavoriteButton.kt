@@ -1,6 +1,7 @@
 package com.cornellappdev.transit.ui.components.home
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -8,8 +9,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.cornellappdev.transit.ui.theme.SecondaryText
+import com.cornellappdev.transit.ui.theme.robotoFamily
 
 @Composable
 fun AddFavoriteButton(
@@ -22,8 +27,16 @@ fun AddFavoriteButton(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 20.dp)
+            .height(40.dp)
     ) {
-        Text("Add Favorite")
+        //TODO: Add '+' Icon
+        Text(
+            text ="Add Favorites",
+            fontFamily = robotoFamily,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 16.sp,
+            color = SecondaryText
+        )
     }
 }
 

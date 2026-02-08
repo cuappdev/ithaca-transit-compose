@@ -47,7 +47,8 @@ fun EcosystemBottomSheetContent(
     modifier: Modifier = Modifier,
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
-    onFavoriteStarClick: (Place) -> Unit
+    onFavoriteStarClick: (Place) -> Unit,
+    onAddFavoriteClick: () -> Unit,
 ) {
     Column(modifier = modifier) {
         Row(
@@ -81,14 +82,14 @@ fun EcosystemBottomSheetContent(
             }
         }
 
-
         BottomSheetFilteredContent(
             currentFilter = activeFilter,
             staticPlaces = staticPlaces,
             favorites = favorites,
             navigateToPlace = navigateToPlace,
             onDetailsClick = onDetailsClick,
-            onFavoriteStarClick = onFavoriteStarClick
+            onFavoriteStarClick = onFavoriteStarClick,
+            onAddFavoriteClick = onAddFavoriteClick
         )
     }
 }
@@ -100,7 +101,8 @@ private fun BottomSheetFilteredContent(
     favorites: Set<Place>,
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
-    onFavoriteStarClick: (Place) -> Unit
+    onFavoriteStarClick: (Place) -> Unit,
+    onAddFavoriteClick: () -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(bottom = 90.dp),
@@ -108,7 +110,7 @@ private fun BottomSheetFilteredContent(
     ) {
         when (currentFilter) {
             FilterState.FAVORITES -> {
-                favoriteList(favorites, navigateToPlace)
+                favoriteList(favorites, navigateToPlace, onAddFavoriteClick)
             }
 
             FilterState.PRINTERS -> {
@@ -141,8 +143,12 @@ private fun BottomSheetFilteredContent(
  */
 private fun LazyListScope.favoriteList(
     favorites: Set<Place>,
-    navigateToPlace: (Place) -> Unit
+    navigateToPlace: (Place) -> Unit,
+    onAddFavoriteClick : () -> Unit
 ) {
+    item{
+        AddFavoriteButton(onAddFavoriteClick = onAddFavoriteClick)
+    }
     items(favorites.toList()) {
         BottomSheetLocationCard(
             title = it.name,
@@ -294,6 +300,7 @@ private fun PreviewEcosystemBottomSheet() {
         modifier = Modifier,
         navigateToPlace = {},
         onDetailsClick = {},
-        onFavoriteStarClick = {}
+        onFavoriteStarClick = {},
+        onAddFavoriteClick = {}
     )
 }
