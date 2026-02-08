@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
-import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
@@ -144,9 +143,9 @@ private fun BottomSheetFilteredContent(
 private fun LazyListScope.favoriteList(
     favorites: Set<Place>,
     navigateToPlace: (Place) -> Unit,
-    onAddFavoriteClick : () -> Unit
+    onAddFavoriteClick: () -> Unit
 ) {
-    item{
+    item {
         AddFavoriteButton(onAddFavoriteClick = onAddFavoriteClick)
     }
     items(favorites.toList()) {
