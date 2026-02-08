@@ -400,11 +400,18 @@ fun HomeScreen(
                     homeViewModel.toggleAddFavoritesSheet(false)
                     homeViewModel.onAddQueryChange("")
                 },
+                // If the intended design is for the favorite sheet to be dismissed when an item is added, uncomment the line below
                 onItemClick = {
                     if (!favoritesViewModel.isFavorite(it)) {
-                        homeViewModel.toggleAddFavoritesSheet(false)
+                        //homeViewModel.toggleAddFavoritesSheet(false)
                         homeViewModel.clearAddQuery()
                         favoritesViewModel.addFavorite(it)
+                        Toast.makeText(
+                            context,
+                            "${it.name} was successfully added to your favorites list!",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
                     } else {
                         Toast.makeText(
                             context,
