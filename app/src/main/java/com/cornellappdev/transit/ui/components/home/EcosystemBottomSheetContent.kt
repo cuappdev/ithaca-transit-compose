@@ -27,7 +27,6 @@ import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FilterState
 import com.cornellappdev.transit.util.ecosystem.toPlace
-import kotlinx.coroutines.launch
 
 
 /**
@@ -48,8 +47,7 @@ fun EcosystemBottomSheetContent(
     modifier: Modifier = Modifier,
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
-    onFavoriteStarClick: (Place) -> Unit,
-    onAddFavoriteClick: () -> Unit
+    onFavoriteStarClick: (Place) -> Unit
 ) {
     Column(modifier = modifier) {
         Row(
@@ -83,8 +81,6 @@ fun EcosystemBottomSheetContent(
             }
         }
 
-        //TODO: Create a separate screen for the search to add favorites
-        AddFavoriteButton(onAddFavoriteClick = onAddFavoriteClick)
 
         BottomSheetFilteredContent(
             currentFilter = activeFilter,
@@ -298,7 +294,6 @@ private fun PreviewEcosystemBottomSheet() {
         modifier = Modifier,
         navigateToPlace = {},
         onDetailsClick = {},
-        onFavoriteStarClick = {},
-        onAddFavoriteClick = {}
+        onFavoriteStarClick = {}
     )
 }
