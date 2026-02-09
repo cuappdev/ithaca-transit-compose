@@ -33,6 +33,7 @@ import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FilterState
 import com.cornellappdev.transit.util.ecosystem.toPlace
@@ -171,7 +172,9 @@ private fun LazyListScope.favoriteList(
     onFilterClick: () -> Unit
 ) {
     item {
-        HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp))
+        HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp)
+        )
     }
     item{
         FilterButton(onFilterClick = onFilterClick)

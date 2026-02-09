@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
 @Composable
@@ -29,8 +30,7 @@ fun FilterButton(
         onClick = onFilterClick,
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent,
-            //TODO: Add correct color
-            contentColor = Color.DarkGray
+            contentColor = SecondaryText
         )
     ){
         Icon(
@@ -39,7 +39,12 @@ fun FilterButton(
             modifier = modifier.size(20.dp)
         )
         //TODO: Add correct weight
-        Text(text = "Filter", fontSize = 16.sp, fontFamily = robotoFamily, fontStyle = FontStyle.Normal)
+        Text(
+            text = "Filter",
+            fontSize = 16.sp,
+            fontFamily = robotoFamily,
+            fontStyle = FontStyle.Normal
+        )
     }
 }
 
