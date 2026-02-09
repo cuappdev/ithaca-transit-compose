@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.ui.components.home
 
+import android.R.attr.fontFamily
 import android.R.attr.fontWeight
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -19,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -26,11 +31,16 @@ import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
+import com.cornellappdev.transit.ui.viewmodels.FilterSheetState
+import com.cornellappdev.transit.ui.viewmodels.FilterState
 
 @Composable
 fun FilterBottomSheet(
     onCancelClicked: () -> Unit,
-    onApplyClicked: () -> Unit
+    onApplyClicked: () -> Unit,
+    filters: List<FilterSheetState>,
+    selectedFilters: Set<FilterSheetState>,
+    onFilterToggle: (FilterSheetState) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -53,11 +63,21 @@ fun FilterBottomSheet(
             )
         }
 
-        // Add your filter options here
-        Text(
-            text = "Filter content goes here",
-            modifier = Modifier.padding(horizontal = 24.dp)
-        )
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = Modifier.padding(horizontal = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(filters) {
+                FilterSheetItem(
+                    imageResId = it.iconId,
+                    label = it.label,
+                    isActive = it in selectedFilters,
+                    itemOnClick = { onFilterToggle(it) }
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -94,6 +114,7 @@ private fun FooterButton(
         modifier = modifier.height(40.dp)) {
         Text(
             text = text,
+            style = TextStyle(letterSpacing = 0.sp),
             fontFamily = robotoFamily,
             fontStyle = FontStyle.Normal,
             fontSize = 16.sp,

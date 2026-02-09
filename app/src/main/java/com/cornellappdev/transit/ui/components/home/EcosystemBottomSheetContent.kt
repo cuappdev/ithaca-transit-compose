@@ -35,6 +35,7 @@ import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.robotoFamily
+import com.cornellappdev.transit.ui.viewmodels.FilterSheetState
 import com.cornellappdev.transit.ui.viewmodels.FilterState
 import com.cornellappdev.transit.util.ecosystem.toPlace
 
@@ -106,6 +107,15 @@ fun EcosystemBottomSheetContent(
         )
     }
 
+    //TODO: Refactor to hoist state up and remove selectedFilters & filterlist
+    var selectedFilters by remember { mutableStateOf(setOf<FilterSheetState>()) }
+    val favoriteFilters = listOf<FilterSheetState>(
+        FilterSheetState.GYMS,
+        FilterSheetState.EATERIES,
+        FilterSheetState.LIBRARIES,
+        FilterSheetState.PRINTERS,
+        FilterSheetState.OTHER
+    )
     if(showFilterSheet) {
         ModalBottomSheet(
             onDismissRequest = onFilterSheetDismiss,
@@ -113,7 +123,17 @@ fun EcosystemBottomSheetContent(
         ) {
             FilterBottomSheet(
                 onCancelClicked  = onFilterSheetDismiss,
-                onApplyClicked = onFilterSheetDismiss
+                onApplyClicked = onFilterSheetDismiss,
+                filters = favoriteFilters,
+                selectedFilters = selectedFilters,
+                //TODO: Refactor to move logic outside of composable
+                onFilterToggle = { filter ->
+                    selectedFilters = if (filter in selectedFilters) {
+                        selectedFilters - filter
+                    } else {
+                        selectedFilters + filter
+                    }
+                }
             )
         }
     }
