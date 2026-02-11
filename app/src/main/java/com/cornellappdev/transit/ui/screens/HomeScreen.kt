@@ -84,6 +84,8 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
+import io.morfly.compose.bottomsheet.material3.BottomSheetScaffold
+import io.morfly.compose.bottomsheet.material3.rememberBottomSheetScaffoldState
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetState
 import io.morfly.compose.bottomsheet.material3.sheetVisibleHeightDp
 import kotlinx.coroutines.launch
@@ -164,7 +166,7 @@ fun HomeScreen(
 
     // Filter scaffold state
     val filterScaffoldState =
-        io.morfly.compose.bottomsheet.material3.rememberBottomSheetScaffoldState(filterSheetState)
+        rememberBottomSheetScaffoldState(filterSheetState)
 
     // Main search bar flow
     val searchBarValue = homeViewModel.searchBarUiState.collectAsState().value
@@ -286,7 +288,7 @@ fun HomeScreen(
             )
         }
 
-        io.morfly.compose.bottomsheet.material3.BottomSheetScaffold(
+        BottomSheetScaffold(
             scaffoldState = filterScaffoldState,
             sheetSwipeEnabled = true,
             sheetContainerColor = DetailsHeaderGray,
