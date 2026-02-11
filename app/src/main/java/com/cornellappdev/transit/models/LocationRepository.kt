@@ -24,7 +24,7 @@ import javax.inject.Singleton
 @Singleton
 class LocationRepository @Inject constructor(private val routesNetworkApi: RoutesNetworkApi) {
 
-    //Source: Uplift
+    // Source: Uplift Android
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val _currentLocation: MutableStateFlow<Location?> = MutableStateFlow(null)

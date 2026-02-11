@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.R
@@ -57,8 +58,13 @@ fun GymDetailsContent(
             isFavorite = isFavorite,
             leftAnnotatedString = homeViewModel.isOpenAnnotatedStringFromOperatingHours(
                 gym.operatingHours()
-            )
+            ),
+            rightAnnotatedString = buildAnnotatedString {
+                append(gym.upliftCapacity?.percent.toString())
+            }
         )
+
+        GymCapacityIndicator(capacity = gym.upliftCapacity, label = null, closed = false)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -81,7 +87,7 @@ fun GymDetailsContent(
         )
 
         Text(
-            text = stringResource(R.string.view_menu),
+            text = stringResource(R.string.view_gym),
             style = Style.heading2,
             color = TransitBlue
         )

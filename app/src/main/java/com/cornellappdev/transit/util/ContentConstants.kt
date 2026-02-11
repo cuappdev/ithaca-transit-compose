@@ -18,6 +18,11 @@ fun getAboutContent(key: String): String {
         put("Okenshields", "Dining room located in Willard Straight Hall on Central Campus.")
         put("Risley Dining Room", "Risley is our gluten-free, tree nut free and peanut free dining room under the AllerCheck™\uFE0F approved by MenuTrinfo®\uFE0F program, in Risley Residential College on North Campus.")
         put("Rose House Dining Room", "Dining room located in Flora Rose House on West Campus. Open only to residents from 6-7pm Wednesdays for House Dinners.")
+        put("Helen Newman", "Helen Newman Hall features a Pool, two-full sized Courts for Basketball/Volleyball/Badminton, a classroom and a dance studio where many Group Fitness classes, Physical Education classes, and club practices are held, a 16-lane Bowling Center and a Fitness Center. Helen Newman is also the home to the majority of the Recreational Services Administration Offices.")
+        put("Toni Morrison", "The Toni Morrison Fitness Center is located in the basement of Toni Morrison Hall.")
+        put("Noyes", "The Noyes Fitness Center is located on the second floor of the Noyes Community Recreation Center, adjacent to Jansen's Market.")
+        put("Teagle Down", "The Teagle Downstairs Fitness Center is located on the ground floor of Teagle Hall. The entrance of this Fitness Center is adjacent from the entrance to Teagle Hall from the parking lot facing the Lynah Ice Rink.")
+        put("Teagle Up", "The Teagle Upstairs Fitness Center is located on the second floor of Teagle Hall. The staircase to the entrance of this Fitness Center is directly across from the entrance to Teagle Hall from the parking lot facing the Lynah Ice Rink.")
     }
 
     return aboutContent.getOrDefault(key, "")

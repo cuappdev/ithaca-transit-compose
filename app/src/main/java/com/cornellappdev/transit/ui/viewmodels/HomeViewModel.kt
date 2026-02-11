@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -37,7 +36,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -441,6 +439,39 @@ class HomeViewModel @Inject constructor(
                 rotateOperatingHours(operatingHours)
             )
         )
+    }
+
+    /**
+     * Format percent string based on a gym's current capacity
+     */
+    fun capacityPercentAnnotatedString(percent: Double): AnnotatedString {
+        return  buildAnnotatedString {
+            if (percent <= 0.65) {
+                withStyle(
+                    style = SpanStyle(
+                        color = LiveGreen,
+                    )
+                ) {
+                    append("Open")
+                }
+            } else {
+                withStyle(
+                    style = SpanStyle(
+                        color = LateRed
+                    )
+                ) {
+                    append("Closed")
+                }
+            }
+            withStyle(
+                style = SpanStyle(
+                    color = SecondaryText
+                )
+            ) {
+                append(" - ")
+                //append(openStatus.nextChangeTime)
+            }
+        }
     }
 
 }
