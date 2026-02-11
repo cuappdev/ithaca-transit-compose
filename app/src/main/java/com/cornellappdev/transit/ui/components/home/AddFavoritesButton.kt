@@ -1,8 +1,11 @@
 package com.cornellappdev.transit.ui.components.home
 
+import android.R.attr.text
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -40,8 +43,9 @@ fun AddFavoritesButton(
             painter = painterResource(R.drawable.ic_addition),
             contentDescription = "Add Favorite",
             tint = SecondaryText,
-            modifier = Modifier.padding(end = 8.dp)
         )
+
+        Spacer(modifier = Modifier.width(8.dp))
 
         Text(
             text = "Add Favorites",
