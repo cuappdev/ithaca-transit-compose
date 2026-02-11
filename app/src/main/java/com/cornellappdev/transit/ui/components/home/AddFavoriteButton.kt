@@ -55,7 +55,7 @@ fun AddFavoriteButton(
 
 @Preview
 @Composable
-fun AddFavoriteButtonPreview() {
+private fun AddFavoriteButtonPreview() {
     AddFavoriteButton(
         onAddFavoriteClick = {},
     )
