@@ -1,8 +1,5 @@
 package com.cornellappdev.transit.ui.components.home
 
-import android.R.attr.fontWeight
-import android.R.attr.letterSpacing
-import android.R.attr.maxLines
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
@@ -33,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.theme.MetadataGray
-import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
@@ -44,7 +40,7 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
  * @param isActive Whether the filter is selected
  */
 @Composable
-fun FilterSheetItem(
+fun FavoritesFilterSheetItem(
     @DrawableRes imageResId: Int,
     label: String,
     isActive: Boolean,
@@ -100,8 +96,8 @@ fun FilterSheetItem(
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewFilterSheetItemActive() {
-    FilterSheetItem(
+private fun PreviewFavoritesFilterSheetItemActive() {
+    FavoritesFilterSheetItem(
         imageResId = R.drawable.eatery_icon,
         label = "Eateries",
         isActive = true
@@ -111,8 +107,8 @@ private fun PreviewFilterSheetItemActive() {
 
 @Preview(showBackground = true)
 @Composable
-private fun InactiveFilterSheetItemInactive() {
-    FilterSheetItem(
+private fun InactiveFavoritesFilterSheetItemInactive() {
+    FavoritesFilterSheetItem(
         imageResId = R.drawable.eatery_icon,
         label = "Eateries",
         isActive = false

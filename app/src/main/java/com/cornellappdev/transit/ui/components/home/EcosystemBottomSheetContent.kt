@@ -117,7 +117,7 @@ fun EcosystemBottomSheetContent(
             onDismissRequest = onFilterSheetDismiss,
             dragHandle = null
         ) {
-            FilterBottomSheet(
+            FavoritesFilterBottomSheet(
                 onCancelClicked  = onFilterSheetDismiss,
                 onApplyClicked = onFilterSheetDismiss,
                 filters = favoriteFilters,

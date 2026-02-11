@@ -31,7 +31,7 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
 
 @Composable
-fun FilterBottomSheet(
+fun FavoritesFilterBottomSheet(
     onCancelClicked: () -> Unit,
     onApplyClicked: () -> Unit,
     filters: List<FavoritesFilterSheetState>,
@@ -66,7 +66,7 @@ fun FilterBottomSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(filters) {
-                FilterSheetItem(
+                FavoritesFilterSheetItem(
                     imageResId = it.iconId,
                     label = it.label,
                     isActive = it in selectedFilters,
