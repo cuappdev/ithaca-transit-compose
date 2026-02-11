@@ -3,10 +3,8 @@ package com.cornellappdev.transit.ui.components.home
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -29,13 +27,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
-import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
-import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.robotoFamily
-import com.cornellappdev.transit.ui.viewmodels.FilterSheetState
+import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
 import com.cornellappdev.transit.ui.viewmodels.FilterState
 import com.cornellappdev.transit.util.ecosystem.toPlace
 
@@ -108,13 +104,13 @@ fun EcosystemBottomSheetContent(
     }
 
     //TODO: Refactor to hoist state up and remove selectedFilters & filterlist
-    var selectedFilters by remember { mutableStateOf(setOf<FilterSheetState>()) }
-    val favoriteFilters = listOf<FilterSheetState>(
-        FilterSheetState.GYMS,
-        FilterSheetState.EATERIES,
-        FilterSheetState.LIBRARIES,
-        FilterSheetState.PRINTERS,
-        FilterSheetState.OTHER
+    var selectedFilters by remember { mutableStateOf(setOf<FavoritesFilterSheetState>()) }
+    val favoriteFilters = listOf<FavoritesFilterSheetState>(
+        FavoritesFilterSheetState.GYMS,
+        FavoritesFilterSheetState.EATERIES,
+        FavoritesFilterSheetState.LIBRARIES,
+        FavoritesFilterSheetState.PRINTERS,
+        FavoritesFilterSheetState.OTHER
     )
     if(showFilterSheet) {
         ModalBottomSheet(

@@ -1,7 +1,5 @@
 package com.cornellappdev.transit.ui.components.home
 
-import android.R.attr.fontFamily
-import android.R.attr.fontWeight
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -31,16 +28,15 @@ import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
-import com.cornellappdev.transit.ui.viewmodels.FilterSheetState
-import com.cornellappdev.transit.ui.viewmodels.FilterState
+import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
 
 @Composable
 fun FilterBottomSheet(
     onCancelClicked: () -> Unit,
     onApplyClicked: () -> Unit,
-    filters: List<FilterSheetState>,
-    selectedFilters: Set<FilterSheetState>,
-    onFilterToggle: (FilterSheetState) -> Unit,
+    filters: List<FavoritesFilterSheetState>,
+    selectedFilters: Set<FavoritesFilterSheetState>,
+    onFilterToggle: (FavoritesFilterSheetState) -> Unit,
 ) {
     Column(
         modifier = Modifier
