@@ -129,7 +129,7 @@ fun HomeScreen(
 
     val showAddFavoritesSheet by homeViewModel.showAddFavoritesSheet.collectAsState()
 
-    val addFavoriteSheetState = rememberModalBottomSheetState(
+    val addFavoritesSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
 
@@ -334,7 +334,7 @@ fun HomeScreen(
                                 ecosystemSheetState = EcosystemSheetState.Details(it)
                             },
                             onFavoriteStarClick = favoritesViewModel::toggleFavorite,
-                            onAddFavoriteClick = {
+                            onAddFavoritesClick = {
                                 homeViewModel.toggleAddFavoritesSheet(true)
                             }
 
@@ -391,7 +391,7 @@ fun HomeScreen(
                 homeViewModel.toggleAddFavoritesSheet(false)
                 homeViewModel.onAddQueryChange("")
             },
-            sheetState = addFavoriteSheetState,
+            sheetState = addFavoritesSheetState,
             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             containerColor = Color.White
         ) {

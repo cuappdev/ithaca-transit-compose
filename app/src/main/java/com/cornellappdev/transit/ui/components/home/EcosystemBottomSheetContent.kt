@@ -47,7 +47,7 @@ fun EcosystemBottomSheetContent(
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     onFavoriteStarClick: (Place) -> Unit,
-    onAddFavoriteClick: () -> Unit,
+    onAddFavoritesClick: () -> Unit,
 ) {
     Column(modifier = modifier) {
         Row(
@@ -88,7 +88,7 @@ fun EcosystemBottomSheetContent(
             navigateToPlace = navigateToPlace,
             onDetailsClick = onDetailsClick,
             onFavoriteStarClick = onFavoriteStarClick,
-            onAddFavoriteClick = onAddFavoriteClick
+            onAddFavoritesClick = onAddFavoritesClick
         )
     }
 }
@@ -101,7 +101,7 @@ private fun BottomSheetFilteredContent(
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     onFavoriteStarClick: (Place) -> Unit,
-    onAddFavoriteClick: () -> Unit
+    onAddFavoritesClick: () -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(bottom = 90.dp),
@@ -109,7 +109,7 @@ private fun BottomSheetFilteredContent(
     ) {
         when (currentFilter) {
             FilterState.FAVORITES -> {
-                favoriteList(favorites, navigateToPlace, onAddFavoriteClick)
+                favoriteList(favorites, navigateToPlace, onAddFavoritesClick)
             }
 
             FilterState.PRINTERS -> {
@@ -143,10 +143,10 @@ private fun BottomSheetFilteredContent(
 private fun LazyListScope.favoriteList(
     favorites: Set<Place>,
     navigateToPlace: (Place) -> Unit,
-    onAddFavoriteClick: () -> Unit
+    onAddFavoritesClick: () -> Unit
 ) {
     item {
-        AddFavoriteButton(onAddFavoriteClick = onAddFavoriteClick)
+        AddFavoritesButton(onAddFavoritesClick = onAddFavoritesClick)
     }
     items(favorites.toList()) {
         BottomSheetLocationCard(
@@ -300,6 +300,6 @@ private fun PreviewEcosystemBottomSheet() {
         navigateToPlace = {},
         onDetailsClick = {},
         onFavoriteStarClick = {},
-        onAddFavoriteClick = {}
+        onAddFavoritesClick = {}
     )
 }

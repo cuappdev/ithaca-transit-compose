@@ -20,12 +20,12 @@ import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
 @Composable
-fun AddFavoriteButton(
-    onAddFavoriteClick: () -> Unit,
+fun AddFavoritesButton(
+    onAddFavoritesClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Button(
-        onClick = onAddFavoriteClick,
+        onClick = onAddFavoritesClick,
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.White,
             contentColor = Color.Black
@@ -55,8 +55,8 @@ fun AddFavoriteButton(
 
 @Preview
 @Composable
-private fun AddFavoriteButtonPreview() {
-    AddFavoriteButton(
-        onAddFavoriteClick = {},
+private fun AddFavoritesButtonPreview() {
+    AddFavoritesButton(
+        onAddFavoritesClick = {},
     )
 }
