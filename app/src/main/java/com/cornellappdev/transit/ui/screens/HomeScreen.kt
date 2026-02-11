@@ -55,6 +55,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
@@ -129,7 +130,7 @@ fun HomeScreen(
         homeViewModel.instantiateLocation(context)
     }
 
-    val showAddFavoritesSheet by homeViewModel.showAddFavoritesSheet.collectAsState()
+    val showAddFavoritesSheet by homeViewModel.showAddFavoritesSheet.collectAsStateWithLifecycle()
 
     val addFavoritesSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
