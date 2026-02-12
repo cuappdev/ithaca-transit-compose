@@ -16,17 +16,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
+import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
+import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FilterState
+import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.util.ecosystem.toPlace
 
 
@@ -97,6 +102,7 @@ fun EcosystemBottomSheetContent(
 
 @Composable
 private fun BottomSheetFilteredContent(
+    homeViewModel: HomeViewModel = hiltViewModel(),
     currentFilter: FilterState,
     staticPlaces: StaticPlaces,
     favorites: Set<Place>,
@@ -123,7 +129,13 @@ private fun BottomSheetFilteredContent(
             }
 
             FilterState.EATERIES -> {
-                eateryList(staticPlaces, navigateToPlace)
+                eateryList(
+                    eateriesApiResponse = staticPlaces.eateries,
+                    onDetailsClick = onDetailsClick,
+                    favorites = favorites,
+                    onFavoriteStarClick = onFavoriteStarClick,
+                    operatingHoursToString = homeViewModel::isOpenAnnotatedStringFromOperatingHours
+                )
             }
 
             FilterState.LIBRARIES -> {
@@ -226,23 +238,38 @@ private fun LazyListScope.printerList(
  * LazyList scoped enumeration of eateries for bottom sheet
  */
 private fun LazyListScope.eateryList(
-    staticPlaces: StaticPlaces,
-    navigateToPlace: (Place) -> Unit
+    eateriesApiResponse: ApiResponse<List<Eatery>>,
+    onDetailsClick: (DetailedEcosystemPlace) -> Unit,
+    favorites: Set<Place>,
+    onFavoriteStarClick: (Place) -> Unit,
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString
 ) {
-    when (staticPlaces.eateries) {
+    when (eateriesApiResponse) {
         is ApiResponse.Error -> {
         }
 
         is ApiResponse.Pending -> {
+            item {
+                CenteredSpinningIndicator()
+            }
         }
 
         is ApiResponse.Success -> {
-            items(staticPlaces.eateries.data) {
-                BottomSheetLocationCard(
+            items(eateriesApiResponse.data) {
+                RoundedImagePlaceCard(
+                    imageUrl = it.imageUrl,
                     title = it.name,
-                    subtitle1 = it.location.orEmpty()
+                    subtitle = it.location ?: "",
+                    isFavorite = it.toPlace() in favorites,
+                    onFavoriteClick = {
+                        onFavoriteStarClick(it.toPlace())
+                    },
+                    placeholderRes = R.drawable.olin_library,
+                    leftAnnotatedString = operatingHoursToString(
+                        it.formatOperatingHours()
+                    )
                 ) {
-                    //TODO: Eatery
+                    onDetailsClick(it)
                 }
                 Spacer(Modifier.height(10.dp))
             }
@@ -270,7 +297,7 @@ private fun LazyListScope.libraryList(
         is ApiResponse.Success -> {
             items(staticPlaces.libraries.data) {
                 RoundedImagePlaceCard(
-                    imageRes = R.drawable.olin_library,
+                    placeholderRes = R.drawable.olin_library,
                     title = it.location,
                     subtitle = it.address,
                     isFavorite = it.toPlace() in favorites,
