@@ -28,6 +28,7 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
@@ -35,6 +36,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,6 +55,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
@@ -82,6 +85,8 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
+import io.morfly.compose.bottomsheet.material3.BottomSheetScaffold
+import io.morfly.compose.bottomsheet.material3.rememberBottomSheetScaffoldState
 import io.morfly.compose.bottomsheet.material3.rememberBottomSheetState
 import io.morfly.compose.bottomsheet.material3.sheetVisibleHeightDp
 import kotlinx.coroutines.launch
@@ -125,6 +130,12 @@ fun HomeScreen(
         homeViewModel.instantiateLocation(context)
     }
 
+    val showAddFavoritesSheet by homeViewModel.showAddFavoritesSheet.collectAsStateWithLifecycle()
+
+    val addFavoritesSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
 
     //SheetState for FavoritesBottomSheet
     val favoritesSheetState = rememberBottomSheetScaffoldState(
@@ -138,20 +149,6 @@ fun HomeScreen(
         }
     )
 
-    //sheetState for AddFavorites BottomSheet
-    val addSheetState = rememberBottomSheetScaffoldState(
-        bottomSheetState = remember {
-            SheetState(
-                skipPartiallyExpanded = true,
-                initialValue = SheetValue.Hidden,
-                density = localDensity,
-                confirmValueChange = {
-                    homeViewModel.onAddQueryChange("")
-                    true
-                }
-            )
-        }
-    )
 
     // Filter sheet state
     // Using advanced-bottomsheet-compose from https://github.com/Morfly/advanced-bottomsheet-compose
@@ -170,7 +167,7 @@ fun HomeScreen(
 
     // Filter scaffold state
     val filterScaffoldState =
-        io.morfly.compose.bottomsheet.material3.rememberBottomSheetScaffoldState(filterSheetState)
+        rememberBottomSheetScaffoldState(filterSheetState)
 
     // Main search bar flow
     val searchBarValue = homeViewModel.searchBarUiState.collectAsState().value
@@ -263,9 +260,7 @@ fun HomeScreen(
                     navController.navigate("settings")
                 },
                 onFavoriteAdd = {
-                    scope.launch {
-                        addSheetState.bottomSheetState.expand()
-                    }
+                    homeViewModel.toggleAddFavoritesSheet(true)
                 },
                 onRecentClear = {
                     homeViewModel.clearRecents()
@@ -294,7 +289,7 @@ fun HomeScreen(
             )
         }
 
-        io.morfly.compose.bottomsheet.material3.BottomSheetScaffold(
+        BottomSheetScaffold(
             scaffoldState = filterScaffoldState,
             sheetSwipeEnabled = true,
             sheetContainerColor = DetailsHeaderGray,
@@ -341,7 +336,11 @@ fun HomeScreen(
                             onDetailsClick = {
                                 ecosystemSheetState = EcosystemSheetState.Details(it)
                             },
-                            onFavoriteStarClick = favoritesViewModel::toggleFavorite
+                            onFavoriteStarClick = favoritesViewModel::toggleFavorite,
+                            onAddFavoritesClick = {
+                                homeViewModel.toggleAddFavoritesSheet(true)
+                            }
+
                         )
                     }
                 }
@@ -367,14 +366,9 @@ fun HomeScreen(
                             "Edit"
                         }
                     }, addOnClick = {
-                        scope.launch {
-                            if (!favoritesSheetState.bottomSheetState.hasExpandedState) {
-                                favoritesSheetState.bottomSheetState.expand()
-                            }
-                            if (editState) {
-                                editState = false
-                            }
-                            addSheetState.bottomSheetState.expand()
+                        homeViewModel.toggleAddFavoritesSheet(true)
+                        if (editState) {
+                            editState = false
                         }
                     },
                     removeOnClick = {
@@ -394,43 +388,47 @@ fun HomeScreen(
     }
 
     // AddFavorites BottomSheet
-    BottomSheetScaffold(
-        sheetShape = RoundedCornerShape(16.dp),
-        scaffoldState = addSheetState,
-        sheetContainerColor = Color.White,
-        sheetPeekHeight = 0.dp,
-        sheetContent = {
+    if (showAddFavoritesSheet) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                homeViewModel.toggleAddFavoritesSheet(false)
+                homeViewModel.onAddQueryChange("")
+            },
+            sheetState = addFavoritesSheetState,
+            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            containerColor = Color.White
+        ) {
             AddFavoritesSearchSheet(
                 addSearchBarValue = addSearchBarValue,
                 placeQueryResponse = placeQueryResponse,
                 cancelOnClick = {
-                    scope.launch {
-                        addSheetState.bottomSheetState.hide()
-                        homeViewModel.onAddQueryChange("")
-                    }
+                    homeViewModel.toggleAddFavoritesSheet(false)
+                    homeViewModel.onAddQueryChange("")
                 },
                 onItemClick = {
-                    scope.launch {
-                        if (!favoritesViewModel.isFavorite(it)) {
-                            addSheetState.bottomSheetState.hide()
-                            homeViewModel.clearAddQuery()
-                            favoritesViewModel.addFavorite(it)
-                        } else {
-                            Toast.makeText(
-                                context,
-                                "${it.name} is already favorited!",
-                                Toast.LENGTH_SHORT
-                            )
-                                .show()
-                        }
+                    if (!favoritesViewModel.isFavorite(it)) {
+                        homeViewModel.clearAddQuery()
+                        favoritesViewModel.addFavorite(it)
+                        Toast.makeText(
+                            context,
+                            "${it.name} was successfully added to your favorites list!",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "${it.name} is already favorited!",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
                     }
                 },
                 onQueryChange = homeViewModel::onAddQueryChange,
                 onClearChange = homeViewModel::clearAddQuery
             )
-        },
-        content = {}
-    )
+        }
+    }
 }
 
 /**

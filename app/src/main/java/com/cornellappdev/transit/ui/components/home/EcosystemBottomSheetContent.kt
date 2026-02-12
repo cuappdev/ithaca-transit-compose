@@ -3,8 +3,10 @@ package com.cornellappdev.transit.ui.components.home
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -51,7 +53,8 @@ fun EcosystemBottomSheetContent(
     modifier: Modifier = Modifier,
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
-    onFavoriteStarClick: (Place) -> Unit
+    onFavoriteStarClick: (Place) -> Unit,
+    onAddFavoritesClick: () -> Unit,
 ) {
     Column(modifier = modifier) {
         Row(
@@ -91,7 +94,8 @@ fun EcosystemBottomSheetContent(
             favorites = favorites,
             navigateToPlace = navigateToPlace,
             onDetailsClick = onDetailsClick,
-            onFavoriteStarClick = onFavoriteStarClick
+            onFavoriteStarClick = onFavoriteStarClick,
+            onAddFavoritesClick = onAddFavoritesClick
         )
     }
 }
@@ -104,15 +108,16 @@ private fun BottomSheetFilteredContent(
     favorites: Set<Place>,
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
-    onFavoriteStarClick: (Place) -> Unit
+    onFavoriteStarClick: (Place) -> Unit,
+    onAddFavoritesClick: () -> Unit
 ) {
     LazyColumn(
-        contentPadding = PaddingValues(bottom = 90.dp),
+        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 20.dp, bottom = 90.dp),
         modifier = Modifier.fillMaxSize()
     ) {
         when (currentFilter) {
             FilterState.FAVORITES -> {
-                favoriteList(favorites, navigateToPlace)
+                favoriteList(favorites, navigateToPlace, onAddFavoritesClick)
             }
 
             FilterState.PRINTERS -> {
@@ -151,8 +156,13 @@ private fun BottomSheetFilteredContent(
  */
 private fun LazyListScope.favoriteList(
     favorites: Set<Place>,
-    navigateToPlace: (Place) -> Unit
+    navigateToPlace: (Place) -> Unit,
+    onAddFavoritesClick: () -> Unit
 ) {
+    item {
+        AddFavoritesButton(onAddFavoritesClick = onAddFavoritesClick)
+        Spacer(Modifier.height(20.dp))
+    }
     items(favorites.toList()) {
         BottomSheetLocationCard(
             title = it.name,
@@ -160,6 +170,7 @@ private fun LazyListScope.favoriteList(
         ) {
             //TODO: Eatery
         }
+        Spacer(Modifier.height(10.dp))
     }
 }
 
@@ -185,7 +196,9 @@ private fun LazyListScope.gymList(
                 ) {
                     //TODO: Eatery
                 }
+                Spacer(Modifier.height(10.dp))
             }
+
         }
     }
 }
@@ -214,7 +227,9 @@ private fun LazyListScope.printerList(
                         it.toPlace()
                     )
                 }
+                Spacer(Modifier.height(10.dp))
             }
+
         }
     }
 }
@@ -256,6 +271,7 @@ private fun LazyListScope.eateryList(
                 ) {
                     onDetailsClick(it)
                 }
+                Spacer(Modifier.height(10.dp))
             }
         }
     }
@@ -291,6 +307,7 @@ private fun LazyListScope.libraryList(
                 ) {
                     navigateToDetails(it)
                 }
+                Spacer(Modifier.height(10.dp))
             }
         }
     }
@@ -319,6 +336,7 @@ private fun PreviewEcosystemBottomSheet() {
         modifier = Modifier,
         navigateToPlace = {},
         onDetailsClick = {},
-        onFavoriteStarClick = {}
+        onFavoriteStarClick = {},
+        onAddFavoritesClick = {}
     )
 }

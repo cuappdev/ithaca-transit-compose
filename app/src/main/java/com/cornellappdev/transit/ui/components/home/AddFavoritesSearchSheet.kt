@@ -67,8 +67,8 @@ fun AddFavoritesSearchSheet(
 
     Column(
         modifier = Modifier
-            .fillMaxHeight(0.92f)
             .fillMaxWidth()
+            .fillMaxHeight(0.92f)
     ) {
         Column(
             modifier = Modifier
