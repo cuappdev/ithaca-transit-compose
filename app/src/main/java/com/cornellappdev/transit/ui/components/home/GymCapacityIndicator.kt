@@ -27,6 +27,7 @@ import com.cornellappdev.transit.ui.theme.Gray02
 import com.cornellappdev.transit.ui.theme.Gray04
 import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.robotoFamily
+import com.cornellappdev.transit.util.LIMITED_CAPACITY_THRESHOLD
 import com.cornellappdev.transit.util.colorInterp
 
 // Source: Uplift Android
@@ -45,7 +46,6 @@ fun GymCapacityIndicator(
     capacity: UpliftCapacity?,
     label: String?,
     closed: Boolean,
-    gymDetail: Boolean = false
 ) {
     val grayedOut = closed || capacity == null
 
@@ -60,30 +60,28 @@ fun GymCapacityIndicator(
         )
     }
 
-    val orangeCutoff = .65f
-
     // Choose a color. If between 0 & 0.5, tween between open and orange. If between 0.5 and 1,
     // tween between orange and closed.
     val color =
-        if (fraction > orangeCutoff)
+        if (fraction > LIMITED_CAPACITY_THRESHOLD)
             colorInterp(
-                (fraction - orangeCutoff) / (1 - orangeCutoff),
+                (fraction - LIMITED_CAPACITY_THRESHOLD) / (1 - LIMITED_CAPACITY_THRESHOLD),
                 AccentOrange,
                 AccentClosed
             )
         else
             colorInterp(
-                fraction / orangeCutoff,
+                fraction / LIMITED_CAPACITY_THRESHOLD,
                 AccentOpen,
                 AccentClosed
             )
 
-    val size = if (gymDetail) 104.5.dp else 72.dp
+    val size = 54.dp
     val percentFontSize =
-        (if (gymDetail) 17.sp else 12.sp) * (if (closed || capacity != null) 1f else .9f)
-    val labelColor = if (gymDetail) Gray04 else PrimaryText
-    val labelFontWeight = if (gymDetail) FontWeight(300) else FontWeight(600)
-    val labelPadding = if (gymDetail) 9.dp else 12.dp
+        12.sp * (if (closed || capacity != null) 1f else .9f)
+    val labelColor = PrimaryText
+    val labelFontWeight = FontWeight(600)
+    val labelPadding = 12.dp
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box {
@@ -111,7 +109,7 @@ fun GymCapacityIndicator(
                 textAlign = TextAlign.Center,
             )
         }
-        if (label != null && !(gymDetail && grayedOut)) {
+        if (label != null) {
             Spacer(modifier = Modifier.height(labelPadding))
             Text(
                 text = label,

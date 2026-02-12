@@ -26,6 +26,7 @@ import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
 import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
+import com.cornellappdev.transit.models.ecosystem.UpliftCapacity
 import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.robotoFamily
@@ -126,7 +127,8 @@ private fun BottomSheetFilteredContent(
                     onDetailsClick = onDetailsClick,
                     favorites = favorites,
                     onFavoriteStarClick = onFavoriteStarClick,
-                    operatingHoursToString = homeViewModel::isOpenAnnotatedStringFromOperatingHours
+                    operatingHoursToString = homeViewModel::isOpenAnnotatedStringFromOperatingHours,
+                    capacityToString = homeViewModel::capacityPercentAnnotatedString
                 )
             }
 
@@ -178,7 +180,8 @@ private fun LazyListScope.gymList(
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     favorites: Set<Place>,
     onFavoriteStarClick: (Place) -> Unit,
-    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
+    capacityToString: (UpliftCapacity?) -> AnnotatedString,
 ) {
     when (gymsApiResponse) {
         is ApiResponse.Error -> {
@@ -202,6 +205,9 @@ private fun LazyListScope.gymList(
                     },
                     leftAnnotatedString = operatingHoursToString(
                         it.operatingHours()
+                    ),
+                    rightAnnotatedString = capacityToString(
+                        it.upliftCapacity
                     ),
                     placeholderRes = R.drawable.olin_library,
                 ) {

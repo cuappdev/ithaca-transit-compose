@@ -2,9 +2,12 @@ package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
@@ -16,10 +19,14 @@ import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 import com.cornellappdev.transit.models.ecosystem.EateryRepository
 import com.cornellappdev.transit.models.ecosystem.GymRepository
+import com.cornellappdev.transit.models.ecosystem.UpliftCapacity
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.theme.AccentOrange
 import com.cornellappdev.transit.ui.theme.LateRed
 import com.cornellappdev.transit.ui.theme.LiveGreen
 import com.cornellappdev.transit.ui.theme.SecondaryText
+import com.cornellappdev.transit.ui.theme.robotoFamily
+import com.cornellappdev.transit.util.LIMITED_CAPACITY_THRESHOLD
 import com.cornellappdev.transit.util.TimeUtils.toPascalCaseString
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -444,32 +451,23 @@ class HomeViewModel @Inject constructor(
     /**
      * Format percent string based on a gym's current capacity
      */
-    fun capacityPercentAnnotatedString(percent: Double): AnnotatedString {
-        return  buildAnnotatedString {
-            if (percent <= 0.65) {
-                withStyle(
-                    style = SpanStyle(
-                        color = LiveGreen,
-                    )
-                ) {
-                    append("Open")
-                }
-            } else {
-                withStyle(
-                    style = SpanStyle(
-                        color = LateRed
-                    )
-                ) {
-                    append("Closed")
-                }
-            }
+    fun capacityPercentAnnotatedString(capacity: UpliftCapacity?): AnnotatedString {
+
+        // Return empty string if no capacity data available
+        if (capacity == null) {
+            return AnnotatedString("")
+        }
+
+        return buildAnnotatedString {
             withStyle(
                 style = SpanStyle(
-                    color = SecondaryText
+                    fontSize = 14.sp,
+                    fontFamily = robotoFamily,
+                    fontWeight = FontWeight(600),
+                    color = if (capacity.percent <= LIMITED_CAPACITY_THRESHOLD) LiveGreen else AccentOrange,
                 )
             ) {
-                append(" - ")
-                //append(openStatus.nextChangeTime)
+                append("${capacity.percentString()} full")
             }
         }
     }

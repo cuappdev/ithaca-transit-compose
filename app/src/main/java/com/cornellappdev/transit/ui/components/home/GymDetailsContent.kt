@@ -51,7 +51,7 @@ fun GymDetailsContent(
             shouldClipBottom = true
         )
 
-        DetailedPlaceHeaderSection(
+        DetailedPlaceHeaderSectionWithWidget(
             gym.name,
             getGymLocationString(gym.name),
             onFavoriteClick = onFavoriteClick,
@@ -59,12 +59,14 @@ fun GymDetailsContent(
             leftAnnotatedString = homeViewModel.isOpenAnnotatedStringFromOperatingHours(
                 gym.operatingHours()
             ),
-            rightAnnotatedString = buildAnnotatedString {
-                append(gym.upliftCapacity?.percent.toString())
-            }
+            widget = {
+                GymCapacityIndicator(
+                    capacity = gym.upliftCapacity,
+                    label = null,
+                    closed = false
+                )
+            },
         )
-
-        GymCapacityIndicator(capacity = gym.upliftCapacity, label = null, closed = false)
 
         Spacer(modifier = Modifier.height(24.dp))
 
