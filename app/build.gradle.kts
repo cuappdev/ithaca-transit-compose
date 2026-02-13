@@ -51,6 +51,7 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("boolean", "ECOSYSTEM_FLAG", "false")
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {

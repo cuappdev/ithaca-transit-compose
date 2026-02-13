@@ -119,6 +119,14 @@ class HomeViewModel @Inject constructor(
             )
         )
 
+    private val _showAddFavoritesSheet = MutableStateFlow(false)
+    val showAddFavoritesSheet: StateFlow<Boolean> = _showAddFavoritesSheet.asStateFlow()
+
+    fun toggleAddFavoritesSheet(show: Boolean) {
+        _showAddFavoritesSheet.value = show
+    }
+
+
     init {
         userPreferenceRepository.favoritesFlow.onEach {
             if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
