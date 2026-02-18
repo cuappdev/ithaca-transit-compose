@@ -1,43 +1,64 @@
 package com.cornellappdev.transit.ui.components.home
 
+import android.R.attr.contentDescription
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.cornellappdev.transit.ui.theme.TransitBlue
+import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
+import com.google.common.math.LinearTransformation.horizontal
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FilterRow(
     selectedFilters: Set<FavoritesFilterSheetState>,
     onFilterClick: () -> Unit,
+    onRemoveFilter: (FavoritesFilterSheetState) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
-        // Filter button
+    Row(modifier = modifier) {
         FilterButton(onFilterClick = onFilterClick)
 
         // Selected filter labels
         if (selectedFilters.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 selectedFilters.forEach { filter ->
-                    FilterLabel(text = filter.label)
+                    FilterLabel(
+                        text = filter.label,
+                        onRemove = { onRemoveFilter(filter) }
+                    )
                 }
             }
         }
@@ -47,18 +68,44 @@ fun FilterRow(
 @Composable
 private fun FilterLabel(
     text: String,
+    onRemove: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.primaryContainer
+        shape = RoundedCornerShape(40.dp),
+        border = BorderStroke(1.dp, TransitBlue)
     ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
-        )
+        Row(
+            modifier = modifier.padding(start = 14.dp, top = 10.dp, bottom = 10.dp, end = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = text,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal,
+                fontFamily = robotoFamily,
+                color = TransitBlue
+            )
+            IconButton(
+                onClick = onRemove,
+                modifier = Modifier.size(20.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    tint = TransitBlue,
+                    contentDescription = "Remove filter",
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
     }
+}
+
+@Preview
+@Composable
+private fun FilterLabelPreview(){
+    FilterLabel("Eateries", {})
 }

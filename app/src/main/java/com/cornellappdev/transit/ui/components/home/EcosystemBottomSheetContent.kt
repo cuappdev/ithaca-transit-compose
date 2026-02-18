@@ -154,7 +154,8 @@ private fun BottomSheetFilteredContent(
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 FilterRow(
                     selectedFilters = homeViewModel.appliedFavoritesFilters.collectAsStateWithLifecycle().value,
-                    onFilterClick = onFilterButtonClick
+                    onFilterClick = onFilterButtonClick,
+                    onRemoveFilter = { filter -> homeViewModel.removeAppliedFilter(filter) }
                 )
             }
         }

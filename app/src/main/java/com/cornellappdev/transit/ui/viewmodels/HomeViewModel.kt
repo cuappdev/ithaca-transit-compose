@@ -154,6 +154,11 @@ class HomeViewModel @Inject constructor(
         toggleFilterSheet(false)
     }
 
+    fun removeAppliedFilter(filter: FavoritesFilterSheetState) {
+        _selectedFavoritesFilters.value = _selectedFavoritesFilters.value - filter
+        _appliedFavoritesFilters.value = _appliedFavoritesFilters.value - filter
+    }
+
     fun cancelFavoritesFilters() {
         // Restore the previously applied filters
         _selectedFavoritesFilters.value = _appliedFavoritesFilters.value
