@@ -1,8 +1,5 @@
 package com.cornellappdev.transit.ui.components.home
 
-import android.R.attr.font
-import android.R.attr.text
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -51,6 +48,6 @@ fun FilterButton(
 
 @Preview(showBackground = true)
 @Composable
-fun FilterButtonPreview(){
+private fun FilterButtonPreview(){
     FilterButton(onFilterClick = {})
 }
