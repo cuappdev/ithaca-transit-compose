@@ -1,6 +1,7 @@
 package com.cornellappdev.transit.util
 
 import android.icu.text.SimpleDateFormat
+import java.time.DayOfWeek
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
@@ -92,5 +93,12 @@ object TimeUtils {
     fun addSecondsToTime(isoString: String, seconds: Int): String {
         return Instant.parse(isoString).plusSeconds(seconds.toLong()).toString()
     }
+
+    /**
+     * Day of week with first letter capitalized and all else lowercase
+     */
+    fun DayOfWeek.toPascalCaseString(): String = this.name.lowercase()
+        .replaceFirstChar { it.uppercase() }
+
 
 }

@@ -55,6 +55,15 @@ object Style {
         ),
     )
 
+    val cardSubtitle = TextStyle(
+        fontSize = 16.sp,
+        fontFamily = robotoFamily,
+        lineHeight = 16.sp,
+        platformStyle = PlatformTextStyle(
+            includeFontPadding = false
+        ),
+    )
+
     val heading3Emphasized = TextStyle(
         fontSize = 14.sp,
         fontFamily = robotoFamily,
@@ -63,6 +72,16 @@ object Style {
             includeFontPadding = false
         ),
         fontWeight = FontWeight(500)
+    )
+
+    val heading3Semibold =  TextStyle(
+        fontSize = 14.sp,
+        fontFamily = robotoFamily,
+        lineHeight = 16.sp,
+        platformStyle = PlatformTextStyle(
+            includeFontPadding = false
+        ),
+        fontWeight = FontWeight(600)
     )
 
     /**

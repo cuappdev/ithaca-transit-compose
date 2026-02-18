@@ -1,10 +1,14 @@
 package com.cornellappdev.transit.ui.components.home
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -21,18 +25,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
+import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
+import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
 import com.cornellappdev.transit.ui.viewmodels.FilterState
+import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.util.ecosystem.toPlace
 
 
@@ -59,6 +68,7 @@ fun EcosystemBottomSheetContent(
     showFilterSheet: Boolean,
     onFilterSheetDismiss: () -> Unit,
     onFilterSheetShow: () -> Unit,
+    onAddFavoritesClick: () -> Unit,
 ) {
     Column(modifier = modifier) {
         Row(
@@ -99,7 +109,8 @@ fun EcosystemBottomSheetContent(
             navigateToPlace = navigateToPlace,
             onDetailsClick = onDetailsClick,
             onFavoriteStarClick = onFavoriteStarClick,
-            onFilterButtonClick = onFilterSheetShow
+            onFilterButtonClick = onFilterSheetShow,
+            onAddFavoritesClick = onAddFavoritesClick
         )
     }
 
@@ -137,43 +148,63 @@ fun EcosystemBottomSheetContent(
 
 @Composable
 private fun BottomSheetFilteredContent(
+    homeViewModel: HomeViewModel = hiltViewModel(),
     currentFilter: FilterState,
     staticPlaces: StaticPlaces,
     favorites: Set<Place>,
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     onFavoriteStarClick: (Place) -> Unit,
+    onAddFavoritesClick: () -> Unit,
     onFilterButtonClick: () -> Unit
 ) {
-    LazyColumn(
-        contentPadding = PaddingValues(bottom = 90.dp),
-        modifier = Modifier.fillMaxSize()
-    ) {
-        when (currentFilter) {
-            FilterState.FAVORITES -> {
-                favoriteList(favorites, navigateToPlace, onFilterButtonClick)
+    Column() {
+        if (currentFilter == FilterState.FAVORITES) {
+            Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+                HorizontalDivider(modifier = Modifier.padding(top = 20.dp, bottom = 8.dp))
+                FilterButton(onFilterClick = onFilterButtonClick)
             }
+        }
+        LazyColumn(
+            contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = if (currentFilter == FilterState.FAVORITES) 0.dp else 20.dp, bottom = 90.dp),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            when (currentFilter) {
+                FilterState.FAVORITES -> {
+                    favoriteList(
+                        favorites,
+                        navigateToPlace,
+                        onAddFavoritesClick
+                    )
+                }
 
-            FilterState.PRINTERS -> {
-                printerList(staticPlaces, navigateToPlace)
-            }
+                FilterState.PRINTERS -> {
+                    printerList(staticPlaces, navigateToPlace)
+                }
 
-            FilterState.GYMS -> {
-                gymList(staticPlaces, navigateToPlace)
-            }
+                FilterState.GYMS -> {
+                    gymList(staticPlaces, navigateToPlace)
+                }
 
-            FilterState.EATERIES -> {
-                eateryList(staticPlaces, navigateToPlace)
-            }
+                FilterState.EATERIES -> {
+                    eateryList(
+                        eateriesApiResponse = staticPlaces.eateries,
+                        onDetailsClick = onDetailsClick,
+                        favorites = favorites,
+                        onFavoriteStarClick = onFavoriteStarClick,
+                        operatingHoursToString = homeViewModel::isOpenAnnotatedStringFromOperatingHours
+                    )
+                }
 
-            FilterState.LIBRARIES -> {
-                libraryList(
-                    staticPlaces,
-                    navigateToPlace,
-                    onDetailsClick,
-                    favorites,
-                    onFavoriteStarClick,
-                )
+                FilterState.LIBRARIES -> {
+                    libraryList(
+                        staticPlaces,
+                        navigateToPlace,
+                        onDetailsClick,
+                        favorites,
+                        onFavoriteStarClick,
+                    )
+                }
             }
         }
     }
@@ -185,15 +216,12 @@ private fun BottomSheetFilteredContent(
 private fun LazyListScope.favoriteList(
     favorites: Set<Place>,
     navigateToPlace: (Place) -> Unit,
-    onFilterClick: () -> Unit
+    onAddFavoritesClick: () -> Unit
 ) {
-    item {
-        HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp)
-        )
-    }
     item{
-        FilterButton(onFilterClick = onFilterClick)
+        Spacer(modifier = Modifier.height(8.dp))
+        AddFavoritesButton(onAddFavoritesClick = onAddFavoritesClick)
+        Spacer(modifier = Modifier.height(20.dp))
     }
     items(favorites.toList()) {
         BottomSheetLocationCard(
@@ -202,6 +230,7 @@ private fun LazyListScope.favoriteList(
         ) {
             //TODO: Eatery
         }
+        Spacer(Modifier.height(10.dp))
     }
 }
 
@@ -227,7 +256,9 @@ private fun LazyListScope.gymList(
                 ) {
                     //TODO: Eatery
                 }
+                Spacer(Modifier.height(10.dp))
             }
+
         }
     }
 }
@@ -256,7 +287,9 @@ private fun LazyListScope.printerList(
                         it.toPlace()
                     )
                 }
+                Spacer(Modifier.height(10.dp))
             }
+
         }
     }
 }
@@ -265,24 +298,40 @@ private fun LazyListScope.printerList(
  * LazyList scoped enumeration of eateries for bottom sheet
  */
 private fun LazyListScope.eateryList(
-    staticPlaces: StaticPlaces,
-    navigateToPlace: (Place) -> Unit
+    eateriesApiResponse: ApiResponse<List<Eatery>>,
+    onDetailsClick: (DetailedEcosystemPlace) -> Unit,
+    favorites: Set<Place>,
+    onFavoriteStarClick: (Place) -> Unit,
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString
 ) {
-    when (staticPlaces.eateries) {
+    when (eateriesApiResponse) {
         is ApiResponse.Error -> {
         }
 
         is ApiResponse.Pending -> {
+            item {
+                CenteredSpinningIndicator()
+            }
         }
 
         is ApiResponse.Success -> {
-            items(staticPlaces.eateries.data) {
-                BottomSheetLocationCard(
+            items(eateriesApiResponse.data) {
+                RoundedImagePlaceCard(
+                    imageUrl = it.imageUrl,
                     title = it.name,
-                    subtitle1 = it.location.orEmpty()
+                    subtitle = it.location ?: "",
+                    isFavorite = it.toPlace() in favorites,
+                    onFavoriteClick = {
+                        onFavoriteStarClick(it.toPlace())
+                    },
+                    placeholderRes = R.drawable.olin_library,
+                    leftAnnotatedString = operatingHoursToString(
+                        it.formatOperatingHours()
+                    )
                 ) {
-                    //TODO: Eatery
+                    onDetailsClick(it)
                 }
+                Spacer(Modifier.height(10.dp))
             }
         }
     }
@@ -308,7 +357,7 @@ private fun LazyListScope.libraryList(
         is ApiResponse.Success -> {
             items(staticPlaces.libraries.data) {
                 RoundedImagePlaceCard(
-                    imageRes = R.drawable.olin_library,
+                    placeholderRes = R.drawable.olin_library,
                     title = it.location,
                     subtitle = it.address,
                     isFavorite = it.toPlace() in favorites,
@@ -318,6 +367,7 @@ private fun LazyListScope.libraryList(
                 ) {
                     navigateToDetails(it)
                 }
+                Spacer(Modifier.height(10.dp))
             }
         }
     }
@@ -347,6 +397,7 @@ private fun PreviewEcosystemBottomSheet() {
         navigateToPlace = {},
         onDetailsClick = {},
         onFavoriteStarClick = {},
+        onAddFavoritesClick = {},
         showFilterSheet = true,
         onFilterSheetDismiss = {},
         onFilterSheetShow = {}
