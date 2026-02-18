@@ -90,7 +90,7 @@ fun EcosystemBottomSheetContent(
             )
         }
 
-        LazyRow {
+        LazyRow(modifier = Modifier.padding(bottom = 12.dp)) {
             items(filters) {
                 BottomSheetFilterItem(
                     imageResId = it.iconId,
@@ -161,13 +161,14 @@ private fun BottomSheetFilteredContent(
     Column() {
         if (currentFilter == FilterState.FAVORITES) {
             Column(modifier = Modifier.padding(horizontal = 12.dp)) {
-                HorizontalDivider(modifier = Modifier.padding(top = 20.dp, bottom = 8.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 FilterButton(onFilterClick = onFilterButtonClick)
             }
         }
         LazyColumn(
-            contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = if (currentFilter == FilterState.FAVORITES) 0.dp else 20.dp, bottom = 90.dp),
-            modifier = Modifier.fillMaxSize()
+            contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = if (currentFilter == FilterState.FAVORITES) 0.dp else 8.dp, bottom = 90.dp),
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             when (currentFilter) {
                 FilterState.FAVORITES -> {
@@ -221,7 +222,6 @@ private fun LazyListScope.favoriteList(
     item{
         Spacer(modifier = Modifier.height(8.dp))
         AddFavoritesButton(onAddFavoritesClick = onAddFavoritesClick)
-        Spacer(modifier = Modifier.height(20.dp))
     }
     items(favorites.toList()) {
         BottomSheetLocationCard(
@@ -230,7 +230,6 @@ private fun LazyListScope.favoriteList(
         ) {
             //TODO: Eatery
         }
-        Spacer(Modifier.height(10.dp))
     }
 }
 
@@ -331,7 +330,6 @@ private fun LazyListScope.eateryList(
                 ) {
                     onDetailsClick(it)
                 }
-                Spacer(Modifier.height(10.dp))
             }
         }
     }
@@ -367,7 +365,6 @@ private fun LazyListScope.libraryList(
                 ) {
                     navigateToDetails(it)
                 }
-                Spacer(Modifier.height(10.dp))
             }
         }
     }
