@@ -43,23 +43,20 @@ fun FilterRow(
     onRemoveFilter: (FavoritesFilterSheetState) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(modifier = modifier) {
-        FilterButton(onFilterClick = onFilterClick)
+    FlowRow(modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        FilterButton(onFilterClick = onFilterClick, modifier = Modifier.align(Alignment.CenterVertically))
 
         // Selected filter labels
         if (selectedFilters.isNotEmpty()) {
-            Spacer(modifier = Modifier.width(8.dp))
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                selectedFilters.forEach { filter ->
-                    FilterLabel(
-                        text = filter.label,
-                        onRemove = { onRemoveFilter(filter) }
-                    )
-                }
+            selectedFilters.forEach { filter ->
+                FilterLabel(
+                    text = filter.label,
+                    onRemove = { onRemoveFilter(filter) },
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
             }
         }
     }
@@ -102,6 +99,18 @@ private fun FilterLabel(
         }
 
     }
+}
+
+@Preview
+@Composable
+private fun FilterRowPreview() {
+    FilterRow(
+        selectedFilters = setOf(FavoritesFilterSheetState.EATERIES),
+        onFilterClick = {},
+        onRemoveFilter = {}
+    )
+
+
 }
 
 @Preview
