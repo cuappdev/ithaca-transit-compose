@@ -35,6 +35,7 @@ import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.theme.MutedTransitBlue
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
+import com.google.common.math.LinearTransformation.vertical
 
 /**
  * Card for each filter on home bottom sheet
@@ -58,10 +59,13 @@ fun FavoritesFilterSheetItem(
                 color = if(isActive) TransitBlue else MetadataGray,
                 shape = RoundedCornerShape(8.dp)
             )
-            //TODO: Fix background color specifics
-            .background(color = if(isActive) MutedTransitBlue else Color.Transparent, shape = RoundedCornerShape(8.dp))
-            .padding(vertical = 16.dp)
-            .clickable(onClick = itemOnClick),
+            .background(
+                color = if(isActive) MutedTransitBlue
+                    else Color.Transparent,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .clickable(onClick = itemOnClick)
+            .padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
