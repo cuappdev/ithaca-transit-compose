@@ -23,10 +23,10 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
 
 @Composable
 fun FilterButton(
-    onFilterClick : () -> Unit,
-    modifier : Modifier = Modifier,
+    onFilterClick: () -> Unit,
+    modifier: Modifier = Modifier,
 
-){
+    ) {
     Button(
         onClick = onFilterClick,
         colors = ButtonDefaults.buttonColors(
@@ -34,7 +34,7 @@ fun FilterButton(
             contentColor = SecondaryText
         ),
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
-    ){
+    ) {
         Icon(
             painter = painterResource(R.drawable.filter_icon),
             contentDescription = "Filter Icon",
@@ -55,6 +55,6 @@ fun FilterButton(
 
 @Preview(showBackground = true)
 @Composable
-private fun FilterButtonPreview(){
+private fun FilterButtonPreview() {
     FilterButton(onFilterClick = {})
 }

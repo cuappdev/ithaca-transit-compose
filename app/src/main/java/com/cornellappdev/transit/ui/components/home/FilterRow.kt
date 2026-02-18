@@ -1,31 +1,23 @@
 package com.cornellappdev.transit.ui.components.home
 
-import android.R.attr.contentDescription
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,7 +25,6 @@ import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
-import com.google.common.math.LinearTransformation.horizontal
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -43,11 +34,15 @@ fun FilterRow(
     onRemoveFilter: (FavoritesFilterSheetState) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    FlowRow(modifier = modifier,
+    FlowRow(
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        FilterButton(onFilterClick = onFilterClick, modifier = Modifier.align(Alignment.CenterVertically))
+        FilterButton(
+            onFilterClick = onFilterClick,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
 
         // Selected filter labels
         if (selectedFilters.isNotEmpty()) {
@@ -71,7 +66,8 @@ private fun FilterLabel(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(40.dp),
-        border = BorderStroke(1.dp, TransitBlue)
+        border = BorderStroke(1.dp, TransitBlue),
+        color = Color.Transparent
     ) {
         Row(
             modifier = modifier.padding(start = 14.dp, top = 10.dp, bottom = 10.dp, end = 8.dp),
@@ -101,7 +97,7 @@ private fun FilterLabel(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun FilterRowPreview() {
     FilterRow(
@@ -113,8 +109,8 @@ private fun FilterRowPreview() {
 
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-private fun FilterLabelPreview(){
+private fun FilterLabelPreview() {
     FilterLabel("Eateries", {})
 }

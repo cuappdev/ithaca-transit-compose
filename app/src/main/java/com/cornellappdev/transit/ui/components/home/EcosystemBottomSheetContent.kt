@@ -113,7 +113,7 @@ fun EcosystemBottomSheetContent(
 
     val selectedFilters by homeViewModel.selectedFavoritesFilters.collectAsStateWithLifecycle()
 
-    if(showFilterSheet) {
+    if (showFilterSheet) {
         ModalBottomSheet(
             onDismissRequest = {
                 homeViewModel.cancelFavoritesFilters()
@@ -161,9 +161,14 @@ private fun BottomSheetFilteredContent(
                 )
             }
         }
-        val showLessPadding = currentFilter == FilterState.FAVORITES && appliedFilters.isEmpty()
+        val isFilterBarHidden = currentFilter == FilterState.FAVORITES && appliedFilters.isEmpty()
         LazyColumn(
-            contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = if (showLessPadding) 0.dp else 8.dp, bottom = 90.dp),
+            contentPadding = PaddingValues(
+                start = 12.dp,
+                end = 12.dp,
+                top = if (isFilterBarHidden) 0.dp else 8.dp,
+                bottom = 90.dp
+            ),
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
@@ -216,7 +221,7 @@ private fun LazyListScope.favoriteList(
     navigateToPlace: (Place) -> Unit,
     onAddFavoritesClick: () -> Unit
 ) {
-    item{
+    item {
         Spacer(modifier = Modifier.height(8.dp))
         AddFavoritesButton(onAddFavoritesClick = onAddFavoritesClick)
     }
@@ -252,7 +257,6 @@ private fun LazyListScope.gymList(
                 ) {
                     //TODO: Eatery
                 }
-                Spacer(Modifier.height(10.dp))
             }
 
         }

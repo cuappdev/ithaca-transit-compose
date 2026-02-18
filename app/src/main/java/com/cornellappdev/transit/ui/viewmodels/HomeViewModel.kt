@@ -127,6 +127,7 @@ class HomeViewModel @Inject constructor(
     fun toggleAddFavoritesSheet(show: Boolean) {
         _showAddFavoritesSheet.value = show
     }
+
     val favoritesFilterList = listOf(
         FavoritesFilterSheetState.GYMS,
         FavoritesFilterSheetState.EATERIES,
@@ -135,11 +136,15 @@ class HomeViewModel @Inject constructor(
         FavoritesFilterSheetState.OTHER
     )
 
-    private val _selectedFavoritesFilters = MutableStateFlow<Set<FavoritesFilterSheetState>>(emptySet())
-    val selectedFavoritesFilters: StateFlow<Set<FavoritesFilterSheetState>> = _selectedFavoritesFilters.asStateFlow()
+    private val _selectedFavoritesFilters =
+        MutableStateFlow<Set<FavoritesFilterSheetState>>(emptySet())
+    val selectedFavoritesFilters: StateFlow<Set<FavoritesFilterSheetState>> =
+        _selectedFavoritesFilters.asStateFlow()
 
-    private val _appliedFavoritesFilters = MutableStateFlow<Set<FavoritesFilterSheetState>>(emptySet())
-    val appliedFavoritesFilters: StateFlow<Set<FavoritesFilterSheetState>> = _appliedFavoritesFilters.asStateFlow()
+    private val _appliedFavoritesFilters =
+        MutableStateFlow<Set<FavoritesFilterSheetState>>(emptySet())
+    val appliedFavoritesFilters: StateFlow<Set<FavoritesFilterSheetState>> =
+        _appliedFavoritesFilters.asStateFlow()
 
     fun toggleFavoritesFilter(filter: FavoritesFilterSheetState) {
         _selectedFavoritesFilters.value = if (filter in _selectedFavoritesFilters.value) {
@@ -148,6 +153,7 @@ class HomeViewModel @Inject constructor(
             _selectedFavoritesFilters.value + filter
         }
     }
+
     fun applyFavoritesFilters() {
         // Save the current selection as applied filters
         _appliedFavoritesFilters.value = _selectedFavoritesFilters.value
