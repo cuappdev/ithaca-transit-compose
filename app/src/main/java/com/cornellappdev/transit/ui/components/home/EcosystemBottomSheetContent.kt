@@ -159,6 +159,9 @@ private fun BottomSheetFilteredContent(
                     onFilterClick = onFilterButtonClick,
                     onRemoveFilter = { filter -> homeViewModel.removeAppliedFilter(filter) }
                 )
+                if (appliedFilters.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
         }
         val isFilterBarHidden = currentFilter == FilterState.FAVORITES && appliedFilters.isEmpty()
