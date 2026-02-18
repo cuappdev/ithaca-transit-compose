@@ -344,8 +344,7 @@ fun HomeScreen(
                                 homeViewModel.toggleAddFavoritesSheet(true)
                             },
                             showFilterSheet = showFilterSheet,
-                            onFilterSheetDismiss = { homeViewModel.toggleFilterSheet(false) },
-                            onFilterSheetShow = { homeViewModel.toggleFilterSheet(true) }
+                            onFilterSheetShow = { homeViewModel.openFilterSheet() }
                         )
                     }
                 }

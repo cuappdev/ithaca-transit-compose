@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -20,9 +19,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
@@ -31,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
@@ -39,7 +36,6 @@ import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.robotoFamily
-import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
 import com.cornellappdev.transit.ui.viewmodels.FilterState
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.util.ecosystem.toPlace
@@ -66,9 +62,9 @@ fun EcosystemBottomSheetContent(
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     onFavoriteStarClick: (Place) -> Unit,
     showFilterSheet: Boolean,
-    onFilterSheetDismiss: () -> Unit,
     onFilterSheetShow: () -> Unit,
     onAddFavoritesClick: () -> Unit,
+    homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
     Column(modifier = modifier) {
         Row(
@@ -114,32 +110,26 @@ fun EcosystemBottomSheetContent(
         )
     }
 
-    //TODO: Refactor to hoist state up and remove selectedFilters & filterlist
-    var selectedFilters by remember { mutableStateOf(setOf<FavoritesFilterSheetState>()) }
-    val favoriteFilters = listOf<FavoritesFilterSheetState>(
-        FavoritesFilterSheetState.GYMS,
-        FavoritesFilterSheetState.EATERIES,
-        FavoritesFilterSheetState.LIBRARIES,
-        FavoritesFilterSheetState.PRINTERS,
-        FavoritesFilterSheetState.OTHER
-    )
+    val selectedFilters by homeViewModel.selectedFavoritesFilters.collectAsStateWithLifecycle()
+
     if(showFilterSheet) {
         ModalBottomSheet(
-            onDismissRequest = onFilterSheetDismiss,
+            onDismissRequest = {
+                homeViewModel.cancelFavoritesFilters()
+            },
             dragHandle = null
         ) {
             FavoritesFilterBottomSheet(
-                onCancelClicked  = onFilterSheetDismiss,
-                onApplyClicked = onFilterSheetDismiss,
-                filters = favoriteFilters,
+                onCancelClicked = {
+                    homeViewModel.cancelFavoritesFilters()
+                },
+                onApplyClicked = {
+                    homeViewModel.applyFavoritesFilters()
+                },
+                filters = homeViewModel.favoritesFilterList,
                 selectedFilters = selectedFilters,
-                //TODO: Refactor to move logic outside of composable
                 onFilterToggle = { filter ->
-                    selectedFilters = if (filter in selectedFilters) {
-                        selectedFilters - filter
-                    } else {
-                        selectedFilters + filter
-                    }
+                    homeViewModel.toggleFavoritesFilter(filter)
                 }
             )
         }
@@ -162,7 +152,10 @@ private fun BottomSheetFilteredContent(
         if (currentFilter == FilterState.FAVORITES) {
             Column(modifier = Modifier.padding(horizontal = 12.dp)) {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                FilterButton(onFilterClick = onFilterButtonClick)
+                FilterRow(
+                    selectedFilters = homeViewModel.appliedFavoritesFilters.collectAsStateWithLifecycle().value,
+                    onFilterClick = onFilterButtonClick
+                )
             }
         }
         LazyColumn(
@@ -396,7 +389,6 @@ private fun PreviewEcosystemBottomSheet() {
         onFavoriteStarClick = {},
         onAddFavoritesClick = {},
         showFilterSheet = true,
-        onFilterSheetDismiss = {},
         onFilterSheetShow = {}
     )
 }
