@@ -67,7 +67,7 @@ fun FavoritesFilterBottomSheet(
         ) {
             items(filters) {
                 FavoritesFilterSheetItem(
-                    imageResId = it.iconId,
+                    iconId = it.iconId,
                     label = it.label,
                     isActive = it in selectedFilters,
                     itemOnClick = { onFilterToggle(it) }
