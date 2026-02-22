@@ -36,6 +36,7 @@ import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
 import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.theme.FavoritesDividerGray
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.FilterState
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
@@ -153,7 +154,10 @@ private fun BottomSheetFilteredContent(
     Column {
         if (currentFilter == FilterState.FAVORITES) {
             Column(modifier = Modifier.padding(horizontal = 12.dp)) {
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    color = FavoritesDividerGray
+                )
                 FilterRow(
                     selectedFilters = appliedFilters,
                     onFilterClick = onFilterButtonClick,
