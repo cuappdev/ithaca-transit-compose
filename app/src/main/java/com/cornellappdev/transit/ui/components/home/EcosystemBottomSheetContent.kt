@@ -150,7 +150,7 @@ private fun BottomSheetFilteredContent(
     onFilterButtonClick: () -> Unit
 ) {
     val appliedFilters by homeViewModel.appliedFavoritesFilters.collectAsStateWithLifecycle()
-    Column() {
+    Column {
         if (currentFilter == FilterState.FAVORITES) {
             Column(modifier = Modifier.padding(horizontal = 12.dp)) {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -170,7 +170,7 @@ private fun BottomSheetFilteredContent(
                 start = 12.dp,
                 end = 12.dp,
                 top = if (isFilterBarHidden) 0.dp else 8.dp,
-                bottom = 90.dp
+                bottom = 120.dp // Makes bottom content visible with padding at the end
             ),
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(20.dp)
