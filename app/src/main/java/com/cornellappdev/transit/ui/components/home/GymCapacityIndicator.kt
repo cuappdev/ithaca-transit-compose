@@ -24,10 +24,9 @@ import com.cornellappdev.transit.ui.theme.AccentClosed
 import com.cornellappdev.transit.ui.theme.AccentOpen
 import com.cornellappdev.transit.ui.theme.AccentOrange
 import com.cornellappdev.transit.ui.theme.Gray02
-import com.cornellappdev.transit.ui.theme.Gray04
 import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.robotoFamily
-import com.cornellappdev.transit.util.LIMITED_CAPACITY_THRESHOLD
+import com.cornellappdev.transit.util.HIGH_CAPACITY_THRESHOLD
 import com.cornellappdev.transit.util.colorInterp
 
 // Source: Uplift Android
@@ -39,17 +38,14 @@ import com.cornellappdev.transit.util.colorInterp
  *                  and whose second element is the max capacity.
  * @param label     The name of the gym placed under this indicator. Can be null to indicate no
  *                  label.
- * @param closed    If this gym is closed.
  */
 @Composable
 fun GymCapacityIndicator(
-    capacity: UpliftCapacity?,
+    capacity: UpliftCapacity,
     label: String?,
-    closed: Boolean,
 ) {
-    val grayedOut = closed || capacity == null
 
-    val fraction = if (!grayedOut) capacity!!.percent.toFloat() else 0f
+    val fraction = capacity.percent.toFloat()
     val animatedFraction = remember { Animatable(0f) }
 
     // When the composable launches, animate the fraction to the capacity fraction.
@@ -63,22 +59,21 @@ fun GymCapacityIndicator(
     // Choose a color. If between 0 & 0.5, tween between open and orange. If between 0.5 and 1,
     // tween between orange and closed.
     val color =
-        if (fraction > LIMITED_CAPACITY_THRESHOLD)
+        if (fraction > HIGH_CAPACITY_THRESHOLD)
             colorInterp(
-                (fraction - LIMITED_CAPACITY_THRESHOLD) / (1 - LIMITED_CAPACITY_THRESHOLD),
+                (fraction - HIGH_CAPACITY_THRESHOLD) / (1 - HIGH_CAPACITY_THRESHOLD),
                 AccentOrange,
                 AccentClosed
             )
         else
             colorInterp(
-                fraction / LIMITED_CAPACITY_THRESHOLD,
+                fraction / HIGH_CAPACITY_THRESHOLD,
                 AccentOpen,
                 AccentClosed
             )
 
     val size = 54.dp
-    val percentFontSize =
-        12.sp * (if (closed || capacity != null) 1f else .9f)
+    val percentFontSize = 12.sp
     val labelColor = PrimaryText
     val labelFontWeight = FontWeight(600)
     val labelPadding = 12.dp
@@ -99,12 +94,11 @@ fun GymCapacityIndicator(
                 strokeCap = StrokeCap.Round
             )
             Text(
-                text = if (closed) "CLOSED"
-                else capacity?.percentString() ?: "NO DATA",
+                text = capacity.percentString(),
                 fontFamily = robotoFamily,
                 fontSize = percentFontSize,
                 fontWeight = FontWeight(700),
-                color = if (grayedOut) Gray02 else PrimaryText,
+                color = PrimaryText,
                 modifier = Modifier.align(Alignment.Center),
                 textAlign = TextAlign.Center,
             )

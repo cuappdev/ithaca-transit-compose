@@ -21,12 +21,15 @@ import com.cornellappdev.transit.models.ecosystem.EateryRepository
 import com.cornellappdev.transit.models.ecosystem.GymRepository
 import com.cornellappdev.transit.models.ecosystem.UpliftCapacity
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.theme.AccentClosed
+import com.cornellappdev.transit.ui.theme.AccentOpen
 import com.cornellappdev.transit.ui.theme.AccentOrange
 import com.cornellappdev.transit.ui.theme.LateRed
 import com.cornellappdev.transit.ui.theme.LiveGreen
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.robotoFamily
-import com.cornellappdev.transit.util.LIMITED_CAPACITY_THRESHOLD
+import com.cornellappdev.transit.util.HIGH_CAPACITY_THRESHOLD
+import com.cornellappdev.transit.util.MEDIUM_CAPACITY_THRESHOLD
 import com.cornellappdev.transit.util.TimeUtils.toPascalCaseString
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -358,7 +361,7 @@ class HomeViewModel @Inject constructor(
      *
      * @param operatingHours A list of pairs mapping the first value day string to second value list of hours open
      */
-    private fun getOpenStatus(
+    fun getOpenStatus(
         operatingHours: List<DayOperatingHours>,
         currentDateTime: LocalDateTime = LocalDateTime.now()
     ): OpenStatus {
@@ -466,13 +469,21 @@ class HomeViewModel @Inject constructor(
             return AnnotatedString("")
         }
 
+        val color = if (capacity.percent <= MEDIUM_CAPACITY_THRESHOLD) {
+            AccentOpen
+        } else if (capacity.percent >= HIGH_CAPACITY_THRESHOLD) {
+            AccentClosed
+        } else {
+            AccentOrange
+        }
+
         return buildAnnotatedString {
             withStyle(
                 style = SpanStyle(
                     fontSize = 14.sp,
                     fontFamily = robotoFamily,
                     fontWeight = FontWeight(600),
-                    color = if (capacity.percent <= LIMITED_CAPACITY_THRESHOLD) LiveGreen else AccentOrange,
+                    color = color,
                 )
             ) {
                 append("${capacity.percentString()} full")

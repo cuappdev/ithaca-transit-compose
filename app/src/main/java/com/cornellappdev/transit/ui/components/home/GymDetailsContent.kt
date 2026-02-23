@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.R
@@ -30,6 +29,9 @@ import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.util.getAboutContent
 import com.cornellappdev.transit.util.getGymLocationString
 
+/**
+ * Displays the full detail view for an individual gym within the ecosystem bottom sheet.
+ */
 @Composable
 fun GymDetailsContent(
     homeViewModel: HomeViewModel = hiltViewModel(),
@@ -37,6 +39,8 @@ fun GymDetailsContent(
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
 ) {
+    val isOpen = homeViewModel.getOpenStatus(gym.operatingHours()).isOpen
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -60,11 +64,12 @@ fun GymDetailsContent(
                 gym.operatingHours()
             ),
             widget = {
-                GymCapacityIndicator(
-                    capacity = gym.upliftCapacity,
-                    label = null,
-                    closed = false
-                )
+                if (gym.upliftCapacity != null && isOpen) {
+                    GymCapacityIndicator(
+                        capacity = gym.upliftCapacity,
+                        label = null,
+                    )
+                }
             },
         )
 
