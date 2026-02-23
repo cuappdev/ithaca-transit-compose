@@ -1,6 +1,7 @@
 package com.cornellappdev.transit.ui.components.home
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,8 +24,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cornellappdev.transit.ui.theme.DetailsHeaderGray
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
@@ -41,12 +44,13 @@ fun FavoritesFilterBottomSheet(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp)
+            .background(color = DetailsHeaderGray)
+            .padding(top = 24.dp, bottom = 16.dp, start = 24.dp, end = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 24.dp),
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -61,7 +65,6 @@ fun FavoritesFilterBottomSheet(
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
-            modifier = Modifier.padding(horizontal = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -75,17 +78,17 @@ fun FavoritesFilterBottomSheet(
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
-
         // Footer with Cancel and Apply buttons
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FooterButton(onClick = onCancelClicked, text = "Cancel", modifier = Modifier.weight(0.5f))
+            FooterButton(
+                onClick = onCancelClicked,
+                text = "Cancel",
+                modifier = Modifier.weight(0.5f)
+            )
             Spacer(modifier = Modifier.width(16.dp))
             FooterButton(onClick = onApplyClicked, text = "Apply", modifier = Modifier.weight(0.5f))
         }
@@ -94,20 +97,21 @@ fun FavoritesFilterBottomSheet(
 
 @Composable
 private fun FooterButton(
-    onClick : () -> Unit,
+    onClick: () -> Unit,
     text: String,
-    modifier : Modifier = Modifier
-){
+    modifier: Modifier = Modifier
+) {
     val isCancel = text == "Cancel"
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = if(isCancel) Color.White else TransitBlue,
-            contentColor = if(isCancel) TransitBlue else Color.White
+            backgroundColor = if (isCancel) Color.White else TransitBlue,
+            contentColor = if (isCancel) TransitBlue else Color.White
         ),
         shape = RoundedCornerShape(16.dp),
-        border = if(isCancel) BorderStroke(1.dp, TransitBlue) else null,
-        modifier = modifier.height(40.dp)) {
+        border = if (isCancel) BorderStroke(1.dp, TransitBlue) else null,
+        modifier = modifier.height(40.dp)
+    ) {
         Text(
             text = text,
             style = TextStyle(letterSpacing = 0.sp),
@@ -117,4 +121,25 @@ private fun FooterButton(
             fontWeight = FontWeight.SemiBold
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FavoritesFilterBottomSheetPreview() {
+    FavoritesFilterBottomSheet(
+        onCancelClicked = {},
+        onApplyClicked = {},
+        filters = listOf(
+            FavoritesFilterSheetState.EATERIES,
+            FavoritesFilterSheetState.OTHER,
+            FavoritesFilterSheetState.LIBRARIES,
+            FavoritesFilterSheetState.PRINTERS,
+            FavoritesFilterSheetState.GYMS
+        ),
+        selectedFilters = setOf(
+            FavoritesFilterSheetState.EATERIES,
+            FavoritesFilterSheetState.LIBRARIES
+        ),
+        onFilterToggle = {}
+    )
 }
