@@ -37,7 +37,6 @@ fun AddFavoritesButton(
         modifier = modifier
             .fillMaxWidth()
             .height(40.dp),
-        contentPadding = PaddingValues(vertical = 0.dp)
     ) {
 
         Icon(
