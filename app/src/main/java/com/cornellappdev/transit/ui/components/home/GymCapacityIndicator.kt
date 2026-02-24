@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.ui.components.home
 
+import android.icu.util.Calendar
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.models.ecosystem.UpliftCapacity
@@ -115,4 +117,13 @@ fun GymCapacityIndicator(
             )
         }
     }
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun GymCapacityIndicatorPreview() {
+    GymCapacityIndicator(
+        UpliftCapacity(0.40, Calendar.getInstance()),
+        label = null
+    )
 }

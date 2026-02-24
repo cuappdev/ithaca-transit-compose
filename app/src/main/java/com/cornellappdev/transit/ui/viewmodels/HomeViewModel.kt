@@ -2,7 +2,6 @@ package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -356,7 +355,7 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Given operating hours rotated for today's date, return whether it is open and when it is open until
+     * Given operating hours, return whether it is open and when it is open until
      * or when it will next open
      *
      * @param operatingHours A list of pairs mapping the first value day string to second value list of hours open
@@ -365,13 +364,14 @@ class HomeViewModel @Inject constructor(
         operatingHours: List<DayOperatingHours>,
         currentDateTime: LocalDateTime = LocalDateTime.now()
     ): OpenStatus {
+        val rotatedOperatingHours = rotateOperatingHours(operatingHours)
 
         val currentTime = currentDateTime.toLocalTime()
-        val todaySchedule = operatingHours[0].hours // First day should be today after rotation
+        val todaySchedule = rotatedOperatingHours[0].hours // First day should be today after rotation
 
         // Check if closed today
         if (todaySchedule.any { it.equals("Closed", ignoreCase = true) }) {
-            return findOpenNextDay(operatingHours)
+            return findOpenNextDay(rotatedOperatingHours)
         }
 
         val timeRanges = todaySchedule.mapNotNull { parseTimeRange(it) }
@@ -391,7 +391,7 @@ class HomeViewModel @Inject constructor(
         }
 
         // Closed for today, find next open day
-        return findOpenNextDay(operatingHours)
+        return findOpenNextDay(rotatedOperatingHours)
     }
 
     /**
