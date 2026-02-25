@@ -1,10 +1,12 @@
 package com.cornellappdev.transit.ui.components.home
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,7 +37,9 @@ fun FilterRow(
     modifier: Modifier = Modifier
 ) {
     FlowRow(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxWidth()
+            .animateContentSize(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
     ) {
@@ -52,6 +56,7 @@ fun FilterRow(
                     onRemove = { onRemoveFilter(filter) },
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
+
             }
         }
     }
