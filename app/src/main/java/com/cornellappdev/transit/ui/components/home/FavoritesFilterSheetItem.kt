@@ -50,12 +50,12 @@ fun FavoritesFilterSheetItem(
             .height(90.dp)
             .border(
                 width = 1.dp,
-                color = if(isActive) TransitBlue else MetadataGray,
+                color = if (isActive) TransitBlue else MetadataGray,
                 shape = RoundedCornerShape(8.dp)
             )
             .background(
-                color = if(isActive) MutedTransitBlue
-                    else Color.Transparent,
+                color = if (isActive) MutedTransitBlue
+                else Color.Transparent,
                 shape = RoundedCornerShape(8.dp)
             )
             .clickable(onClick = itemOnClick)
@@ -67,14 +67,14 @@ fun FavoritesFilterSheetItem(
             contentDescription = label,
             modifier = Modifier
                 .size(34.dp),
-            tint = if(isActive) TransitBlue else Color.Unspecified
+            tint = if (isActive) TransitBlue else Color.Unspecified
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             label,
-            color = if(isActive) TransitBlue else MetadataGray,
+            color = if (isActive) TransitBlue else MetadataGray,
             textAlign = TextAlign.Center,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
@@ -88,22 +88,20 @@ fun FavoritesFilterSheetItem(
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewFavoritesFilterSheetItemActive() {
+private fun ActiveFavoritesFilterSheetItemPreview() {
     FavoritesFilterSheetItem(
         iconId = R.drawable.eatery_filter_icon,
         label = "Eateries",
         isActive = true
     ) {}
-
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun InactiveFavoritesFilterSheetItemInactive() {
+private fun InactiveFavoritesFilterSheetItemPreview() {
     FavoritesFilterSheetItem(
         iconId = R.drawable.eatery_filter_icon,
         label = "Eateries",
         isActive = false
     ) {}
-
 }

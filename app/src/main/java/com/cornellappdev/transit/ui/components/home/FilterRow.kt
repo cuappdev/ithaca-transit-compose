@@ -106,7 +106,6 @@ private fun FilterRowPreview() {
         onRemoveFilter = {}
     )
 
-
 }
 
 @Preview(showBackground = true)
