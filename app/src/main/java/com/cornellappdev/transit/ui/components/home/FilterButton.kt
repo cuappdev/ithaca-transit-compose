@@ -25,8 +25,7 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
 fun FilterButton(
     onFilterClick: () -> Unit,
     modifier: Modifier = Modifier,
-
-    ) {
+) {
     Button(
         onClick = onFilterClick,
         colors = ButtonDefaults.buttonColors(
