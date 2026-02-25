@@ -189,6 +189,8 @@ fun HomeScreen(
 
     // Favorite filter bottom sheet state
     val showFilterSheet by homeViewModel.showFilterSheet.collectAsStateWithLifecycle()
+    val selectedFilters by homeViewModel.selectedFavoritesFilters.collectAsStateWithLifecycle()
+    val appliedFilters by homeViewModel.appliedFavoritesFilters.collectAsStateWithLifecycle()
 
     // Intercept clicks outside of search bar and disable search
     @Composable
@@ -343,7 +345,15 @@ fun HomeScreen(
                                 homeViewModel.toggleAddFavoritesSheet(true)
                             },
                             showFilterSheet = showFilterSheet,
-                            onFilterSheetShow = { homeViewModel.openFilterSheet() }
+                            onFilterSheetShow = homeViewModel::openFilterSheet,
+                            selectedFilters = selectedFilters,
+                            appliedFilters = appliedFilters,
+                            favoritesFilterList = homeViewModel.favoritesFilterList,
+                            onCancelFilters = homeViewModel::cancelFavoritesFilters,
+                            onApplyFilters = homeViewModel::applyFavoritesFilters,
+                            onFilterToggle = homeViewModel::toggleFavoritesFilter,
+                            onRemoveAppliedFilter = homeViewModel::removeAppliedFilter,
+                            operatingHoursToString = homeViewModel::isOpenAnnotatedStringFromOperatingHours
                         )
                     }
                 }

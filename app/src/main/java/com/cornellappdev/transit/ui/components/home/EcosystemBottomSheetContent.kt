@@ -18,7 +18,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
@@ -26,8 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
@@ -37,9 +34,10 @@ import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.FavoritesDividerGray
 import com.cornellappdev.transit.ui.theme.robotoFamily
+import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
 import com.cornellappdev.transit.ui.viewmodels.FilterState
-import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.util.ecosystem.toPlace
+import kotlin.collections.isNotEmpty
 
 
 /**
@@ -65,7 +63,14 @@ fun EcosystemBottomSheetContent(
     showFilterSheet: Boolean,
     onFilterSheetShow: () -> Unit,
     onAddFavoritesClick: () -> Unit,
-    homeViewModel: HomeViewModel = hiltViewModel(),
+    selectedFilters: Set<FavoritesFilterSheetState>,
+    appliedFilters: Set<FavoritesFilterSheetState>,
+    favoritesFilterList: List<FavoritesFilterSheetState>,
+    onCancelFilters: () -> Unit,
+    onApplyFilters: () -> Unit,
+    onFilterToggle: (FavoritesFilterSheetState) -> Unit,
+    onRemoveAppliedFilter: (FavoritesFilterSheetState) -> Unit,
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
 ) {
     Column(modifier = modifier) {
         Row(
@@ -107,31 +112,24 @@ fun EcosystemBottomSheetContent(
             onDetailsClick = onDetailsClick,
             onFavoriteStarClick = onFavoriteStarClick,
             onFilterButtonClick = onFilterSheetShow,
-            onAddFavoritesClick = onAddFavoritesClick
+            onAddFavoritesClick = onAddFavoritesClick,
+            appliedFilters = appliedFilters,
+            onRemoveAppliedFilter = onRemoveAppliedFilter,
+            operatingHoursToString = operatingHoursToString
         )
     }
 
-    val selectedFilters by homeViewModel.selectedFavoritesFilters.collectAsStateWithLifecycle()
-
     if (showFilterSheet) {
         ModalBottomSheet(
-            onDismissRequest = {
-                homeViewModel.cancelFavoritesFilters()
-            },
+            onDismissRequest = onCancelFilters,
             dragHandle = null
         ) {
             FavoritesFilterBottomSheet(
-                onCancelClicked = {
-                    homeViewModel.cancelFavoritesFilters()
-                },
-                onApplyClicked = {
-                    homeViewModel.applyFavoritesFilters()
-                },
-                filters = homeViewModel.favoritesFilterList,
+                onCancelClicked = onCancelFilters,
+                onApplyClicked = onApplyFilters,
+                filters = favoritesFilterList,
                 selectedFilters = selectedFilters,
-                onFilterToggle = { filter ->
-                    homeViewModel.toggleFavoritesFilter(filter)
-                }
+                onFilterToggle = onFilterToggle
             )
         }
     }
@@ -139,7 +137,6 @@ fun EcosystemBottomSheetContent(
 
 @Composable
 private fun BottomSheetFilteredContent(
-    homeViewModel: HomeViewModel = hiltViewModel(),
     currentFilter: FilterState,
     staticPlaces: StaticPlaces,
     favorites: Set<Place>,
@@ -147,9 +144,11 @@ private fun BottomSheetFilteredContent(
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     onFavoriteStarClick: (Place) -> Unit,
     onAddFavoritesClick: () -> Unit,
-    onFilterButtonClick: () -> Unit
+    onFilterButtonClick: () -> Unit,
+    appliedFilters: Set<FavoritesFilterSheetState>,
+    onRemoveAppliedFilter: (FavoritesFilterSheetState) -> Unit,
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString
 ) {
-    val appliedFilters by homeViewModel.appliedFavoritesFilters.collectAsStateWithLifecycle()
     Column {
         if (currentFilter == FilterState.FAVORITES) {
             Column(modifier = Modifier.padding(horizontal = 12.dp)) {
@@ -160,7 +159,7 @@ private fun BottomSheetFilteredContent(
                 FilterRow(
                     selectedFilters = appliedFilters,
                     onFilterClick = onFilterButtonClick,
-                    onRemoveFilter = { filter -> homeViewModel.removeAppliedFilter(filter) }
+                    onRemoveFilter = onRemoveAppliedFilter
                 )
                 if (appliedFilters.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
@@ -201,7 +200,7 @@ private fun BottomSheetFilteredContent(
                         onDetailsClick = onDetailsClick,
                         favorites = favorites,
                         onFavoriteStarClick = onFavoriteStarClick,
-                        operatingHoursToString = homeViewModel::isOpenAnnotatedStringFromOperatingHours
+                        operatingHoursToString = operatingHoursToString
                     )
                 }
 
@@ -402,7 +401,21 @@ private fun PreviewEcosystemBottomSheet() {
         onDetailsClick = {},
         onFavoriteStarClick = {},
         onAddFavoritesClick = {},
-        showFilterSheet = true,
-        onFilterSheetShow = {}
+        showFilterSheet = false,
+        onFilterSheetShow = {},
+        selectedFilters = emptySet(),
+        appliedFilters = emptySet(),
+        favoritesFilterList = listOf(
+            FavoritesFilterSheetState.GYMS,
+            FavoritesFilterSheetState.EATERIES,
+            FavoritesFilterSheetState.LIBRARIES,
+            FavoritesFilterSheetState.PRINTERS,
+            FavoritesFilterSheetState.OTHER
+        ),
+        onCancelFilters = {},
+        onApplyFilters = {},
+        onFilterToggle = {},
+        onRemoveAppliedFilter = {},
+        operatingHoursToString = { _ -> AnnotatedString("") }
     )
 }
