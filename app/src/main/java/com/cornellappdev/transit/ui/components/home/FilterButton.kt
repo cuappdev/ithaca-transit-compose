@@ -32,7 +32,8 @@ fun FilterButton(
             containerColor = Color.Transparent,
             contentColor = SecondaryText
         ),
-        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+        contentPadding = PaddingValues(horizontal = 8.dp),
+        modifier = modifier,
     ) {
         Icon(
             painter = painterResource(R.drawable.filter_icon),

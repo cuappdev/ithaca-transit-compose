@@ -37,7 +37,7 @@ fun FilterRow(
     FlowRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
     ) {
         FilterButton(
             onFilterClick = onFilterClick,
@@ -70,7 +70,7 @@ private fun FilterLabel(
         color = Color.Transparent
     ) {
         Row(
-            modifier = modifier.padding(start = 14.dp, top = 10.dp, bottom = 10.dp, end = 8.dp),
+            modifier = Modifier.padding(start = 14.dp, top = 10.dp, bottom = 10.dp, end = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
