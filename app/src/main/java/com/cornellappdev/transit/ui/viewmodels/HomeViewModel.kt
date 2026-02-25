@@ -367,7 +367,8 @@ class HomeViewModel @Inject constructor(
         val rotatedOperatingHours = rotateOperatingHours(operatingHours)
 
         val currentTime = currentDateTime.toLocalTime()
-        val todaySchedule = rotatedOperatingHours[0].hours // First day should be today after rotation
+        val todaySchedule =
+            rotatedOperatingHours[0].hours // First day should be today after rotation
 
         // Check if closed today
         if (todaySchedule.any { it.equals("Closed", ignoreCase = true) }) {
@@ -453,9 +454,7 @@ class HomeViewModel @Inject constructor(
      */
     fun isOpenAnnotatedStringFromOperatingHours(operatingHours: List<DayOperatingHours>): AnnotatedString {
         return getOpenStatusAnnotatedString(
-            getOpenStatus(
-                rotateOperatingHours(operatingHours)
-            )
+            getOpenStatus(operatingHours)
         )
     }
 
