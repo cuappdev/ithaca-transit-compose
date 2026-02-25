@@ -15,6 +15,33 @@ import java.util.Locale
 object TimeUtils {
 
     /**
+     * Value to represent the custom order of days in a week (with Sunday as
+     * the first day). Sunday first indexing courtesy of Eatery
+     */
+    val dayOrder = mapOf(
+        "Sunday" to 0,
+        "Monday" to 1,
+        "Tuesday" to 2,
+        "Wednesday" to 3,
+        "Thursday" to 4,
+        "Friday" to 5,
+        "Saturday" to 6
+    )
+
+    /**
+     * Mapping from order to day
+     */
+    val dayString = mapOf(
+        0 to "Sunday",
+        1 to "Monday",
+        2 to "Tuesday",
+        3 to "Wednesday",
+        4 to "Thursday",
+        5 to "Friday",
+        6 to "Saturday"
+    )
+
+    /**
      * Formatter for date and time. Ex: Mar 17, 1998 4:42 AM
      */
     val dateTimeFormatter =

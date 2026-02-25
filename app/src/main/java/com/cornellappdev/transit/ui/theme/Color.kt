@@ -25,4 +25,12 @@ val DetailsDividerGray = Color(0xffc6c6c8)
 
 val FavoritesYellow = Color(0xFFFEC50E)
 
+val Gray02 = Color(0xFFA5A5A5)
+val Gray04 = Color(0xFF707070)
 val Gray05 = Color(0xFF586069)
+
+// Gyms
+
+val AccentOpen = Color(0xFF64C270)
+val AccentClosed = Color(0xFFF07D7D)
+val AccentOrange = Color(0xFFFE8F13)

@@ -1,6 +1,10 @@
 package com.cornellappdev.transit.models.ecosystem
 
 import android.icu.util.Calendar
+import com.cornellappdev.transit.models.Place
+import com.cornellappdev.transit.models.PlaceType
+import com.cornellappdev.transit.util.TimeUtils.dayString
+import com.cornellappdev.transit.util.getGymLocationString
 import kotlin.math.roundToInt
 
 /**
@@ -38,7 +42,37 @@ data class UpliftGym(
     val upliftCapacity: UpliftCapacity?,
     val latitude: Double,
     val longitude: Double,
-) : DetailedEcosystemPlace
+) : DetailedEcosystemPlace {
+
+    override fun operatingHours(): List<DayOperatingHours> {
+
+        // Sunday is enforced to be first indexed day
+        val indexedHours = hours.takeLast(1) + hours.dropLast(1)
+
+        val dayOperatingHours = indexedHours.mapIndexed { index, dayHours ->
+            dayHours?.let {
+                DayOperatingHours(
+                    dayOfWeek = dayString[index] ?: "",
+                    hours = dayHours.map { timeInterval ->
+                        timeInterval.toString()
+
+                    })
+            } ?: DayOperatingHours(dayOfWeek = dayString[index] ?: "", hours = listOf("Closed"))
+        }
+
+
+        return dayOperatingHours
+
+    }
+
+    override fun toPlace(): Place = Place(
+        latitude = this.latitude,
+        longitude = this.longitude,
+        name = this.name,
+        detail = getGymLocationString(this.name),
+        type = PlaceType.APPLE_PLACE
+    )
+}
 
 /**
  * A gym's capacity.

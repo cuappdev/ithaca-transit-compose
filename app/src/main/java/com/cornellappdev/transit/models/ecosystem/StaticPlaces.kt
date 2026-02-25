@@ -1,5 +1,7 @@
 package com.cornellappdev.transit.models.ecosystem
 
+import com.cornellappdev.transit.models.Place
+import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.networking.ApiResponse
 import com.squareup.moshi.Json
 
@@ -22,7 +24,15 @@ data class Printer(
     @Json(name = "description") var description: String,
     @Json(name = "latitude") var latitude: Double,
     @Json(name = "longitude") var longitude: Double
-)
+) : EcosystemPlace {
+    override fun toPlace(): Place = Place(
+        latitude = this.latitude,
+        longitude = this.longitude,
+        name = this.location,
+        detail = this.description,
+        type = PlaceType.APPLE_PLACE
+    )
+}
 
 /**
  * Class representing a Cornell library
@@ -33,4 +43,18 @@ data class Library(
     @Json(name = "address") var address: String,
     @Json(name = "latitude") var latitude: Double,
     @Json(name = "longitude") var longitude: Double
-) : DetailedEcosystemPlace
+) : DetailedEcosystemPlace {
+
+    override fun operatingHours(): List<DayOperatingHours> {
+        //TODO: Implement
+        return emptyList()
+    }
+
+    override fun toPlace(): Place = Place(
+        latitude = this.latitude,
+        longitude = this.longitude,
+        name = this.location,
+        detail = this.address,
+        type = PlaceType.APPLE_PLACE
+    )
+}

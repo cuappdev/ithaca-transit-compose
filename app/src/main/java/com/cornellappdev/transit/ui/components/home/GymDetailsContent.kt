@@ -18,7 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.models.ecosystem.Eatery
+import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.Gray05
 import com.cornellappdev.transit.ui.theme.PrimaryText
@@ -27,14 +27,20 @@ import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.util.getAboutContent
+import com.cornellappdev.transit.util.getGymLocationString
 
+/**
+ * Displays the full detail view for an individual gym within the ecosystem bottom sheet.
+ */
 @Composable
-fun EateryDetailsContent(
+fun GymDetailsContent(
     homeViewModel: HomeViewModel = hiltViewModel(),
-    eatery: Eatery,
+    gym: UpliftGym,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
 ) {
+    val isOpen = homeViewModel.getOpenStatus(gym.operatingHours()).isOpen
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -44,19 +50,27 @@ fun EateryDetailsContent(
             )
     ) {
         PlaceCardImage(
-            imageUrl = eatery.imageUrl,
+            imageUrl = gym.imageUrl,
             placeholderRes = R.drawable.olin_library,
             shouldClipBottom = true
         )
 
-        DetailedPlaceHeaderSection(
-            eatery.name,
-            eatery.campusArea,
-            leftAnnotatedString = homeViewModel.isOpenAnnotatedStringFromOperatingHours(
-                eatery.operatingHours()
-            ),
+        DetailedPlaceHeaderSectionWithWidget(
+            gym.name,
+            getGymLocationString(gym.name),
             onFavoriteClick = onFavoriteClick,
-            isFavorite = isFavorite
+            isFavorite = isFavorite,
+            leftAnnotatedString = homeViewModel.isOpenAnnotatedStringFromOperatingHours(
+                gym.operatingHours()
+            ),
+            widget = {
+                if (gym.upliftCapacity != null && isOpen) {
+                    GymCapacityIndicator(
+                        capacity = gym.upliftCapacity,
+                        label = null,
+                    )
+                }
+            },
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -73,14 +87,14 @@ fun EateryDetailsContent(
         )
 
         Text(
-            text = getAboutContent(eatery.name),
+            text = getAboutContent(gym.name),
             style = Style.detailBody,
             color = SecondaryText,
             modifier = Modifier.padding(bottom = 15.dp)
         )
 
         Text(
-            text = stringResource(R.string.view_menu),
+            text = stringResource(R.string.view_gym),
             style = Style.heading2,
             color = TransitBlue
         )
@@ -100,7 +114,7 @@ fun EateryDetailsContent(
                 tint = Gray05
             )
             Text(
-                text = eatery.location ?: "",
+                text = getGymLocationString(gym.name) ?: "",
                 style = Style.detailBody,
                 color = SecondaryText,
                 modifier = Modifier.padding(start = 15.dp)
@@ -113,8 +127,8 @@ fun EateryDetailsContent(
         HorizontalDivider(thickness = 1.dp, color = DividerGray)
 
         ExpandableOperatingHoursList(
-            homeViewModel.isOpenAnnotatedStringFromOperatingHours(eatery.operatingHours()),
-            homeViewModel.rotateOperatingHours(eatery.operatingHours())
+            homeViewModel.isOpenAnnotatedStringFromOperatingHours(gym.operatingHours()),
+            homeViewModel.rotateOperatingHours(gym.operatingHours())
         )
 
     }

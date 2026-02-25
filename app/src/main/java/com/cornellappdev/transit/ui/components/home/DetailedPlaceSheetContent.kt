@@ -38,7 +38,6 @@ import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.util.BOTTOM_SHEET_MAX_HEIGHT_PERCENT
-import com.cornellappdev.transit.util.ecosystem.toPlace
 
 @Composable
 fun DetailedPlaceSheetContent(
@@ -110,8 +109,13 @@ fun DetailedPlaceSheetContent(
                 }
 
                 is UpliftGym -> {
-                    //TODO
-                    Text(ecosystemPlace.name)
+                    GymDetailsContent(
+                        gym = ecosystemPlace,
+                        isFavorite = ecosystemPlace.toPlace() in favorites,
+                        onFavoriteClick = {
+                            onFavoriteStarClick(ecosystemPlace.toPlace())
+                        }
+                    )
                 }
             }
         }
@@ -148,7 +152,9 @@ fun DetailedPlaceSheetContent(
                                 }
 
                                 is UpliftGym -> {
-                                    //TODO
+                                    navigateToPlace(
+                                        ecosystemPlace.toPlace()
+                                    )
                                 }
                             }
                         }

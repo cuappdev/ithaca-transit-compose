@@ -6,6 +6,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
@@ -17,10 +18,17 @@ import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 import com.cornellappdev.transit.models.ecosystem.EateryRepository
 import com.cornellappdev.transit.models.ecosystem.GymRepository
+import com.cornellappdev.transit.models.ecosystem.UpliftCapacity
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.theme.AccentClosed
+import com.cornellappdev.transit.ui.theme.AccentOpen
+import com.cornellappdev.transit.ui.theme.AccentOrange
 import com.cornellappdev.transit.ui.theme.LateRed
 import com.cornellappdev.transit.ui.theme.LiveGreen
 import com.cornellappdev.transit.ui.theme.SecondaryText
+import com.cornellappdev.transit.ui.theme.robotoFamily
+import com.cornellappdev.transit.util.HIGH_CAPACITY_THRESHOLD
+import com.cornellappdev.transit.util.MEDIUM_CAPACITY_THRESHOLD
 import com.cornellappdev.transit.util.TimeUtils.toPascalCaseString
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,7 +45,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -348,22 +355,24 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Given operating hours rotated for today's date, return whether it is open and when it is open until
+     * Given operating hours, return whether it is open and when it is open until
      * or when it will next open
      *
      * @param operatingHours A list of pairs mapping the first value day string to second value list of hours open
      */
-    private fun getOpenStatus(
+    fun getOpenStatus(
         operatingHours: List<DayOperatingHours>,
         currentDateTime: LocalDateTime = LocalDateTime.now()
     ): OpenStatus {
+        val rotatedOperatingHours = rotateOperatingHours(operatingHours)
 
         val currentTime = currentDateTime.toLocalTime()
-        val todaySchedule = operatingHours[0].hours // First day should be today after rotation
+        val todaySchedule =
+            rotatedOperatingHours[0].hours // First day should be today after rotation
 
         // Check if closed today
         if (todaySchedule.any { it.equals("Closed", ignoreCase = true) }) {
-            return findOpenNextDay(operatingHours)
+            return findOpenNextDay(rotatedOperatingHours)
         }
 
         val timeRanges = todaySchedule.mapNotNull { parseTimeRange(it) }
@@ -383,7 +392,7 @@ class HomeViewModel @Inject constructor(
         }
 
         // Closed for today, find next open day
-        return findOpenNextDay(operatingHours)
+        return findOpenNextDay(rotatedOperatingHours)
     }
 
     /**
@@ -445,10 +454,40 @@ class HomeViewModel @Inject constructor(
      */
     fun isOpenAnnotatedStringFromOperatingHours(operatingHours: List<DayOperatingHours>): AnnotatedString {
         return getOpenStatusAnnotatedString(
-            getOpenStatus(
-                rotateOperatingHours(operatingHours)
-            )
+            getOpenStatus(operatingHours)
         )
+    }
+
+    /**
+     * Format percent string based on a gym's current capacity
+     */
+    fun capacityPercentAnnotatedString(capacity: UpliftCapacity?): AnnotatedString {
+
+        // Return empty string if no capacity data available
+        if (capacity == null) {
+            return AnnotatedString("")
+        }
+
+        val color = if (capacity.percent <= MEDIUM_CAPACITY_THRESHOLD) {
+            AccentOpen
+        } else if (capacity.percent >= HIGH_CAPACITY_THRESHOLD) {
+            AccentClosed
+        } else {
+            AccentOrange
+        }
+
+        return buildAnnotatedString {
+            withStyle(
+                style = SpanStyle(
+                    fontSize = 14.sp,
+                    fontFamily = robotoFamily,
+                    fontWeight = FontWeight(600),
+                    color = color,
+                )
+            ) {
+                append("${capacity.percentString()} full")
+            }
+        }
     }
 
 }

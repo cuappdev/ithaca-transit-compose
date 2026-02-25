@@ -67,7 +67,7 @@ private fun OperatingHoursRow(
     ) {
         Row(
             horizontalArrangement = Arrangement.Start,
-            modifier = Modifier.weight(0.6f)
+            modifier = Modifier.weight(0.58f)
         ) {
             if (isHighlighted) {
                 VerticalDivider(
@@ -89,7 +89,7 @@ private fun OperatingHoursRow(
 
         Column(
             horizontalAlignment = Alignment.Start,
-            modifier = Modifier.weight(0.4f)
+            modifier = Modifier.weight(0.42f)
         ) {
             hours.forEach { timeRange ->
                 Text(
