@@ -161,7 +161,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun removeAppliedFilter(filter: FavoritesFilterSheetState) {
-        _selectedFavoritesFilters.value = _selectedFavoritesFilters.value - filter
+        _selectedFavoritesFilters.value -= filter
         _appliedFavoritesFilters.value = _appliedFavoritesFilters.value - filter
     }
 

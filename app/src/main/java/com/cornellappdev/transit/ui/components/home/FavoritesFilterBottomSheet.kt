@@ -87,6 +87,7 @@ fun FavoritesFilterBottomSheet(
             FooterButton(
                 onClick = onCancelClicked,
                 text = "Cancel",
+                isCancel = true,
                 modifier = Modifier.weight(0.5f)
             )
             Spacer(modifier = Modifier.width(16.dp))
@@ -99,9 +100,9 @@ fun FavoritesFilterBottomSheet(
 private fun FooterButton(
     onClick: () -> Unit,
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isCancel: Boolean = false
 ) {
-    val isCancel = text == "Cancel"
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
