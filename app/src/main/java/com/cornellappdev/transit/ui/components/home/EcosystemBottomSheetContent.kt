@@ -376,7 +376,7 @@ private fun LazyListScope.libraryList(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun PreviewEcosystemBottomSheet() {
     EcosystemBottomSheetContent(
