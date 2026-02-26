@@ -43,7 +43,6 @@ fun RoundedImagePlaceCard(
 ) {
     Column(
         modifier = Modifier
-            .padding(horizontal = 24.dp, vertical = 10.dp)
             .clickable { onClick() }
     ) {
         Column(

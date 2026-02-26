@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.ui.components.home
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,7 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
@@ -29,10 +32,12 @@ import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
 import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.ui.theme.FavoritesDividerGray
 import com.cornellappdev.transit.ui.theme.robotoFamily
+import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
 import com.cornellappdev.transit.ui.viewmodels.FilterState
-import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.util.ecosystem.toPlace
+import kotlin.collections.isNotEmpty
 
 
 /**
@@ -43,6 +48,7 @@ import com.cornellappdev.transit.util.ecosystem.toPlace
  * @param staticPlaces Collection of all places to populate filters with
  * @param navigateToPlace Function called to navigate to route options
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EcosystemBottomSheetContent(
     filters: List<FilterState>,
@@ -54,7 +60,17 @@ fun EcosystemBottomSheetContent(
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     onFavoriteStarClick: (Place) -> Unit,
+    showFilterSheet: Boolean,
+    onFilterSheetShow: () -> Unit,
     onAddFavoritesClick: () -> Unit,
+    selectedFilters: Set<FavoritesFilterSheetState>,
+    appliedFilters: Set<FavoritesFilterSheetState>,
+    favoritesFilterList: List<FavoritesFilterSheetState>,
+    onCancelFilters: () -> Unit,
+    onApplyFilters: () -> Unit,
+    onFilterToggle: (FavoritesFilterSheetState) -> Unit,
+    onRemoveAppliedFilter: (FavoritesFilterSheetState) -> Unit,
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
 ) {
     Column(modifier = modifier) {
         Row(
@@ -76,7 +92,7 @@ fun EcosystemBottomSheetContent(
             )
         }
 
-        LazyRow {
+        LazyRow(modifier = Modifier.padding(bottom = 12.dp)) {
             items(filters) {
                 BottomSheetFilterItem(
                     imageResId = it.iconId,
@@ -95,57 +111,108 @@ fun EcosystemBottomSheetContent(
             navigateToPlace = navigateToPlace,
             onDetailsClick = onDetailsClick,
             onFavoriteStarClick = onFavoriteStarClick,
-            onAddFavoritesClick = onAddFavoritesClick
+            onFilterButtonClick = onFilterSheetShow,
+            onAddFavoritesClick = onAddFavoritesClick,
+            appliedFilters = appliedFilters,
+            onRemoveAppliedFilter = onRemoveAppliedFilter,
+            operatingHoursToString = operatingHoursToString
         )
+    }
+
+    if (showFilterSheet) {
+        ModalBottomSheet(
+            onDismissRequest = onCancelFilters,
+            dragHandle = null
+        ) {
+            FavoritesFilterBottomSheet(
+                onCancelClicked = onCancelFilters,
+                onApplyClicked = onApplyFilters,
+                filters = favoritesFilterList,
+                selectedFilters = selectedFilters,
+                onFilterToggle = onFilterToggle
+            )
+        }
     }
 }
 
 @Composable
 private fun BottomSheetFilteredContent(
-    homeViewModel: HomeViewModel = hiltViewModel(),
     currentFilter: FilterState,
     staticPlaces: StaticPlaces,
     favorites: Set<Place>,
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     onFavoriteStarClick: (Place) -> Unit,
-    onAddFavoritesClick: () -> Unit
+    onAddFavoritesClick: () -> Unit,
+    onFilterButtonClick: () -> Unit,
+    appliedFilters: Set<FavoritesFilterSheetState>,
+    onRemoveAppliedFilter: (FavoritesFilterSheetState) -> Unit,
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString
 ) {
-    LazyColumn(
-        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 20.dp, bottom = 90.dp),
-        modifier = Modifier.fillMaxSize()
-    ) {
-        when (currentFilter) {
-            FilterState.FAVORITES -> {
-                favoriteList(favorites, navigateToPlace, onAddFavoritesClick)
-            }
-
-            FilterState.PRINTERS -> {
-                printerList(staticPlaces, navigateToPlace)
-            }
-
-            FilterState.GYMS -> {
-                gymList(staticPlaces, navigateToPlace)
-            }
-
-            FilterState.EATERIES -> {
-                eateryList(
-                    eateriesApiResponse = staticPlaces.eateries,
-                    onDetailsClick = onDetailsClick,
-                    favorites = favorites,
-                    onFavoriteStarClick = onFavoriteStarClick,
-                    operatingHoursToString = homeViewModel::isOpenAnnotatedStringFromOperatingHours
+    Column {
+        if (currentFilter == FilterState.FAVORITES) {
+            Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    color = FavoritesDividerGray
                 )
-            }
-
-            FilterState.LIBRARIES -> {
-                libraryList(
-                    staticPlaces,
-                    navigateToPlace,
-                    onDetailsClick,
-                    favorites,
-                    onFavoriteStarClick,
+                FilterRow(
+                    selectedFilters = appliedFilters,
+                    onFilterClick = onFilterButtonClick,
+                    onRemoveFilter = onRemoveAppliedFilter
                 )
+                if (appliedFilters.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+        val isFilterBarHidden = currentFilter == FilterState.FAVORITES && appliedFilters.isEmpty()
+        LazyColumn(
+            contentPadding = PaddingValues(
+                start = 12.dp,
+                end = 12.dp,
+                top = if (isFilterBarHidden) 0.dp else 8.dp,
+                bottom = 120.dp // Makes bottom content visible with padding at the end
+            ),
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            when (currentFilter) {
+                FilterState.FAVORITES -> {
+                    favoriteList(
+                        favorites,
+                        navigateToPlace,
+                        onAddFavoritesClick
+                    )
+                }
+
+                FilterState.PRINTERS -> {
+                    printerList(staticPlaces, navigateToPlace)
+                }
+
+                FilterState.GYMS -> {
+                    gymList(staticPlaces, navigateToPlace)
+                }
+
+                FilterState.EATERIES -> {
+                    eateryList(
+                        eateriesApiResponse = staticPlaces.eateries,
+                        onDetailsClick = onDetailsClick,
+                        favorites = favorites,
+                        onFavoriteStarClick = onFavoriteStarClick,
+                        operatingHoursToString = operatingHoursToString
+                    )
+                }
+
+                FilterState.LIBRARIES -> {
+                    libraryList(
+                        staticPlaces,
+                        navigateToPlace,
+                        onDetailsClick,
+                        favorites,
+                        onFavoriteStarClick,
+                    )
+                }
             }
         }
     }
@@ -160,8 +227,8 @@ private fun LazyListScope.favoriteList(
     onAddFavoritesClick: () -> Unit
 ) {
     item {
+        Spacer(modifier = Modifier.height(8.dp))
         AddFavoritesButton(onAddFavoritesClick = onAddFavoritesClick)
-        Spacer(Modifier.height(20.dp))
     }
     items(favorites.toList()) {
         BottomSheetLocationCard(
@@ -170,7 +237,6 @@ private fun LazyListScope.favoriteList(
         ) {
             //TODO: Eatery
         }
-        Spacer(Modifier.height(10.dp))
     }
 }
 
@@ -196,7 +262,6 @@ private fun LazyListScope.gymList(
                 ) {
                     //TODO: Eatery
                 }
-                Spacer(Modifier.height(10.dp))
             }
 
         }
@@ -271,7 +336,6 @@ private fun LazyListScope.eateryList(
                 ) {
                     onDetailsClick(it)
                 }
-                Spacer(Modifier.height(10.dp))
             }
         }
     }
@@ -307,13 +371,12 @@ private fun LazyListScope.libraryList(
                 ) {
                     navigateToDetails(it)
                 }
-                Spacer(Modifier.height(10.dp))
             }
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun PreviewEcosystemBottomSheet() {
     EcosystemBottomSheetContent(
@@ -337,6 +400,22 @@ private fun PreviewEcosystemBottomSheet() {
         navigateToPlace = {},
         onDetailsClick = {},
         onFavoriteStarClick = {},
-        onAddFavoritesClick = {}
+        onAddFavoritesClick = {},
+        showFilterSheet = false,
+        onFilterSheetShow = {},
+        selectedFilters = emptySet(),
+        appliedFilters = emptySet(),
+        favoritesFilterList = listOf(
+            FavoritesFilterSheetState.GYMS,
+            FavoritesFilterSheetState.EATERIES,
+            FavoritesFilterSheetState.LIBRARIES,
+            FavoritesFilterSheetState.PRINTERS,
+            FavoritesFilterSheetState.OTHER
+        ),
+        onCancelFilters = {},
+        onApplyFilters = {},
+        onFilterToggle = {},
+        onRemoveAppliedFilter = {},
+        operatingHoursToString = { _ -> AnnotatedString("") }
     )
 }
