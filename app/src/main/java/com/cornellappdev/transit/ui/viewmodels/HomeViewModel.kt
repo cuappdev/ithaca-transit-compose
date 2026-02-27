@@ -90,6 +90,13 @@ class HomeViewModel @Inject constructor(
 
     val filterState: MutableStateFlow<FilterState> = MutableStateFlow(FilterState.FAVORITES)
 
+    private val _showFilterSheet = MutableStateFlow(false)
+    val showFilterSheet: StateFlow<Boolean> = _showFilterSheet.asStateFlow()
+
+    fun toggleFilterSheet(show: Boolean) {
+        _showFilterSheet.value = show
+    }
+
     val staticPlacesFlow =
         combine(
             routeRepository.printerFlow,
@@ -119,6 +126,55 @@ class HomeViewModel @Inject constructor(
 
     fun toggleAddFavoritesSheet(show: Boolean) {
         _showAddFavoritesSheet.value = show
+    }
+
+    val favoritesFilterList = listOf(
+        FavoritesFilterSheetState.GYMS,
+        FavoritesFilterSheetState.EATERIES,
+        FavoritesFilterSheetState.LIBRARIES,
+        FavoritesFilterSheetState.PRINTERS,
+        FavoritesFilterSheetState.OTHER
+    )
+
+    private val _selectedFavoritesFilters =
+        MutableStateFlow<Set<FavoritesFilterSheetState>>(emptySet())
+    val selectedFavoritesFilters: StateFlow<Set<FavoritesFilterSheetState>> =
+        _selectedFavoritesFilters.asStateFlow()
+
+    private val _appliedFavoritesFilters =
+        MutableStateFlow<Set<FavoritesFilterSheetState>>(emptySet())
+    val appliedFavoritesFilters: StateFlow<Set<FavoritesFilterSheetState>> =
+        _appliedFavoritesFilters.asStateFlow()
+
+    fun toggleFavoritesFilter(filter: FavoritesFilterSheetState) {
+        _selectedFavoritesFilters.value = if (filter in _selectedFavoritesFilters.value) {
+            _selectedFavoritesFilters.value - filter
+        } else {
+            _selectedFavoritesFilters.value + filter
+        }
+    }
+
+    fun applyFavoritesFilters() {
+        // Save the current selection as applied filters
+        _appliedFavoritesFilters.value = _selectedFavoritesFilters.value
+        toggleFilterSheet(false)
+    }
+
+    fun removeAppliedFilter(filter: FavoritesFilterSheetState) {
+        _selectedFavoritesFilters.value -= filter
+        _appliedFavoritesFilters.value = _appliedFavoritesFilters.value - filter
+    }
+
+    fun cancelFavoritesFilters() {
+        // Restore the previously applied filters
+        _selectedFavoritesFilters.value = _appliedFavoritesFilters.value
+        toggleFilterSheet(false)
+    }
+
+    fun openFilterSheet() {
+        // Initialize selected filters with currently applied filters
+        _selectedFavoritesFilters.value = _appliedFavoritesFilters.value
+        toggleFilterSheet(true)
     }
 
 
