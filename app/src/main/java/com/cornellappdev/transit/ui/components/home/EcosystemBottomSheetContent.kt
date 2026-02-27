@@ -117,7 +117,7 @@ private fun BottomSheetFilteredContent(
     ) {
         when (currentFilter) {
             FilterState.FAVORITES -> {
-                favoriteList(favorites, navigateToPlace, onAddFavoritesClick)
+                favoriteList(favorites, navigateToPlace, onAddFavoritesClick, onFavoriteStarClick)
             }
 
             FilterState.PRINTERS -> {
@@ -157,7 +157,8 @@ private fun BottomSheetFilteredContent(
 private fun LazyListScope.favoriteList(
     favorites: Set<Place>,
     navigateToPlace: (Place) -> Unit,
-    onAddFavoritesClick: () -> Unit
+    onAddFavoritesClick: () -> Unit,
+    onFavoriteStarClick: (Place) -> Unit
 ) {
     item {
         AddFavoritesButton(onAddFavoritesClick = onAddFavoritesClick)
@@ -166,8 +167,13 @@ private fun LazyListScope.favoriteList(
     items(favorites.toList()) {
         BottomSheetLocationCard(
             title = it.name,
-            subtitle1 = it.subLabel
+            subtitle1 = it.subLabel,
+            isFavorite = true,
+            onFavoriteClick = {
+                onFavoriteStarClick(it)
+            }
         ) {
+            navigateToPlace(it)
             //TODO: Eatery
         }
         Spacer(Modifier.height(10.dp))
@@ -192,7 +198,9 @@ private fun LazyListScope.gymList(
             items(staticPlaces.gyms.data) {
                 BottomSheetLocationCard(
                     title = it.name,
-                    subtitle1 = it.id
+                    subtitle1 = it.id,
+                    isFavorite = true,
+                    onFavoriteClick = {}
                 ) {
                     //TODO: Eatery
                 }
@@ -221,7 +229,9 @@ private fun LazyListScope.printerList(
             items(staticPlaces.printers.data) {
                 BottomSheetLocationCard(
                     title = it.location,
-                    subtitle1 = it.description
+                    subtitle1 = it.description,
+                    isFavorite = true,
+                    onFavoriteClick = {}
                 ) {
                     navigateToPlace(
                         it.toPlace()
