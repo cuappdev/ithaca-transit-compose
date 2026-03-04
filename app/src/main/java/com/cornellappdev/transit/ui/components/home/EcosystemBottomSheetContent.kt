@@ -284,14 +284,30 @@ private fun LazyListScope.printerList(
 
         is ApiResponse.Success -> {
             items(staticPlaces.printers.data) {
-                BottomSheetLocationCard(
+//                BottomSheetLocationCard(
+//                    title = it.location,
+//                    subtitle1 = it.description
+//                ) {
+//                    navigateToPlace(
+//                        it.toPlace()
+//                    )
+//                }
+                PrinterCard(
                     title = it.location,
-                    subtitle1 = it.description
-                ) {
-                    navigateToPlace(
-                        it.toPlace()
-                    )
-                }
+                    subtitle = it.description,
+                    inColor = true, // temporary
+                    tags = listOf("Copy", "Scan"), // temporary
+                    alert = "Residents Only", // temporary
+                    isFavorite = false,
+                    onFavoriteClick = {
+                        //onFavoriteStarClick(it.toPlace())
+                    },
+                    onClick = {
+                        navigateToPlace(
+                            it.toPlace()
+                        )
+                    }
+                )
                 Spacer(Modifier.height(10.dp))
             }
 

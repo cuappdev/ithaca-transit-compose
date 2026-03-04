@@ -1,6 +1,5 @@
 package com.cornellappdev.transit.ui.components.home
 
-import android.util.EventLogTags
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,7 +29,7 @@ import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
-import com.cornellappdev.transit.ui.theme.TextButtonGray
+import com.cornellappdev.transit.ui.theme.UpliftCapacityOrange
 
 /**
  * Card for a printer
@@ -41,13 +40,13 @@ fun PrinterCard(
     subtitle: String,
     inColor: Boolean,
     tags: List<String> = emptyList(),
+    alert: String,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
     onClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
-            .padding(horizontal = 24.dp, vertical = 10.dp)
             .clickable { onClick() }
     ) {
         Column(
@@ -81,6 +80,23 @@ fun PrinterCard(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(end = 32.dp)
                     )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.warning),
+                            contentDescription = null
+                        )
+                        Text(
+                            text = alert,
+                            style = Style.heading3,
+                            color = UpliftCapacityOrange,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(end = 32.dp)
+                        )
+                    }
                     Spacer(modifier = Modifier.height(4.dp))
                     LazyRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -160,9 +176,9 @@ fun PrinterCardPreview() {
         subtitle = "Room 115",
         inColor = true,
         tags = listOf("Copy", "Scan"),
+        alert = "Residents Only",
         isFavorite = false,
         onFavoriteClick = {},
-    ) {
-
-    }
+        onClick = {},
+    )
 }
