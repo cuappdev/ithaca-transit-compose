@@ -236,7 +236,7 @@ private fun LazyListScope.favoriteList(
         BottomSheetLocationCard(
             title = it.name,
             subtitle1 = it.subLabel,
-            isFavorite = true,
+            isFavorite = true, //hard-coded data may result in bugs in the future
             onFavoriteClick = {
                 onFavoriteStarClick(it)
             }

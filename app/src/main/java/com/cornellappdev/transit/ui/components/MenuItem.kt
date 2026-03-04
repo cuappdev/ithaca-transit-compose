@@ -69,8 +69,14 @@ fun MenuItem(type: PlaceType, label: String, sublabel: String, onClick: () -> Un
 }
 
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun PreviewMenuItem() {
+fun PreviewMenuItemBusStop() {
     MenuItem(PlaceType.BUS_STOP, "Ithaca Commons", "Ithaca, NY", {})
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewMenuItemApplePlace() {
+    MenuItem(PlaceType.APPLE_PLACE, "Apple Place", "Ithaca, NY", {})
 }
