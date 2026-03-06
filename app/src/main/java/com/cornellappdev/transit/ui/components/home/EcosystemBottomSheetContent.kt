@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
+import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
 import com.cornellappdev.transit.models.ecosystem.Eatery
@@ -429,3 +430,59 @@ private fun PreviewEcosystemBottomSheet() {
         operatingHoursToString = { _ -> AnnotatedString("") }
     )
 }
+
+@Preview(showBackground = true, name = "Favorites with Applied Filters")
+@Composable
+private fun PreviewBottomSheetFilteredContentFavorites() {
+    BottomSheetFilteredContent(
+        currentFilter = FilterState.FAVORITES,
+        staticPlaces = StaticPlaces(
+            ApiResponse.Success(emptyList()),
+            ApiResponse.Success(emptyList()),
+            ApiResponse.Success(emptyList()),
+            ApiResponse.Success(emptyList())
+        ),
+        favorites = setOf(
+            Place(
+                latitude = 42.4534,
+                longitude = -76.4735,
+                name = "Toni Morrison Dining",
+                detail = "Toni Morrison Hall",
+                type = PlaceType.APPLE_PLACE
+            ),
+            Place(
+                latitude = 42.4534,
+                longitude = -76.4735,
+                name = "Olin Library",
+                detail = "Ho Plaza",
+                type = PlaceType.APPLE_PLACE
+            ),
+            Place(
+                latitude = 42.4480,
+                longitude = -76.4840,
+                name = "Noyes Community Recreation Center",
+                detail = "North Campus",
+                type = PlaceType.APPLE_PLACE
+            ),
+            Place(
+                latitude = 42.4440,
+                longitude = -76.4825,
+                name = "Seneca St & Fall Creek Dr",
+                detail = "Bus Stop",
+                type = PlaceType.BUS_STOP
+            )
+        ),
+        navigateToPlace = {},
+        onDetailsClick = {},
+        onFavoriteStarClick = {},
+        onAddFavoritesClick = {},
+        onFilterButtonClick = {},
+        appliedFilters = setOf(
+            FavoritesFilterSheetState.EATERIES,
+            FavoritesFilterSheetState.LIBRARIES
+        ),
+        onRemoveAppliedFilter = {},
+        operatingHoursToString = { _ -> AnnotatedString("") }
+    )
+}
+
