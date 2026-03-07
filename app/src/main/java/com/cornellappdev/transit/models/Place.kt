@@ -22,7 +22,19 @@ enum class PlaceType {
     BUS_STOP,
 
     @Json(name = "applePlace")
-    APPLE_PLACE
+    APPLE_PLACE,
+
+    @Json(name = "eatery")
+    EATERY,
+
+    @Json(name = "library")
+    LIBRARY,
+
+    @Json(name = "gym")
+    GYM,
+
+    @Json(name = "printer")
+    PRINTER
 }
 
 /**
@@ -36,6 +48,7 @@ data class Place(
     @Json(name = "detail") val detail: String?,
     @Json(name = "type") var type: PlaceType
 ) {
+    //TODO: sublabel for bus stop should be the current distance away
     val subLabel
         get() = if (type == PlaceType.BUS_STOP) "Bus Stop" else detail.toString()
 }

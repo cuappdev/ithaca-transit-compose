@@ -110,8 +110,21 @@ fun DetailedPlaceSheetContent(
                 }
 
                 is UpliftGym -> {
-                    //TODO
-                    Text(ecosystemPlace.name)
+                    //Placeholder until gym implementation is merged in
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp)
+                    ) {
+                        DetailedPlaceHeaderSection(
+                            title = ecosystemPlace.name,
+                            subtitle = ecosystemPlace.id,
+                            onFavoriteClick = {
+                                onFavoriteStarClick(ecosystemPlace.toPlace())
+                            },
+                            isFavorite = ecosystemPlace.toPlace() in favorites
+                        )
+                    }
                 }
             }
         }
@@ -148,7 +161,7 @@ fun DetailedPlaceSheetContent(
                                 }
 
                                 is UpliftGym -> {
-                                    //TODO
+                                    navigateToPlace(ecosystemPlace.toPlace())
                                 }
                             }
                         }

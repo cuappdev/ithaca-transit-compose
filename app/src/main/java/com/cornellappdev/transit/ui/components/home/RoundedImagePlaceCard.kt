@@ -38,7 +38,7 @@ fun RoundedImagePlaceCard(
     onFavoriteClick: () -> Unit,
     leftAnnotatedString: AnnotatedString? = null,
     rightAnnotatedString: AnnotatedString? = null,
-    @DrawableRes placeholderRes: Int,
+    @DrawableRes placeholderRes: Int? = null,
     onClick: () -> Unit,
 ) {
     Column(

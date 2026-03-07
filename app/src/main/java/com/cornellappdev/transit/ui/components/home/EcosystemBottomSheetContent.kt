@@ -18,6 +18,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
@@ -31,7 +32,10 @@ import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
 import com.cornellappdev.transit.models.ecosystem.Eatery
+import com.cornellappdev.transit.models.ecosystem.Library
+import com.cornellappdev.transit.models.ecosystem.Printer
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
+import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.FavoritesDividerGray
 import com.cornellappdev.transit.ui.theme.robotoFamily
@@ -168,52 +172,68 @@ private fun BottomSheetFilteredContent(
             }
         }
         val isFilterBarHidden = currentFilter == FilterState.FAVORITES && appliedFilters.isEmpty()
-        LazyColumn(
-            contentPadding = PaddingValues(
-                start = 12.dp,
-                end = 12.dp,
-                top = if (isFilterBarHidden) 0.dp else 8.dp,
-                bottom = 120.dp // Makes bottom content visible with padding at the end
-            ),
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            when (currentFilter) {
-                FilterState.FAVORITES -> {
-                    favoriteList(
-                        favorites,
-                        navigateToPlace,
-                        onAddFavoritesClick,
-                        onFavoriteStarClick
-                    )
-                }
+        key(currentFilter, appliedFilters) {
+            LazyColumn(
+                contentPadding = PaddingValues(
+                    start = 12.dp,
+                    end = 12.dp,
+                    top = if (isFilterBarHidden) 0.dp else 8.dp,
+                    bottom = 120.dp // Makes bottom content visible with padding at the end
+                ),
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                when (currentFilter) {
+                    FilterState.FAVORITES -> {
+                        favoriteList(
+                            favorites = favorites,
+                            appliedFilters = appliedFilters,
+                            navigateToPlace = navigateToPlace,
+                            onAddFavoritesClick = onAddFavoritesClick,
+                            onFavoriteStarClick = onFavoriteStarClick,
+                            staticPlaces = staticPlaces,
+                            onDetailsClick = onDetailsClick,
+                            operatingHoursToString = operatingHoursToString
+                        )
+                    }
 
-                FilterState.PRINTERS -> {
-                    printerList(staticPlaces, navigateToPlace)
-                }
+                    FilterState.PRINTERS -> {
+                        printerList(
+                            staticPlaces = staticPlaces,
+                            navigateToPlace = navigateToPlace,
+                            favorites = favorites,
+                            onFavoriteStarClick = onFavoriteStarClick
+                        )
+                    }
 
-                FilterState.GYMS -> {
-                    gymList(staticPlaces, navigateToPlace)
-                }
+                    FilterState.GYMS -> {
+                        gymList(
+                            staticPlaces = staticPlaces,
+                            navigateToPlace = navigateToPlace,
+                            favorites = favorites,
+                            onFavoriteStarClick = onFavoriteStarClick
+                        )
+                    }
 
-                FilterState.EATERIES -> {
-                    eateryList(
-                        eateriesApiResponse = staticPlaces.eateries,
-                        onDetailsClick = onDetailsClick,
-                        favorites = favorites,
-                        onFavoriteStarClick = onFavoriteStarClick,
-                        operatingHoursToString = operatingHoursToString
-                    )
-                }
+                    FilterState.EATERIES -> {
+                        eateryList(
+                            eateriesApiResponse = staticPlaces.eateries,
+                            onDetailsClick = onDetailsClick,
+                            favorites = favorites,
+                            onFavoriteStarClick = onFavoriteStarClick,
+                            operatingHoursToString = operatingHoursToString
+                        )
+                    }
 
-                FilterState.LIBRARIES -> {
-                    libraryList(
-                        staticPlaces,
-                        navigateToPlace,
-                        onDetailsClick,
-                        favorites,
-                        onFavoriteStarClick,
-                    )
+                    FilterState.LIBRARIES -> {
+                        libraryList(
+                            staticPlaces,
+                            navigateToPlace,
+                            onDetailsClick,
+                            favorites,
+                            onFavoriteStarClick,
+                        )
+                    }
                 }
             }
         }
@@ -225,25 +245,148 @@ private fun BottomSheetFilteredContent(
  */
 private fun LazyListScope.favoriteList(
     favorites: Set<Place>,
+    appliedFilters: Set<FavoritesFilterSheetState>,
     navigateToPlace: (Place) -> Unit,
     onAddFavoritesClick: () -> Unit,
-    onFavoriteStarClick: (Place) -> Unit
+    onFavoriteStarClick: (Place) -> Unit,
+    staticPlaces: StaticPlaces,
+    onDetailsClick: (DetailedEcosystemPlace) -> Unit,
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString
 ) {
+    val filteredFavorites = if (appliedFilters.isEmpty()) {
+        favorites.toList()
+    } else {
+        favorites.filter { place ->
+            appliedFilters.any { filter ->
+                when (filter) {
+                    FavoritesFilterSheetState.EATERIES -> place.type == PlaceType.EATERY
+                    FavoritesFilterSheetState.LIBRARIES -> place.type == PlaceType.LIBRARY
+                    FavoritesFilterSheetState.GYMS -> place.type == PlaceType.GYM
+                    FavoritesFilterSheetState.PRINTERS -> place.type == PlaceType.PRINTER
+                    FavoritesFilterSheetState.OTHER ->
+                        place.type == PlaceType.APPLE_PLACE || place.type == PlaceType.BUS_STOP
+                }
+            }
+        }
+    }
+
     item {
         Spacer(modifier = Modifier.height(8.dp))
         AddFavoritesButton(onAddFavoritesClick = onAddFavoritesClick)
     }
-    items(favorites.toList()) {
-        BottomSheetLocationCard(
-            title = it.name,
-            subtitle1 = it.subLabel,
-            isFavorite = true, //hard-coded data may result in bugs in the future
-            onFavoriteClick = {
-                onFavoriteStarClick(it)
+
+    val eateries = (staticPlaces.eateries as? ApiResponse.Success)?.data ?: emptyList()
+    val libraries = (staticPlaces.libraries as? ApiResponse.Success)?.data ?: emptyList()
+    val gyms = (staticPlaces.gyms as? ApiResponse.Success)?.data ?: emptyList()
+    val printers = (staticPlaces.printers as? ApiResponse.Success)?.data ?: emptyList()
+
+    items(filteredFavorites) { place ->
+        when (place.type) {
+            PlaceType.EATERY -> {
+                val matchingEatery = eateries.find { it.toPlace() == place }
+                if (matchingEatery != null) {
+                    RoundedImagePlaceCard(
+                        title = matchingEatery.name,
+                        subtitle = matchingEatery.location ?: "",
+                        isFavorite = true,
+                        onFavoriteClick = { onFavoriteStarClick(place) },
+                        leftAnnotatedString = operatingHoursToString(
+                            matchingEatery.formatOperatingHours()
+                        )
+                    ) {
+                        onDetailsClick(matchingEatery)
+                    }
+                } else {
+                    BottomSheetLocationCard(
+                        title = place.name,
+                        subtitle1 = place.subLabel,
+                        isFavorite = true,
+                        onFavoriteClick = { onFavoriteStarClick(place) }
+                    ) {
+                        navigateToPlace(place)
+                    }
+                }
             }
-        ) {
-            navigateToPlace(it)
-            //TODO: Eatery
+
+            PlaceType.LIBRARY -> {
+                val matchingLibrary = libraries.find { it.toPlace() == place }
+                if (matchingLibrary != null) {
+                    RoundedImagePlaceCard(
+                        title = matchingLibrary.location,
+                        subtitle = matchingLibrary.address,
+                        isFavorite = true,
+                        onFavoriteClick = { onFavoriteStarClick(place) }
+                    ) {
+                        onDetailsClick(matchingLibrary)
+                    }
+                } else {
+                    BottomSheetLocationCard(
+                        title = place.name,
+                        subtitle1 = place.subLabel,
+                        isFavorite = true,
+                        onFavoriteClick = { onFavoriteStarClick(place) }
+                    ) {
+                        navigateToPlace(place)
+                    }
+                }
+            }
+
+            PlaceType.GYM -> {
+                val matchingGym = gyms.find { it.toPlace() == place }
+                if (matchingGym != null) {
+                    BottomSheetLocationCard(
+                        title = matchingGym.name,
+                        subtitle1 = matchingGym.id,
+                        isFavorite = true,
+                        onFavoriteClick = { onFavoriteStarClick(place) }
+                    ) {
+                        onDetailsClick(matchingGym)
+                    }
+                } else {
+                    BottomSheetLocationCard(
+                        title = place.name,
+                        subtitle1 = place.subLabel,
+                        isFavorite = true,
+                        onFavoriteClick = { onFavoriteStarClick(place) }
+                    ) {
+                        navigateToPlace(place)
+                    }
+                }
+            }
+
+            PlaceType.PRINTER -> {
+                val matchingPrinter = printers.find { it.toPlace() == place }
+                if (matchingPrinter != null) {
+                    BottomSheetLocationCard(
+                        title = matchingPrinter.location,
+                        subtitle1 = matchingPrinter.description,
+                        isFavorite = true,
+                        onFavoriteClick = { onFavoriteStarClick(place) }
+                    ) {
+                        navigateToPlace(matchingPrinter.toPlace())
+                    }
+                } else {
+                    BottomSheetLocationCard(
+                        title = place.name,
+                        subtitle1 = place.subLabel,
+                        isFavorite = true,
+                        onFavoriteClick = { onFavoriteStarClick(place) }
+                    ) {
+                        navigateToPlace(place)
+                    }
+                }
+            }
+
+            PlaceType.BUS_STOP, PlaceType.APPLE_PLACE -> {
+                BottomSheetLocationCard(
+                    title = place.name,
+                    subtitle1 = place.subLabel,
+                    isFavorite = true,
+                    onFavoriteClick = { onFavoriteStarClick(place) }
+                ) {
+                    navigateToPlace(place)
+                }
+            }
         }
     }
 }
@@ -253,7 +396,9 @@ private fun LazyListScope.favoriteList(
  */
 private fun LazyListScope.gymList(
     staticPlaces: StaticPlaces,
-    navigateToPlace: (Place) -> Unit
+    navigateToPlace: (Place) -> Unit,
+    favorites: Set<Place>,
+    onFavoriteStarClick: (Place) -> Unit
 ) {
     when (staticPlaces.gyms) {
         is ApiResponse.Error -> {
@@ -263,17 +408,17 @@ private fun LazyListScope.gymList(
         }
 
         is ApiResponse.Success -> {
-            items(staticPlaces.gyms.data) {
+            items(staticPlaces.gyms.data) { gym ->
+                val place = gym.toPlace()
                 BottomSheetLocationCard(
-                    title = it.name,
-                    subtitle1 = it.id,
-                    isFavorite = true,
-                    onFavoriteClick = {}
+                    title = gym.name,
+                    subtitle1 = gym.id,
+                    isFavorite = place in favorites,
+                    onFavoriteClick = { onFavoriteStarClick(place) }
                 ) {
-                    //TODO: Eatery
+                    navigateToPlace(place)
                 }
             }
-
         }
     }
 }
@@ -283,7 +428,9 @@ private fun LazyListScope.gymList(
  */
 private fun LazyListScope.printerList(
     staticPlaces: StaticPlaces,
-    navigateToPlace: (Place) -> Unit
+    navigateToPlace: (Place) -> Unit,
+    favorites: Set<Place>,
+    onFavoriteStarClick: (Place) -> Unit
 ) {
     when (staticPlaces.printers) {
         is ApiResponse.Error -> {
@@ -293,19 +440,17 @@ private fun LazyListScope.printerList(
         }
 
         is ApiResponse.Success -> {
-            items(staticPlaces.printers.data) {
+            items(staticPlaces.printers.data) { printer ->
+                val place = printer.toPlace()
                 BottomSheetLocationCard(
-                    title = it.location,
-                    subtitle1 = it.description,
-                    isFavorite = true,
-                    onFavoriteClick = {}
+                    title = printer.location,
+                    subtitle1 = printer.description,
+                    isFavorite = place in favorites,
+                    onFavoriteClick = { onFavoriteStarClick(place) }
                 ) {
-                    navigateToPlace(
-                        it.toPlace()
-                    )
+                    navigateToPlace(place)
                 }
             }
-
         }
     }
 }
@@ -434,35 +579,85 @@ private fun PreviewEcosystemBottomSheet() {
 @Preview(showBackground = true, name = "Favorites with Applied Filters")
 @Composable
 private fun PreviewBottomSheetFilteredContentFavorites() {
+    val mockEatery = Eatery(
+        id = 1,
+        name = "Trillium",
+        menuSummary = "Coffee, pastries, sandwiches",
+        imageUrl = null,
+        location = "Kennedy Hall",
+        campusArea = "Central Campus",
+        onlineOrderUrl = null,
+        latitude = 42.4488,
+        longitude = -76.4813,
+        paymentAcceptsMealSwipes = true,
+        paymentAcceptsBrbs = true,
+        paymentAcceptsCash = true,
+        events = null
+    )
+
+    val mockLibrary = Library(
+        id = 1,
+        location = "Olin Library",
+        address = "161 Ho Plaza",
+        latitude = 42.4534,
+        longitude = -76.4735
+    )
+
+    val mockGym = UpliftGym(
+        name = "Noyes Community Recreation Center",
+        id = "noyes-rec",
+        facilityId = "1",
+        hours = listOf(null, null, null, null, null, null, null),
+        imageUrl = null,
+        upliftCapacity = null,
+        latitude = 42.4480,
+        longitude = -76.4840
+    )
+
+    val mockPrinter = Printer(
+        id = 1,
+        location = "Mann Library",
+        description = "1st Floor, near entrance",
+        latitude = 42.4479,
+        longitude = -76.4764
+    )
+
     BottomSheetFilteredContent(
         currentFilter = FilterState.FAVORITES,
         staticPlaces = StaticPlaces(
-            ApiResponse.Success(emptyList()),
-            ApiResponse.Success(emptyList()),
-            ApiResponse.Success(emptyList()),
-            ApiResponse.Success(emptyList())
+            printers = ApiResponse.Success(listOf(mockPrinter)),
+            libraries = ApiResponse.Success(listOf(mockLibrary)),
+            eateries = ApiResponse.Success(listOf(mockEatery)),
+            gyms = ApiResponse.Success(listOf(mockGym))
         ),
         favorites = setOf(
             Place(
-                latitude = 42.4534,
-                longitude = -76.4735,
-                name = "Toni Morrison Dining",
-                detail = "Toni Morrison Hall",
-                type = PlaceType.APPLE_PLACE
+                latitude = 42.4488,
+                longitude = -76.4813,
+                name = "Trillium",
+                detail = "Kennedy Hall",
+                type = PlaceType.EATERY
             ),
             Place(
                 latitude = 42.4534,
                 longitude = -76.4735,
                 name = "Olin Library",
-                detail = "Ho Plaza",
-                type = PlaceType.APPLE_PLACE
+                detail = "161 Ho Plaza",
+                type = PlaceType.LIBRARY
             ),
             Place(
                 latitude = 42.4480,
                 longitude = -76.4840,
                 name = "Noyes Community Recreation Center",
                 detail = "North Campus",
-                type = PlaceType.APPLE_PLACE
+                type = PlaceType.GYM
+            ),
+            Place(
+                latitude = 42.4479,
+                longitude = -76.4764,
+                name = "Mann Library",
+                detail = "1st Floor, near entrance",
+                type = PlaceType.PRINTER
             ),
             Place(
                 latitude = 42.4440,
@@ -479,10 +674,13 @@ private fun PreviewBottomSheetFilteredContentFavorites() {
         onFilterButtonClick = {},
         appliedFilters = setOf(
             FavoritesFilterSheetState.EATERIES,
-            FavoritesFilterSheetState.LIBRARIES
+            FavoritesFilterSheetState.LIBRARIES,
+            FavoritesFilterSheetState.GYMS,
+            FavoritesFilterSheetState.PRINTERS,
+            FavoritesFilterSheetState.OTHER
         ),
         onRemoveAppliedFilter = {},
-        operatingHoursToString = { _ -> AnnotatedString("") }
+        operatingHoursToString = { _ -> AnnotatedString("Open • 10am - 4pm") }
     )
 }
 

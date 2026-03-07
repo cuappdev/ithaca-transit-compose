@@ -19,24 +19,30 @@ import com.cornellappdev.transit.ui.theme.MetadataGray
  * Rounded image from a network request, fallback to a drawable
  */
 @Composable
-fun PlaceCardImage(imageUrl: String?, @DrawableRes placeholderRes: Int, shouldClipBottom: Boolean = false) {
+fun PlaceCardImage(
+    imageUrl: String?,
+    @DrawableRes placeholderRes: Int? = null,
+    shouldClipBottom: Boolean = false
+) {
 
     val imageModifier = Modifier
         .then(
-        if(shouldClipBottom) Modifier.clip(RoundedCornerShape(12.dp))
-            else Modifier.clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)))
+            if (shouldClipBottom) Modifier.clip(RoundedCornerShape(12.dp))
+            else Modifier.clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+        )
         .fillMaxWidth()
         .height(112.dp)
         .background(MetadataGray)
 
-    if (imageUrl.isNullOrBlank()) {
+    // Images with no placeholders will simply not show
+    if (imageUrl.isNullOrBlank() && placeholderRes != null) {
         Image(
             painter = painterResource(id = placeholderRes),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = imageModifier
         )
-    } else {
+    } else if (!imageUrl.isNullOrBlank() && placeholderRes != null) {
         AsyncImage(
             model = imageUrl,
             contentDescription = null,
