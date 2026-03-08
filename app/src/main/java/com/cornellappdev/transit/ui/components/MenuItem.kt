@@ -36,6 +36,7 @@ fun MenuItem(type: PlaceType, label: String, sublabel: String, onClick: () -> Un
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        //TODO: Add icons for each ecosystem type
         if (type == PlaceType.APPLE_PLACE) {
             Image(
                 painterResource(R.drawable.location_pin_gray),
@@ -71,12 +72,12 @@ fun MenuItem(type: PlaceType, label: String, sublabel: String, onClick: () -> Un
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewMenuItemBusStop() {
+private fun PreviewMenuItemBusStop() {
     MenuItem(PlaceType.BUS_STOP, "Ithaca Commons", "Ithaca, NY", {})
 }
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewMenuItemApplePlace() {
+private fun PreviewMenuItemApplePlace() {
     MenuItem(PlaceType.APPLE_PLACE, "Apple Place", "Ithaca, NY", {})
 }

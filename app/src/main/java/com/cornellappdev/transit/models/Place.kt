@@ -1,7 +1,6 @@
 package com.cornellappdev.transit.models
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 import kotlinx.serialization.Serializable
 
 

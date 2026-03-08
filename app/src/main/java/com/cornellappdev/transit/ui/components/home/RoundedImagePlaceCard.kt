@@ -108,7 +108,7 @@ fun RoundedImagePlaceCard(
 
 @Preview
 @Composable
-fun RoundedImagePlaceCardPreview() {
+private fun RoundedImagePlaceCardPreview() {
     RoundedImagePlaceCard(
         placeholderRes = R.drawable.olin_library,
         title = "Olin Library",
