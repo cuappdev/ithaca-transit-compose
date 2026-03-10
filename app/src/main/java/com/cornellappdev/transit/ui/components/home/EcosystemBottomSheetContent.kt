@@ -293,21 +293,25 @@ private fun LazyListScope.printerList(
 //                    )
 //                }
                 PrinterCard(
-                    title = it.location,
-                    subtitle = it.description,
-                    inColor = true, // temporary
-                    tags = listOf("Copy", "Scan"), // temporary
-                    alert = "Residents Only", // temporary
+                    title = it.location.substringBefore("*").trim(),
+                    subtitle = it.description.substringAfter("-").trim(),
+                    inColor = it.description.contains("Color", ignoreCase = true), // temporary
+                    copy = it.description.contains("Copy", ignoreCase = true),
+                    scan = it.description.contains("Scan", ignoreCase = true),
+                    alert = if (it.location.contains("*")) {
+                            it.location.substringAfter("*").trim('*').trim()
+                        } else {
+                        ""
+                    },
                     isFavorite = false,
                     onFavoriteClick = {
                         //onFavoriteStarClick(it.toPlace())
-                    },
-                    onClick = {
-                        navigateToPlace(
-                            it.toPlace()
-                        )
                     }
-                )
+                    ) {
+                    navigateToPlace(
+                        it.toPlace()
+                    )
+                }
                 Spacer(Modifier.height(10.dp))
             }
 

@@ -39,7 +39,8 @@ fun PrinterCard(
     title: String,
     subtitle: String,
     inColor: Boolean,
-    tags: List<String> = emptyList(),
+    copy: Boolean,
+    scan: Boolean,
     alert: String,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
@@ -80,22 +81,24 @@ fun PrinterCard(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(end = 32.dp)
                     )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.warning),
-                            contentDescription = null
-                        )
-                        Text(
-                            text = alert,
-                            style = Style.heading3,
-                            color = UpliftCapacityOrange,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(end = 32.dp)
-                        )
+                    if (alert != "") {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.warning),
+                                contentDescription = null
+                            )
+                            Text(
+                                text = alert,
+                                style = Style.heading3,
+                                color = UpliftCapacityOrange,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(end = 32.dp)
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     LazyRow(
@@ -124,8 +127,20 @@ fun PrinterCard(
                             }
                         }
 
-                        items(tags) { tag ->
-                            Tag(name = tag)
+                        item {
+                            if(copy) {
+                                Tag(
+                                    name = "Copy",
+                                )
+                            }
+                        }
+
+                        item {
+                            if(scan) {
+                                Tag(
+                                    name = "Scan",
+                                )
+                            }
                         }
 
                     }
@@ -175,7 +190,8 @@ fun PrinterCardPreview() {
         title = "Akew:kon",
         subtitle = "Room 115",
         inColor = true,
-        tags = listOf("Copy", "Scan"),
+        copy = true,
+        scan = true,
         alert = "Residents Only",
         isFavorite = false,
         onFavoriteClick = {},
