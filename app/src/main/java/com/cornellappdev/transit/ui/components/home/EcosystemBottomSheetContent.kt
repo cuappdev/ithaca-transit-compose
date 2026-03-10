@@ -187,7 +187,7 @@ private fun BottomSheetFilteredContent(
                 }
 
                 FilterState.PRINTERS -> {
-                    printerList(staticPlaces, navigateToPlace)
+                    printerList(staticPlaces, navigateToPlace, onFavoriteStarClick, favorites)
                 }
 
                 FilterState.GYMS -> {
@@ -273,8 +273,10 @@ private fun LazyListScope.gymList(
  */
 private fun LazyListScope.printerList(
     staticPlaces: StaticPlaces,
-    navigateToPlace: (Place) -> Unit
-) {
+    navigateToPlace: (Place) -> Unit,
+    onFavoriteStarClick: (Place) -> Unit,
+    favorites: Set<Place>,
+    ) {
     when (staticPlaces.printers) {
         is ApiResponse.Error -> {
         }
@@ -284,14 +286,6 @@ private fun LazyListScope.printerList(
 
         is ApiResponse.Success -> {
             items(staticPlaces.printers.data) {
-//                BottomSheetLocationCard(
-//                    title = it.location,
-//                    subtitle1 = it.description
-//                ) {
-//                    navigateToPlace(
-//                        it.toPlace()
-//                    )
-//                }
                 PrinterCard(
                     title = it.location.substringBefore("*").trim(),
                     subtitle = it.description.substringAfter("-").trim(),
@@ -303,9 +297,9 @@ private fun LazyListScope.printerList(
                         } else {
                         ""
                     },
-                    isFavorite = false,
+                    isFavorite = it.toPlace() in favorites,
                     onFavoriteClick = {
-                        //onFavoriteStarClick(it.toPlace())
+                        onFavoriteStarClick(it.toPlace())
                     }
                     ) {
                     navigateToPlace(
