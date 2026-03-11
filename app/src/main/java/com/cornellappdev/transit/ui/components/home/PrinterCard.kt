@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,7 +28,7 @@ import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
-import com.cornellappdev.transit.ui.theme.UpliftCapacityOrange
+import com.cornellappdev.transit.ui.theme.WarningOrange
 
 /**
  * Card for a printer
@@ -38,9 +38,9 @@ fun PrinterCard(
     title: String,
     subtitle: String,
     inColor: Boolean,
-    copy: Boolean,
-    scan: Boolean,
-    alert: String,
+    hasCopy: Boolean,
+    hasScan: Boolean,
+    alertMessage: String,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
     onClick: () -> Unit,
@@ -80,19 +80,20 @@ fun PrinterCard(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(end = 32.dp)
                     )
-                    if (alert != "") {
+                    if (alertMessage.isNotBlank()) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Image(
+                            Icon(
                                 painter = painterResource(id = R.drawable.warning),
-                                contentDescription = null
+                                contentDescription = null,
+                                tint = WarningOrange,
                             )
                             Text(
-                                text = alert,
+                                text = alertMessage,
                                 style = Style.heading3,
-                                color = UpliftCapacityOrange,
+                                color = WarningOrange,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.padding(end = 32.dp)
@@ -100,48 +101,34 @@ fun PrinterCard(
                         }
                     }
                     Spacer(modifier = Modifier.height(4.dp))
-                    LazyRow(
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        item {
-                            Image(
-                                painter = painterResource(id = R.drawable.printer_image),
-                                contentDescription = null,
+                        Icon(
+                            painter = painterResource(id = R.drawable.printer_image),
+                            contentDescription = null,
+                        )
+                        if (inColor) {
+                            Tag(
+                                name = "Color",
+                                iconRes = R.drawable.color_wheel
+                            )
+                        } else {
+                            Tag(
+                                name = "BW",
+                                iconRes = R.drawable.black_white_wheel
                             )
                         }
 
-                        item {
-                            if (inColor) {
-                                Tag(
-                                    name = "Color",
-                                    iconRes = R.drawable.color_wheel
-                                )
-                            } else {
-                                Tag(
-                                    name = "BW",
-                                    iconRes = R.drawable.black_white_wheel
-                                )
-                            }
+                        if (hasCopy) {
+                            Tag(name = "Copy")
                         }
 
-                        item {
-                            if(copy) {
-                                Tag(
-                                    name = "Copy",
-                                )
-                            }
+                        if (hasScan) {
+                            Tag(name = "Scan")
                         }
-
-                        item {
-                            if(scan) {
-                                Tag(
-                                    name = "Scan",
-                                )
-                            }
-                        }
-
                     }
                 }
 
@@ -153,7 +140,7 @@ fun PrinterCard(
 }
 
 @Composable
-fun Tag(
+private fun Tag(
     name: String,
     iconRes: Int? = null,
 ) {
@@ -184,14 +171,14 @@ fun Tag(
 
 @Preview
 @Composable
-fun PrinterCardPreview() {
+private fun PrinterCardPreview() {
     PrinterCard(
         title = "Akew:kon",
         subtitle = "Room 115",
         inColor = true,
-        copy = true,
-        scan = true,
-        alert = "Residents Only",
+        hasCopy = true,
+        hasScan = true,
+        alertMessage = "Residents Only",
         isFavorite = false,
         onFavoriteClick = {},
         onClick = {},

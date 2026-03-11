@@ -286,29 +286,30 @@ private fun LazyListScope.printerList(
 
         is ApiResponse.Success -> {
             items(staticPlaces.printers.data) {
+                val place = it.toPlace()
+                val alert = if (it.location.contains("*")) {
+                    it.location.substringAfter("*").trim('*').trim()
+                } else {
+                    ""
+                }
+
                 PrinterCard(
                     title = it.location.substringBefore("*").trim(),
                     subtitle = it.description.substringAfter("-").trim(),
-                    inColor = it.description.contains("Color", ignoreCase = true), // temporary
-                    copy = it.description.contains("Copy", ignoreCase = true),
-                    scan = it.description.contains("Scan", ignoreCase = true),
-                    alert = if (it.location.contains("*")) {
-                            it.location.substringAfter("*").trim('*').trim()
-                        } else {
-                        ""
-                    },
-                    isFavorite = it.toPlace() in favorites,
+                    inColor = it.description.contains("Color", ignoreCase = true),
+                    hasCopy = it.description.contains("Copy", ignoreCase = true),
+                    hasScan = it.description.contains("Scan", ignoreCase = true),
+                    alertMessage = alert,
+                    isFavorite = place in favorites,
                     onFavoriteClick = {
-                        onFavoriteStarClick(it.toPlace())
+                        onFavoriteStarClick(place)
                     }
                     ) {
                     navigateToPlace(
-                        it.toPlace()
+                        place
                     )
                 }
-                Spacer(Modifier.height(10.dp))
             }
-
         }
     }
 }
