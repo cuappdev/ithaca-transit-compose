@@ -27,7 +27,6 @@ import com.cornellappdev.transit.ui.theme.Style
 fun BottomSheetLocationCard(
     title: String,
     subtitle1: String,
-    subtitle2: String = "",
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
     onClick: () -> Unit
@@ -79,7 +78,6 @@ private fun PreviewBottomSheetLocationCard() {
     BottomSheetLocationCard(
         title = "Uris Hall",
         subtitle1 = "Bus Stop",
-        subtitle2 = "Is this subtitle necessary?",
         isFavorite = true,
         onFavoriteClick = {}
     ) { }

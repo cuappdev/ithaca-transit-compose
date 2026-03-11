@@ -49,5 +49,5 @@ data class Place(
 ) {
     //TODO: sublabel for bus stop should be the current distance away
     val subLabel
-        get() = if (type == PlaceType.BUS_STOP) "Bus Stop" else detail.toString()
+        get() = if (type == PlaceType.BUS_STOP) "Bus Stop" else detail.orEmpty()
 }

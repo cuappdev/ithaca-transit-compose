@@ -280,10 +280,15 @@ private fun LazyListScope.favoriteList(
     val gyms = (staticPlaces.gyms as? ApiResponse.Success)?.data ?: emptyList()
     val printers = (staticPlaces.printers as? ApiResponse.Success)?.data ?: emptyList()
 
+    val eateryByPlace: Map<Place, Eatery> = eateries.associateBy { it.toPlace() }
+    val libraryByPlace: Map<Place, Library> = libraries.associateBy { it.toPlace() }
+    val gymByPlace: Map<Place, UpliftGym> = gyms.associateBy { it.toPlace() }
+    val printerByPlace: Map<Place, Printer> = printers.associateBy { it.toPlace() }
+
     items(filteredFavorites) { place ->
         when (place.type) {
             PlaceType.EATERY -> {
-                val matchingEatery = eateries.find { it.toPlace() == place }
+                val matchingEatery = eateryByPlace[place]
                 if (matchingEatery != null) {
                     RoundedImagePlaceCard(
                         title = matchingEatery.name,
@@ -309,7 +314,7 @@ private fun LazyListScope.favoriteList(
             }
 
             PlaceType.LIBRARY -> {
-                val matchingLibrary = libraries.find { it.toPlace() == place }
+                val matchingLibrary = libraryByPlace[place]
                 if (matchingLibrary != null) {
                     RoundedImagePlaceCard(
                         title = matchingLibrary.location,
@@ -332,7 +337,7 @@ private fun LazyListScope.favoriteList(
             }
 
             PlaceType.GYM -> {
-                val matchingGym = gyms.find { it.toPlace() == place }
+                val matchingGym = gymByPlace[place]
                 if (matchingGym != null) {
                     BottomSheetLocationCard(
                         title = matchingGym.name,
@@ -355,7 +360,7 @@ private fun LazyListScope.favoriteList(
             }
 
             PlaceType.PRINTER -> {
-                val matchingPrinter = printers.find { it.toPlace() == place }
+                val matchingPrinter = printerByPlace[place]
                 if (matchingPrinter != null) {
                     BottomSheetLocationCard(
                         title = matchingPrinter.location,
