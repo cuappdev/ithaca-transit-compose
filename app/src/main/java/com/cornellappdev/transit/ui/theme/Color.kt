@@ -29,3 +29,5 @@ val FavoritesYellow = Color(0xFFFEC50E)
 val FavoritesDividerGray = Color(0xffDADADA)
 
 val Gray05 = Color(0xFF586069)
+
+val WarningOrange = Color(0xFFFE8F13)

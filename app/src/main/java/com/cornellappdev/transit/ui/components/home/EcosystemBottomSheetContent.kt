@@ -361,14 +361,27 @@ private fun LazyListScope.favoriteList(
 
             PlaceType.PRINTER -> {
                 val matchingPrinter = printerByPlace[place]
+                val alert = if (matchingPrinter?.location?.contains("*") == true) {
+                    matchingPrinter.location.substringAfter("*").trim('*').trim()
+                } else {
+                    ""
+                }
                 if (matchingPrinter != null) {
-                    BottomSheetLocationCard(
-                        title = matchingPrinter.location,
-                        subtitle1 = matchingPrinter.description,
-                        isFavorite = true,
-                        onFavoriteClick = { onFavoriteStarClick(place) }
+                    PrinterCard(
+                        title = matchingPrinter.location.substringBefore("*").trim(),
+                        subtitle = matchingPrinter.description.substringAfter("-").trim(),
+                        inColor = matchingPrinter.description.contains("Color", ignoreCase = true),
+                        hasCopy = matchingPrinter.description.contains("Copy", ignoreCase = true),
+                        hasScan = matchingPrinter.description.contains("Scan", ignoreCase = true),
+                        alertMessage = alert,
+                        isFavorite = place in favorites,
+                        onFavoriteClick = {
+                            onFavoriteStarClick(place)
+                        }
                     ) {
-                        navigateToPlace(matchingPrinter.toPlace())
+                        navigateToPlace(
+                            place
+                        )
                     }
                 } else {
                     BottomSheetLocationCard(
@@ -445,15 +458,29 @@ private fun LazyListScope.printerList(
         }
 
         is ApiResponse.Success -> {
-            items(staticPlaces.printers.data) { printer ->
-                val place = printer.toPlace()
-                BottomSheetLocationCard(
-                    title = printer.location,
-                    subtitle1 = printer.description,
+            items(staticPlaces.printers.data) {
+                val place = it.toPlace()
+                val alert = if (it.location.contains("*")) {
+                    it.location.substringAfter("*").trim('*').trim()
+                } else {
+                    ""
+                }
+
+                PrinterCard(
+                    title = it.location.substringBefore("*").trim(),
+                    subtitle = it.description.substringAfter("-").trim(),
+                    inColor = it.description.contains("Color", ignoreCase = true),
+                    hasCopy = it.description.contains("Copy", ignoreCase = true),
+                    hasScan = it.description.contains("Scan", ignoreCase = true),
+                    alertMessage = alert,
                     isFavorite = place in favorites,
-                    onFavoriteClick = { onFavoriteStarClick(place) }
-                ) {
-                    navigateToPlace(place)
+                    onFavoriteClick = {
+                        onFavoriteStarClick(place)
+                    }
+                    ) {
+                    navigateToPlace(
+                        place
+                    )
                 }
             }
         }
