@@ -43,9 +43,7 @@ fun BottomSheetLocationCard(
                 .padding(16.dp)
         ) {
             Column(
-                modifier = Modifier
-                    .align(Alignment.CenterStart),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
             ) {
                 Text(
                     text = title,
@@ -62,7 +60,6 @@ fun BottomSheetLocationCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(end = 32.dp)
-
                 )
             }
 
