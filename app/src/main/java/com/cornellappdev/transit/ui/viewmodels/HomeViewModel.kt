@@ -1,12 +1,6 @@
 package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
@@ -15,23 +9,11 @@ import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.models.UserPreferenceRepository
-import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 import com.cornellappdev.transit.models.ecosystem.EateryRepository
 import com.cornellappdev.transit.models.ecosystem.GymRepository
-import com.cornellappdev.transit.models.ecosystem.UpliftCapacity
 import com.cornellappdev.transit.networking.ApiResponse
-import com.cornellappdev.transit.ui.theme.AccentClosed
-import com.cornellappdev.transit.ui.theme.AccentOpen
-import com.cornellappdev.transit.ui.theme.AccentOrange
-import com.cornellappdev.transit.ui.theme.LateRed
-import com.cornellappdev.transit.ui.theme.LiveGreen
-import com.cornellappdev.transit.ui.theme.SecondaryText
-import com.cornellappdev.transit.ui.theme.robotoFamily
-import com.cornellappdev.transit.util.HIGH_CAPACITY_THRESHOLD
-import com.cornellappdev.transit.util.MEDIUM_CAPACITY_THRESHOLD
-import com.cornellappdev.transit.util.TimeUtils.getOpenStatus
-import com.cornellappdev.transit.util.TimeUtils.toPascalCaseString
-import com.cornellappdev.transit.util.calculateDistanceString
+import com.cornellappdev.transit.util.StringUtils.fromMetersToMiles
+import com.cornellappdev.transit.util.calculateDistance
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,13 +29,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-import kotlin.math.log
-
 
 /**
  * ViewModel handling home screen UI state and search functionality
@@ -370,12 +346,12 @@ class HomeViewModel @Inject constructor(
         val currentLocationSnapshot = currentLocation.value
         if (currentLocationSnapshot != null && latitude != null && longitude != null) {
             return " - " +
-                    calculateDistanceString(
+                    calculateDistance(
                         LatLng(
                             currentLocationSnapshot.latitude,
                             currentLocationSnapshot.longitude
                         ), LatLng(latitude, longitude)
-                    )
+                    ).toString().fromMetersToMiles() + " mi"
 
         }
         return ""

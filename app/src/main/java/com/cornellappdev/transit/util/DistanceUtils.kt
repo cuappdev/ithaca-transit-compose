@@ -4,16 +4,15 @@ import android.location.Location
 import com.cornellappdev.transit.util.StringUtils.fromMetersToMiles
 import com.google.android.gms.maps.model.LatLng
 
-
 /**
- * Returns distance string in miles
+ * Returns distance in miles
  */
-fun calculateDistanceString(
+fun calculateDistance(
     from: LatLng,
-    to: LatLng,
-) : String {
+    to: LatLng
+): Double {
     val results = FloatArray(1)
     Location.distanceBetween(from.latitude, from.longitude, to.latitude, to.longitude, results)
 
-    return results[0].toString().fromMetersToMiles() + " mi"
+    return results[0].toDouble()
 }
