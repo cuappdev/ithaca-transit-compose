@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
@@ -38,7 +40,6 @@ import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.util.BOTTOM_SHEET_MAX_HEIGHT_PERCENT
-import com.cornellappdev.transit.util.ecosystem.toPlace
 
 @Composable
 fun DetailedPlaceSheetContent(
@@ -47,7 +48,8 @@ fun DetailedPlaceSheetContent(
     onBackButtonPressed: () -> Unit,
     navigateToPlace: (Place) -> Unit,
     onFavoriteStarClick: (Place) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    distanceStringToPlace: (Double?, Double?) -> String
 ) {
     Column(
         modifier = modifier
@@ -95,7 +97,11 @@ fun DetailedPlaceSheetContent(
                         isFavorite = ecosystemPlace.toPlace() in favorites,
                         onFavoriteClick = {
                             onFavoriteStarClick(ecosystemPlace.toPlace())
-                        }
+                        },
+                        distanceString = distanceStringToPlace(
+                            ecosystemPlace.latitude,
+                            ecosystemPlace.longitude
+                        )
                     )
                 }
 
@@ -110,8 +116,17 @@ fun DetailedPlaceSheetContent(
                 }
 
                 is UpliftGym -> {
-                    //TODO
-                    Text(ecosystemPlace.name)
+                    GymDetailsContent(
+                        gym = ecosystemPlace,
+                        isFavorite = ecosystemPlace.toPlace() in favorites,
+                        onFavoriteClick = {
+                            onFavoriteStarClick(ecosystemPlace.toPlace())
+                        },
+                        distanceString = distanceStringToPlace(
+                            ecosystemPlace.latitude,
+                            ecosystemPlace.longitude
+                        )
+                    )
                 }
             }
         }
@@ -148,7 +163,9 @@ fun DetailedPlaceSheetContent(
                                 }
 
                                 is UpliftGym -> {
-                                    //TODO
+                                    navigateToPlace(
+                                        ecosystemPlace.toPlace()
+                                    )
                                 }
                             }
                         }
@@ -184,21 +201,52 @@ fun DetailedPlaceSheetContent(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun DetailedPlaceSheetContentPreview() {
-    DetailedPlaceSheetContent(
-        Library(
+private class ExamplePlaceProvider : PreviewParameterProvider<DetailedEcosystemPlace> {
+    override val values = sequenceOf(
+        Eatery(
+            id = 1,
+            name = "Okenshields",
+            menuSummary = null,
+            imageUrl = null,
+            location = "Willard Straight Hall",
+            campusArea = "Central",
+            onlineOrderUrl = null,
+            latitude = null,
+            longitude = null,
+            paymentAcceptsMealSwipes = null,
+            paymentAcceptsBrbs = null,
+            paymentAcceptsCash = null,
+            events = null
+        ), Library(
             id = 1,
             location = "Olin Library",
             address = "Ho Plaza",
             latitude = 1.0,
             longitude = 1.0
         ),
+        UpliftGym(
+            name = "Helen Newman",
+            id = "",
+            facilityId = "",
+            hours = emptyList(),
+            latitude = 0.0,
+            longitude = 0.0,
+            upliftCapacity = null,
+            imageUrl = null
+        )
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DetailedPlaceSheetContentPreview(@PreviewParameter(ExamplePlaceProvider::class) place: DetailedEcosystemPlace) {
+    DetailedPlaceSheetContent(
+        place,
         favorites = emptySet(),
         onBackButtonPressed = {},
         navigateToPlace = {},
         onFavoriteStarClick = {},
-        modifier = Modifier.background(Color.White)
+        modifier = Modifier.background(Color.White),
+        distanceStringToPlace = { _, _ -> "" }
     )
 }

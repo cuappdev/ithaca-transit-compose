@@ -75,6 +75,7 @@ import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
 import com.cornellappdev.transit.util.BOTTOM_SHEET_MAX_HEIGHT_PERCENT
 import com.cornellappdev.transit.util.ECOSYSTEM_FLAG
+import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
 import com.cornellappdev.transit.util.orZeroIfUnspecified
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -321,7 +322,8 @@ fun HomeScreen(
                                 homeViewModel.beginRouteOptions(it)
                                 navController.navigate("route")
                             },
-                            modifier = Modifier.onTapDisableSearch()
+                            modifier = Modifier.onTapDisableSearch(),
+                            distanceStringToPlace = homeViewModel::distanceStringIfCurrentLocationExists
                         )
                     }
 
@@ -353,7 +355,8 @@ fun HomeScreen(
                             onApplyFilters = homeViewModel::applyFavoritesFilters,
                             onFilterToggle = homeViewModel::toggleFavoritesFilter,
                             onRemoveAppliedFilter = homeViewModel::removeAppliedFilter,
-                            operatingHoursToString = homeViewModel::isOpenAnnotatedStringFromOperatingHours
+                            operatingHoursToString = ::isOpenAnnotatedStringFromOperatingHours,
+                            distanceStringToPlace = homeViewModel::distanceStringIfCurrentLocationExists
                         )
                     }
                 }
