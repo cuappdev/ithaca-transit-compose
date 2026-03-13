@@ -288,14 +288,11 @@ private fun LazyListScope.favoriteList(
                         onDetailsClick(matchingEatery)
                     }
                 } else {
-                    BottomSheetLocationCard(
-                        title = place.name,
-                        subtitle1 = place.subLabel,
-                        isFavorite = true,
-                        onFavoriteClick = { onFavoriteStarClick(place) }
-                    ) {
-                        navigateToPlace(place)
-                    }
+                    StandardCard(
+                        place = place,
+                        onFavoriteStarClick = onFavoriteStarClick,
+                        navigateToPlace = navigateToPlace
+                    )
                 }
             }
 
@@ -311,14 +308,11 @@ private fun LazyListScope.favoriteList(
                         onDetailsClick(matchingLibrary)
                     }
                 } else {
-                    BottomSheetLocationCard(
-                        title = place.name,
-                        subtitle1 = place.subLabel,
-                        isFavorite = true,
-                        onFavoriteClick = { onFavoriteStarClick(place) }
-                    ) {
-                        navigateToPlace(place)
-                    }
+                    StandardCard(
+                        place = place,
+                        onFavoriteStarClick = onFavoriteStarClick,
+                        navigateToPlace = navigateToPlace
+                    )
                 }
             }
 
@@ -334,14 +328,11 @@ private fun LazyListScope.favoriteList(
                         onDetailsClick(matchingGym)
                     }
                 } else {
-                    BottomSheetLocationCard(
-                        title = place.name,
-                        subtitle1 = place.subLabel,
-                        isFavorite = true,
-                        onFavoriteClick = { onFavoriteStarClick(place) }
-                    ) {
-                        navigateToPlace(place)
-                    }
+                    StandardCard(
+                        place = place,
+                        onFavoriteStarClick = onFavoriteStarClick,
+                        navigateToPlace = navigateToPlace
+                    )
                 }
             }
 
@@ -370,26 +361,20 @@ private fun LazyListScope.favoriteList(
                         )
                     }
                 } else {
-                    BottomSheetLocationCard(
-                        title = place.name,
-                        subtitle1 = place.subLabel,
-                        isFavorite = true,
-                        onFavoriteClick = { onFavoriteStarClick(place) }
-                    ) {
-                        navigateToPlace(place)
-                    }
+                    StandardCard(
+                        place = place,
+                        onFavoriteStarClick = onFavoriteStarClick,
+                        navigateToPlace = navigateToPlace
+                    )
                 }
             }
 
             PlaceType.BUS_STOP, PlaceType.APPLE_PLACE -> {
-                BottomSheetLocationCard(
-                    title = place.name,
-                    subtitle1 = place.subLabel,
-                    isFavorite = true,
-                    onFavoriteClick = { onFavoriteStarClick(place) }
-                ) {
-                    navigateToPlace(place)
-                }
+                StandardCard(
+                    place = place,
+                    onFavoriteStarClick = onFavoriteStarClick,
+                    navigateToPlace = navigateToPlace
+                )
             }
         }
     }
@@ -463,7 +448,7 @@ private fun LazyListScope.printerList(
                     onFavoriteClick = {
                         onFavoriteStarClick(place)
                     }
-                    ) {
+                ) {
                     navigateToPlace(
                         place
                     )
@@ -547,6 +532,22 @@ private fun LazyListScope.libraryList(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun StandardCard(
+    place: Place,
+    onFavoriteStarClick: (Place) -> Unit,
+    navigateToPlace: (Place) -> Unit
+) {
+    BottomSheetLocationCard(
+        title = place.name,
+        subtitle1 = place.subLabel,
+        isFavorite = true,
+        onFavoriteClick = { onFavoriteStarClick(place) }
+    ) {
+        navigateToPlace(place)
     }
 }
 
