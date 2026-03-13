@@ -42,6 +42,7 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.EcosystemFavoritesUiState
 import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
 import com.cornellappdev.transit.ui.viewmodels.FilterState
+import com.cornellappdev.transit.ui.viewmodels.PrinterCardUiState
 import com.cornellappdev.transit.util.ecosystem.toPlace
 import kotlin.collections.isNotEmpty
 
@@ -256,7 +257,7 @@ private fun LazyListScope.favoriteList(
     eateryByPlace: Map<Place, Eatery>,
     libraryByPlace: Map<Place, Library>,
     gymByPlace: Map<Place, UpliftGym>,
-    printerByPlace: Map<Place, Printer>,
+    printerByPlace: Map<Place, PrinterCardUiState>,
     navigateToPlace: (Place) -> Unit,
     onAddFavoritesClick: () -> Unit,
     onFavoriteStarClick: (Place) -> Unit,
@@ -338,27 +339,20 @@ private fun LazyListScope.favoriteList(
 
             PlaceType.PRINTER -> {
                 val matchingPrinter = printerByPlace[place]
-                val alert = if (matchingPrinter?.location?.contains("*") == true) {
-                    matchingPrinter.location.substringAfter("*").trim('*').trim()
-                } else {
-                    ""
-                }
                 if (matchingPrinter != null) {
                     PrinterCard(
-                        title = matchingPrinter.location.substringBefore("*").trim(),
-                        subtitle = matchingPrinter.description.substringAfter("-").trim(),
-                        inColor = matchingPrinter.description.contains("Color", ignoreCase = true),
-                        hasCopy = matchingPrinter.description.contains("Copy", ignoreCase = true),
-                        hasScan = matchingPrinter.description.contains("Scan", ignoreCase = true),
-                        alertMessage = alert,
+                        title = matchingPrinter.title,
+                        subtitle = matchingPrinter.subtitle,
+                        inColor = matchingPrinter.inColor,
+                        hasCopy = matchingPrinter.hasCopy,
+                        hasScan = matchingPrinter.hasScan,
+                        alertMessage = matchingPrinter.alertMessage,
                         isFavorite = place in favorites,
                         onFavoriteClick = {
                             onFavoriteStarClick(place)
                         }
                     ) {
-                        navigateToPlace(
-                            place
-                        )
+                        navigateToPlace(place)
                     }
                 } else {
                     StandardCard(
@@ -728,7 +722,16 @@ private fun PreviewBottomSheetFilteredContentFavorites() {
             eateryByPlace = listOf(mockEatery).associateBy { it.toPlace() },
             libraryByPlace = listOf(mockLibrary).associateBy { it.toPlace() },
             gymByPlace = listOf(mockGym).associateBy { it.toPlace() },
-            printerByPlace = listOf(mockPrinter).associateBy { it.toPlace() }
+            printerByPlace = mapOf(
+                mockPrinter.toPlace() to PrinterCardUiState(
+                    title = "Mann Library",
+                    subtitle = "near entrance",
+                    inColor = false,
+                    hasCopy = false,
+                    hasScan = false,
+                    alertMessage = ""
+                )
+            )
         ),
         navigateToPlace = {},
         onDetailsClick = {},
@@ -746,4 +749,6 @@ private fun PreviewBottomSheetFilteredContentFavorites() {
         operatingHoursToString = { _ -> AnnotatedString("Open • 10am - 4pm") }
     )
 }
+
+
 

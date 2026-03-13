@@ -172,7 +172,10 @@ class HomeViewModel @Inject constructor(
             eateryByPlace = eateries.associateBy { it.toPlace() },
             libraryByPlace = libraries.associateBy { it.toPlace() },
             gymByPlace = gyms.associateBy { it.toPlace() },
-            printerByPlace = printers.associateBy { it.toPlace() }
+            printerByPlace = printers.associate { printer ->
+                val place = printer.toPlace()
+                place to printer.toPrinterCardUiState()
+            }
         )
     }.stateIn(
         scope = viewModelScope,
@@ -551,8 +554,32 @@ data class EcosystemFavoritesUiState(
     val eateryByPlace: Map<Place, Eatery> = emptyMap(),
     val libraryByPlace: Map<Place, Library> = emptyMap(),
     val gymByPlace: Map<Place, UpliftGym> = emptyMap(),
-    val printerByPlace: Map<Place, Printer> = emptyMap()
+    val printerByPlace: Map<Place, PrinterCardUiState> = emptyMap()
 )
+
+/**
+ * UI-ready printer fields so composables don't parse backend strings.
+ */
+data class PrinterCardUiState(
+    val title: String,
+    val subtitle: String,
+    val inColor: Boolean,
+    val hasCopy: Boolean,
+    val hasScan: Boolean,
+    val alertMessage: String
+)
+
+private fun Printer.toPrinterCardUiState(): PrinterCardUiState {
+    val alertMessage = location.substringAfter("*", "").trim('*').trim()
+    return PrinterCardUiState(
+        title = location.substringBefore("*").trim(),
+        subtitle = description.substringAfter("-", description).trim(),
+        inColor = description.contains("Color", ignoreCase = true),
+        hasCopy = description.contains("Copy", ignoreCase = true),
+        hasScan = description.contains("Scan", ignoreCase = true),
+        alertMessage = alertMessage
+    )
+}
 
 private fun Set<FavoritesFilterSheetState>.toAllowedPlaceTypes(): Set<PlaceType> = buildSet {
     if (FavoritesFilterSheetState.EATERIES in this@toAllowedPlaceTypes) add(PlaceType.EATERY)
