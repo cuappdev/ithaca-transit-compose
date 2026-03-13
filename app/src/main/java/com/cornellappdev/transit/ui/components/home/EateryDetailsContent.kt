@@ -34,6 +34,7 @@ fun EateryDetailsContent(
     eatery: Eatery,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
+    distanceString: String,
 ) {
     Column(
         modifier = Modifier
@@ -51,7 +52,7 @@ fun EateryDetailsContent(
 
         DetailedPlaceHeaderSection(
             eatery.name,
-            eatery.campusArea,
+            eatery.campusArea + distanceString,
             leftAnnotatedString = isOpenAnnotatedStringFromOperatingHours(
                 eatery.operatingHours()
             ),

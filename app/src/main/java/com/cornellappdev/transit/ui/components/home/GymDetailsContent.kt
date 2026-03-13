@@ -40,6 +40,7 @@ fun GymDetailsContent(
     gym: UpliftGym,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
+    distanceString: String
 ) {
     val isOpen = getOpenStatus(gym.operatingHours()).isOpen
 
@@ -47,8 +48,7 @@ fun GymDetailsContent(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                start = 20.dp,
-                end = 20.dp,
+                horizontal = 20.dp
             )
     ) {
         PlaceCardImage(
@@ -59,7 +59,7 @@ fun GymDetailsContent(
 
         DetailedPlaceHeaderSectionWithWidget(
             gym.name,
-            getGymLocationString(gym.name),
+            getGymLocationString(gym.name) + distanceString,
             onFavoriteClick = onFavoriteClick,
             isFavorite = isFavorite,
             leftAnnotatedString = isOpenAnnotatedStringFromOperatingHours(

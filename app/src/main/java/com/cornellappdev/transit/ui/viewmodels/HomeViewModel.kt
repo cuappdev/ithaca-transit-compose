@@ -31,6 +31,7 @@ import com.cornellappdev.transit.util.HIGH_CAPACITY_THRESHOLD
 import com.cornellappdev.transit.util.MEDIUM_CAPACITY_THRESHOLD
 import com.cornellappdev.transit.util.TimeUtils.getOpenStatus
 import com.cornellappdev.transit.util.TimeUtils.toPascalCaseString
+import com.cornellappdev.transit.util.calculateDistanceString
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,6 +52,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import kotlin.math.log
 
 
 /**
@@ -361,4 +363,21 @@ class HomeViewModel @Inject constructor(
         this.filterState.value = filterState
     }
 
+    /**
+     * Returns a distance string from a location to the current location if both exist, otherwise returns empty string
+     */
+    fun distanceStringIfCurrentLocationExists(latitude: Double?, longitude: Double?): String {
+        val currentLocationSnapshot = currentLocation.value
+        if (currentLocationSnapshot != null && latitude != null && longitude != null) {
+            return " - " +
+                    calculateDistanceString(
+                        LatLng(
+                            currentLocationSnapshot.latitude,
+                            currentLocationSnapshot.longitude
+                        ), LatLng(latitude, longitude)
+                    )
+
+        }
+        return ""
+    }
 }

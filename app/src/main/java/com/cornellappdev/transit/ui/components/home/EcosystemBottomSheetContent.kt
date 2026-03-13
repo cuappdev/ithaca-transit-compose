@@ -75,6 +75,7 @@ fun EcosystemBottomSheetContent(
     onFilterToggle: (FavoritesFilterSheetState) -> Unit,
     onRemoveAppliedFilter: (FavoritesFilterSheetState) -> Unit,
     operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
+    distanceStringToPlace: (Double?, Double?) -> String,
 ) {
     Column(modifier = modifier) {
         Row(
@@ -119,7 +120,8 @@ fun EcosystemBottomSheetContent(
             onAddFavoritesClick = onAddFavoritesClick,
             appliedFilters = appliedFilters,
             onRemoveAppliedFilter = onRemoveAppliedFilter,
-            operatingHoursToString = operatingHoursToString
+            operatingHoursToString = operatingHoursToString,
+            distanceStringToPlace = distanceStringToPlace
         )
     }
 
@@ -151,7 +153,8 @@ private fun BottomSheetFilteredContent(
     onFilterButtonClick: () -> Unit,
     appliedFilters: Set<FavoritesFilterSheetState>,
     onRemoveAppliedFilter: (FavoritesFilterSheetState) -> Unit,
-    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
+    distanceStringToPlace: (Double?, Double?) -> String,
 ) {
     Column {
         if (currentFilter == FilterState.FAVORITES) {
@@ -201,7 +204,8 @@ private fun BottomSheetFilteredContent(
                         favorites = favorites,
                         onFavoriteStarClick = onFavoriteStarClick,
                         operatingHoursToString = ::isOpenAnnotatedStringFromOperatingHours,
-                        capacityToString = ::capacityPercentAnnotatedString
+                        capacityToString = ::capacityPercentAnnotatedString,
+                        distanceStringToPlace = distanceStringToPlace
                     )
                 }
 
@@ -211,7 +215,8 @@ private fun BottomSheetFilteredContent(
                         onDetailsClick = onDetailsClick,
                         favorites = favorites,
                         onFavoriteStarClick = onFavoriteStarClick,
-                        operatingHoursToString = operatingHoursToString
+                        operatingHoursToString = operatingHoursToString,
+                        distanceStringToPlace = distanceStringToPlace
                     )
                 }
 
@@ -261,6 +266,7 @@ private fun LazyListScope.gymList(
     onFavoriteStarClick: (Place) -> Unit,
     operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
     capacityToString: (UpliftCapacity?) -> AnnotatedString,
+    distanceStringToPlace: (Double?, Double?) -> String,
 ) {
     when (gymsApiResponse) {
         is ApiResponse.Error -> {
@@ -277,7 +283,10 @@ private fun LazyListScope.gymList(
                 RoundedImagePlaceCard(
                     imageUrl = it.imageUrl,
                     title = it.name,
-                    subtitle = getGymLocationString(it.name),
+                    subtitle = getGymLocationString(it.name) + distanceStringToPlace(
+                        it.latitude,
+                        it.longitude
+                    ),
                     isFavorite = it.toPlace() in favorites,
                     onFavoriteClick = {
                         onFavoriteStarClick(it.toPlace())
@@ -352,7 +361,8 @@ private fun LazyListScope.eateryList(
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     favorites: Set<Place>,
     onFavoriteStarClick: (Place) -> Unit,
-    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
+    distanceStringToPlace: (Double?, Double?) -> String,
 ) {
     when (eateriesApiResponse) {
         is ApiResponse.Error -> {
@@ -369,7 +379,8 @@ private fun LazyListScope.eateryList(
                 RoundedImagePlaceCard(
                     imageUrl = it.imageUrl,
                     title = it.name,
-                    subtitle = it.location ?: "",
+                    subtitle = (it.location
+                        ?: "") + distanceStringToPlace(it.latitude, it.longitude),
                     isFavorite = it.toPlace() in favorites,
                     onFavoriteClick = {
                         onFavoriteStarClick(it.toPlace())
@@ -461,6 +472,7 @@ private fun PreviewEcosystemBottomSheet() {
         onApplyFilters = {},
         onFilterToggle = {},
         onRemoveAppliedFilter = {},
-        operatingHoursToString = { _ -> AnnotatedString("") }
+        operatingHoursToString = { _ -> AnnotatedString("") },
+        distanceStringToPlace = { _, _ -> "" }
     )
 }

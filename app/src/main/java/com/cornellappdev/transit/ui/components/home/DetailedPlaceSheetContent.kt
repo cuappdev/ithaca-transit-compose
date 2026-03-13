@@ -46,7 +46,8 @@ fun DetailedPlaceSheetContent(
     onBackButtonPressed: () -> Unit,
     navigateToPlace: (Place) -> Unit,
     onFavoriteStarClick: (Place) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    distanceStringToPlace: (Double?, Double?) -> String
 ) {
     Column(
         modifier = modifier
@@ -94,7 +95,11 @@ fun DetailedPlaceSheetContent(
                         isFavorite = ecosystemPlace.toPlace() in favorites,
                         onFavoriteClick = {
                             onFavoriteStarClick(ecosystemPlace.toPlace())
-                        }
+                        },
+                        distanceString = distanceStringToPlace(
+                            ecosystemPlace.latitude,
+                            ecosystemPlace.longitude
+                        )
                     )
                 }
 
@@ -114,7 +119,11 @@ fun DetailedPlaceSheetContent(
                         isFavorite = ecosystemPlace.toPlace() in favorites,
                         onFavoriteClick = {
                             onFavoriteStarClick(ecosystemPlace.toPlace())
-                        }
+                        },
+                        distanceString = distanceStringToPlace(
+                            ecosystemPlace.latitude,
+                            ecosystemPlace.longitude
+                        )
                     )
                 }
             }
@@ -205,6 +214,7 @@ private fun DetailedPlaceSheetContentPreview() {
         onBackButtonPressed = {},
         navigateToPlace = {},
         onFavoriteStarClick = {},
-        modifier = Modifier.background(Color.White)
+        modifier = Modifier.background(Color.White),
+        distanceStringToPlace = { _, _ -> "" }
     )
 }

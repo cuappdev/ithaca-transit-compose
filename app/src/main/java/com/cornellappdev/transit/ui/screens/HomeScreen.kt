@@ -322,7 +322,8 @@ fun HomeScreen(
                                 homeViewModel.beginRouteOptions(it)
                                 navController.navigate("route")
                             },
-                            modifier = Modifier.onTapDisableSearch()
+                            modifier = Modifier.onTapDisableSearch(),
+                            distanceStringToPlace = homeViewModel::distanceStringIfCurrentLocationExists
                         )
                     }
 
@@ -354,7 +355,8 @@ fun HomeScreen(
                             onApplyFilters = homeViewModel::applyFavoritesFilters,
                             onFilterToggle = homeViewModel::toggleFavoritesFilter,
                             onRemoveAppliedFilter = homeViewModel::removeAppliedFilter,
-                            operatingHoursToString = ::isOpenAnnotatedStringFromOperatingHours
+                            operatingHoursToString = ::isOpenAnnotatedStringFromOperatingHours,
+                            distanceStringToPlace = homeViewModel::distanceStringIfCurrentLocationExists
                         )
                     }
                 }
