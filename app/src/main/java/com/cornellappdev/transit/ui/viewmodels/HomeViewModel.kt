@@ -4,24 +4,29 @@ import android.content.Context
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.Place
+import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
+import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.EateryRepository
 import com.cornellappdev.transit.models.ecosystem.GymRepository
+import com.cornellappdev.transit.models.ecosystem.Library
+import com.cornellappdev.transit.models.ecosystem.Printer
+import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.LateRed
 import com.cornellappdev.transit.ui.theme.LiveGreen
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.util.TimeUtils.toPascalCaseString
+import com.cornellappdev.transit.util.ecosystem.toPlace
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,7 +42,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -145,6 +149,36 @@ class HomeViewModel @Inject constructor(
         MutableStateFlow<Set<FavoritesFilterSheetState>>(emptySet())
     val appliedFavoritesFilters: StateFlow<Set<FavoritesFilterSheetState>> =
         _appliedFavoritesFilters.asStateFlow()
+
+    val ecosystemFavoritesUiState: StateFlow<EcosystemFavoritesUiState> = combine(
+        userPreferenceRepository.favoritesFlow,
+        staticPlacesFlow,
+        appliedFavoritesFilters
+    ) { favorites, staticPlaces, appliedFilters ->
+        val allowedTypes = appliedFilters.toAllowedPlaceTypes()
+
+        val filteredSortedFavorites = favorites.asSequence()
+            .filter { allowedTypes.isEmpty() || it.type in allowedTypes }
+            .sortedWith(compareBy<Place>({ it.type.ordinal }, { it.name }))
+            .toList()
+
+        val eateries = (staticPlaces.eateries as? ApiResponse.Success)?.data.orEmpty()
+        val libraries = (staticPlaces.libraries as? ApiResponse.Success)?.data.orEmpty()
+        val gyms = (staticPlaces.gyms as? ApiResponse.Success)?.data.orEmpty()
+        val printers = (staticPlaces.printers as? ApiResponse.Success)?.data.orEmpty()
+
+        EcosystemFavoritesUiState(
+            filteredSortedFavorites = filteredSortedFavorites,
+            eateryByPlace = eateries.associateBy { it.toPlace() },
+            libraryByPlace = libraries.associateBy { it.toPlace() },
+            gymByPlace = gyms.associateBy { it.toPlace() },
+            printerByPlace = printers.associateBy { it.toPlace() }
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = EcosystemFavoritesUiState()
+    )
 
     fun toggleFavoritesFilter(filter: FavoritesFilterSheetState) {
         _selectedFavoritesFilters.value = if (filter in _selectedFavoritesFilters.value) {
@@ -507,4 +541,26 @@ class HomeViewModel @Inject constructor(
         )
     }
 
+}
+
+/**
+ * Derived favorites content for the ecosystem tabs, computed in ViewModel.
+ */
+data class EcosystemFavoritesUiState(
+    val filteredSortedFavorites: List<Place> = emptyList(),
+    val eateryByPlace: Map<Place, Eatery> = emptyMap(),
+    val libraryByPlace: Map<Place, Library> = emptyMap(),
+    val gymByPlace: Map<Place, UpliftGym> = emptyMap(),
+    val printerByPlace: Map<Place, Printer> = emptyMap()
+)
+
+private fun Set<FavoritesFilterSheetState>.toAllowedPlaceTypes(): Set<PlaceType> = buildSet {
+    if (FavoritesFilterSheetState.EATERIES in this@toAllowedPlaceTypes) add(PlaceType.EATERY)
+    if (FavoritesFilterSheetState.LIBRARIES in this@toAllowedPlaceTypes) add(PlaceType.LIBRARY)
+    if (FavoritesFilterSheetState.GYMS in this@toAllowedPlaceTypes) add(PlaceType.GYM)
+    if (FavoritesFilterSheetState.PRINTERS in this@toAllowedPlaceTypes) add(PlaceType.PRINTER)
+    if (FavoritesFilterSheetState.OTHER in this@toAllowedPlaceTypes) {
+        add(PlaceType.APPLE_PLACE)
+        add(PlaceType.BUS_STOP)
+    }
 }

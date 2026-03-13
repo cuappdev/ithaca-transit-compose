@@ -39,6 +39,7 @@ import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.FavoritesDividerGray
 import com.cornellappdev.transit.ui.theme.robotoFamily
+import com.cornellappdev.transit.ui.viewmodels.EcosystemFavoritesUiState
 import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
 import com.cornellappdev.transit.ui.viewmodels.FilterState
 import com.cornellappdev.transit.util.ecosystem.toPlace
@@ -61,6 +62,7 @@ fun EcosystemBottomSheetContent(
     onFilterClick: (FilterState) -> Unit,
     staticPlaces: StaticPlaces,
     favorites: Set<Place>,
+    favoritesUiState: EcosystemFavoritesUiState,
     modifier: Modifier = Modifier,
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
@@ -113,6 +115,7 @@ fun EcosystemBottomSheetContent(
             currentFilter = activeFilter,
             staticPlaces = staticPlaces,
             favorites = favorites,
+            favoritesUiState = favoritesUiState,
             navigateToPlace = navigateToPlace,
             onDetailsClick = onDetailsClick,
             onFavoriteStarClick = onFavoriteStarClick,
@@ -145,6 +148,7 @@ private fun BottomSheetFilteredContent(
     currentFilter: FilterState,
     staticPlaces: StaticPlaces,
     favorites: Set<Place>,
+    favoritesUiState: EcosystemFavoritesUiState,
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     onFavoriteStarClick: (Place) -> Unit,
@@ -187,11 +191,14 @@ private fun BottomSheetFilteredContent(
                     FilterState.FAVORITES -> {
                         favoriteList(
                             favorites = favorites,
-                            appliedFilters = appliedFilters,
+                            filteredFavorites = favoritesUiState.filteredSortedFavorites,
+                            eateryByPlace = favoritesUiState.eateryByPlace,
+                            libraryByPlace = favoritesUiState.libraryByPlace,
+                            gymByPlace = favoritesUiState.gymByPlace,
+                            printerByPlace = favoritesUiState.printerByPlace,
                             navigateToPlace = navigateToPlace,
                             onAddFavoritesClick = onAddFavoritesClick,
                             onFavoriteStarClick = onFavoriteStarClick,
-                            staticPlaces = staticPlaces,
                             onDetailsClick = onDetailsClick,
                             operatingHoursToString = operatingHoursToString
                         )
@@ -245,47 +252,26 @@ private fun BottomSheetFilteredContent(
  */
 private fun LazyListScope.favoriteList(
     favorites: Set<Place>,
-    appliedFilters: Set<FavoritesFilterSheetState>,
+    filteredFavorites: List<Place>,
+    eateryByPlace: Map<Place, Eatery>,
+    libraryByPlace: Map<Place, Library>,
+    gymByPlace: Map<Place, UpliftGym>,
+    printerByPlace: Map<Place, Printer>,
     navigateToPlace: (Place) -> Unit,
     onAddFavoritesClick: () -> Unit,
     onFavoriteStarClick: (Place) -> Unit,
-    staticPlaces: StaticPlaces,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString
 ) {
-    val filteredFavorites = if (appliedFilters.isEmpty()) {
-        favorites.toList()
-    } else {
-        favorites.filter { place ->
-            appliedFilters.any { filter ->
-                when (filter) {
-                    FavoritesFilterSheetState.EATERIES -> place.type == PlaceType.EATERY
-                    FavoritesFilterSheetState.LIBRARIES -> place.type == PlaceType.LIBRARY
-                    FavoritesFilterSheetState.GYMS -> place.type == PlaceType.GYM
-                    FavoritesFilterSheetState.PRINTERS -> place.type == PlaceType.PRINTER
-                    FavoritesFilterSheetState.OTHER ->
-                        place.type == PlaceType.APPLE_PLACE || place.type == PlaceType.BUS_STOP
-                }
-            }
-        }
-    }
-
     item {
         Spacer(modifier = Modifier.height(8.dp))
         AddFavoritesButton(onAddFavoritesClick = onAddFavoritesClick)
     }
 
-    val eateries = (staticPlaces.eateries as? ApiResponse.Success)?.data ?: emptyList()
-    val libraries = (staticPlaces.libraries as? ApiResponse.Success)?.data ?: emptyList()
-    val gyms = (staticPlaces.gyms as? ApiResponse.Success)?.data ?: emptyList()
-    val printers = (staticPlaces.printers as? ApiResponse.Success)?.data ?: emptyList()
-
-    val eateryByPlace: Map<Place, Eatery> = eateries.associateBy { it.toPlace() }
-    val libraryByPlace: Map<Place, Library> = libraries.associateBy { it.toPlace() }
-    val gymByPlace: Map<Place, UpliftGym> = gyms.associateBy { it.toPlace() }
-    val printerByPlace: Map<Place, Printer> = printers.associateBy { it.toPlace() }
-
-    items(filteredFavorites) { place ->
+    items(
+        items = filteredFavorites,
+        key = { place -> "${place.type}:${place.name}:${place.latitude}:${place.longitude}" }
+    ) { place ->
         when (place.type) {
             PlaceType.EATERY -> {
                 val matchingEatery = eateryByPlace[place]
@@ -584,6 +570,7 @@ private fun PreviewEcosystemBottomSheet() {
             ApiResponse.Pending
         ),
         favorites = emptySet(),
+        favoritesUiState = EcosystemFavoritesUiState(),
         modifier = Modifier,
         navigateToPlace = {},
         onDetailsClick = {},
@@ -698,6 +685,49 @@ private fun PreviewBottomSheetFilteredContentFavorites() {
                 detail = "Bus Stop",
                 type = PlaceType.BUS_STOP
             )
+        ),
+        favoritesUiState = EcosystemFavoritesUiState(
+            filteredSortedFavorites = listOf(
+                Place(
+                    latitude = 42.4488,
+                    longitude = -76.4813,
+                    name = "Trillium",
+                    detail = "Kennedy Hall",
+                    type = PlaceType.EATERY
+                ),
+                Place(
+                    latitude = 42.4534,
+                    longitude = -76.4735,
+                    name = "Olin Library",
+                    detail = "161 Ho Plaza",
+                    type = PlaceType.LIBRARY
+                ),
+                Place(
+                    latitude = 42.4480,
+                    longitude = -76.4840,
+                    name = "Noyes Community Recreation Center",
+                    detail = "North Campus",
+                    type = PlaceType.GYM
+                ),
+                Place(
+                    latitude = 42.4479,
+                    longitude = -76.4764,
+                    name = "Mann Library",
+                    detail = "1st Floor, near entrance",
+                    type = PlaceType.PRINTER
+                ),
+                Place(
+                    latitude = 42.4440,
+                    longitude = -76.4825,
+                    name = "Seneca St & Fall Creek Dr",
+                    detail = "Bus Stop",
+                    type = PlaceType.BUS_STOP
+                )
+            ),
+            eateryByPlace = listOf(mockEatery).associateBy { it.toPlace() },
+            libraryByPlace = listOf(mockLibrary).associateBy { it.toPlace() },
+            gymByPlace = listOf(mockGym).associateBy { it.toPlace() },
+            printerByPlace = listOf(mockPrinter).associateBy { it.toPlace() }
         ),
         navigateToPlace = {},
         onDetailsClick = {},
