@@ -200,6 +200,11 @@ object TimeUtils {
         operatingHours: List<DayOperatingHours>,
         currentDateTime: LocalDateTime = LocalDateTime.now()
     ): OpenStatus {
+
+        if (operatingHours.isEmpty()) {
+            return OpenStatus(false, "Closed today")
+        }
+
         val rotatedOperatingHours = rotateOperatingHours(operatingHours)
 
         val currentTime = currentDateTime.toLocalTime()

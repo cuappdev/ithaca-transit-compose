@@ -26,6 +26,7 @@ import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
+import com.cornellappdev.transit.util.StringUtils.createDeepLink
 import com.cornellappdev.transit.util.TimeUtils.getOpenStatus
 import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
 import com.cornellappdev.transit.util.TimeUtils.rotateOperatingHours
@@ -57,7 +58,7 @@ fun GymDetailsContent(
             shouldClipBottom = true
         )
 
-        DetailedPlaceHeaderSectionWithWidget(
+        DetailedPlaceHeaderSection(
             gym.name,
             getGymLocationString(gym.name) + distanceString,
             onFavoriteClick = onFavoriteClick,
@@ -95,8 +96,12 @@ fun GymDetailsContent(
             modifier = Modifier.padding(bottom = 15.dp)
         )
 
+        val (annotatedString, inlineContent) =
+            stringResource(R.string.view_gym).createDeepLink(R.drawable.upliftlink)
+
         Text(
-            text = stringResource(R.string.view_gym),
+            text = annotatedString,
+            inlineContent = inlineContent,
             style = Style.heading2,
             color = TransitBlue
         )

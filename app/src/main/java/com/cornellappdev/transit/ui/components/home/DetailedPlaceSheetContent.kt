@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
@@ -199,17 +201,47 @@ fun DetailedPlaceSheetContent(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun DetailedPlaceSheetContentPreview() {
-    DetailedPlaceSheetContent(
-        Library(
+private class ExamplePlaceProvider : PreviewParameterProvider<DetailedEcosystemPlace> {
+    override val values = sequenceOf(
+        Eatery(
+            id = 1,
+            name = "Okenshields",
+            menuSummary = null,
+            imageUrl = null,
+            location = "Willard Straight Hall",
+            campusArea = "Central",
+            onlineOrderUrl = null,
+            latitude = null,
+            longitude = null,
+            paymentAcceptsMealSwipes = null,
+            paymentAcceptsBrbs = null,
+            paymentAcceptsCash = null,
+            events = null
+        ), Library(
             id = 1,
             location = "Olin Library",
             address = "Ho Plaza",
             latitude = 1.0,
             longitude = 1.0
         ),
+        UpliftGym(
+            name = "Helen Newman",
+            id = "",
+            facilityId = "",
+            hours = emptyList(),
+            latitude = 0.0,
+            longitude = 0.0,
+            upliftCapacity = null,
+            imageUrl = null
+        )
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DetailedPlaceSheetContentPreview(@PreviewParameter(ExamplePlaceProvider::class) place: DetailedEcosystemPlace) {
+    DetailedPlaceSheetContent(
+        place,
         favorites = emptySet(),
         onBackButtonPressed = {},
         navigateToPlace = {},

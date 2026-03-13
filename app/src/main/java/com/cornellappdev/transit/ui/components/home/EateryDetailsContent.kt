@@ -25,6 +25,7 @@ import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
+import com.cornellappdev.transit.util.StringUtils.createDeepLink
 import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
 import com.cornellappdev.transit.util.TimeUtils.rotateOperatingHours
 import com.cornellappdev.transit.util.getAboutContent
@@ -80,8 +81,12 @@ fun EateryDetailsContent(
             modifier = Modifier.padding(bottom = 15.dp)
         )
 
+        val (annotatedString, inlineContent) =
+            stringResource(R.string.view_menu).createDeepLink(R.drawable.eaterylink)
+
         Text(
-            text = stringResource(R.string.view_menu),
+            text = annotatedString,
+            inlineContent = inlineContent,
             style = Style.heading2,
             color = TransitBlue
         )

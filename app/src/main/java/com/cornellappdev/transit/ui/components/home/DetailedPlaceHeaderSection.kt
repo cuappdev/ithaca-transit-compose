@@ -23,7 +23,10 @@ import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
 
 /**
- * Text area of detailed place header with favorites star
+ * Text area of detailed place header with favorites star, and optional
+ * annotated text and widget.
+ *
+ * [rightAnnotatedString] takes precedence over [widget].
  */
 @Composable
 fun DetailedPlaceHeaderSection(
@@ -31,6 +34,7 @@ fun DetailedPlaceHeaderSection(
     subtitle: String?,
     leftAnnotatedString: AnnotatedString? = null,
     rightAnnotatedString: AnnotatedString? = null,
+    widget: @Composable BoxScope.() -> Unit = {},
     onFavoriteClick: () -> Unit,
     isFavorite: Boolean
 ) {
@@ -82,67 +86,12 @@ fun DetailedPlaceHeaderSection(
             }
         }
 
-        FavoritesStar(onFavoriteClick, isFavorite)
-    }
-}
-
-/**
- * Text area of detailed place header with favorites star on the top right and widget on the bottom right
- */
-@Composable
-fun DetailedPlaceHeaderSectionWithWidget(
-    title: String,
-    subtitle: String?,
-    leftAnnotatedString: AnnotatedString? = null,
-    widget: @Composable BoxScope.() -> Unit,
-    onFavoriteClick: () -> Unit,
-    isFavorite: Boolean
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 24.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .align(Alignment.CenterStart),
-        ) {
-            Text(
-                text = title,
-                style = Style.detailHeading,
-                color = PrimaryText,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(end = 32.dp, bottom = 12.dp)
-            )
-            subtitle?.let {
-                Text(
-                    text = subtitle,
-                    style = Style.cardSubtitle,
-                    color = SecondaryText,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(end = 32.dp, bottom = 8.dp)
-
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                leftAnnotatedString?.let {
-                    Text(
-                        text = leftAnnotatedString,
-                        style = Style.cardSubtitle
-                    )
-                }
-                Spacer(modifier = Modifier.weight(1f))
+        if (rightAnnotatedString == null) {
+            Box(Modifier.align(BottomEnd)) {
+                widget()
             }
         }
 
-        Box(Modifier.align(BottomEnd)) {
-            widget()
-        }
         FavoritesStar(onFavoriteClick, isFavorite)
     }
 }
