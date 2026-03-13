@@ -1,8 +1,8 @@
 package com.cornellappdev.transit.ui.components.home
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -21,43 +22,39 @@ import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
 @Composable
-fun AddFavoritesButton(
-    onAddFavoritesClick: () -> Unit,
-    modifier: Modifier = Modifier
+fun FilterButton(
+    onFilterClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Button(
-        onClick = onAddFavoritesClick,
+        onClick = onFilterClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color.White,
-            contentColor = Color.Black
+            containerColor = Color.Transparent,
+            contentColor = SecondaryText
         ),
-        modifier = modifier
-            .fillMaxWidth()
-            .height(40.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp),
+        modifier = modifier,
     ) {
-
         Icon(
-            painter = painterResource(R.drawable.ic_addition),
-            contentDescription = "Add Favorite",
-            tint = SecondaryText,
+            painter = painterResource(R.drawable.filter_icon),
+            contentDescription = "Filter Icon",
+            modifier = modifier.size(20.dp)
         )
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(4.dp))
 
         Text(
-            text = "Add Favorites",
-            fontFamily = robotoFamily,
-            fontWeight = FontWeight.SemiBold,
+            text = "Filter",
             fontSize = 16.sp,
-            color = SecondaryText
+            fontFamily = robotoFamily,
+            fontStyle = FontStyle.Normal,
+            fontWeight = FontWeight.Normal,
         )
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-private fun AddFavoritesButtonPreview() {
-    AddFavoritesButton(
-        onAddFavoritesClick = {},
-    )
+private fun FilterButtonPreview() {
+    FilterButton(onFilterClick = {})
 }

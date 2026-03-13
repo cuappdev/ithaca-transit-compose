@@ -25,12 +25,12 @@ import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
-import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
+import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
+import com.cornellappdev.transit.util.TimeUtils.rotateOperatingHours
 import com.cornellappdev.transit.util.getAboutContent
 
 @Composable
 fun EateryDetailsContent(
-    homeViewModel: HomeViewModel = hiltViewModel(),
     eatery: Eatery,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
@@ -52,7 +52,7 @@ fun EateryDetailsContent(
         DetailedPlaceHeaderSection(
             eatery.name,
             eatery.campusArea,
-            leftAnnotatedString = homeViewModel.isOpenAnnotatedStringFromOperatingHours(
+            leftAnnotatedString = isOpenAnnotatedStringFromOperatingHours(
                 eatery.operatingHours()
             ),
             onFavoriteClick = onFavoriteClick,
@@ -113,8 +113,8 @@ fun EateryDetailsContent(
         HorizontalDivider(thickness = 1.dp, color = DividerGray)
 
         ExpandableOperatingHoursList(
-            homeViewModel.isOpenAnnotatedStringFromOperatingHours(eatery.operatingHours()),
-            homeViewModel.rotateOperatingHours(eatery.operatingHours())
+            isOpenAnnotatedStringFromOperatingHours(eatery.operatingHours()),
+            rotateOperatingHours(eatery.operatingHours())
         )
 
     }

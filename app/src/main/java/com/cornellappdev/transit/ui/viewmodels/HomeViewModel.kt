@@ -29,6 +29,7 @@ import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.util.HIGH_CAPACITY_THRESHOLD
 import com.cornellappdev.transit.util.MEDIUM_CAPACITY_THRESHOLD
+import com.cornellappdev.transit.util.TimeUtils.getOpenStatus
 import com.cornellappdev.transit.util.TimeUtils.toPascalCaseString
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -97,6 +98,13 @@ class HomeViewModel @Inject constructor(
 
     val filterState: MutableStateFlow<FilterState> = MutableStateFlow(FilterState.FAVORITES)
 
+    private val _showFilterSheet = MutableStateFlow(false)
+    val showFilterSheet: StateFlow<Boolean> = _showFilterSheet.asStateFlow()
+
+    fun toggleFilterSheet(show: Boolean) {
+        _showFilterSheet.value = show
+    }
+
     val staticPlacesFlow =
         combine(
             routeRepository.printerFlow,
@@ -126,6 +134,55 @@ class HomeViewModel @Inject constructor(
 
     fun toggleAddFavoritesSheet(show: Boolean) {
         _showAddFavoritesSheet.value = show
+    }
+
+    val favoritesFilterList = listOf(
+        FavoritesFilterSheetState.GYMS,
+        FavoritesFilterSheetState.EATERIES,
+        FavoritesFilterSheetState.LIBRARIES,
+        FavoritesFilterSheetState.PRINTERS,
+        FavoritesFilterSheetState.OTHER
+    )
+
+    private val _selectedFavoritesFilters =
+        MutableStateFlow<Set<FavoritesFilterSheetState>>(emptySet())
+    val selectedFavoritesFilters: StateFlow<Set<FavoritesFilterSheetState>> =
+        _selectedFavoritesFilters.asStateFlow()
+
+    private val _appliedFavoritesFilters =
+        MutableStateFlow<Set<FavoritesFilterSheetState>>(emptySet())
+    val appliedFavoritesFilters: StateFlow<Set<FavoritesFilterSheetState>> =
+        _appliedFavoritesFilters.asStateFlow()
+
+    fun toggleFavoritesFilter(filter: FavoritesFilterSheetState) {
+        _selectedFavoritesFilters.value = if (filter in _selectedFavoritesFilters.value) {
+            _selectedFavoritesFilters.value - filter
+        } else {
+            _selectedFavoritesFilters.value + filter
+        }
+    }
+
+    fun applyFavoritesFilters() {
+        // Save the current selection as applied filters
+        _appliedFavoritesFilters.value = _selectedFavoritesFilters.value
+        toggleFilterSheet(false)
+    }
+
+    fun removeAppliedFilter(filter: FavoritesFilterSheetState) {
+        _selectedFavoritesFilters.value -= filter
+        _appliedFavoritesFilters.value = _appliedFavoritesFilters.value - filter
+    }
+
+    fun cancelFavoritesFilters() {
+        // Restore the previously applied filters
+        _selectedFavoritesFilters.value = _appliedFavoritesFilters.value
+        toggleFilterSheet(false)
+    }
+
+    fun openFilterSheet() {
+        // Initialize selected filters with currently applied filters
+        _selectedFavoritesFilters.value = _appliedFavoritesFilters.value
+        toggleFilterSheet(true)
     }
 
 
@@ -302,192 +359,6 @@ class HomeViewModel @Inject constructor(
      */
     fun setCategoryFilter(filterState: FilterState) {
         this.filterState.value = filterState
-    }
-
-    /**
-     * Rotate operating hours such that first value is today's date
-     *
-     * @param operatingHours A list of pairs mapping the first value day string to second value list of hours open
-     */
-    fun rotateOperatingHours(
-        operatingHours: List<DayOperatingHours>,
-        currentDate: LocalDate = LocalDate.now()
-    ): List<DayOperatingHours> {
-        val today = currentDate.dayOfWeek.toPascalCaseString()
-
-        val todayIndex = operatingHours.indexOfFirst {
-            it.dayOfWeek.equals(today, ignoreCase = true)
-        }
-
-        // Defensive programming only if [operatingHours] is missing a day
-        if (todayIndex == -1) return operatingHours
-
-        return operatingHours.drop(todayIndex) + operatingHours.take(todayIndex)
-    }
-
-    /**
-     * Find the next time a place is open if it is closed for the day
-     */
-    private fun findOpenNextDay(operatingHours: List<DayOperatingHours>): OpenStatus {
-        // Check day after
-        val dayAfter = operatingHours[1].hours
-        if (!dayAfter.any { it.equals("Closed", ignoreCase = true) }) {
-            val firstOpenTime = parseTimeRange(dayAfter[0])?.first
-            if (firstOpenTime != null) {
-                return OpenStatus(
-                    false,
-                    "until ${formatTime(firstOpenTime)}"
-                )
-            }
-        }
-        // Find next open day
-        for (i in 2 until operatingHours.size) {
-            val currDay = operatingHours[i].hours
-            if (!currDay.any { it.equals("Closed", ignoreCase = true) }) {
-                val dayName = operatingHours[i].dayOfWeek
-                return OpenStatus(
-                    false,
-                    "until $dayName"
-                )
-            }
-        }
-        return OpenStatus(false, "Closed today")
-    }
-
-    /**
-     * Given operating hours, return whether it is open and when it is open until
-     * or when it will next open
-     *
-     * @param operatingHours A list of pairs mapping the first value day string to second value list of hours open
-     */
-    fun getOpenStatus(
-        operatingHours: List<DayOperatingHours>,
-        currentDateTime: LocalDateTime = LocalDateTime.now()
-    ): OpenStatus {
-        val rotatedOperatingHours = rotateOperatingHours(operatingHours)
-
-        val currentTime = currentDateTime.toLocalTime()
-        val todaySchedule =
-            rotatedOperatingHours[0].hours // First day should be today after rotation
-
-        // Check if closed today
-        if (todaySchedule.any { it.equals("Closed", ignoreCase = true) }) {
-            return findOpenNextDay(rotatedOperatingHours)
-        }
-
-        val timeRanges = todaySchedule.mapNotNull { parseTimeRange(it) }
-
-        // Check if currently open
-        for (range in timeRanges) {
-            if (currentTime >= range.first && currentTime < range.second) {
-                return OpenStatus(true, "until ${formatTime(range.second)}")
-            }
-        }
-
-        // Check if opens later today
-        for (range in timeRanges) {
-            if (currentTime < range.first) {
-                return OpenStatus(false, "until ${formatTime(range.first)}")
-            }
-        }
-
-        // Closed for today, find next open day
-        return findOpenNextDay(rotatedOperatingHours)
-    }
-
-    /**
-     * Return annotated string for open times
-     */
-    private fun getOpenStatusAnnotatedString(openStatus: OpenStatus): AnnotatedString {
-        return buildAnnotatedString {
-            if (openStatus.isOpen) {
-                withStyle(
-                    style = SpanStyle(
-                        color = LiveGreen,
-                    )
-                ) {
-                    append("Open")
-                }
-            } else {
-                withStyle(
-                    style = SpanStyle(
-                        color = LateRed
-                    )
-                ) {
-                    append("Closed")
-                }
-            }
-            withStyle(
-                style = SpanStyle(
-                    color = SecondaryText
-                )
-            ) {
-                append(" - ")
-                append(openStatus.nextChangeTime)
-            }
-        }
-    }
-
-    private fun parseTimeRange(timeString: String): Pair<LocalTime, LocalTime>? {
-        if (timeString.equals("Closed", ignoreCase = true)) return null
-
-        val parts = timeString.split("-").map { it.trim() }
-        if (parts.size != 2) return null
-
-        return try {
-            val formatter = DateTimeFormatter.ofPattern("h:mm a")
-            val start = LocalTime.parse(parts[0], formatter)
-            val end = LocalTime.parse(parts[1], formatter)
-            start to end
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    private fun formatTime(time: LocalTime): String {
-        val formatter = DateTimeFormatter.ofPattern("h:mm a")
-        return time.format(formatter)
-    }
-
-    /**
-     * Rotate operating hours to current day, then determine if place is open, then format string
-     */
-    fun isOpenAnnotatedStringFromOperatingHours(operatingHours: List<DayOperatingHours>): AnnotatedString {
-        return getOpenStatusAnnotatedString(
-            getOpenStatus(operatingHours)
-        )
-    }
-
-    /**
-     * Format percent string based on a gym's current capacity
-     */
-    fun capacityPercentAnnotatedString(capacity: UpliftCapacity?): AnnotatedString {
-
-        // Return empty string if no capacity data available
-        if (capacity == null) {
-            return AnnotatedString("")
-        }
-
-        val color = if (capacity.percent <= MEDIUM_CAPACITY_THRESHOLD) {
-            AccentOpen
-        } else if (capacity.percent >= HIGH_CAPACITY_THRESHOLD) {
-            AccentClosed
-        } else {
-            AccentOrange
-        }
-
-        return buildAnnotatedString {
-            withStyle(
-                style = SpanStyle(
-                    fontSize = 14.sp,
-                    fontFamily = robotoFamily,
-                    fontWeight = FontWeight(600),
-                    color = color,
-                )
-            ) {
-                append("${capacity.percentString()} full")
-            }
-        }
     }
 
 }

@@ -26,6 +26,9 @@ import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
+import com.cornellappdev.transit.util.TimeUtils.getOpenStatus
+import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
+import com.cornellappdev.transit.util.TimeUtils.rotateOperatingHours
 import com.cornellappdev.transit.util.getAboutContent
 import com.cornellappdev.transit.util.getGymLocationString
 
@@ -34,12 +37,11 @@ import com.cornellappdev.transit.util.getGymLocationString
  */
 @Composable
 fun GymDetailsContent(
-    homeViewModel: HomeViewModel = hiltViewModel(),
     gym: UpliftGym,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
 ) {
-    val isOpen = homeViewModel.getOpenStatus(gym.operatingHours()).isOpen
+    val isOpen = getOpenStatus(gym.operatingHours()).isOpen
 
     Column(
         modifier = Modifier
@@ -60,7 +62,7 @@ fun GymDetailsContent(
             getGymLocationString(gym.name),
             onFavoriteClick = onFavoriteClick,
             isFavorite = isFavorite,
-            leftAnnotatedString = homeViewModel.isOpenAnnotatedStringFromOperatingHours(
+            leftAnnotatedString = isOpenAnnotatedStringFromOperatingHours(
                 gym.operatingHours()
             ),
             widget = {
@@ -127,8 +129,8 @@ fun GymDetailsContent(
         HorizontalDivider(thickness = 1.dp, color = DividerGray)
 
         ExpandableOperatingHoursList(
-            homeViewModel.isOpenAnnotatedStringFromOperatingHours(gym.operatingHours()),
-            homeViewModel.rotateOperatingHours(gym.operatingHours())
+            isOpenAnnotatedStringFromOperatingHours(gym.operatingHours()),
+            rotateOperatingHours(gym.operatingHours())
         )
 
     }

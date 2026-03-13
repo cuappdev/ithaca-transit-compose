@@ -1,0 +1,107 @@
+package com.cornellappdev.transit.ui.components.home
+
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.cornellappdev.transit.R
+import com.cornellappdev.transit.ui.theme.MetadataGray
+import com.cornellappdev.transit.ui.theme.MutedTransitBlue
+import com.cornellappdev.transit.ui.theme.TransitBlue
+import com.cornellappdev.transit.ui.theme.robotoFamily
+
+/**
+ * Card for each filter on home bottom sheet
+ * @param iconId The icon for the item
+ * @param label The label for the item
+ * @param isActive Whether the filter is selected
+ */
+@Composable
+fun FavoritesFilterSheetItem(
+    @DrawableRes iconId: Int,
+    label: String,
+    isActive: Boolean,
+    itemOnClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(90.dp)
+            .border(
+                width = 1.dp,
+                color = if (isActive) TransitBlue else MetadataGray,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .background(
+                color = if (isActive) MutedTransitBlue
+                else Color.Transparent,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .clickable(onClick = itemOnClick)
+            .padding(vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            painterResource(id = iconId),
+            contentDescription = label,
+            modifier = Modifier
+                .size(34.dp),
+            tint = if (isActive) TransitBlue else Color.Unspecified
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            label,
+            color = if (isActive) TransitBlue else MetadataGray,
+            textAlign = TextAlign.Center,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            fontFamily = robotoFamily,
+            style = TextStyle(letterSpacing = 0.sp),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ActiveFavoritesFilterSheetItemPreview() {
+    FavoritesFilterSheetItem(
+        iconId = R.drawable.eatery_filter_icon,
+        label = "Eateries",
+        isActive = true
+    ) {}
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun InactiveFavoritesFilterSheetItemPreview() {
+    FavoritesFilterSheetItem(
+        iconId = R.drawable.eatery_filter_icon,
+        label = "Eateries",
+        isActive = false
+    ) {}
+}

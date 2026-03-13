@@ -11,6 +11,7 @@ val PurpleGray40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 val TransitBlue = Color(0xff079ddc)
+val MutedTransitBlue = Color(0xFFD6F3FF)
 val PrimaryText = Color(0xff212121)
 val TextButtonGray = Color(0xff6A737D)
 val SecondaryText = Color(0xff616161)
@@ -25,9 +26,13 @@ val DetailsDividerGray = Color(0xffc6c6c8)
 
 val FavoritesYellow = Color(0xFFFEC50E)
 
+val FavoritesDividerGray = Color(0xffDADADA)
+
 val Gray02 = Color(0xFFA5A5A5)
 val Gray04 = Color(0xFF707070)
 val Gray05 = Color(0xFF586069)
+
+val WarningOrange = Color(0xFFFE8F13)
 
 // Gyms
 

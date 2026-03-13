@@ -42,7 +42,8 @@ fun RoundedImagePlaceCard(
     onClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier.clickable { onClick() }
+        modifier = Modifier
+            .clickable { onClick() }
     ) {
         Column(
             modifier = Modifier

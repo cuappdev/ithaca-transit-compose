@@ -39,7 +39,6 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,6 +75,7 @@ import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
 import com.cornellappdev.transit.util.BOTTOM_SHEET_MAX_HEIGHT_PERCENT
 import com.cornellappdev.transit.util.ECOSYSTEM_FLAG
+import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
 import com.cornellappdev.transit.util.orZeroIfUnspecified
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -170,23 +170,28 @@ fun HomeScreen(
         rememberBottomSheetScaffoldState(filterSheetState)
 
     // Main search bar flow
-    val searchBarValue = homeViewModel.searchBarUiState.collectAsState().value
+    val searchBarValue = homeViewModel.searchBarUiState.collectAsStateWithLifecycle().value
 
     // Favorited locations
-    val favorites = favoritesViewModel.favoritesStops.collectAsState().value
+    val favorites = favoritesViewModel.favoritesStops.collectAsStateWithLifecycle().value
 
     // Add search bar
-    val addSearchBarValue = homeViewModel.addSearchQuery.collectAsState().value
+    val addSearchBarValue = homeViewModel.addSearchQuery.collectAsStateWithLifecycle().value
 
     // Add search bar query response
-    val placeQueryResponse = homeViewModel.placeQueryFlow.collectAsState().value
+    val placeQueryResponse = homeViewModel.placeQueryFlow.collectAsStateWithLifecycle().value
 
-    val filterStateValue = homeViewModel.filterState.collectAsState().value
+    val filterStateValue = homeViewModel.filterState.collectAsStateWithLifecycle().value
 
-    val staticPlaces = homeViewModel.staticPlacesFlow.collectAsState().value
+    val staticPlaces = homeViewModel.staticPlacesFlow.collectAsStateWithLifecycle().value
 
     // Main search bar active/inactive
     var searchActive by remember { mutableStateOf(false) }
+
+    // Favorite filter bottom sheet state
+    val showFilterSheet by homeViewModel.showFilterSheet.collectAsStateWithLifecycle()
+    val selectedFilters by homeViewModel.selectedFavoritesFilters.collectAsStateWithLifecycle()
+    val appliedFilters by homeViewModel.appliedFavoritesFilters.collectAsStateWithLifecycle()
 
     // Intercept clicks outside of search bar and disable search
     @Composable
@@ -339,8 +344,17 @@ fun HomeScreen(
                             onFavoriteStarClick = favoritesViewModel::toggleFavorite,
                             onAddFavoritesClick = {
                                 homeViewModel.toggleAddFavoritesSheet(true)
-                            }
-
+                            },
+                            showFilterSheet = showFilterSheet,
+                            onFilterSheetShow = homeViewModel::openFilterSheet,
+                            selectedFilters = selectedFilters,
+                            appliedFilters = appliedFilters,
+                            favoritesFilterList = homeViewModel.favoritesFilterList,
+                            onCancelFilters = homeViewModel::cancelFavoritesFilters,
+                            onApplyFilters = homeViewModel::applyFavoritesFilters,
+                            onFilterToggle = homeViewModel::toggleFavoritesFilter,
+                            onRemoveAppliedFilter = homeViewModel::removeAppliedFilter,
+                            operatingHoursToString = ::isOpenAnnotatedStringFromOperatingHours
                         )
                     }
                 }
