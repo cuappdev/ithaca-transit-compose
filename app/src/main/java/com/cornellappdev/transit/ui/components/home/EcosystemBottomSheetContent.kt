@@ -249,7 +249,6 @@ private fun BottomSheetFilteredContent(
                     FilterState.LIBRARIES -> {
                         libraryList(
                             staticPlaces,
-                            navigateToPlace,
                             onDetailsClick,
                             favorites,
                             onFavoriteStarClick,
@@ -430,6 +429,7 @@ private fun LazyListScope.gymList(
 ) {
     when (gymsApiResponse) {
         is ApiResponse.Error -> {
+            infoItem("Unable to load gyms")
         }
 
         is ApiResponse.Pending -> {
@@ -439,6 +439,11 @@ private fun LazyListScope.gymList(
         }
 
         is ApiResponse.Success -> {
+            if (gymsApiResponse.data.isEmpty()) {
+                infoItem("No gyms available")
+                return
+            }
+
             items(gymsApiResponse.data) {
                 RoundedImagePlaceCard(
                     imageUrl = it.imageUrl,
@@ -478,12 +483,21 @@ private fun LazyListScope.printerList(
 ) {
     when (staticPlaces.printers) {
         is ApiResponse.Error -> {
+            infoItem("Unable to load printers")
         }
 
         is ApiResponse.Pending -> {
+            item {
+                CenteredSpinningIndicator()
+            }
         }
 
         is ApiResponse.Success -> {
+            if (staticPlaces.printers.data.isEmpty()) {
+                infoItem("No printers available")
+                return
+            }
+
             items(staticPlaces.printers.data) {
                 val place = it.toPlace()
                 val alert = if (it.location.contains("*")) {
@@ -529,6 +543,7 @@ private fun LazyListScope.eateryList(
 ) {
     when (eateriesApiResponse) {
         is ApiResponse.Error -> {
+            infoItem("Unable to load eateries")
         }
 
         is ApiResponse.Pending -> {
@@ -538,6 +553,11 @@ private fun LazyListScope.eateryList(
         }
 
         is ApiResponse.Success -> {
+            if (eateriesApiResponse.data.isEmpty()) {
+                infoItem("No eateries available")
+                return
+            }
+
             items(eateriesApiResponse.data) {
                 RoundedImagePlaceCard(
                     imageUrl = it.imageUrl,
@@ -565,7 +585,6 @@ private fun LazyListScope.eateryList(
  */
 private fun LazyListScope.libraryList(
     staticPlaces: StaticPlaces,
-    navigateToPlace: (Place) -> Unit,
     navigateToDetails: (DetailedEcosystemPlace) -> Unit,
     favorites: Set<Place>,
     onFavoriteStarClick: (Place) -> Unit,
@@ -573,12 +592,21 @@ private fun LazyListScope.libraryList(
 ) {
     when (staticPlaces.libraries) {
         is ApiResponse.Error -> {
+            infoItem("Unable to load libraries")
         }
 
         is ApiResponse.Pending -> {
+            item {
+                CenteredSpinningIndicator()
+            }
         }
 
         is ApiResponse.Success -> {
+            if (staticPlaces.libraries.data.isEmpty()) {
+                infoItem("No libraries available")
+                return
+            }
+
             items(staticPlaces.libraries.data) {
                 RoundedImagePlaceCard(
                     placeholderRes = R.drawable.olin_library,
@@ -592,6 +620,19 @@ private fun LazyListScope.libraryList(
                     navigateToDetails(it)
                 }
             }
+        }
+    }
+}
+
+private fun LazyListScope.infoItem(message: String) {
+    item {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(text = message)
         }
     }
 }

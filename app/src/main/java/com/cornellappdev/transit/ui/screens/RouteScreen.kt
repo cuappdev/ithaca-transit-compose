@@ -814,6 +814,7 @@ private fun RouteOptionsSearchSheet(
                                 type = it.type,
                                 label = it.name,
                                 sublabel = it.subLabel,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                                 onClick = {
                                     if (isStart) {
                                         routeViewModel.setStartPlace(
@@ -847,6 +848,7 @@ private fun RouteOptionsSearchSheet(
                                 type = it.type,
                                 label = it.name,
                                 sublabel = it.subLabel,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                                 onClick = {
                                     if (isStart) {
                                         routeViewModel.setStartPlace(

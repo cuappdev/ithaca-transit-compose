@@ -19,6 +19,8 @@ import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.util.StringUtils.fromMetersToMiles
 import com.cornellappdev.transit.util.calculateDistance
+import com.cornellappdev.transit.util.ecosystem.buildEcosystemSearchPlaces
+import com.cornellappdev.transit.util.ecosystem.mergeAndRankSearchResults
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +30,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -52,7 +55,8 @@ class HomeViewModel @Inject constructor(
     /**
      * The current query in the add favorites search bar, as a StateFlow
      */
-    val addSearchQuery: MutableStateFlow<String> = MutableStateFlow("")
+    private val _addSearchQuery: MutableStateFlow<String> = MutableStateFlow("")
+    val addSearchQuery: StateFlow<String> = _addSearchQuery.asStateFlow()
 
     /**
      * The list of queried places retrieved from the route repository, as a StateFlow.
@@ -79,7 +83,9 @@ class HomeViewModel @Inject constructor(
         FilterState.PRINTERS
     )
 
-    val filterState: MutableStateFlow<FilterState> = MutableStateFlow(FilterState.FAVORITES)
+    private val _filterState: MutableStateFlow<FilterState> =
+        MutableStateFlow(FilterState.FAVORITES)
+    val filterState: StateFlow<FilterState> = _filterState.asStateFlow()
 
     private val _showFilterSheet = MutableStateFlow(false)
     val showFilterSheet: StateFlow<Boolean> = _showFilterSheet.asStateFlow()
@@ -112,8 +118,44 @@ class HomeViewModel @Inject constructor(
             )
         )
 
+    private val ecosystemSearchPlacesFlow: StateFlow<List<Place>> =
+        combine(
+            routeRepository.printerFlow,
+            routeRepository.libraryFlow,
+            eateryRepository.eateryFlow,
+            gymRepository.gymFlow
+        ) { printers, libraries, eateries, gyms ->
+            buildEcosystemSearchPlaces(
+                printers = printers,
+                libraries = libraries,
+                eateries = eateries,
+                gyms = gyms
+            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
+
     private val _showAddFavoritesSheet = MutableStateFlow(false)
     val showAddFavoritesSheet: StateFlow<Boolean> = _showAddFavoritesSheet.asStateFlow()
+
+    val addSearchResultsFlow: StateFlow<ApiResponse<List<Place>>> =
+        combine(
+            _addSearchQuery,
+            placeQueryFlow,
+            ecosystemSearchPlacesFlow
+        ) { query, routeSearchResults, ecosystemPlaces ->
+            mergeAndRankSearchResults(
+                query = query,
+                routeSearchResults = routeSearchResults,
+                ecosystemPlaces = ecosystemPlaces
+            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ApiResponse.Success(emptyList())
+        )
 
     fun toggleAddFavoritesSheet(show: Boolean) {
         _showAddFavoritesSheet.value = show
@@ -221,12 +263,23 @@ class HomeViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
 
-        routeRepository.placeFlow.onEach {
-            if (_searchBarUiState.value is SearchBarUIState.Query) {
-                _searchBarUiState.value =
-                    (_searchBarUiState.value as SearchBarUIState.Query).copy(
-                        searched = it
-                    )
+        combine(
+            searchBarUiState
+                .filterIsInstance<SearchBarUIState.Query>()
+                .map { it.queryText }
+                .distinctUntilChanged(),
+            placeQueryFlow,
+            ecosystemSearchPlacesFlow
+        ) { query, routeSearchResults, ecosystemPlaces ->
+            query to mergeAndRankSearchResults(
+                query = query,
+                routeSearchResults = routeSearchResults,
+                ecosystemPlaces = ecosystemPlaces
+            )
+        }.onEach { (query, mergedResults) ->
+            val currentState = _searchBarUiState.value
+            if (currentState is SearchBarUIState.Query && currentState.queryText == query) {
+                _searchBarUiState.value = currentState.copy(searched = mergedResults)
             }
         }.launchIn(viewModelScope)
 
@@ -239,7 +292,11 @@ class HomeViewModel @Inject constructor(
                 routeRepository.makeSearch(it)
             }.launchIn(viewModelScope)
 
-        addSearchQuery.debounce(300L).distinctUntilChanged().onEach {
+        _addSearchQuery.debounce(300L)
+            .map { it.trim() }
+            .distinctUntilChanged()
+            .filter { it.isNotEmpty() }
+            .onEach {
             routeRepository.makeSearch(it)
         }.launchIn(viewModelScope)
     }
@@ -271,7 +328,7 @@ class HomeViewModel @Inject constructor(
      * Change the query in the add favorites search bar and update search results
      */
     fun onAddQueryChange(query: String) {
-        addSearchQuery.value = query
+        _addSearchQuery.value = query
     }
 
     /**
@@ -374,7 +431,7 @@ class HomeViewModel @Inject constructor(
      * Set the filter selected on the bottom sheet for categories of places
      */
     fun setCategoryFilter(filterState: FilterState) {
-        this.filterState.value = filterState
+        _filterState.value = filterState
     }
 
     /**

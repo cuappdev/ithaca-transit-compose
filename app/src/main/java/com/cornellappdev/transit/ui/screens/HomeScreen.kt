@@ -178,8 +178,8 @@ fun HomeScreen(
     // Add search bar
     val addSearchBarValue = homeViewModel.addSearchQuery.collectAsStateWithLifecycle().value
 
-    // Add search bar query response
-    val placeQueryResponse = homeViewModel.placeQueryFlow.collectAsStateWithLifecycle().value
+    // Add search bar query response (backend + ecosystem, ranked by relevance)
+    val placeQueryResponse = homeViewModel.addSearchResultsFlow.collectAsStateWithLifecycle().value
 
     val filterStateValue = homeViewModel.filterState.collectAsStateWithLifecycle().value
 

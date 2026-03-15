@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -59,6 +60,9 @@ class RouteRepository @Inject constructor(
 
     private val _libraryFlow: MutableStateFlow<ApiResponse<List<Library>>> =
         MutableStateFlow(ApiResponse.Pending)
+
+    // Monotonic token used to ensure only the latest search request updates placeFlow.
+    private val latestSearchToken = AtomicLong(0L)
 
     init {
         fetchAllStops()
@@ -142,15 +146,30 @@ class RouteRepository @Inject constructor(
      * Makes a new call to places related to a query string.
      */
     fun makeSearch(query: String) {
+        val token = latestSearchToken.incrementAndGet()
+
+        if (query.isBlank()) {
+            if (token == latestSearchToken.get()) {
+                _placeFlow.value = ApiResponse.Success(emptyList())
+            }
+            return
+        }
+
         _placeFlow.value = ApiResponse.Pending
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val placeResponse = appleSearch(SearchQuery(query))
                 val res = placeResponse.unwrap()
                 val totalLocations = (res.places ?: emptyList()) + (res.stops ?: (emptyList()))
-                _placeFlow.value = ApiResponse.Success(totalLocations)
+                if (token == latestSearchToken.get()) {
+                    _placeFlow.value = ApiResponse.Success(totalLocations)
+                }
+            } catch (_: kotlinx.coroutines.CancellationException) {
+                // Ignore cancellation; latest query owns the flow update.
             } catch (e: Exception) {
-                _placeFlow.value = ApiResponse.Error
+                if (token == latestSearchToken.get()) {
+                    _placeFlow.value = ApiResponse.Error
+                }
             }
         }
     }

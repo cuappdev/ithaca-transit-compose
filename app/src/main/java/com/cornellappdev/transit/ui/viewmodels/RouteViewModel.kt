@@ -1,7 +1,5 @@
 package com.cornellappdev.transit.ui.viewmodels
 
-import android.content.Context
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -10,39 +8,46 @@ import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.DirectionType
 import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.MapState
+import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.Route
 import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
 import com.cornellappdev.transit.models.UserPreferenceRepository
+import com.cornellappdev.transit.models.ecosystem.EateryRepository
+import com.cornellappdev.transit.models.ecosystem.GymRepository
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.util.TimeUtils
+import com.cornellappdev.transit.util.ecosystem.buildEcosystemSearchPlaces
+import com.cornellappdev.transit.util.ecosystem.mergeAndRankSearchResults
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.Date
 import javax.inject.Inject
-import kotlin.math.pow
 
 @HiltViewModel
 @OptIn(FlowPreview::class)
 class RouteViewModel @Inject constructor(
     private val routeRepository: RouteRepository,
     private val locationRepository: LocationRepository,
+    private val eateryRepository: EateryRepository,
+    private val gymRepository: GymRepository,
     private val userPreferenceRepository: UserPreferenceRepository,
     private val selectedRouteRepository: SelectedRouteRepository
 ) : ViewModel() {
@@ -60,9 +65,10 @@ class RouteViewModel @Inject constructor(
     /**
      * State of the arriveBy selector
      */
-    val arriveByFlow: MutableStateFlow<ArriveByUIState> = MutableStateFlow(
+    private val _arriveByFlow: MutableStateFlow<ArriveByUIState> = MutableStateFlow(
         ArriveByUIState.LeaveNow()
     )
+    val arriveByFlow: StateFlow<ArriveByUIState> = _arriveByFlow.asStateFlow()
 
     /**
      * State of date picker
@@ -100,21 +106,23 @@ class RouteViewModel @Inject constructor(
     /**
      * Emits whether a route should be showing on the map
      */
-    val mapState: MutableStateFlow<MapState> =
+    private val _mapState: MutableStateFlow<MapState> =
         MutableStateFlow(
             MapState(
                 isShowing = false,
                 route = null
             )
         )
+    val mapState: StateFlow<MapState> = _mapState.asStateFlow()
 
     /**
      * Emits details of a route
      */
-    val detailsState: MutableStateFlow<List<DirectionDetails>> =
+    private val _detailsState: MutableStateFlow<List<DirectionDetails>> =
         MutableStateFlow(
             emptyList()
         )
+    val detailsState: StateFlow<List<DirectionDetails>> = _detailsState.asStateFlow()
 
     /**
      * The current UI state of the search bar, as a MutableStateFlow
@@ -122,6 +130,25 @@ class RouteViewModel @Inject constructor(
     private val _searchBarUiState: MutableStateFlow<SearchBarUIState> =
         MutableStateFlow(SearchBarUIState.RecentAndFavorites(emptySet(), emptyList()))
     val searchBarUiState: StateFlow<SearchBarUIState> = _searchBarUiState.asStateFlow()
+
+    private val ecosystemSearchPlacesFlow: StateFlow<List<Place>> =
+        combine(
+            routeRepository.printerFlow,
+            routeRepository.libraryFlow,
+            eateryRepository.eateryFlow,
+            gymRepository.gymFlow
+        ) { printers, libraries, eateries, gyms ->
+            buildEcosystemSearchPlaces(
+                printers = printers,
+                libraries = libraries,
+                eateries = eateries,
+                gyms = gyms
+            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
 
     init {
         userPreferenceRepository.favoritesFlow.onEach {
@@ -142,27 +169,38 @@ class RouteViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
 
-        routeRepository.placeFlow.onEach {
-            if (_searchBarUiState.value is SearchBarUIState.Query) {
-                _searchBarUiState.value =
-                    (_searchBarUiState.value as SearchBarUIState.Query).copy(
-                        searched = it
-                    )
+        combine(
+            searchBarUiState
+                .filterIsInstance<SearchBarUIState.Query>()
+                .map { it.queryText }
+                .distinctUntilChanged(),
+            routeRepository.placeFlow,
+            ecosystemSearchPlacesFlow
+        ) { query, routeSearchResults, ecosystemPlaces ->
+            query to mergeAndRankSearchResults(
+                query = query,
+                routeSearchResults = routeSearchResults,
+                ecosystemPlaces = ecosystemPlaces
+            )
+        }.onEach { (query, mergedResults) ->
+            val currentState = _searchBarUiState.value
+            if (currentState is SearchBarUIState.Query && currentState.queryText == query) {
+                _searchBarUiState.value = currentState.copy(searched = mergedResults)
             }
         }.launchIn(viewModelScope)
 
 
-        combine(selectedRoute, arriveByFlow) { startAndEnd, arriveBy ->
+        combine(selectedRoute, _arriveByFlow) { startAndEnd, arriveBy ->
             val startState = startAndEnd.startPlace
             val endState = startAndEnd.endPlace
             getLatestOptions(startState, endState, arriveBy)
         }.launchIn(viewModelScope)
 
-        mapState.onEach {
+        _mapState.onEach {
             if (it.route == null) {
-                detailsState.value = emptyList()
+                _detailsState.value = emptyList()
             } else {
-                detailsState.value = it.route.directions.map { direction ->
+                _detailsState.value = it.route.directions.map { direction ->
                     DirectionDetails(
                         startTime = TimeUtils.getHHMM(
                             direction.startTime
@@ -279,14 +317,14 @@ class RouteViewModel @Inject constructor(
      * Change the arriveBy parameter for routes
      */
     fun changeArriveBy(arriveBy: ArriveByUIState) {
-        arriveByFlow.value = arriveBy
+        _arriveByFlow.value = arriveBy
     }
 
     /**
      * Set map state for home screen
      */
     fun setMapState(value: MapState) {
-        mapState.value = value
+        _mapState.value = value
     }
 
     /**
@@ -363,7 +401,7 @@ class RouteViewModel @Inject constructor(
         getLatestOptions(
             selectedRoute.value.startPlace,
             selectedRoute.value.endPlace,
-            arriveByFlow.value
+            _arriveByFlow.value
         )
     }
 
