@@ -312,7 +312,8 @@ private fun LazyListScope.favoriteList(
                     StandardCard(
                         place = place,
                         onFavoriteStarClick = onFavoriteStarClick,
-                        navigateToPlace = navigateToPlace
+                        navigateToPlace = navigateToPlace,
+                        distanceStringToPlace = distanceStringToPlace
                     )
                 }
             }
@@ -335,7 +336,8 @@ private fun LazyListScope.favoriteList(
                     StandardCard(
                         place = place,
                         onFavoriteStarClick = onFavoriteStarClick,
-                        navigateToPlace = navigateToPlace
+                        navigateToPlace = navigateToPlace,
+                        distanceStringToPlace = distanceStringToPlace
                     )
                 }
             }
@@ -366,7 +368,8 @@ private fun LazyListScope.favoriteList(
                     StandardCard(
                         place = place,
                         onFavoriteStarClick = onFavoriteStarClick,
-                        navigateToPlace = navigateToPlace
+                        navigateToPlace = navigateToPlace,
+                        distanceStringToPlace = distanceStringToPlace
                     )
                 }
             }
@@ -395,7 +398,8 @@ private fun LazyListScope.favoriteList(
                     StandardCard(
                         place = place,
                         onFavoriteStarClick = onFavoriteStarClick,
-                        navigateToPlace = navigateToPlace
+                        navigateToPlace = navigateToPlace,
+                        distanceStringToPlace = distanceStringToPlace
                     )
                 }
             }
@@ -404,7 +408,8 @@ private fun LazyListScope.favoriteList(
                 StandardCard(
                     place = place,
                     onFavoriteStarClick = onFavoriteStarClick,
-                    navigateToPlace = navigateToPlace
+                    navigateToPlace = navigateToPlace,
+                    distanceStringToPlace = distanceStringToPlace
                 )
             }
         }
@@ -595,11 +600,15 @@ private fun LazyListScope.libraryList(
 private fun StandardCard(
     place: Place,
     onFavoriteStarClick: (Place) -> Unit,
-    navigateToPlace: (Place) -> Unit
+    navigateToPlace: (Place) -> Unit,
+    distanceStringToPlace: (Double?, Double?) -> String,
 ) {
+    val distance = distanceStringToPlace(place.latitude, place.longitude)
+    val subtitle = if (distance.isBlank()) place.subLabel else "${place.subLabel}$distance"
+
     BottomSheetLocationCard(
         title = place.name,
-        subtitle1 = place.subLabel,
+        subtitle1 = subtitle,
         isFavorite = true,
         onFavoriteClick = { onFavoriteStarClick(place) }
     ) {
