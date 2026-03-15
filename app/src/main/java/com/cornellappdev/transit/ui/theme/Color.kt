@@ -28,6 +28,14 @@ val FavoritesYellow = Color(0xFFFEC50E)
 
 val FavoritesDividerGray = Color(0xffDADADA)
 
+val Gray02 = Color(0xFFA5A5A5)
+val Gray04 = Color(0xFF707070)
 val Gray05 = Color(0xFF586069)
 
 val WarningOrange = Color(0xFFFE8F13)
+
+// Gyms
+
+val AccentOpen = Color(0xFF64C270)
+val AccentClosed = Color(0xFFF07D7D)
+val AccentOrange = Color(0xFFFE8F13)

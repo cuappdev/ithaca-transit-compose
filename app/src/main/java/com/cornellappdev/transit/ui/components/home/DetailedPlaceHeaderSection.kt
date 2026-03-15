@@ -1,6 +1,7 @@
 package com.cornellappdev.transit.ui.components.home
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
@@ -19,7 +21,10 @@ import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
 
 /**
- * Text area of detailed place header with favorites star
+ * Text area of detailed place header with favorites star, and optional
+ * annotated text and widget.
+ *
+ * [rightAnnotatedString] takes precedence over [widget].
  */
 @Composable
 fun DetailedPlaceHeaderSection(
@@ -27,6 +32,7 @@ fun DetailedPlaceHeaderSection(
     subtitle: String?,
     leftAnnotatedString: AnnotatedString? = null,
     rightAnnotatedString: AnnotatedString? = null,
+    widget: @Composable BoxScope.() -> Unit = {},
     onFavoriteClick: () -> Unit,
     isFavorite: Boolean
 ) {
@@ -75,6 +81,12 @@ fun DetailedPlaceHeaderSection(
                         style = Style.cardSubtitle
                     )
                 }
+            }
+        }
+
+        if (rightAnnotatedString == null) {
+            Box(Modifier.align(BottomEnd)) {
+                widget()
             }
         }
 

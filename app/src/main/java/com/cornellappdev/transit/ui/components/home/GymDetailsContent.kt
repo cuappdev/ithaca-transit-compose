@@ -17,7 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.cornellappdev.transit.R
-import com.cornellappdev.transit.models.ecosystem.Eatery
+import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.Gray05
 import com.cornellappdev.transit.ui.theme.PrimaryText
@@ -25,39 +25,53 @@ import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.util.StringUtils.createDeepLink
+import com.cornellappdev.transit.util.TimeUtils.getOpenStatus
 import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
 import com.cornellappdev.transit.util.TimeUtils.rotateOperatingHours
 import com.cornellappdev.transit.util.getAboutContent
+import com.cornellappdev.transit.util.getGymLocationString
 
+/**
+ * Displays the full detail view for an individual gym within the ecosystem bottom sheet.
+ */
 @Composable
-fun EateryDetailsContent(
-    eatery: Eatery,
+fun GymDetailsContent(
+    gym: UpliftGym,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
-    distanceString: String,
+    distanceString: String
 ) {
+    val isOpen = getOpenStatus(gym.operatingHours()).isOpen
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                start = 20.dp,
-                end = 20.dp,
+                horizontal = 20.dp
             )
     ) {
         PlaceCardImage(
-            imageUrl = eatery.imageUrl,
+            imageUrl = gym.imageUrl,
             placeholderRes = R.drawable.olin_library,
             shouldClipBottom = true
         )
 
         DetailedPlaceHeaderSection(
-            eatery.name,
-            eatery.campusArea + distanceString,
-            leftAnnotatedString = isOpenAnnotatedStringFromOperatingHours(
-                eatery.operatingHours()
-            ),
+            gym.name,
+            getGymLocationString(gym.name) + distanceString,
             onFavoriteClick = onFavoriteClick,
-            isFavorite = isFavorite
+            isFavorite = isFavorite,
+            leftAnnotatedString = isOpenAnnotatedStringFromOperatingHours(
+                gym.operatingHours()
+            ),
+            widget = {
+                if (gym.upliftCapacity != null && isOpen) {
+                    GymCapacityIndicator(
+                        capacity = gym.upliftCapacity,
+                        label = null,
+                    )
+                }
+            },
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -74,14 +88,14 @@ fun EateryDetailsContent(
         )
 
         Text(
-            text = getAboutContent(eatery.name),
+            text = getAboutContent(gym.name),
             style = Style.detailBody,
             color = SecondaryText,
             modifier = Modifier.padding(bottom = 15.dp)
         )
 
         val (annotatedString, inlineContent) =
-            stringResource(R.string.view_menu).createDeepLink(R.drawable.eaterylink)
+            stringResource(R.string.view_gym).createDeepLink(R.drawable.upliftlink)
 
         Text(
             text = annotatedString,
@@ -105,7 +119,7 @@ fun EateryDetailsContent(
                 tint = Gray05
             )
             Text(
-                text = eatery.location ?: "",
+                text = getGymLocationString(gym.name) ?: "",
                 style = Style.detailBody,
                 color = SecondaryText,
                 modifier = Modifier.padding(start = 15.dp)
@@ -118,8 +132,8 @@ fun EateryDetailsContent(
         HorizontalDivider(thickness = 1.dp, color = DividerGray)
 
         ExpandableOperatingHoursList(
-            isOpenAnnotatedStringFromOperatingHours(eatery.operatingHours()),
-            rotateOperatingHours(eatery.operatingHours())
+            isOpenAnnotatedStringFromOperatingHours(gym.operatingHours()),
+            rotateOperatingHours(gym.operatingHours())
         )
 
     }

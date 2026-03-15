@@ -1,10 +1,6 @@
 package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cornellappdev.transit.models.LocationRepository
@@ -14,7 +10,6 @@ import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.models.UserPreferenceRepository
-import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.EateryRepository
 import com.cornellappdev.transit.models.ecosystem.GymRepository
@@ -22,11 +17,8 @@ import com.cornellappdev.transit.models.ecosystem.Library
 import com.cornellappdev.transit.models.ecosystem.Printer
 import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
-import com.cornellappdev.transit.ui.theme.LateRed
-import com.cornellappdev.transit.ui.theme.LiveGreen
-import com.cornellappdev.transit.ui.theme.SecondaryText
-import com.cornellappdev.transit.util.TimeUtils.toPascalCaseString
-import com.cornellappdev.transit.util.ecosystem.toPlace
+import com.cornellappdev.transit.util.StringUtils.fromMetersToMiles
+import com.cornellappdev.transit.util.calculateDistance
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,12 +34,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-
 
 /**
  * ViewModel handling home screen UI state and search functionality
@@ -391,159 +378,22 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Rotate operating hours such that first value is today's date
-     *
-     * @param operatingHours A list of pairs mapping the first value day string to second value list of hours open
+     * Returns a distance string from a location to the current location if both exist, otherwise returns empty string
      */
-    fun rotateOperatingHours(
-        operatingHours: List<DayOperatingHours>,
-        currentDate: LocalDate = LocalDate.now()
-    ): List<DayOperatingHours> {
-        val today = currentDate.dayOfWeek.toPascalCaseString()
+    fun distanceStringIfCurrentLocationExists(latitude: Double?, longitude: Double?): String {
+        val currentLocationSnapshot = currentLocation.value
+        if (currentLocationSnapshot != null && latitude != null && longitude != null) {
+            return " - " +
+                    calculateDistance(
+                        LatLng(
+                            currentLocationSnapshot.latitude,
+                            currentLocationSnapshot.longitude
+                        ), LatLng(latitude, longitude)
+                    ).toString().fromMetersToMiles() + " mi"
 
-        val todayIndex = operatingHours.indexOfFirst {
-            it.dayOfWeek.equals(today, ignoreCase = true)
         }
-
-        // Defensive programming only if [operatingHours] is missing a day
-        if (todayIndex == -1) return operatingHours
-
-        return operatingHours.drop(todayIndex) + operatingHours.take(todayIndex)
+        return ""
     }
-
-    /**
-     * Find the next time a place is open if it is closed for the day
-     */
-    private fun findOpenNextDay(operatingHours: List<DayOperatingHours>): OpenStatus {
-        // Check day after
-        val dayAfter = operatingHours[1].hours
-        if (!dayAfter.any { it.equals("Closed", ignoreCase = true) }) {
-            val firstOpenTime = parseTimeRange(dayAfter[0])?.first
-            if (firstOpenTime != null) {
-                return OpenStatus(
-                    false,
-                    "until ${formatTime(firstOpenTime)}"
-                )
-            }
-        }
-        // Find next open day
-        for (i in 2 until operatingHours.size) {
-            val currDay = operatingHours[i].hours
-            if (!currDay.any { it.equals("Closed", ignoreCase = true) }) {
-                val dayName = operatingHours[i].dayOfWeek
-                return OpenStatus(
-                    false,
-                    "until $dayName"
-                )
-            }
-        }
-        return OpenStatus(false, "Closed today")
-    }
-
-    /**
-     * Given operating hours rotated for today's date, return whether it is open and when it is open until
-     * or when it will next open
-     *
-     * @param operatingHours A list of pairs mapping the first value day string to second value list of hours open
-     */
-    private fun getOpenStatus(
-        operatingHours: List<DayOperatingHours>,
-        currentDateTime: LocalDateTime = LocalDateTime.now()
-    ): OpenStatus {
-
-        val currentTime = currentDateTime.toLocalTime()
-        val todaySchedule = operatingHours[0].hours // First day should be today after rotation
-
-        // Check if closed today
-        if (todaySchedule.any { it.equals("Closed", ignoreCase = true) }) {
-            return findOpenNextDay(operatingHours)
-        }
-
-        val timeRanges = todaySchedule.mapNotNull { parseTimeRange(it) }
-
-        // Check if currently open
-        for (range in timeRanges) {
-            if (currentTime >= range.first && currentTime < range.second) {
-                return OpenStatus(true, "until ${formatTime(range.second)}")
-            }
-        }
-
-        // Check if opens later today
-        for (range in timeRanges) {
-            if (currentTime < range.first) {
-                return OpenStatus(false, "until ${formatTime(range.first)}")
-            }
-        }
-
-        // Closed for today, find next open day
-        return findOpenNextDay(operatingHours)
-    }
-
-    /**
-     * Return annotated string for open times
-     */
-    private fun getOpenStatusAnnotatedString(openStatus: OpenStatus): AnnotatedString {
-        return buildAnnotatedString {
-            if (openStatus.isOpen) {
-                withStyle(
-                    style = SpanStyle(
-                        color = LiveGreen,
-                    )
-                ) {
-                    append("Open")
-                }
-            } else {
-                withStyle(
-                    style = SpanStyle(
-                        color = LateRed
-                    )
-                ) {
-                    append("Closed")
-                }
-            }
-            withStyle(
-                style = SpanStyle(
-                    color = SecondaryText
-                )
-            ) {
-                append(" - ")
-                append(openStatus.nextChangeTime)
-            }
-        }
-    }
-
-    private fun parseTimeRange(timeString: String): Pair<LocalTime, LocalTime>? {
-        if (timeString.equals("Closed", ignoreCase = true)) return null
-
-        val parts = timeString.split("-").map { it.trim() }
-        if (parts.size != 2) return null
-
-        return try {
-            val formatter = DateTimeFormatter.ofPattern("h:mm a")
-            val start = LocalTime.parse(parts[0], formatter)
-            val end = LocalTime.parse(parts[1], formatter)
-            start to end
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    private fun formatTime(time: LocalTime): String {
-        val formatter = DateTimeFormatter.ofPattern("h:mm a")
-        return time.format(formatter)
-    }
-
-    /**
-     * Rotate operating hours to current day, then determine if place is open, then format string
-     */
-    fun isOpenAnnotatedStringFromOperatingHours(operatingHours: List<DayOperatingHours>): AnnotatedString {
-        return getOpenStatusAnnotatedString(
-            getOpenStatus(
-                rotateOperatingHours(operatingHours)
-            )
-        )
-    }
-
 }
 
 /**

@@ -35,6 +35,7 @@ import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.Library
 import com.cornellappdev.transit.models.ecosystem.Printer
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
+import com.cornellappdev.transit.models.ecosystem.UpliftCapacity
 import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.FavoritesDividerGray
@@ -42,9 +43,11 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.EcosystemFavoritesUiState
 import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
 import com.cornellappdev.transit.ui.viewmodels.FilterState
+import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
+import com.cornellappdev.transit.util.ecosystem.capacityPercentAnnotatedString
 import com.cornellappdev.transit.ui.viewmodels.PrinterCardUiState
-import com.cornellappdev.transit.util.ecosystem.toPlace
 import kotlin.collections.isNotEmpty
+import com.cornellappdev.transit.util.getGymLocationString
 
 
 /**
@@ -79,6 +82,7 @@ fun EcosystemBottomSheetContent(
     onFilterToggle: (FavoritesFilterSheetState) -> Unit,
     onRemoveAppliedFilter: (FavoritesFilterSheetState) -> Unit,
     operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
+    distanceStringToPlace: (Double?, Double?) -> String,
 ) {
     Column(modifier = modifier) {
         Row(
@@ -124,7 +128,8 @@ fun EcosystemBottomSheetContent(
             onAddFavoritesClick = onAddFavoritesClick,
             appliedFilters = appliedFilters,
             onRemoveAppliedFilter = onRemoveAppliedFilter,
-            operatingHoursToString = operatingHoursToString
+            operatingHoursToString = operatingHoursToString,
+            distanceStringToPlace = distanceStringToPlace
         )
     }
 
@@ -157,7 +162,8 @@ private fun BottomSheetFilteredContent(
     onFilterButtonClick: () -> Unit,
     appliedFilters: Set<FavoritesFilterSheetState>,
     onRemoveAppliedFilter: (FavoritesFilterSheetState) -> Unit,
-    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
+    distanceStringToPlace: (Double?, Double?) -> String,
 ) {
     Column {
         if (currentFilter == FilterState.FAVORITES) {
@@ -214,24 +220,28 @@ private fun BottomSheetFilteredContent(
                         )
                     }
 
-                    FilterState.GYMS -> {
-                        gymList(
-                            staticPlaces = staticPlaces,
-                            navigateToPlace = navigateToPlace,
-                            favorites = favorites,
-                            onFavoriteStarClick = onFavoriteStarClick
-                        )
-                    }
+                FilterState.GYMS -> {
+                    gymList(
+                        gymsApiResponse = staticPlaces.gyms,
+                        onDetailsClick = onDetailsClick,
+                        favorites = favorites,
+                        onFavoriteStarClick = onFavoriteStarClick,
+                        operatingHoursToString = ::isOpenAnnotatedStringFromOperatingHours,
+                        capacityToString = ::capacityPercentAnnotatedString,
+                        distanceStringToPlace = distanceStringToPlace
+                    )
+                }
 
-                    FilterState.EATERIES -> {
-                        eateryList(
-                            eateriesApiResponse = staticPlaces.eateries,
-                            onDetailsClick = onDetailsClick,
-                            favorites = favorites,
-                            onFavoriteStarClick = onFavoriteStarClick,
-                            operatingHoursToString = operatingHoursToString
-                        )
-                    }
+                FilterState.EATERIES -> {
+                    eateryList(
+                        eateriesApiResponse = staticPlaces.eateries,
+                        onDetailsClick = onDetailsClick,
+                        favorites = favorites,
+                        onFavoriteStarClick = onFavoriteStarClick,
+                        operatingHoursToString = operatingHoursToString,
+                        distanceStringToPlace = distanceStringToPlace
+                    )
+                }
 
                     FilterState.LIBRARIES -> {
                         libraryList(
@@ -283,7 +293,7 @@ private fun LazyListScope.favoriteList(
                         isFavorite = true,
                         onFavoriteClick = { onFavoriteStarClick(place) },
                         leftAnnotatedString = operatingHoursToString(
-                            matchingEatery.formatOperatingHours()
+                            matchingEatery.operatingHours()
                         )
                     ) {
                         onDetailsClick(matchingEatery)
@@ -378,28 +388,46 @@ private fun LazyListScope.favoriteList(
  * LazyList scoped enumeration of gyms for bottom sheet
  */
 private fun LazyListScope.gymList(
-    staticPlaces: StaticPlaces,
-    navigateToPlace: (Place) -> Unit,
+    gymsApiResponse: ApiResponse<List<UpliftGym>>,
+    onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     favorites: Set<Place>,
-    onFavoriteStarClick: (Place) -> Unit
+    onFavoriteStarClick: (Place) -> Unit,
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
+    capacityToString: (UpliftCapacity?) -> AnnotatedString,
+    distanceStringToPlace: (Double?, Double?) -> String,
 ) {
-    when (staticPlaces.gyms) {
+    when (gymsApiResponse) {
         is ApiResponse.Error -> {
         }
 
         is ApiResponse.Pending -> {
+            item {
+                CenteredSpinningIndicator()
+            }
         }
 
         is ApiResponse.Success -> {
-            items(staticPlaces.gyms.data) { gym ->
-                val place = gym.toPlace()
-                BottomSheetLocationCard(
-                    title = gym.name,
-                    subtitle1 = gym.id,
-                    isFavorite = place in favorites,
-                    onFavoriteClick = { onFavoriteStarClick(place) }
+            items(gymsApiResponse.data) {
+                RoundedImagePlaceCard(
+                    imageUrl = it.imageUrl,
+                    title = it.name,
+                    subtitle = getGymLocationString(it.name) + distanceStringToPlace(
+                        it.latitude,
+                        it.longitude
+                    ),
+                    isFavorite = it.toPlace() in favorites,
+                    onFavoriteClick = {
+                        onFavoriteStarClick(it.toPlace())
+                    },
+                    leftAnnotatedString = operatingHoursToString(
+                        it.operatingHours()
+                    ),
+                    rightAnnotatedString = capacityToString(
+                        it.upliftCapacity
+                    ),
+                    placeholderRes = R.drawable.olin_library,
                 ) {
-                    navigateToPlace(place)
+                    onDetailsClick(it)
                 }
             }
         }
@@ -460,7 +488,8 @@ private fun LazyListScope.eateryList(
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     favorites: Set<Place>,
     onFavoriteStarClick: (Place) -> Unit,
-    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
+    distanceStringToPlace: (Double?, Double?) -> String,
 ) {
     when (eateriesApiResponse) {
         is ApiResponse.Error -> {
@@ -477,14 +506,15 @@ private fun LazyListScope.eateryList(
                 RoundedImagePlaceCard(
                     imageUrl = it.imageUrl,
                     title = it.name,
-                    subtitle = it.location ?: "",
+                    subtitle = (it.location
+                        ?: "") + distanceStringToPlace(it.latitude, it.longitude),
                     isFavorite = it.toPlace() in favorites,
                     onFavoriteClick = {
                         onFavoriteStarClick(it.toPlace())
                     },
                     placeholderRes = R.drawable.olin_library,
                     leftAnnotatedString = operatingHoursToString(
-                        it.formatOperatingHours()
+                        it.operatingHours()
                     )
                 ) {
                     onDetailsClick(it)
@@ -586,7 +616,8 @@ private fun PreviewEcosystemBottomSheet() {
         onApplyFilters = {},
         onFilterToggle = {},
         onRemoveAppliedFilter = {},
-        operatingHoursToString = { _ -> AnnotatedString("") }
+        operatingHoursToString = { _ -> AnnotatedString("") },
+        distanceStringToPlace = { _, _ -> "" }
     )
 }
 
@@ -746,7 +777,8 @@ private fun PreviewBottomSheetFilteredContentFavorites() {
             FavoritesFilterSheetState.OTHER
         ),
         onRemoveAppliedFilter = {},
-        operatingHoursToString = { _ -> AnnotatedString("Open • 10am - 4pm") }
+        operatingHoursToString = { _ -> AnnotatedString("Open • 10am - 4pm") },
+        distanceStringToPlace = { _, _ -> "distance" }
     )
 }
 

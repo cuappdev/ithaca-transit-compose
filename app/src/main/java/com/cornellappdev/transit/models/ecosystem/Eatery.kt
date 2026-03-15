@@ -1,5 +1,8 @@
 package com.cornellappdev.transit.models.ecosystem
 
+import com.cornellappdev.transit.models.Place
+import com.cornellappdev.transit.models.PlaceType
+import com.cornellappdev.transit.util.TimeUtils.dayOrder
 import com.cornellappdev.transit.util.TimeUtils.toPascalCaseString
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -27,27 +30,8 @@ data class Eatery(
     @Json(name = "events") val events: List<Event>?
 ) : DetailedEcosystemPlace {
 
-    /**
-     * Value to represent the custom order of days in a week (with Sunday as
-     * the first day due to a particular design choice). Used for sorting purposes
-     */
-    private val dayOrder = mapOf(
-        "Sunday" to 1,
-        "Monday" to 2,
-        "Tuesday" to 3,
-        "Wednesday" to 4,
-        "Thursday" to 5,
-        "Friday" to 6,
-        "Saturday" to 7
-    )
-
-    /**
-     * @Return a list of associated dayOfWeek and hours pairs in [DayOperatingHours] representing
-     * each day of the week and the corresponding times that an eatery is open. The list is sorted
-     * by day with the custom dayOrder (Sunday first).
-     */
-    fun formatOperatingHours(): List<DayOperatingHours> {
-        val dailyHours = operatingHours()
+    override fun operatingHours(): List<DayOperatingHours> {
+        val dailyHours = getOperatingHours()
 
         // Convert map to list and sort by custom day order
         return dailyHours.entries
@@ -66,7 +50,7 @@ data class Eatery(
     /**
      * @Return a map of each day of the week to its list of operating hours
      */
-    private fun operatingHours(): Map<DayOfWeek, MutableList<String>> {
+    private fun getOperatingHours(): Map<DayOfWeek, MutableList<String>> {
         val dailyHours = mutableMapOf<DayOfWeek, MutableList<String>>()
 
         events?.forEach { event ->
@@ -87,6 +71,14 @@ data class Eatery(
 
         return dailyHours
     }
+
+    override fun toPlace(): Place = Place(
+        latitude = this.latitude ?: 0.0,
+        longitude = this.longitude ?: 0.0,
+        name = this.name,
+        detail = this.location,
+        type = PlaceType.APPLE_PLACE
+    )
 }
 
 
