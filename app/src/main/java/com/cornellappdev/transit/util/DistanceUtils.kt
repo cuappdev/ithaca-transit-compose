@@ -1,7 +1,6 @@
 package com.cornellappdev.transit.util
 
 import android.location.Location
-import com.cornellappdev.transit.util.StringUtils.fromMetersToMiles
 import com.google.android.gms.maps.model.LatLng
 
 /**

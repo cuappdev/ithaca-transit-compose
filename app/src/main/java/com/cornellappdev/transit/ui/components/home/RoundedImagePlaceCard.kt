@@ -38,7 +38,7 @@ fun RoundedImagePlaceCard(
     onFavoriteClick: () -> Unit,
     leftAnnotatedString: AnnotatedString? = null,
     rightAnnotatedString: AnnotatedString? = null,
-    @DrawableRes placeholderRes: Int,
+    @DrawableRes placeholderRes: Int? = null,
     onClick: () -> Unit,
 ) {
     Column(
@@ -108,7 +108,7 @@ fun RoundedImagePlaceCard(
 
 @Preview
 @Composable
-fun RoundedImagePlaceCardPreview() {
+private fun RoundedImagePlaceCardPreview() {
     RoundedImagePlaceCard(
         placeholderRes = R.drawable.olin_library,
         title = "Olin Library",

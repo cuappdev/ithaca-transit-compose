@@ -70,7 +70,7 @@ data class UpliftGym(
         longitude = this.longitude,
         name = this.name,
         detail = getGymLocationString(this.name),
-        type = PlaceType.APPLE_PLACE
+        type = PlaceType.GYM
     )
 }
 

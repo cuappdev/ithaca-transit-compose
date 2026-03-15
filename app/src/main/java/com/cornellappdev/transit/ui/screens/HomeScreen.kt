@@ -184,6 +184,8 @@ fun HomeScreen(
     val filterStateValue = homeViewModel.filterState.collectAsStateWithLifecycle().value
 
     val staticPlaces = homeViewModel.staticPlacesFlow.collectAsStateWithLifecycle().value
+    val ecosystemFavoritesUiState =
+        homeViewModel.ecosystemFavoritesUiState.collectAsStateWithLifecycle().value
 
     // Main search bar active/inactive
     var searchActive by remember { mutableStateOf(false) }
@@ -335,6 +337,7 @@ fun HomeScreen(
                             modifier = Modifier.onTapDisableSearch(),
                             staticPlaces = staticPlaces,
                             favorites = favorites,
+                            favoritesUiState = ecosystemFavoritesUiState,
                             navigateToPlace = {
                                 homeViewModel.beginRouteOptions(it)
                                 navController.navigate("route")

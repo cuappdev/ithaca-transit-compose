@@ -18,6 +18,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
@@ -27,19 +28,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.Place
+import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.models.ecosystem.DayOperatingHours
 import com.cornellappdev.transit.models.ecosystem.DetailedEcosystemPlace
 import com.cornellappdev.transit.models.ecosystem.Eatery
+import com.cornellappdev.transit.models.ecosystem.Library
+import com.cornellappdev.transit.models.ecosystem.Printer
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.models.ecosystem.UpliftCapacity
 import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.FavoritesDividerGray
 import com.cornellappdev.transit.ui.theme.robotoFamily
+import com.cornellappdev.transit.ui.viewmodels.EcosystemFavoritesUiState
 import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
 import com.cornellappdev.transit.ui.viewmodels.FilterState
 import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
 import com.cornellappdev.transit.util.ecosystem.capacityPercentAnnotatedString
+import com.cornellappdev.transit.ui.viewmodels.PrinterCardUiState
 import kotlin.collections.isNotEmpty
 import com.cornellappdev.transit.util.getGymLocationString
 
@@ -60,6 +66,7 @@ fun EcosystemBottomSheetContent(
     onFilterClick: (FilterState) -> Unit,
     staticPlaces: StaticPlaces,
     favorites: Set<Place>,
+    favoritesUiState: EcosystemFavoritesUiState,
     modifier: Modifier = Modifier,
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
@@ -113,6 +120,7 @@ fun EcosystemBottomSheetContent(
             currentFilter = activeFilter,
             staticPlaces = staticPlaces,
             favorites = favorites,
+            favoritesUiState = favoritesUiState,
             navigateToPlace = navigateToPlace,
             onDetailsClick = onDetailsClick,
             onFavoriteStarClick = onFavoriteStarClick,
@@ -146,6 +154,7 @@ private fun BottomSheetFilteredContent(
     currentFilter: FilterState,
     staticPlaces: StaticPlaces,
     favorites: Set<Place>,
+    favoritesUiState: EcosystemFavoritesUiState,
     navigateToPlace: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     onFavoriteStarClick: (Place) -> Unit,
@@ -174,60 +183,79 @@ private fun BottomSheetFilteredContent(
             }
         }
         val isFilterBarHidden = currentFilter == FilterState.FAVORITES && appliedFilters.isEmpty()
-        LazyColumn(
-            contentPadding = PaddingValues(
-                start = 12.dp,
-                end = 12.dp,
-                top = if (isFilterBarHidden) 0.dp else 8.dp,
-                bottom = 120.dp // Makes bottom content visible with padding at the end
-            ),
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            when (currentFilter) {
-                FilterState.FAVORITES -> {
-                    favoriteList(
-                        favorites,
-                        navigateToPlace,
-                        onAddFavoritesClick
-                    )
-                }
+        key(currentFilter, appliedFilters) {
+            LazyColumn(
+                contentPadding = PaddingValues(
+                    start = 12.dp,
+                    end = 12.dp,
+                    top = if (isFilterBarHidden) 0.dp else 8.dp,
+                    bottom = 120.dp // Makes bottom content visible with padding at the end
+                ),
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                when (currentFilter) {
+                    FilterState.FAVORITES -> {
+                        favoriteList(
+                            favorites = favorites,
+                            filteredFavorites = favoritesUiState.filteredSortedFavorites,
+                            eateryByPlace = favoritesUiState.eateryByPlace,
+                            libraryByPlace = favoritesUiState.libraryByPlace,
+                            gymByPlace = favoritesUiState.gymByPlace,
+                            printerByPlace = favoritesUiState.printerByPlace,
+                            navigateToPlace = navigateToPlace,
+                            onAddFavoritesClick = onAddFavoritesClick,
+                            onFavoriteStarClick = onFavoriteStarClick,
+                            onDetailsClick = onDetailsClick,
+                            operatingHoursToString = operatingHoursToString,
+                            capacityToString = ::capacityPercentAnnotatedString,
+                            distanceStringToPlace = distanceStringToPlace
+                        )
+                    }
 
-                FilterState.PRINTERS -> {
-                    printerList(staticPlaces, navigateToPlace, onFavoriteStarClick, favorites)
-                }
+                    FilterState.PRINTERS -> {
+                        printerList(
+                            staticPlaces = staticPlaces,
+                            navigateToPlace = navigateToPlace,
+                            favorites = favorites,
+                            onFavoriteStarClick = onFavoriteStarClick,
+                            distanceStringToPlace = distanceStringToPlace
+                        )
+                    }
 
-                FilterState.GYMS -> {
-                    gymList(
-                        gymsApiResponse = staticPlaces.gyms,
-                        onDetailsClick = onDetailsClick,
-                        favorites = favorites,
-                        onFavoriteStarClick = onFavoriteStarClick,
-                        operatingHoursToString = ::isOpenAnnotatedStringFromOperatingHours,
-                        capacityToString = ::capacityPercentAnnotatedString,
-                        distanceStringToPlace = distanceStringToPlace
-                    )
-                }
+                    FilterState.GYMS -> {
+                        gymList(
+                            gymsApiResponse = staticPlaces.gyms,
+                            onDetailsClick = onDetailsClick,
+                            favorites = favorites,
+                            onFavoriteStarClick = onFavoriteStarClick,
+                            operatingHoursToString = ::isOpenAnnotatedStringFromOperatingHours,
+                            capacityToString = ::capacityPercentAnnotatedString,
+                            distanceStringToPlace = distanceStringToPlace
+                        )
+                    }
 
-                FilterState.EATERIES -> {
-                    eateryList(
-                        eateriesApiResponse = staticPlaces.eateries,
-                        onDetailsClick = onDetailsClick,
-                        favorites = favorites,
-                        onFavoriteStarClick = onFavoriteStarClick,
-                        operatingHoursToString = operatingHoursToString,
-                        distanceStringToPlace = distanceStringToPlace
-                    )
-                }
+                    FilterState.EATERIES -> {
+                        eateryList(
+                            eateriesApiResponse = staticPlaces.eateries,
+                            onDetailsClick = onDetailsClick,
+                            favorites = favorites,
+                            onFavoriteStarClick = onFavoriteStarClick,
+                            operatingHoursToString = operatingHoursToString,
+                            distanceStringToPlace = distanceStringToPlace
+                        )
+                    }
 
-                FilterState.LIBRARIES -> {
-                    libraryList(
-                        staticPlaces,
-                        navigateToPlace,
-                        onDetailsClick,
-                        favorites,
-                        onFavoriteStarClick,
-                    )
+                    FilterState.LIBRARIES -> {
+                        libraryList(
+                            staticPlaces,
+                            navigateToPlace,
+                            onDetailsClick,
+                            favorites,
+                            onFavoriteStarClick,
+                            distanceStringToPlace,
+                        )
+                    }
                 }
             }
         }
@@ -239,19 +267,151 @@ private fun BottomSheetFilteredContent(
  */
 private fun LazyListScope.favoriteList(
     favorites: Set<Place>,
+    filteredFavorites: List<Place>,
+    eateryByPlace: Map<Place, Eatery>,
+    libraryByPlace: Map<Place, Library>,
+    gymByPlace: Map<Place, UpliftGym>,
+    printerByPlace: Map<Place, PrinterCardUiState>,
     navigateToPlace: (Place) -> Unit,
-    onAddFavoritesClick: () -> Unit
+    onAddFavoritesClick: () -> Unit,
+    onFavoriteStarClick: (Place) -> Unit,
+    onDetailsClick: (DetailedEcosystemPlace) -> Unit,
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
+    capacityToString: (UpliftCapacity?) -> AnnotatedString,
+    distanceStringToPlace: (Double?, Double?) -> String
 ) {
     item {
         Spacer(modifier = Modifier.height(8.dp))
         AddFavoritesButton(onAddFavoritesClick = onAddFavoritesClick)
     }
-    items(favorites.toList()) {
-        BottomSheetLocationCard(
-            title = it.name,
-            subtitle1 = it.subLabel
-        ) {
-            //TODO: Eatery
+
+    items(
+        items = filteredFavorites,
+        key = { place -> "${place.type}:${place.name}:${place.latitude}:${place.longitude}" }
+    ) { place ->
+        when (place.type) {
+            PlaceType.EATERY -> {
+                val matchingEatery = eateryByPlace[place]
+                if (matchingEatery != null) {
+                    RoundedImagePlaceCard(
+                        title = matchingEatery.name,
+                        subtitle = (matchingEatery.location
+                            ?: "") + distanceStringToPlace(
+                            matchingEatery.latitude,
+                            matchingEatery.longitude
+                        ),
+                        isFavorite = true,
+                        onFavoriteClick = { onFavoriteStarClick(place) },
+                        leftAnnotatedString = operatingHoursToString(
+                            matchingEatery.operatingHours()
+                        )
+                    ) {
+                        onDetailsClick(matchingEatery)
+                    }
+                } else {
+                    StandardCard(
+                        place = place,
+                        onFavoriteStarClick = onFavoriteStarClick,
+                        navigateToPlace = navigateToPlace,
+                        distanceStringToPlace = distanceStringToPlace
+                    )
+                }
+            }
+
+            PlaceType.LIBRARY -> {
+                val matchingLibrary = libraryByPlace[place]
+                if (matchingLibrary != null) {
+                    RoundedImagePlaceCard(
+                        title = matchingLibrary.location,
+                        subtitle = matchingLibrary.address + distanceStringToPlace(
+                            matchingLibrary.latitude,
+                            matchingLibrary.longitude
+                        ),
+                        isFavorite = true,
+                        onFavoriteClick = { onFavoriteStarClick(place) }
+                    ) {
+                        onDetailsClick(matchingLibrary)
+                    }
+                } else {
+                    StandardCard(
+                        place = place,
+                        onFavoriteStarClick = onFavoriteStarClick,
+                        navigateToPlace = navigateToPlace,
+                        distanceStringToPlace = distanceStringToPlace
+                    )
+                }
+            }
+
+            PlaceType.GYM -> {
+                val matchingGym = gymByPlace[place]
+                if (matchingGym != null) {
+                    RoundedImagePlaceCard(
+                        title = matchingGym.name,
+                        subtitle = getGymLocationString(matchingGym.name) + distanceStringToPlace(
+                            matchingGym.latitude,
+                            matchingGym.longitude
+                        ),
+                        isFavorite = true,
+                        onFavoriteClick = {
+                            onFavoriteStarClick(place)
+                        },
+                        leftAnnotatedString = operatingHoursToString(
+                            matchingGym.operatingHours()
+                        ),
+                        rightAnnotatedString = capacityToString(
+                            matchingGym.upliftCapacity
+                        ),
+                    ) {
+                        onDetailsClick(matchingGym)
+                    }
+                } else {
+                    StandardCard(
+                        place = place,
+                        onFavoriteStarClick = onFavoriteStarClick,
+                        navigateToPlace = navigateToPlace,
+                        distanceStringToPlace = distanceStringToPlace
+                    )
+                }
+            }
+
+            PlaceType.PRINTER -> {
+                val matchingPrinter = printerByPlace[place]
+                if (matchingPrinter != null) {
+                    PrinterCard(
+                        title = matchingPrinter.title,
+                        subtitle = matchingPrinter.subtitle + distanceStringToPlace(
+                            place.latitude,
+                            place.longitude
+                        ),
+                        inColor = matchingPrinter.inColor,
+                        hasCopy = matchingPrinter.hasCopy,
+                        hasScan = matchingPrinter.hasScan,
+                        alertMessage = matchingPrinter.alertMessage,
+                        isFavorite = place in favorites,
+                        onFavoriteClick = {
+                            onFavoriteStarClick(place)
+                        }
+                    ) {
+                        navigateToPlace(place)
+                    }
+                } else {
+                    StandardCard(
+                        place = place,
+                        onFavoriteStarClick = onFavoriteStarClick,
+                        navigateToPlace = navigateToPlace,
+                        distanceStringToPlace = distanceStringToPlace
+                    )
+                }
+            }
+
+            PlaceType.BUS_STOP, PlaceType.APPLE_PLACE -> {
+                StandardCard(
+                    place = place,
+                    onFavoriteStarClick = onFavoriteStarClick,
+                    navigateToPlace = navigateToPlace,
+                    distanceStringToPlace = distanceStringToPlace
+                )
+            }
         }
     }
 }
@@ -302,7 +462,6 @@ private fun LazyListScope.gymList(
                     onDetailsClick(it)
                 }
             }
-
         }
     }
 }
@@ -313,8 +472,9 @@ private fun LazyListScope.gymList(
 private fun LazyListScope.printerList(
     staticPlaces: StaticPlaces,
     navigateToPlace: (Place) -> Unit,
-    onFavoriteStarClick: (Place) -> Unit,
     favorites: Set<Place>,
+    onFavoriteStarClick: (Place) -> Unit,
+    distanceStringToPlace: (Double?, Double?) -> String,
 ) {
     when (staticPlaces.printers) {
         is ApiResponse.Error -> {
@@ -334,7 +494,10 @@ private fun LazyListScope.printerList(
 
                 PrinterCard(
                     title = it.location.substringBefore("*").trim(),
-                    subtitle = it.description.substringAfter("-").trim(),
+                    subtitle = it.description.substringAfter("-").trim() + distanceStringToPlace(
+                        it.latitude,
+                        it.longitude
+                    ),
                     inColor = it.description.contains("Color", ignoreCase = true),
                     hasCopy = it.description.contains("Copy", ignoreCase = true),
                     hasScan = it.description.contains("Scan", ignoreCase = true),
@@ -405,7 +568,8 @@ private fun LazyListScope.libraryList(
     navigateToPlace: (Place) -> Unit,
     navigateToDetails: (DetailedEcosystemPlace) -> Unit,
     favorites: Set<Place>,
-    onFavoriteStarClick: (Place) -> Unit
+    onFavoriteStarClick: (Place) -> Unit,
+    distanceStringToPlace: (Double?, Double?) -> String,
 ) {
     when (staticPlaces.libraries) {
         is ApiResponse.Error -> {
@@ -419,7 +583,7 @@ private fun LazyListScope.libraryList(
                 RoundedImagePlaceCard(
                     placeholderRes = R.drawable.olin_library,
                     title = it.location,
-                    subtitle = it.address,
+                    subtitle = it.address + distanceStringToPlace(it.latitude, it.longitude),
                     isFavorite = it.toPlace() in favorites,
                     onFavoriteClick = {
                         onFavoriteStarClick(it.toPlace())
@@ -429,6 +593,26 @@ private fun LazyListScope.libraryList(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun StandardCard(
+    place: Place,
+    onFavoriteStarClick: (Place) -> Unit,
+    navigateToPlace: (Place) -> Unit,
+    distanceStringToPlace: (Double?, Double?) -> String,
+) {
+    val distance = distanceStringToPlace(place.latitude, place.longitude)
+    val subtitle = if (distance.isBlank()) place.subLabel else "${place.subLabel}$distance"
+
+    BottomSheetLocationCard(
+        title = place.name,
+        subtitle1 = subtitle,
+        isFavorite = true,
+        onFavoriteClick = { onFavoriteStarClick(place) }
+    ) {
+        navigateToPlace(place)
     }
 }
 
@@ -452,6 +636,7 @@ private fun PreviewEcosystemBottomSheet() {
             ApiResponse.Pending
         ),
         favorites = emptySet(),
+        favoritesUiState = EcosystemFavoritesUiState(),
         modifier = Modifier,
         navigateToPlace = {},
         onDetailsClick = {},
@@ -476,3 +661,167 @@ private fun PreviewEcosystemBottomSheet() {
         distanceStringToPlace = { _, _ -> "" }
     )
 }
+
+@Preview(showBackground = true, name = "Favorites with Applied Filters")
+@Composable
+private fun PreviewBottomSheetFilteredContentFavorites() {
+    val mockEatery = Eatery(
+        id = 1,
+        name = "Trillium",
+        menuSummary = "Coffee, pastries, sandwiches",
+        imageUrl = null,
+        location = "Kennedy Hall",
+        campusArea = "Central Campus",
+        onlineOrderUrl = null,
+        latitude = 42.4488,
+        longitude = -76.4813,
+        paymentAcceptsMealSwipes = true,
+        paymentAcceptsBrbs = true,
+        paymentAcceptsCash = true,
+        events = null
+    )
+
+    val mockLibrary = Library(
+        id = 1,
+        location = "Olin Library",
+        address = "161 Ho Plaza",
+        latitude = 42.4534,
+        longitude = -76.4735
+    )
+
+    val mockGym = UpliftGym(
+        name = "Noyes Community Recreation Center",
+        id = "noyes-rec",
+        facilityId = "1",
+        hours = listOf(null, null, null, null, null, null, null),
+        imageUrl = null,
+        upliftCapacity = null,
+        latitude = 42.4480,
+        longitude = -76.4840
+    )
+
+    val mockPrinter = Printer(
+        id = 1,
+        location = "Mann Library",
+        description = "1st Floor, near entrance",
+        latitude = 42.4479,
+        longitude = -76.4764
+    )
+
+    BottomSheetFilteredContent(
+        currentFilter = FilterState.FAVORITES,
+        staticPlaces = StaticPlaces(
+            printers = ApiResponse.Success(listOf(mockPrinter)),
+            libraries = ApiResponse.Success(listOf(mockLibrary)),
+            eateries = ApiResponse.Success(listOf(mockEatery)),
+            gyms = ApiResponse.Success(listOf(mockGym))
+        ),
+        favorites = setOf(
+            Place(
+                latitude = 42.4488,
+                longitude = -76.4813,
+                name = "Trillium",
+                detail = "Kennedy Hall",
+                type = PlaceType.EATERY
+            ),
+            Place(
+                latitude = 42.4534,
+                longitude = -76.4735,
+                name = "Olin Library",
+                detail = "161 Ho Plaza",
+                type = PlaceType.LIBRARY
+            ),
+            Place(
+                latitude = 42.4480,
+                longitude = -76.4840,
+                name = "Noyes Community Recreation Center",
+                detail = "North Campus",
+                type = PlaceType.GYM
+            ),
+            Place(
+                latitude = 42.4479,
+                longitude = -76.4764,
+                name = "Mann Library",
+                detail = "1st Floor, near entrance",
+                type = PlaceType.PRINTER
+            ),
+            Place(
+                latitude = 42.4440,
+                longitude = -76.4825,
+                name = "Seneca St & Fall Creek Dr",
+                detail = "Bus Stop",
+                type = PlaceType.BUS_STOP
+            )
+        ),
+        favoritesUiState = EcosystemFavoritesUiState(
+            filteredSortedFavorites = listOf(
+                Place(
+                    latitude = 42.4488,
+                    longitude = -76.4813,
+                    name = "Trillium",
+                    detail = "Kennedy Hall",
+                    type = PlaceType.EATERY
+                ),
+                Place(
+                    latitude = 42.4534,
+                    longitude = -76.4735,
+                    name = "Olin Library",
+                    detail = "161 Ho Plaza",
+                    type = PlaceType.LIBRARY
+                ),
+                Place(
+                    latitude = 42.4480,
+                    longitude = -76.4840,
+                    name = "Noyes Community Recreation Center",
+                    detail = "North Campus",
+                    type = PlaceType.GYM
+                ),
+                Place(
+                    latitude = 42.4479,
+                    longitude = -76.4764,
+                    name = "Mann Library",
+                    detail = "1st Floor, near entrance",
+                    type = PlaceType.PRINTER
+                ),
+                Place(
+                    latitude = 42.4440,
+                    longitude = -76.4825,
+                    name = "Seneca St & Fall Creek Dr",
+                    detail = "Bus Stop",
+                    type = PlaceType.BUS_STOP
+                )
+            ),
+            eateryByPlace = listOf(mockEatery).associateBy { it.toPlace() },
+            libraryByPlace = listOf(mockLibrary).associateBy { it.toPlace() },
+            gymByPlace = listOf(mockGym).associateBy { it.toPlace() },
+            printerByPlace = mapOf(
+                mockPrinter.toPlace() to PrinterCardUiState(
+                    title = "Mann Library",
+                    subtitle = "near entrance",
+                    inColor = false,
+                    hasCopy = false,
+                    hasScan = false,
+                    alertMessage = ""
+                )
+            )
+        ),
+        navigateToPlace = {},
+        onDetailsClick = {},
+        onFavoriteStarClick = {},
+        onAddFavoritesClick = {},
+        onFilterButtonClick = {},
+        appliedFilters = setOf(
+            FavoritesFilterSheetState.EATERIES,
+            FavoritesFilterSheetState.LIBRARIES,
+            FavoritesFilterSheetState.GYMS,
+            FavoritesFilterSheetState.PRINTERS,
+            FavoritesFilterSheetState.OTHER
+        ),
+        onRemoveAppliedFilter = {},
+        operatingHoursToString = { _ -> AnnotatedString("Open • 10am - 4pm") },
+        distanceStringToPlace = { _, _ -> "distance" }
+    )
+}
+
+
+

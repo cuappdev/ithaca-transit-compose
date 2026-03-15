@@ -1,7 +1,5 @@
 package com.cornellappdev.transit.util
 
-import android.adservices.adid.AdId
-
 
 /**
  * Temporary mapping for about content
