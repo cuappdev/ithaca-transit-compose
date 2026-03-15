@@ -77,7 +77,7 @@ data class Eatery(
         longitude = this.longitude ?: 0.0,
         name = this.name,
         detail = this.location,
-        type = PlaceType.APPLE_PLACE
+        type = PlaceType.EATERY
     )
 }
 

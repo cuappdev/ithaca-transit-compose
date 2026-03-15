@@ -207,7 +207,9 @@ private fun BottomSheetFilteredContent(
                             onAddFavoritesClick = onAddFavoritesClick,
                             onFavoriteStarClick = onFavoriteStarClick,
                             onDetailsClick = onDetailsClick,
-                            operatingHoursToString = operatingHoursToString
+                            operatingHoursToString = operatingHoursToString,
+                            capacityToString = ::capacityPercentAnnotatedString,
+                            distanceStringToPlace = distanceStringToPlace
                         )
                     }
 
@@ -216,32 +218,33 @@ private fun BottomSheetFilteredContent(
                             staticPlaces = staticPlaces,
                             navigateToPlace = navigateToPlace,
                             favorites = favorites,
-                            onFavoriteStarClick = onFavoriteStarClick
+                            onFavoriteStarClick = onFavoriteStarClick,
+                            distanceStringToPlace = distanceStringToPlace
                         )
                     }
 
-                FilterState.GYMS -> {
-                    gymList(
-                        gymsApiResponse = staticPlaces.gyms,
-                        onDetailsClick = onDetailsClick,
-                        favorites = favorites,
-                        onFavoriteStarClick = onFavoriteStarClick,
-                        operatingHoursToString = ::isOpenAnnotatedStringFromOperatingHours,
-                        capacityToString = ::capacityPercentAnnotatedString,
-                        distanceStringToPlace = distanceStringToPlace
-                    )
-                }
+                    FilterState.GYMS -> {
+                        gymList(
+                            gymsApiResponse = staticPlaces.gyms,
+                            onDetailsClick = onDetailsClick,
+                            favorites = favorites,
+                            onFavoriteStarClick = onFavoriteStarClick,
+                            operatingHoursToString = ::isOpenAnnotatedStringFromOperatingHours,
+                            capacityToString = ::capacityPercentAnnotatedString,
+                            distanceStringToPlace = distanceStringToPlace
+                        )
+                    }
 
-                FilterState.EATERIES -> {
-                    eateryList(
-                        eateriesApiResponse = staticPlaces.eateries,
-                        onDetailsClick = onDetailsClick,
-                        favorites = favorites,
-                        onFavoriteStarClick = onFavoriteStarClick,
-                        operatingHoursToString = operatingHoursToString,
-                        distanceStringToPlace = distanceStringToPlace
-                    )
-                }
+                    FilterState.EATERIES -> {
+                        eateryList(
+                            eateriesApiResponse = staticPlaces.eateries,
+                            onDetailsClick = onDetailsClick,
+                            favorites = favorites,
+                            onFavoriteStarClick = onFavoriteStarClick,
+                            operatingHoursToString = operatingHoursToString,
+                            distanceStringToPlace = distanceStringToPlace
+                        )
+                    }
 
                     FilterState.LIBRARIES -> {
                         libraryList(
@@ -250,6 +253,7 @@ private fun BottomSheetFilteredContent(
                             onDetailsClick,
                             favorites,
                             onFavoriteStarClick,
+                            distanceStringToPlace,
                         )
                     }
                 }
@@ -272,7 +276,9 @@ private fun LazyListScope.favoriteList(
     onAddFavoritesClick: () -> Unit,
     onFavoriteStarClick: (Place) -> Unit,
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
-    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString
+    operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
+    capacityToString: (UpliftCapacity?) -> AnnotatedString,
+    distanceStringToPlace: (Double?, Double?) -> String
 ) {
     item {
         Spacer(modifier = Modifier.height(8.dp))
@@ -289,7 +295,11 @@ private fun LazyListScope.favoriteList(
                 if (matchingEatery != null) {
                     RoundedImagePlaceCard(
                         title = matchingEatery.name,
-                        subtitle = matchingEatery.location ?: "",
+                        subtitle = (matchingEatery.location
+                            ?: "") + distanceStringToPlace(
+                            matchingEatery.latitude,
+                            matchingEatery.longitude
+                        ),
                         isFavorite = true,
                         onFavoriteClick = { onFavoriteStarClick(place) },
                         leftAnnotatedString = operatingHoursToString(
@@ -312,7 +322,10 @@ private fun LazyListScope.favoriteList(
                 if (matchingLibrary != null) {
                     RoundedImagePlaceCard(
                         title = matchingLibrary.location,
-                        subtitle = matchingLibrary.address,
+                        subtitle = matchingLibrary.address + distanceStringToPlace(
+                            matchingLibrary.latitude,
+                            matchingLibrary.longitude
+                        ),
                         isFavorite = true,
                         onFavoriteClick = { onFavoriteStarClick(place) }
                     ) {
@@ -330,11 +343,22 @@ private fun LazyListScope.favoriteList(
             PlaceType.GYM -> {
                 val matchingGym = gymByPlace[place]
                 if (matchingGym != null) {
-                    BottomSheetLocationCard(
+                    RoundedImagePlaceCard(
                         title = matchingGym.name,
-                        subtitle1 = matchingGym.id,
-                        isFavorite = true,
-                        onFavoriteClick = { onFavoriteStarClick(place) }
+                        subtitle = getGymLocationString(matchingGym.name) + distanceStringToPlace(
+                            matchingGym.latitude,
+                            matchingGym.longitude
+                        ),
+                        isFavorite = matchingGym.toPlace() in favorites,
+                        onFavoriteClick = {
+                            onFavoriteStarClick(matchingGym.toPlace())
+                        },
+                        leftAnnotatedString = operatingHoursToString(
+                            matchingGym.operatingHours()
+                        ),
+                        rightAnnotatedString = capacityToString(
+                            matchingGym.upliftCapacity
+                        ),
                     ) {
                         onDetailsClick(matchingGym)
                     }
@@ -352,7 +376,10 @@ private fun LazyListScope.favoriteList(
                 if (matchingPrinter != null) {
                     PrinterCard(
                         title = matchingPrinter.title,
-                        subtitle = matchingPrinter.subtitle,
+                        subtitle = matchingPrinter.subtitle + distanceStringToPlace(
+                            place.latitude,
+                            place.longitude
+                        ),
                         inColor = matchingPrinter.inColor,
                         hasCopy = matchingPrinter.hasCopy,
                         hasScan = matchingPrinter.hasScan,
@@ -441,7 +468,8 @@ private fun LazyListScope.printerList(
     staticPlaces: StaticPlaces,
     navigateToPlace: (Place) -> Unit,
     favorites: Set<Place>,
-    onFavoriteStarClick: (Place) -> Unit
+    onFavoriteStarClick: (Place) -> Unit,
+    distanceStringToPlace: (Double?, Double?) -> String,
 ) {
     when (staticPlaces.printers) {
         is ApiResponse.Error -> {
@@ -461,7 +489,10 @@ private fun LazyListScope.printerList(
 
                 PrinterCard(
                     title = it.location.substringBefore("*").trim(),
-                    subtitle = it.description.substringAfter("-").trim(),
+                    subtitle = it.description.substringAfter("-").trim() + distanceStringToPlace(
+                        it.latitude,
+                        it.longitude
+                    ),
                     inColor = it.description.contains("Color", ignoreCase = true),
                     hasCopy = it.description.contains("Copy", ignoreCase = true),
                     hasScan = it.description.contains("Scan", ignoreCase = true),
@@ -532,7 +563,8 @@ private fun LazyListScope.libraryList(
     navigateToPlace: (Place) -> Unit,
     navigateToDetails: (DetailedEcosystemPlace) -> Unit,
     favorites: Set<Place>,
-    onFavoriteStarClick: (Place) -> Unit
+    onFavoriteStarClick: (Place) -> Unit,
+    distanceStringToPlace: (Double?, Double?) -> String,
 ) {
     when (staticPlaces.libraries) {
         is ApiResponse.Error -> {
@@ -546,7 +578,7 @@ private fun LazyListScope.libraryList(
                 RoundedImagePlaceCard(
                     placeholderRes = R.drawable.olin_library,
                     title = it.location,
-                    subtitle = it.address,
+                    subtitle = it.address + distanceStringToPlace(it.latitude, it.longitude),
                     isFavorite = it.toPlace() in favorites,
                     onFavoriteClick = {
                         onFavoriteStarClick(it.toPlace())

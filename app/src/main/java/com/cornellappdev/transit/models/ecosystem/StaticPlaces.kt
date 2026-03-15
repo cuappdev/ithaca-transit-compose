@@ -30,7 +30,7 @@ data class Printer(
         longitude = this.longitude,
         name = this.location,
         detail = this.description,
-        type = PlaceType.APPLE_PLACE
+        type = PlaceType.PRINTER
     )
 }
 
@@ -55,6 +55,6 @@ data class Library(
         longitude = this.longitude,
         name = this.location,
         detail = this.address,
-        type = PlaceType.APPLE_PLACE
+        type = PlaceType.LIBRARY
     )
 }
