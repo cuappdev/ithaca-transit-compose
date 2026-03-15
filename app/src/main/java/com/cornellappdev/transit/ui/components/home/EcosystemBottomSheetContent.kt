@@ -351,9 +351,9 @@ private fun LazyListScope.favoriteList(
                             matchingGym.latitude,
                             matchingGym.longitude
                         ),
-                        isFavorite = matchingGym.toPlace() in favorites,
+                        isFavorite = true,
                         onFavoriteClick = {
-                            onFavoriteStarClick(matchingGym.toPlace())
+                            onFavoriteStarClick(place)
                         },
                         leftAnnotatedString = operatingHoursToString(
                             matchingGym.operatingHours()
