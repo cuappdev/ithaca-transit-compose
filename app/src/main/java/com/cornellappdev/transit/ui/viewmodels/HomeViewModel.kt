@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -57,11 +56,6 @@ class HomeViewModel @Inject constructor(
      */
     private val _addSearchQuery: MutableStateFlow<String> = MutableStateFlow("")
     val addSearchQuery: StateFlow<String> = _addSearchQuery.asStateFlow()
-
-    /**
-     * The list of queried places retrieved from the route repository, as a StateFlow.
-     */
-    val placeQueryFlow: StateFlow<ApiResponse<List<Place>>> = routeRepository.placeFlow
 
     /**
      * The current UI state of the search bar, as a MutableStateFlow
@@ -119,8 +113,12 @@ class HomeViewModel @Inject constructor(
         )
 
     private val homeQueryFlow: StateFlow<String> = searchBarUiState
-        .filterIsInstance<SearchBarUIState.Query>()
-        .map { it.queryText }
+        .map { state ->
+            when (state) {
+                is SearchBarUIState.Query -> state.queryText
+                is SearchBarUIState.RecentAndFavorites -> ""
+            }
+        }
         .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
@@ -262,11 +260,9 @@ class HomeViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
 
-        searchBarUiState
+        homeQueryFlow
             .debounce(300L)
-            .filterIsInstance<SearchBarUIState.Query>()
-            .map { it.queryText }
-            .distinctUntilChanged()
+            .filter { it.isNotBlank() }
             .onEach {
                 routeRepository.makeSearch(it)
             }.launchIn(viewModelScope)
