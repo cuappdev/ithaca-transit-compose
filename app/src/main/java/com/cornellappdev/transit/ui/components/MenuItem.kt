@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.ui.theme.PrimaryText
@@ -42,6 +43,7 @@ fun MenuItem(
     Row(
         modifier
             .fillMaxWidth()
+            .defaultMinSize(minHeight = 36.dp)
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
