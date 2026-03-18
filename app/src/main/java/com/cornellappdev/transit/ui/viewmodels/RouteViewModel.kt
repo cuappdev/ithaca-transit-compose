@@ -14,12 +14,9 @@ import com.cornellappdev.transit.models.RouteOptions
 import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
 import com.cornellappdev.transit.models.UserPreferenceRepository
-import com.cornellappdev.transit.models.ecosystem.EateryRepository
-import com.cornellappdev.transit.models.ecosystem.GymRepository
+import com.cornellappdev.transit.models.search.UnifiedSearchRepository
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.util.TimeUtils
-import com.cornellappdev.transit.util.ecosystem.buildEcosystemSearchPlaces
-import com.cornellappdev.transit.util.ecosystem.mergeAndRankSearchResults
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -46,8 +43,7 @@ import javax.inject.Inject
 class RouteViewModel @Inject constructor(
     private val routeRepository: RouteRepository,
     private val locationRepository: LocationRepository,
-    private val eateryRepository: EateryRepository,
-    private val gymRepository: GymRepository,
+    private val unifiedSearchRepository: UnifiedSearchRepository,
     private val userPreferenceRepository: UserPreferenceRepository,
     private val selectedRouteRepository: SelectedRouteRepository
 ) : ViewModel() {
@@ -131,24 +127,27 @@ class RouteViewModel @Inject constructor(
         MutableStateFlow(SearchBarUIState.RecentAndFavorites(emptySet(), emptyList()))
     val searchBarUiState: StateFlow<SearchBarUIState> = _searchBarUiState.asStateFlow()
 
-    private val ecosystemSearchPlacesFlow: StateFlow<List<Place>> =
-        combine(
-            routeRepository.printerFlow,
-            routeRepository.libraryFlow,
-            eateryRepository.eateryFlow,
-            gymRepository.gymFlow
-        ) { printers, libraries, eateries, gyms ->
-            buildEcosystemSearchPlaces(
-                printers = printers,
-                libraries = libraries,
-                eateries = eateries,
-                gyms = gyms
-            )
-        }.stateIn(
+    private val routeQueryFlow: StateFlow<String> = searchBarUiState
+        .map { state ->
+            when (state) {
+                is SearchBarUIState.Query -> state.queryText
+                is SearchBarUIState.RecentAndFavorites -> ""
+            }
+        }
+        .distinctUntilChanged()
+        .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = emptyList()
+            initialValue = ""
         )
+
+    private val mergedRouteSearchResultsFlow: StateFlow<ApiResponse<List<Place>>> =
+        unifiedSearchRepository.mergedSearchResults(routeQueryFlow)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = ApiResponse.Success(emptyList())
+            )
 
     init {
         userPreferenceRepository.favoritesFlow.onEach {
@@ -169,19 +168,8 @@ class RouteViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
 
-        combine(
-            searchBarUiState
-                .filterIsInstance<SearchBarUIState.Query>()
-                .map { it.queryText }
-                .distinctUntilChanged(),
-            routeRepository.placeFlow,
-            ecosystemSearchPlacesFlow
-        ) { query, routeSearchResults, ecosystemPlaces ->
-            query to mergeAndRankSearchResults(
-                query = query,
-                routeSearchResults = routeSearchResults,
-                ecosystemPlaces = ecosystemPlaces
-            )
+        combine(routeQueryFlow, mergedRouteSearchResultsFlow) { query, mergedResults ->
+            query to mergedResults
         }.onEach { (query, mergedResults) ->
             val currentState = _searchBarUiState.value
             if (currentState is SearchBarUIState.Query && currentState.queryText == query) {
@@ -241,11 +229,9 @@ class RouteViewModel @Inject constructor(
 
         }.launchIn(viewModelScope)
 
-        searchBarUiState
+        routeQueryFlow
             .debounce(300L)
-            .filterIsInstance<SearchBarUIState.Query>()
-            .map { it.queryText }
-            .distinctUntilChanged()
+            .filter { it.isNotBlank() }
             .onEach {
                 routeRepository.makeSearch(it)
             }.launchIn(viewModelScope)

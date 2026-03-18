@@ -10,6 +10,7 @@ import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.models.UserPreferenceRepository
+import com.cornellappdev.transit.models.search.UnifiedSearchRepository
 import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.EateryRepository
 import com.cornellappdev.transit.models.ecosystem.GymRepository
@@ -19,8 +20,6 @@ import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.util.StringUtils.fromMetersToMiles
 import com.cornellappdev.transit.util.calculateDistance
-import com.cornellappdev.transit.util.ecosystem.buildEcosystemSearchPlaces
-import com.cornellappdev.transit.util.ecosystem.mergeAndRankSearchResults
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,6 +47,7 @@ class HomeViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
     private val eateryRepository: EateryRepository,
     private val gymRepository: GymRepository,
+    private val unifiedSearchRepository: UnifiedSearchRepository,
     private val userPreferenceRepository: UserPreferenceRepository,
     private val selectedRouteRepository: SelectedRouteRepository
 ) : ViewModel() {
@@ -118,40 +118,30 @@ class HomeViewModel @Inject constructor(
             )
         )
 
-    private val ecosystemSearchPlacesFlow: StateFlow<List<Place>> =
-        combine(
-            routeRepository.printerFlow,
-            routeRepository.libraryFlow,
-            eateryRepository.eateryFlow,
-            gymRepository.gymFlow
-        ) { printers, libraries, eateries, gyms ->
-            buildEcosystemSearchPlaces(
-                printers = printers,
-                libraries = libraries,
-                eateries = eateries,
-                gyms = gyms
-            )
-        }.stateIn(
+    private val homeQueryFlow: StateFlow<String> = searchBarUiState
+        .filterIsInstance<SearchBarUIState.Query>()
+        .map { it.queryText }
+        .distinctUntilChanged()
+        .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = emptyList()
+            initialValue = ""
         )
+
+    private val mergedHomeSearchResultsFlow: StateFlow<ApiResponse<List<Place>>> =
+        unifiedSearchRepository.mergedSearchResults(homeQueryFlow)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = ApiResponse.Success(emptyList())
+            )
 
     private val _showAddFavoritesSheet = MutableStateFlow(false)
     val showAddFavoritesSheet: StateFlow<Boolean> = _showAddFavoritesSheet.asStateFlow()
 
     val addSearchResultsFlow: StateFlow<ApiResponse<List<Place>>> =
-        combine(
-            _addSearchQuery,
-            placeQueryFlow,
-            ecosystemSearchPlacesFlow
-        ) { query, routeSearchResults, ecosystemPlaces ->
-            mergeAndRankSearchResults(
-                query = query,
-                routeSearchResults = routeSearchResults,
-                ecosystemPlaces = ecosystemPlaces
-            )
-        }.stateIn(
+        unifiedSearchRepository.mergedSearchResults(_addSearchQuery)
+            .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = ApiResponse.Success(emptyList())
@@ -263,19 +253,8 @@ class HomeViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
 
-        combine(
-            searchBarUiState
-                .filterIsInstance<SearchBarUIState.Query>()
-                .map { it.queryText }
-                .distinctUntilChanged(),
-            placeQueryFlow,
-            ecosystemSearchPlacesFlow
-        ) { query, routeSearchResults, ecosystemPlaces ->
-            query to mergeAndRankSearchResults(
-                query = query,
-                routeSearchResults = routeSearchResults,
-                ecosystemPlaces = ecosystemPlaces
-            )
+        combine(homeQueryFlow, mergedHomeSearchResultsFlow) { query, mergedResults ->
+            query to mergedResults
         }.onEach { (query, mergedResults) ->
             val currentState = _searchBarUiState.value
             if (currentState is SearchBarUIState.Query && currentState.queryText == query) {

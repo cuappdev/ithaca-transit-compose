@@ -109,6 +109,9 @@ fun RouteScreen(
             skipHalfExpanded = true,
             confirmValueChange = {
                 keyboardController?.hide()
+                if (it == ModalBottomSheetValue.Hidden) {
+                    routeViewModel.onQueryChange("")
+                }
                 true
             }
         )
@@ -119,6 +122,9 @@ fun RouteScreen(
             skipHalfExpanded = true,
             confirmValueChange = {
                 keyboardController?.hide()
+                if (it == ModalBottomSheetValue.Hidden) {
+                    routeViewModel.onQueryChange("")
+                }
                 true
             }
         )
