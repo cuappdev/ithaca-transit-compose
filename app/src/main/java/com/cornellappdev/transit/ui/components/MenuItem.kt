@@ -104,5 +104,29 @@ private fun PreviewMenuItemBusStop() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewMenuItemApplePlace() {
-    MenuItem(PlaceType.EATERY, "Apple Place", "Ithaca, NY", {})
+    MenuItem(PlaceType.APPLE_PLACE, "Apple Place", "Ithaca, NY", {})
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewMenuItemEatery() {
+    MenuItem(PlaceType.EATERY, "Eatery", "Ithaca, NY", {})
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewMenuItemGym() {
+    MenuItem(PlaceType.GYM, "Gym", "Ithaca, NY", {})
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewMenuItemLibrary() {
+    MenuItem(PlaceType.LIBRARY, "Library", "Ithaca, NY", {})
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewMenuItemPrinter() {
+    MenuItem(PlaceType.PRINTER, "Printer", "Ithaca, NY", {})
 }
