@@ -439,7 +439,11 @@ private fun LazyListScope.gymList(
         }
 
         is ApiResponse.Success -> {
-            items(gymsApiResponse.data) {
+            items(gymsApiResponse.data
+                .sortedBy { distanceStringToPlace(it.latitude, it.longitude) }
+                .sortedByDescending { operatingHoursToString(it.operatingHours())
+                    .contains("open", ignoreCase = true) }
+            ) {
                 RoundedImagePlaceCard(
                     imageUrl = it.imageUrl,
                     title = it.name,
@@ -484,7 +488,10 @@ private fun LazyListScope.printerList(
         }
 
         is ApiResponse.Success -> {
-            items(staticPlaces.printers.data) {
+            val printers = staticPlaces.printers.data.filter { it.location != "" }
+            items(printers
+                .sortedBy { distanceStringToPlace(it.latitude, it.longitude) })
+            {
                 val place = it.toPlace()
                 val alert = if (it.location.contains("*")) {
                     it.location.substringAfter("*").trim('*').trim()
@@ -538,7 +545,11 @@ private fun LazyListScope.eateryList(
         }
 
         is ApiResponse.Success -> {
-            items(eateriesApiResponse.data) {
+            items(eateriesApiResponse.data
+                .sortedBy { distanceStringToPlace(it.latitude, it.longitude) }
+                .sortedByDescending { operatingHoursToString(it.operatingHours())
+                    .contains("open", ignoreCase = true) }
+            ) {
                 RoundedImagePlaceCard(
                     imageUrl = it.imageUrl,
                     title = it.name,
@@ -579,7 +590,9 @@ private fun LazyListScope.libraryList(
         }
 
         is ApiResponse.Success -> {
-            items(staticPlaces.libraries.data) {
+            items(staticPlaces.libraries.data
+                .sortedBy { distanceStringToPlace(it.latitude, it.longitude) }
+            ) {
                 RoundedImagePlaceCard(
                     placeholderRes = R.drawable.olin_library,
                     title = it.location,
