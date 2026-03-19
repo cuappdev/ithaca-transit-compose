@@ -46,6 +46,7 @@ import com.cornellappdev.transit.ui.viewmodels.FilterState
 import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
 import com.cornellappdev.transit.util.ecosystem.capacityPercentAnnotatedString
 import com.cornellappdev.transit.ui.viewmodels.PrinterCardUiState
+import com.cornellappdev.transit.util.TimeUtils
 import kotlin.collections.isNotEmpty
 import com.cornellappdev.transit.util.getGymLocationString
 
@@ -439,11 +440,7 @@ private fun LazyListScope.gymList(
         }
 
         is ApiResponse.Success -> {
-            items(gymsApiResponse.data
-                .sortedBy { distanceStringToPlace(it.latitude, it.longitude) }
-                .sortedByDescending { operatingHoursToString(it.operatingHours())
-                    .contains("open", ignoreCase = true) }
-            ) {
+            items(gymsApiResponse.data) {
                 RoundedImagePlaceCard(
                     imageUrl = it.imageUrl,
                     title = it.name,
@@ -488,10 +485,7 @@ private fun LazyListScope.printerList(
         }
 
         is ApiResponse.Success -> {
-            val printers = staticPlaces.printers.data.filter { it.location != "" }
-            items(printers
-                .sortedBy { distanceStringToPlace(it.latitude, it.longitude) })
-            {
+            items(staticPlaces.printers.data) {
                 val place = it.toPlace()
                 val alert = if (it.location.contains("*")) {
                     it.location.substringAfter("*").trim('*').trim()
@@ -545,11 +539,7 @@ private fun LazyListScope.eateryList(
         }
 
         is ApiResponse.Success -> {
-            items(eateriesApiResponse.data
-                .sortedBy { distanceStringToPlace(it.latitude, it.longitude) }
-                .sortedByDescending { operatingHoursToString(it.operatingHours())
-                    .contains("open", ignoreCase = true) }
-            ) {
+            items(eateriesApiResponse.data) {
                 RoundedImagePlaceCard(
                     imageUrl = it.imageUrl,
                     title = it.name,
@@ -590,9 +580,7 @@ private fun LazyListScope.libraryList(
         }
 
         is ApiResponse.Success -> {
-            items(staticPlaces.libraries.data
-                .sortedBy { distanceStringToPlace(it.latitude, it.longitude) }
-            ) {
+            items(staticPlaces.libraries.data) {
                 RoundedImagePlaceCard(
                     placeholderRes = R.drawable.olin_library,
                     title = it.location,
