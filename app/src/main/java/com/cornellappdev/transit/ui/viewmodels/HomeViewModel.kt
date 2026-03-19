@@ -422,7 +422,7 @@ class HomeViewModel @Inject constructor(
     /**
      * Returns a numerical distance from a location to the current location if both exist, otherwise returns Double.MAX_VALUE
      */
-    fun numericalDistancetoPlace(latitude: Double?, longitude: Double?): Double {
+    fun numericalDistanceToPlace(latitude: Double?, longitude: Double?): Double {
         val currentLocationSnapshot = currentLocation.value
         return if (currentLocationSnapshot != null && latitude != null && longitude != null) {
             calculateDistance(
@@ -449,9 +449,9 @@ class HomeViewModel @Inject constructor(
             val sortedData = response.data.sortedWith(
                 if (getIsOpen != null) {
                     compareByDescending<T> { getIsOpen(it) }
-                        .thenBy { numericalDistancetoPlace(getLatitude(it),getLongitude(it)) }
+                        .thenBy { numericalDistanceToPlace(getLatitude(it),getLongitude(it)) }
                 } else {
-                    compareBy { numericalDistancetoPlace(getLatitude(it),getLongitude(it)) }
+                    compareBy { numericalDistanceToPlace(getLatitude(it),getLongitude(it)) }
                 }
             )
             return ApiResponse.Success(sortedData)
