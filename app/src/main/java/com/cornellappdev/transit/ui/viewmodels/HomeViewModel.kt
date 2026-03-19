@@ -18,6 +18,7 @@ import com.cornellappdev.transit.models.ecosystem.Printer
 import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.util.StringUtils.fromMetersToMiles
+import com.cornellappdev.transit.util.TimeUtils
 import com.cornellappdev.transit.util.calculateDistance
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -93,13 +94,36 @@ class HomeViewModel @Inject constructor(
             routeRepository.printerFlow,
             routeRepository.libraryFlow,
             eateryRepository.eateryFlow,
-            gymRepository.gymFlow
-        ) { printers, libraries, eateries, gyms ->
+            gymRepository.gymFlow,
+            locationRepository.currentLocation
+        ) { printers, libraries, eateries, gyms, location ->
             StaticPlaces(
-                printers,
-                libraries,
-                eateries,
-                gyms
+                printers = sortApiResponse(
+                    response = if (printers is ApiResponse.Success) {
+                        ApiResponse.Success(printers.data.filter { it.location.isNotBlank() })
+                    } else {
+                        printers
+                    },
+                    getLatitude = { it.latitude },
+                    getLongitude = { it.longitude }
+                ),
+                libraries = sortApiResponse(
+                    response = libraries,
+                    getLatitude = { it.latitude },
+                    getLongitude = { it.longitude }
+                ),
+                eateries = sortApiResponse(
+                    response = eateries,
+                    getLatitude = { it.latitude },
+                    getLongitude = { it.longitude },
+                    getIsOpen = { TimeUtils.getOpenStatus(it.operatingHours()).isOpen }
+                ),
+                gyms = sortApiResponse(
+                    response = gyms,
+                    getLatitude = { it.latitude },
+                    getLongitude = { it.longitude },
+                    getIsOpen = { TimeUtils.getOpenStatus(it.operatingHours()).isOpen }
+                )
             )
         }.stateIn(
             scope = viewModelScope,
@@ -393,6 +417,47 @@ class HomeViewModel @Inject constructor(
 
         }
         return ""
+    }
+
+    /**
+     * Returns a numerical distance from a location to the current location if both exist, otherwise returns Double.MAX_VALUE
+     */
+    fun numericalDistanceToPlace(latitude: Double?, longitude: Double?): Double {
+        val currentLocationSnapshot = currentLocation.value
+        return if (currentLocationSnapshot != null && latitude != null && longitude != null) {
+            calculateDistance(
+                LatLng(
+                    currentLocationSnapshot.latitude,
+                    currentLocationSnapshot.longitude
+                ), LatLng(latitude, longitude)
+            )
+        } else {
+            Double.MAX_VALUE
+        }
+    }
+
+    /**
+     * Sort a list of places by distance to the current location and whether they are open/closed
+     */
+    private fun <T> sortApiResponse(
+        response: ApiResponse<List<T>>,
+        getLatitude: (T) -> Double?,
+        getLongitude: (T) -> Double?,
+        getIsOpen: ((T) -> Boolean)? = null
+    ): ApiResponse<List<T>> {
+        if (response is ApiResponse.Success) {
+            val sortedData = response.data.sortedWith(
+                if (getIsOpen != null) {
+                    compareByDescending<T> { getIsOpen(it) }
+                        .thenBy { numericalDistanceToPlace(getLatitude(it),getLongitude(it)) }
+                } else {
+                    compareBy { numericalDistanceToPlace(getLatitude(it),getLongitude(it)) }
+                }
+            )
+            return ApiResponse.Success(sortedData)
+        } else {
+            return response
+        }
     }
 }
 
