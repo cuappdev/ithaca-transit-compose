@@ -359,7 +359,9 @@ fun HomeScreen(
                             onFilterToggle = homeViewModel::toggleFavoritesFilter,
                             onRemoveAppliedFilter = homeViewModel::removeAppliedFilter,
                             operatingHoursToString = ::isOpenAnnotatedStringFromOperatingHours,
-                            distanceStringToPlace = homeViewModel::distanceStringIfCurrentLocationExists
+                            distanceStringToPlace = homeViewModel::distanceTextOrPlaceholder,
+                            sanitizeLibraryAddress = homeViewModel::sanitizeLibraryAddress,
+                            printerToCardUiState = homeViewModel::printerToCardUiState
                         )
                     }
                 }

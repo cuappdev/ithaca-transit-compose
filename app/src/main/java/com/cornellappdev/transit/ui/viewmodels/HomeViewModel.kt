@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import java.util.Locale
 import kotlin.text.toDouble
 
 /**
@@ -433,6 +434,26 @@ class HomeViewModel @Inject constructor(
         }
         return ""
     }
+
+    /**
+     * Returns distance text with a loading placeholder when current location is not ready.
+     */
+    fun distanceTextOrPlaceholder(latitude: Double?, longitude: Double?): String {
+        val distanceText = distanceStringIfCurrentLocationExists(latitude, longitude)
+        return if (distanceText.isBlank()) " - Calculating Distance..." else distanceText
+    }
+
+    /**
+     * Keeps only the first segment of a library address (text before the first comma).
+     */
+    fun sanitizeLibraryAddress(address: String): String {
+        return address.substringBefore(",").trim()
+    }
+
+    /**
+     * Maps raw printer fields to UI-ready fields for card rendering.
+     */
+    fun printerToCardUiState(printer: Printer): PrinterCardUiState = printer.toPrinterCardUiState()
 }
 
 /**
@@ -459,15 +480,39 @@ data class PrinterCardUiState(
 )
 
 private fun Printer.toPrinterCardUiState(): PrinterCardUiState {
-    val alertMessage = location.substringAfter("*", "").trim('*').trim()
+    //Hard-coded way to handle closed for construction message, change when backend is updated
+    val constructionAlert = "CLOSED FOR CONSTRUCTION"
+    val constructionRegex = Regex("""\bCLOSED\s+FOR\s+CONSTRUCTION\b""", RegexOption.IGNORE_CASE)
+    val hasConstructionAlert = constructionRegex.containsMatchIn(location)
+
+    val rawTitle = location.substringBefore("*").trim()
+    val title = rawTitle
+        .replace(constructionRegex, "")
+        .replace(Regex("""\s{2,}"""), " ")
+        .trim(' ', '-', ',', ';', ':')
+
+    val starAlertMessage = location.substringAfter("*", "").trim('*').trim()
+    val alertMessage = if (hasConstructionAlert) constructionAlert else starAlertMessage
+
     return PrinterCardUiState(
-        title = location.substringBefore("*").trim(),
-        subtitle = description.substringAfter("-", description).trim(),
+        title = title,
+        subtitle = description.substringAfter("-", description).trim().toTitleCaseWords(),
         inColor = description.contains("Color", ignoreCase = true),
         hasCopy = description.contains("Copy", ignoreCase = true),
         hasScan = description.contains("Scan", ignoreCase = true),
         alertMessage = alertMessage
     )
+}
+
+private fun String.toTitleCaseWords(): String {
+    return split(Regex("""\s+"""))
+        .filter { it.isNotBlank() }
+        .joinToString(" ") { word ->
+            word.lowercase(Locale.getDefault())
+                .replaceFirstChar { char ->
+                    if (char.isLowerCase()) char.titlecase(Locale.getDefault()) else char.toString()
+                }
+        }
 }
 
 private fun Set<FavoritesFilterSheetState>.toAllowedPlaceTypes(): Set<PlaceType> = buildSet {
