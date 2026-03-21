@@ -27,6 +27,7 @@ import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.util.StringUtils.createDeepLink
 import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
 import com.cornellappdev.transit.util.TimeUtils.rotateOperatingHours
+import com.cornellappdev.transit.util.getAboutContent
 
 @Composable
 fun EateryDetailsContent(
@@ -67,6 +68,7 @@ fun EateryDetailsContent(
 
         val aboutText = eatery.shortAbout
             ?.takeIf { it.isNotBlank() }
+            ?: getAboutContent(eatery.name).takeIf { it.isNotBlank() }
             ?: "This is one of Cornell's many eateries."
 
         Text(
