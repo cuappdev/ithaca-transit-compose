@@ -14,4 +14,4 @@ const val HIGH_CAPACITY_THRESHOLD = 0.65f
 
 const val NOTIFICATIONS_ENABLED = false
 
-const val METERS_TO_FEET = 3.28
+const val METERS_TO_FEET = 3.28084

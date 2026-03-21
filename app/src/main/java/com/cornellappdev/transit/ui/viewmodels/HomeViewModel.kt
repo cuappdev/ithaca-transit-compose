@@ -18,8 +18,7 @@ import com.cornellappdev.transit.models.ecosystem.Library
 import com.cornellappdev.transit.models.ecosystem.Printer
 import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
-import com.cornellappdev.transit.util.METERS_TO_FEET
-import com.cornellappdev.transit.util.StringUtils.fromMetersToMiles
+import com.cornellappdev.transit.util.StringUtils.fromMetersToFeet
 import com.cornellappdev.transit.util.calculateDistance
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,7 +37,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import java.util.Locale
-import kotlin.text.toDouble
 
 /**
  * ViewModel handling home screen UI state and search functionality
@@ -418,19 +416,13 @@ class HomeViewModel @Inject constructor(
     fun distanceStringIfCurrentLocationExists(latitude: Double?, longitude: Double?): String {
         val currentLocationSnapshot = currentLocation.value
         if (currentLocationSnapshot != null && latitude != null && longitude != null) {
-            var distance: String
             val distanceInMeters = calculateDistance(
                 LatLng(
                     currentLocationSnapshot.latitude,
                     currentLocationSnapshot.longitude
                 ), LatLng(latitude, longitude)
             ).toString()
-            if (distanceInMeters.toDouble() > 160) {
-                distance = distanceInMeters.fromMetersToMiles() + " mi"
-            } else {
-                distance = (distanceInMeters.toDouble() * METERS_TO_FEET).toInt().toString() + " ft"
-            }
-            return " - $distance"
+            return " - ${distanceInMeters.fromMetersToFeet()}"
         }
         return ""
     }
