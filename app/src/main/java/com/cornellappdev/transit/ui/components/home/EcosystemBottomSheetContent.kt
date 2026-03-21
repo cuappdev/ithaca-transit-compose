@@ -667,17 +667,24 @@ private fun PreviewEcosystemBottomSheet() {
 private fun PreviewBottomSheetFilteredContentFavorites() {
     val mockEatery = Eatery(
         id = 1,
+        cornellId = 1,
+        announcements = emptyList(),
         name = "Trillium",
+        shortName = "Trillium",
+        about = "A central campus cafe with coffee, pastries, and sandwiches.",
+        shortAbout = null,
+        cornellDining = true,
         menuSummary = "Coffee, pastries, sandwiches",
         imageUrl = null,
         location = "Kennedy Hall",
         campusArea = "Central Campus",
         onlineOrderUrl = null,
+        contactPhone = null,
+        contactEmail = null,
         latitude = 42.4488,
         longitude = -76.4813,
-        paymentAcceptsMealSwipes = true,
-        paymentAcceptsBrbs = true,
-        paymentAcceptsCash = true,
+        paymentMethods = listOf("SWIPE", "BRB", "CASH"),
+        eateryTypes = listOf("CAFE"),
         events = null
     )
 
