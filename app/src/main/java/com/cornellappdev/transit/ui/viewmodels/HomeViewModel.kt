@@ -1,8 +1,10 @@
 package com.cornellappdev.transit.ui.viewmodels
 
 import android.content.Context
+import androidx.annotation.DrawableRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.LocationRepository
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.models.PlaceType
@@ -48,6 +50,24 @@ class HomeViewModel @Inject constructor(
     private val userPreferenceRepository: UserPreferenceRepository,
     private val selectedRouteRepository: SelectedRouteRepository
 ) : ViewModel() {
+
+    val libraryCardsFlow: StateFlow<ApiResponse<List<LibraryCardUiState>>> =
+        routeRepository.libraryFlow.map { response ->
+            when (val filteredResponse = response.withExcludedLibrariesRemoved()) {
+                is ApiResponse.Success -> {
+                    ApiResponse.Success(
+                        filteredResponse.data
+                            .map { it.toLibraryCardUiState() }
+                    )
+                }
+                is ApiResponse.Pending -> ApiResponse.Pending
+                is ApiResponse.Error -> ApiResponse.Error
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = ApiResponse.Pending
+        )
 
     /**
      * The current query in the add favorites search bar, as a StateFlow
@@ -97,7 +117,7 @@ class HomeViewModel @Inject constructor(
         ) { printers, libraries, eateries, gyms ->
             StaticPlaces(
                 printers,
-                libraries,
+                libraries.withExcludedLibrariesRemoved(),
                 eateries,
                 gyms
             )
@@ -137,8 +157,17 @@ class HomeViewModel @Inject constructor(
     val appliedFavoritesFilters: StateFlow<Set<FavoritesFilterSheetState>> =
         _appliedFavoritesFilters.asStateFlow()
 
+    private val filteredFavoritesFlow: StateFlow<Set<Place>> =
+        userPreferenceRepository.favoritesFlow
+            .map { favorites -> favorites.filterNot { it.isExcludedLibraryPlace() }.toSet() }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = emptySet()
+            )
+
     val ecosystemFavoritesUiState: StateFlow<EcosystemFavoritesUiState> = combine(
-        userPreferenceRepository.favoritesFlow,
+        filteredFavoritesFlow,
         staticPlacesFlow,
         appliedFavoritesFilters
     ) { favorites, staticPlaces, appliedFilters ->
@@ -157,7 +186,9 @@ class HomeViewModel @Inject constructor(
         EcosystemFavoritesUiState(
             filteredSortedFavorites = filteredSortedFavorites,
             eateryByPlace = eateries.associateBy { it.toPlace() },
-            libraryByPlace = libraries.associateBy { it.toPlace() },
+            libraryCardByPlace = libraries
+                .map { it.toLibraryCardUiState() }
+                .associateBy { it.library.toPlace() },
             gymByPlace = gyms.associateBy { it.toPlace() },
             printerByPlace = printers.associate { printer ->
                 val place = printer.toPlace()
@@ -203,7 +234,7 @@ class HomeViewModel @Inject constructor(
 
 
     init {
-        userPreferenceRepository.favoritesFlow.onEach {
+        filteredFavoritesFlow.onEach {
             if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
                 _searchBarUiState.value =
                     (_searchBarUiState.value as SearchBarUIState.RecentAndFavorites).copy(
@@ -250,7 +281,7 @@ class HomeViewModel @Inject constructor(
     fun onQueryChange(query: String) {
         if (query == "") {
             _searchBarUiState.value = SearchBarUIState.RecentAndFavorites(
-                userPreferenceRepository.favoritesFlow.value,
+                filteredFavoritesFlow.value,
                 userPreferenceRepository.recentsFlow.value
             )
         } else {
@@ -402,9 +433,17 @@ class HomeViewModel @Inject constructor(
 data class EcosystemFavoritesUiState(
     val filteredSortedFavorites: List<Place> = emptyList(),
     val eateryByPlace: Map<Place, Eatery> = emptyMap(),
-    val libraryByPlace: Map<Place, Library> = emptyMap(),
+    val libraryCardByPlace: Map<Place, LibraryCardUiState> = emptyMap(),
     val gymByPlace: Map<Place, UpliftGym> = emptyMap(),
     val printerByPlace: Map<Place, PrinterCardUiState> = emptyMap()
+)
+
+/**
+ * UI-ready library fields so composables receive configured fallback/override images.
+ */
+data class LibraryCardUiState(
+    val library: Library,
+    @DrawableRes val placeholderRes: Int
 )
 
 /**
@@ -428,6 +467,57 @@ private fun Printer.toPrinterCardUiState(): PrinterCardUiState {
         hasCopy = description.contains("Copy", ignoreCase = true),
         hasScan = description.contains("Scan", ignoreCase = true),
         alertMessage = alertMessage
+    )
+}
+
+private val libraryImageOverridesByLocation: Map<String, Int> = mapOf(
+    // Temporary placeholders: each location is explicitly configurable for future per-library assets.
+    "africana studies and research center" to R.drawable.library_img_africana_studies,
+    "carpenter hall" to R.drawable.library_img_carpenter_hall,
+    "clark hall" to R.drawable.library_img_clark_hall,
+    "comstock hall" to R.drawable.library_img_comstock_hall,
+    "imogene powers johnson center for birds and biodiversity" to R.drawable.olin_library,
+    "ives hall" to R.drawable.library_img_ives_hall,
+    "jordan hall" to R.drawable.olin_library,
+    "lincoln hall" to R.drawable.library_img_lincoln_hall,
+    "malott hall" to R.drawable.library_img_malott_hall,
+    "mann library" to R.drawable.library_img_mann_library,
+    "myron taylor hall" to R.drawable.library_img_myron_taylor_hall,
+    "myron taylor jane foster library addition" to R.drawable.olin_library,
+    "olin library" to R.drawable.olin_library,
+    "rand hall" to R.drawable.library_img_rand_hall,
+    "sage hall" to R.drawable.library_img_sage_hall,
+    "statler hall" to R.drawable.library_img_statler_hall,
+    "vet education center" to R.drawable.library_img_vet_center
+)
+
+private val excludedLibraryLocations: Set<String> = setOf(
+    "imogene powers johnson center for birds and biodiversity",
+    "myron taylor jane foster library addition",
+    "jordan hall"
+)
+
+private fun ApiResponse<List<Library>>.withExcludedLibrariesRemoved(): ApiResponse<List<Library>> {
+    return when (this) {
+        is ApiResponse.Success -> ApiResponse.Success(data.filterNot { it.isExcludedLibrary() })
+        is ApiResponse.Pending -> ApiResponse.Pending
+        is ApiResponse.Error -> ApiResponse.Error
+    }
+}
+
+private fun Library.isExcludedLibrary(): Boolean {
+    return location.trim().lowercase() in excludedLibraryLocations
+}
+
+private fun Place.isExcludedLibraryPlace(): Boolean {
+    return type == PlaceType.LIBRARY && name.trim().lowercase() in excludedLibraryLocations
+}
+
+private fun Library.toLibraryCardUiState(): LibraryCardUiState {
+    val normalizedLocation = location.trim().lowercase()
+    return LibraryCardUiState(
+        library = this,
+        placeholderRes = libraryImageOverridesByLocation[normalizedLocation] ?: R.drawable.olin_library
     )
 }
 
