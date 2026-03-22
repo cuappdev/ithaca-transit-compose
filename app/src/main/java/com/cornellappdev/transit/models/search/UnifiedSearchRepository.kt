@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -50,10 +52,18 @@ class UnifiedSearchRepository @Inject constructor(
 
     fun mergedSearchResults(queryFlow: Flow<String>): Flow<ApiResponse<List<Place>>> =
         combine(
-            queryFlow,
-            routeRepository.placeFlow,
+            queryFlow
+                .map { it.trim() }
+                .distinctUntilChanged(),
+            routeRepository.placeSearchStateFlow,
             ecosystemSearchPlacesFlow
-        ) { query, routeSearchResults, ecosystemPlaces ->
+        ) { query, routeSearchState, ecosystemPlaces ->
+            val routeSearchResults = when {
+                query.isBlank() -> ApiResponse.Success(emptyList())
+                routeSearchState.query.equals(query, ignoreCase = true) -> routeSearchState.response
+                else -> ApiResponse.Pending
+            }
+
             mergeAndRankSearchResults(
                 query = query,
                 routeSearchResults = routeSearchResults,

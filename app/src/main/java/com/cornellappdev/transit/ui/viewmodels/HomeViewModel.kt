@@ -471,20 +471,20 @@ data class PrinterCardUiState(
     val alertMessage: String
 )
 
+//Hard-coded way to handle closed for construction message, change when backend is updated
+val PRINTER_CONSTRUCTION_ALERT = "CLOSED FOR CONSTRUCTION"
+val PRINTER_CONSTRUCTION_REGEX = Regex("""\bCLOSED\s+FOR\s+CONSTRUCTION\b""", RegexOption.IGNORE_CASE)
 private fun Printer.toPrinterCardUiState(): PrinterCardUiState {
-    //Hard-coded way to handle closed for construction message, change when backend is updated
-    val constructionAlert = "CLOSED FOR CONSTRUCTION"
-    val constructionRegex = Regex("""\bCLOSED\s+FOR\s+CONSTRUCTION\b""", RegexOption.IGNORE_CASE)
-    val hasConstructionAlert = constructionRegex.containsMatchIn(location)
+    val hasConstructionAlert = PRINTER_CONSTRUCTION_REGEX.containsMatchIn(location)
 
     val rawTitle = location.substringBefore("*").trim()
     val title = rawTitle
-        .replace(constructionRegex, "")
+        .replace(PRINTER_CONSTRUCTION_REGEX, "")
         .replace(Regex("""\s{2,}"""), " ")
         .trim(' ', '-', ',', ';', ':')
 
     val starAlertMessage = location.substringAfter("*", "").trim('*').trim()
-    val alertMessage = if (hasConstructionAlert) constructionAlert else starAlertMessage
+    val alertMessage = if (hasConstructionAlert) PRINTER_CONSTRUCTION_ALERT else starAlertMessage
 
     return PrinterCardUiState(
         title = title,

@@ -49,7 +49,7 @@ fun MenuItem(
     ) {
         Image(
             painterResource(iconForPlaceType(type)),
-            contentDescription = type.name,
+            contentDescription = null,
             modifier = Modifier
                 .size(24.dp),
         )
