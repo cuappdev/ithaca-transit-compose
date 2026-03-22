@@ -12,8 +12,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.cancellation.CancellationException
+
+data class PlaceSearchState(
+    val query: String,
+    val response: ApiResponse<List<Place>>,
+)
 
 /**
  * Repository for data related to routes
@@ -51,6 +58,9 @@ class RouteRepository @Inject constructor(
     private val _placeFlow: MutableStateFlow<ApiResponse<List<Place>>> =
         MutableStateFlow(ApiResponse.Pending)
 
+    private val _placeSearchStateFlow: MutableStateFlow<PlaceSearchState> =
+        MutableStateFlow(PlaceSearchState(query = "", response = ApiResponse.Success(emptyList())))
+
     private val _lastRouteFlow: MutableStateFlow<ApiResponse<RouteOptions>> =
         MutableStateFlow(ApiResponse.Pending)
 
@@ -59,6 +69,9 @@ class RouteRepository @Inject constructor(
 
     private val _libraryFlow: MutableStateFlow<ApiResponse<List<Library>>> =
         MutableStateFlow(ApiResponse.Pending)
+
+    // Monotonic token used to ensure only the latest search request updates placeFlow.
+    private val latestSearchToken = AtomicLong(0L)
 
     init {
         fetchAllStops()
@@ -82,6 +95,11 @@ class RouteRepository @Inject constructor(
      * A StateFlow holding the last queried location
      */
     val placeFlow = _placeFlow.asStateFlow()
+
+    /**
+     * A StateFlow holding the last queried location tagged by query.
+     */
+    val placeSearchStateFlow = _placeSearchStateFlow.asStateFlow()
 
     /**
      * A StateFlow holding the list of all printers
@@ -142,15 +160,47 @@ class RouteRepository @Inject constructor(
      * Makes a new call to places related to a query string.
      */
     fun makeSearch(query: String) {
-        _placeFlow.value = ApiResponse.Pending
+        val normalizedQuery = query.trim()
+        val token = latestSearchToken.incrementAndGet()
+
+        if (normalizedQuery.isBlank()) {
+            if (token == latestSearchToken.get()) {
+                _placeFlow.value = ApiResponse.Success(emptyList())
+                _placeSearchStateFlow.value =
+                    PlaceSearchState(query = "", response = ApiResponse.Success(emptyList()))
+            }
+            return
+        }
+
+        _placeSearchStateFlow.value = PlaceSearchState(
+            query = normalizedQuery,
+            response = ApiResponse.Pending
+        )
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val placeResponse = appleSearch(SearchQuery(query))
+                if(token == latestSearchToken.get()){
+                    _placeFlow.value = ApiResponse.Pending
+                }
+                val placeResponse = appleSearch(SearchQuery(normalizedQuery))
                 val res = placeResponse.unwrap()
                 val totalLocations = (res.places ?: emptyList()) + (res.stops ?: (emptyList()))
-                _placeFlow.value = ApiResponse.Success(totalLocations)
+                if (token == latestSearchToken.get()) {
+                    _placeFlow.value = ApiResponse.Success(totalLocations)
+                    _placeSearchStateFlow.value = PlaceSearchState(
+                        query = normalizedQuery,
+                        response = ApiResponse.Success(totalLocations)
+                    )
+                }
+            } catch (_: CancellationException) {
+                // Ignore cancellation; latest query owns the flow update.
             } catch (e: Exception) {
-                _placeFlow.value = ApiResponse.Error
+                if (token == latestSearchToken.get()) {
+                    _placeFlow.value = ApiResponse.Error
+                    _placeSearchStateFlow.value = PlaceSearchState(
+                        query = normalizedQuery,
+                        response = ApiResponse.Error
+                    )
+                }
             }
         }
     }
@@ -192,5 +242,4 @@ class RouteRepository @Inject constructor(
             }
         }
     }
-
 }

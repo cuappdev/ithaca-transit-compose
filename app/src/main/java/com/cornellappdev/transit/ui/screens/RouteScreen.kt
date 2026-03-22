@@ -109,6 +109,9 @@ fun RouteScreen(
             skipHalfExpanded = true,
             confirmValueChange = {
                 keyboardController?.hide()
+                if (it == ModalBottomSheetValue.Hidden) {
+                    routeViewModel.onQueryChange("")
+                }
                 true
             }
         )
@@ -119,6 +122,9 @@ fun RouteScreen(
             skipHalfExpanded = true,
             confirmValueChange = {
                 keyboardController?.hide()
+                if (it == ModalBottomSheetValue.Hidden) {
+                    routeViewModel.onQueryChange("")
+                }
                 true
             }
         )
@@ -814,6 +820,7 @@ private fun RouteOptionsSearchSheet(
                                 type = it.type,
                                 label = it.name,
                                 sublabel = it.subLabel,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                                 onClick = {
                                     if (isStart) {
                                         routeViewModel.setStartPlace(
@@ -847,6 +854,7 @@ private fun RouteOptionsSearchSheet(
                                 type = it.type,
                                 label = it.name,
                                 sublabel = it.subLabel,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                                 onClick = {
                                     if (isStart) {
                                         routeViewModel.setStartPlace(

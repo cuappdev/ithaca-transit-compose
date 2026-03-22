@@ -41,6 +41,15 @@ object StringUtils {
         return "%.1f".format(this.toDouble() / 1609.34)
     }
 
+    fun String.fromMetersToFeet(): String {
+        val meters = this.toDoubleOrNull() ?: return this
+        return if (meters > 160) {
+            "${this.fromMetersToMiles()} mi"
+        } else {
+            "${(meters * METERS_TO_FEET).toInt()} ft"
+        }
+    }
+
     /**
      * Creates an annotated string link with an arrow and an optional icon.
      *

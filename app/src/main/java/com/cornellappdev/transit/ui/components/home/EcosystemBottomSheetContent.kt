@@ -43,6 +43,7 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.EcosystemFavoritesUiState
 import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
 import com.cornellappdev.transit.ui.viewmodels.FilterState
+import com.cornellappdev.transit.util.TimeUtils.getOpenStatus
 import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
 import com.cornellappdev.transit.util.ecosystem.capacityPercentAnnotatedString
 import com.cornellappdev.transit.ui.viewmodels.PrinterCardUiState
@@ -83,6 +84,8 @@ fun EcosystemBottomSheetContent(
     onRemoveAppliedFilter: (FavoritesFilterSheetState) -> Unit,
     operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
     distanceStringToPlace: (Double?, Double?) -> String,
+    sanitizeLibraryAddress: (String) -> String,
+    printerToCardUiState: (Printer) -> PrinterCardUiState,
 ) {
     Column(modifier = modifier) {
         Row(
@@ -129,7 +132,9 @@ fun EcosystemBottomSheetContent(
             appliedFilters = appliedFilters,
             onRemoveAppliedFilter = onRemoveAppliedFilter,
             operatingHoursToString = operatingHoursToString,
-            distanceStringToPlace = distanceStringToPlace
+            distanceStringToPlace = distanceStringToPlace,
+            sanitizeLibraryAddress = sanitizeLibraryAddress,
+            printerToCardUiState = printerToCardUiState
         )
     }
 
@@ -164,6 +169,8 @@ private fun BottomSheetFilteredContent(
     onRemoveAppliedFilter: (FavoritesFilterSheetState) -> Unit,
     operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
     distanceStringToPlace: (Double?, Double?) -> String,
+    sanitizeLibraryAddress: (String) -> String,
+    printerToCardUiState: (Printer) -> PrinterCardUiState,
 ) {
     Column {
         if (currentFilter == FilterState.FAVORITES) {
@@ -209,7 +216,8 @@ private fun BottomSheetFilteredContent(
                             onDetailsClick = onDetailsClick,
                             operatingHoursToString = operatingHoursToString,
                             capacityToString = ::capacityPercentAnnotatedString,
-                            distanceStringToPlace = distanceStringToPlace
+                            distanceStringToPlace = distanceStringToPlace,
+                            sanitizeLibraryAddress = sanitizeLibraryAddress
                         )
                     }
 
@@ -219,7 +227,8 @@ private fun BottomSheetFilteredContent(
                             navigateToPlace = navigateToPlace,
                             favorites = favorites,
                             onFavoriteStarClick = onFavoriteStarClick,
-                            distanceStringToPlace = distanceStringToPlace
+                            distanceStringToPlace = distanceStringToPlace,
+                            printerToCardUiState = printerToCardUiState
                         )
                     }
 
@@ -249,11 +258,11 @@ private fun BottomSheetFilteredContent(
                     FilterState.LIBRARIES -> {
                         libraryList(
                             staticPlaces,
-                            navigateToPlace,
                             onDetailsClick,
                             favorites,
                             onFavoriteStarClick,
                             distanceStringToPlace,
+                            sanitizeLibraryAddress,
                         )
                     }
                 }
@@ -278,7 +287,8 @@ private fun LazyListScope.favoriteList(
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
     capacityToString: (UpliftCapacity?) -> AnnotatedString,
-    distanceStringToPlace: (Double?, Double?) -> String
+    distanceStringToPlace: (Double?, Double?) -> String,
+    sanitizeLibraryAddress: (String) -> String,
 ) {
     item {
         Spacer(modifier = Modifier.height(8.dp))
@@ -296,10 +306,7 @@ private fun LazyListScope.favoriteList(
                     RoundedImagePlaceCard(
                         title = matchingEatery.name,
                         subtitle = (matchingEatery.location
-                            ?: "") + distanceStringToPlace(
-                            matchingEatery.latitude,
-                            matchingEatery.longitude
-                        ),
+                            ?: "") + distanceStringToPlace(matchingEatery.latitude, matchingEatery.longitude),
                         isFavorite = true,
                         onFavoriteClick = { onFavoriteStarClick(place) },
                         leftAnnotatedString = operatingHoursToString(
@@ -323,10 +330,8 @@ private fun LazyListScope.favoriteList(
                 if (matchingLibrary != null) {
                     RoundedImagePlaceCard(
                         title = matchingLibrary.location,
-                        subtitle = matchingLibrary.address + distanceStringToPlace(
-                            matchingLibrary.latitude,
-                            matchingLibrary.longitude
-                        ),
+                        subtitle = sanitizeLibraryAddress(matchingLibrary.address) +
+                            distanceStringToPlace(matchingLibrary.latitude, matchingLibrary.longitude),
                         isFavorite = true,
                         onFavoriteClick = { onFavoriteStarClick(place) }
                     ) {
@@ -345,12 +350,11 @@ private fun LazyListScope.favoriteList(
             PlaceType.GYM -> {
                 val matchingGym = gymByPlace[place]
                 if (matchingGym != null) {
+                    val isGymOpen = getOpenStatus(matchingGym.operatingHours()).isOpen
                     RoundedImagePlaceCard(
                         title = matchingGym.name,
-                        subtitle = getGymLocationString(matchingGym.name) + distanceStringToPlace(
-                            matchingGym.latitude,
-                            matchingGym.longitude
-                        ),
+                        subtitle = getGymLocationString(matchingGym.name) +
+                            distanceStringToPlace(matchingGym.latitude, matchingGym.longitude),
                         isFavorite = true,
                         onFavoriteClick = {
                             onFavoriteStarClick(place)
@@ -358,9 +362,11 @@ private fun LazyListScope.favoriteList(
                         leftAnnotatedString = operatingHoursToString(
                             matchingGym.operatingHours()
                         ),
-                        rightAnnotatedString = capacityToString(
-                            matchingGym.upliftCapacity
-                        ),
+                        rightAnnotatedString = if (isGymOpen) {
+                            capacityToString(matchingGym.upliftCapacity)
+                        } else {
+                            null
+                        },
                     ) {
                         onDetailsClick(matchingGym)
                     }
@@ -379,10 +385,8 @@ private fun LazyListScope.favoriteList(
                 if (matchingPrinter != null) {
                     PrinterCard(
                         title = matchingPrinter.title,
-                        subtitle = matchingPrinter.subtitle + distanceStringToPlace(
-                            place.latitude,
-                            place.longitude
-                        ),
+                        subtitle = matchingPrinter.subtitle +
+                            distanceStringToPlace(place.latitude, place.longitude),
                         inColor = matchingPrinter.inColor,
                         hasCopy = matchingPrinter.hasCopy,
                         hasScan = matchingPrinter.hasScan,
@@ -430,6 +434,7 @@ private fun LazyListScope.gymList(
 ) {
     when (gymsApiResponse) {
         is ApiResponse.Error -> {
+            infoItem("Unable to load gyms")
         }
 
         is ApiResponse.Pending -> {
@@ -439,14 +444,18 @@ private fun LazyListScope.gymList(
         }
 
         is ApiResponse.Success -> {
+            if (gymsApiResponse.data.isEmpty()) {
+                infoItem("No gyms available")
+                return
+            }
+
             items(gymsApiResponse.data) {
+                val isGymOpen = getOpenStatus(it.operatingHours()).isOpen
                 RoundedImagePlaceCard(
                     imageUrl = it.imageUrl,
                     title = it.name,
-                    subtitle = getGymLocationString(it.name) + distanceStringToPlace(
-                        it.latitude,
-                        it.longitude
-                    ),
+                    subtitle = getGymLocationString(it.name) +
+                        distanceStringToPlace(it.latitude, it.longitude),
                     isFavorite = it.toPlace() in favorites,
                     onFavoriteClick = {
                         onFavoriteStarClick(it.toPlace())
@@ -454,9 +463,11 @@ private fun LazyListScope.gymList(
                     leftAnnotatedString = operatingHoursToString(
                         it.operatingHours()
                     ),
-                    rightAnnotatedString = capacityToString(
-                        it.upliftCapacity
-                    ),
+                    rightAnnotatedString = if (isGymOpen) {
+                        capacityToString(it.upliftCapacity)
+                    } else {
+                        null
+                    },
                     placeholderRes = R.drawable.olin_library,
                 ) {
                     onDetailsClick(it)
@@ -475,33 +486,36 @@ private fun LazyListScope.printerList(
     favorites: Set<Place>,
     onFavoriteStarClick: (Place) -> Unit,
     distanceStringToPlace: (Double?, Double?) -> String,
+    printerToCardUiState: (Printer) -> PrinterCardUiState,
 ) {
     when (staticPlaces.printers) {
         is ApiResponse.Error -> {
+            infoItem("Unable to load printers")
         }
 
         is ApiResponse.Pending -> {
+            item {
+                CenteredSpinningIndicator()
+            }
         }
 
         is ApiResponse.Success -> {
+            if (staticPlaces.printers.data.isEmpty()) {
+                infoItem("No printers available")
+                return
+            }
+
             items(staticPlaces.printers.data) {
                 val place = it.toPlace()
-                val alert = if (it.location.contains("*")) {
-                    it.location.substringAfter("*").trim('*').trim()
-                } else {
-                    ""
-                }
+                val printerUi = printerToCardUiState(it)
 
                 PrinterCard(
-                    title = it.location.substringBefore("*").trim(),
-                    subtitle = it.description.substringAfter("-").trim() + distanceStringToPlace(
-                        it.latitude,
-                        it.longitude
-                    ),
-                    inColor = it.description.contains("Color", ignoreCase = true),
-                    hasCopy = it.description.contains("Copy", ignoreCase = true),
-                    hasScan = it.description.contains("Scan", ignoreCase = true),
-                    alertMessage = alert,
+                    title = printerUi.title,
+                    subtitle = printerUi.subtitle + distanceStringToPlace(it.latitude, it.longitude),
+                    inColor = printerUi.inColor,
+                    hasCopy = printerUi.hasCopy,
+                    hasScan = printerUi.hasScan,
+                    alertMessage = printerUi.alertMessage,
                     isFavorite = place in favorites,
                     onFavoriteClick = {
                         onFavoriteStarClick(place)
@@ -529,6 +543,7 @@ private fun LazyListScope.eateryList(
 ) {
     when (eateriesApiResponse) {
         is ApiResponse.Error -> {
+            infoItem("Unable to load eateries")
         }
 
         is ApiResponse.Pending -> {
@@ -538,6 +553,11 @@ private fun LazyListScope.eateryList(
         }
 
         is ApiResponse.Success -> {
+            if (eateriesApiResponse.data.isEmpty()) {
+                infoItem("No eateries available")
+                return
+            }
+
             items(eateriesApiResponse.data) {
                 RoundedImagePlaceCard(
                     imageUrl = it.imageUrl,
@@ -565,25 +585,35 @@ private fun LazyListScope.eateryList(
  */
 private fun LazyListScope.libraryList(
     staticPlaces: StaticPlaces,
-    navigateToPlace: (Place) -> Unit,
     navigateToDetails: (DetailedEcosystemPlace) -> Unit,
     favorites: Set<Place>,
     onFavoriteStarClick: (Place) -> Unit,
     distanceStringToPlace: (Double?, Double?) -> String,
+    sanitizeLibraryAddress: (String) -> String,
 ) {
     when (staticPlaces.libraries) {
         is ApiResponse.Error -> {
+            infoItem("Unable to load libraries")
         }
 
         is ApiResponse.Pending -> {
+            item {
+                CenteredSpinningIndicator()
+            }
         }
 
         is ApiResponse.Success -> {
+            if (staticPlaces.libraries.data.isEmpty()) {
+                infoItem("No libraries available")
+                return
+            }
+
             items(staticPlaces.libraries.data) {
                 RoundedImagePlaceCard(
                     placeholderRes = R.drawable.olin_library,
                     title = it.location,
-                    subtitle = it.address + distanceStringToPlace(it.latitude, it.longitude),
+                    subtitle = sanitizeLibraryAddress(it.address) +
+                        distanceStringToPlace(it.latitude, it.longitude),
                     isFavorite = it.toPlace() in favorites,
                     onFavoriteClick = {
                         onFavoriteStarClick(it.toPlace())
@@ -596,6 +626,19 @@ private fun LazyListScope.libraryList(
     }
 }
 
+private fun LazyListScope.infoItem(message: String) {
+    item {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(text = message)
+        }
+    }
+}
+
 @Composable
 private fun StandardCard(
     place: Place,
@@ -603,8 +646,7 @@ private fun StandardCard(
     navigateToPlace: (Place) -> Unit,
     distanceStringToPlace: (Double?, Double?) -> String,
 ) {
-    val distance = distanceStringToPlace(place.latitude, place.longitude)
-    val subtitle = if (distance.isBlank()) place.subLabel else "${place.subLabel}$distance"
+    val subtitle = place.subLabel + distanceStringToPlace(place.latitude, place.longitude)
 
     BottomSheetLocationCard(
         title = place.name,
@@ -658,7 +700,18 @@ private fun PreviewEcosystemBottomSheet() {
         onFilterToggle = {},
         onRemoveAppliedFilter = {},
         operatingHoursToString = { _ -> AnnotatedString("") },
-        distanceStringToPlace = { _, _ -> "" }
+        distanceStringToPlace = { _, _ -> "" },
+        sanitizeLibraryAddress = { it },
+        printerToCardUiState = { _ ->
+            PrinterCardUiState(
+                title = "",
+                subtitle = "",
+                inColor = false,
+                hasCopy = false,
+                hasScan = false,
+                alertMessage = ""
+            )
+        }
     )
 }
 
@@ -819,9 +872,17 @@ private fun PreviewBottomSheetFilteredContentFavorites() {
         ),
         onRemoveAppliedFilter = {},
         operatingHoursToString = { _ -> AnnotatedString("Open • 10am - 4pm") },
-        distanceStringToPlace = { _, _ -> "distance" }
+        distanceStringToPlace = { _, _ -> "distance" },
+        sanitizeLibraryAddress = { it },
+        printerToCardUiState = { _ ->
+            PrinterCardUiState(
+                title = "",
+                subtitle = "",
+                inColor = false,
+                hasCopy = false,
+                hasScan = false,
+                alertMessage = ""
+            )
+        }
     )
 }
-
-
-

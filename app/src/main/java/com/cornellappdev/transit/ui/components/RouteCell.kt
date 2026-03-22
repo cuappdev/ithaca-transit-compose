@@ -41,7 +41,6 @@ import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.google.android.gms.maps.model.LatLng
-import java.util.Locale
 
 /**
  * Composable function to display a route cell with transport details.
@@ -254,7 +253,7 @@ fun SingleRoute(
                 )
                 if (walkOnly && distance != null) {
                     Text(
-                        "${String.format(Locale.US, "%.1f", distance.toFloat())} mi away",
+                        distance,
                         color = MetadataGray,
                         fontFamily = robotoFamily,
                         fontSize = 10.sp,
@@ -303,7 +302,7 @@ fun SingleRoute(
 
         if (distance != null && !walkOnly) {
             Text(
-                "${String.format(Locale.US, "%.1f", distance.toFloat())} mi away",
+                distance,
                 color = MetadataGray,
                 fontFamily = robotoFamily,
                 fontSize = 10.sp,

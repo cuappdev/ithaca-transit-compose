@@ -10,6 +10,7 @@ import com.cornellappdev.transit.models.RouteRepository
 import com.cornellappdev.transit.models.SelectedRouteRepository
 import com.cornellappdev.transit.models.ecosystem.StaticPlaces
 import com.cornellappdev.transit.models.UserPreferenceRepository
+import com.cornellappdev.transit.models.search.UnifiedSearchRepository
 import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.models.ecosystem.EateryRepository
 import com.cornellappdev.transit.models.ecosystem.GymRepository
@@ -17,7 +18,7 @@ import com.cornellappdev.transit.models.ecosystem.Library
 import com.cornellappdev.transit.models.ecosystem.Printer
 import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
-import com.cornellappdev.transit.util.StringUtils.fromMetersToMiles
+import com.cornellappdev.transit.util.StringUtils.fromMetersToFeet
 import com.cornellappdev.transit.util.calculateDistance
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,13 +29,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import java.util.Locale
 
 /**
  * ViewModel handling home screen UI state and search functionality
@@ -45,6 +47,7 @@ class HomeViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
     private val eateryRepository: EateryRepository,
     private val gymRepository: GymRepository,
+    private val unifiedSearchRepository: UnifiedSearchRepository,
     private val userPreferenceRepository: UserPreferenceRepository,
     private val selectedRouteRepository: SelectedRouteRepository
 ) : ViewModel() {
@@ -52,12 +55,8 @@ class HomeViewModel @Inject constructor(
     /**
      * The current query in the add favorites search bar, as a StateFlow
      */
-    val addSearchQuery: MutableStateFlow<String> = MutableStateFlow("")
-
-    /**
-     * The list of queried places retrieved from the route repository, as a StateFlow.
-     */
-    val placeQueryFlow: StateFlow<ApiResponse<List<Place>>> = routeRepository.placeFlow
+    private val _addSearchQuery: MutableStateFlow<String> = MutableStateFlow("")
+    val addSearchQuery: StateFlow<String> = _addSearchQuery.asStateFlow()
 
     /**
      * The current UI state of the search bar, as a MutableStateFlow
@@ -79,7 +78,9 @@ class HomeViewModel @Inject constructor(
         FilterState.PRINTERS
     )
 
-    val filterState: MutableStateFlow<FilterState> = MutableStateFlow(FilterState.FAVORITES)
+    private val _filterState: MutableStateFlow<FilterState> =
+        MutableStateFlow(FilterState.FAVORITES)
+    val filterState: StateFlow<FilterState> = _filterState.asStateFlow()
 
     private val _showFilterSheet = MutableStateFlow(false)
     val showFilterSheet: StateFlow<Boolean> = _showFilterSheet.asStateFlow()
@@ -112,8 +113,38 @@ class HomeViewModel @Inject constructor(
             )
         )
 
+    private val homeQueryFlow: StateFlow<String> = searchBarUiState
+        .map { state ->
+            when (state) {
+                is SearchBarUIState.Query -> state.queryText
+                is SearchBarUIState.RecentAndFavorites -> ""
+            }
+        }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ""
+        )
+
+    private val mergedHomeSearchResultsFlow: StateFlow<ApiResponse<List<Place>>> =
+        unifiedSearchRepository.mergedSearchResults(homeQueryFlow)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = ApiResponse.Success(emptyList())
+            )
+
     private val _showAddFavoritesSheet = MutableStateFlow(false)
     val showAddFavoritesSheet: StateFlow<Boolean> = _showAddFavoritesSheet.asStateFlow()
+
+    val addSearchResultsFlow: StateFlow<ApiResponse<List<Place>>> =
+        unifiedSearchRepository.mergedSearchResults(_addSearchQuery)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = ApiResponse.Success(emptyList())
+            )
 
     fun toggleAddFavoritesSheet(show: Boolean) {
         _showAddFavoritesSheet.value = show
@@ -221,27 +252,29 @@ class HomeViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
 
-        routeRepository.placeFlow.onEach {
-            if (_searchBarUiState.value is SearchBarUIState.Query) {
-                _searchBarUiState.value =
-                    (_searchBarUiState.value as SearchBarUIState.Query).copy(
-                        searched = it
-                    )
+        combine(homeQueryFlow, mergedHomeSearchResultsFlow) { query, mergedResults ->
+            query to mergedResults
+        }.onEach { (query, mergedResults) ->
+            val currentState = _searchBarUiState.value
+            if (currentState is SearchBarUIState.Query && currentState.queryText == query) {
+                _searchBarUiState.value = currentState.copy(searched = mergedResults)
             }
         }.launchIn(viewModelScope)
 
-        searchBarUiState
+        homeQueryFlow
             .debounce(300L)
-            .filterIsInstance<SearchBarUIState.Query>()
-            .map { it.queryText }
-            .distinctUntilChanged()
+            .filter { it.isNotBlank() }
             .onEach {
                 routeRepository.makeSearch(it)
             }.launchIn(viewModelScope)
 
-        addSearchQuery.debounce(300L).distinctUntilChanged().onEach {
-            routeRepository.makeSearch(it)
-        }.launchIn(viewModelScope)
+        _addSearchQuery.debounce(300L)
+            .map { it.trim() }
+            .distinctUntilChanged()
+            .filter { it.isNotEmpty() }
+            .onEach {
+                routeRepository.makeSearch(it)
+            }.launchIn(viewModelScope)
     }
 
     /**
@@ -271,7 +304,7 @@ class HomeViewModel @Inject constructor(
      * Change the query in the add favorites search bar and update search results
      */
     fun onAddQueryChange(query: String) {
-        addSearchQuery.value = query
+        _addSearchQuery.value = query
     }
 
     /**
@@ -374,7 +407,7 @@ class HomeViewModel @Inject constructor(
      * Set the filter selected on the bottom sheet for categories of places
      */
     fun setCategoryFilter(filterState: FilterState) {
-        this.filterState.value = filterState
+        _filterState.value = filterState
     }
 
     /**
@@ -383,17 +416,36 @@ class HomeViewModel @Inject constructor(
     fun distanceStringIfCurrentLocationExists(latitude: Double?, longitude: Double?): String {
         val currentLocationSnapshot = currentLocation.value
         if (currentLocationSnapshot != null && latitude != null && longitude != null) {
-            return " - " +
-                    calculateDistance(
-                        LatLng(
-                            currentLocationSnapshot.latitude,
-                            currentLocationSnapshot.longitude
-                        ), LatLng(latitude, longitude)
-                    ).toString().fromMetersToMiles() + " mi"
-
+            val distanceInMeters = calculateDistance(
+                LatLng(
+                    currentLocationSnapshot.latitude,
+                    currentLocationSnapshot.longitude
+                ), LatLng(latitude, longitude)
+            ).toString()
+            return " - ${distanceInMeters.fromMetersToFeet()}"
         }
         return ""
     }
+
+    /**
+     * Returns distance text with a loading placeholder when current location is not ready.
+     */
+    fun distanceTextOrPlaceholder(latitude: Double?, longitude: Double?): String {
+        val distanceText = distanceStringIfCurrentLocationExists(latitude, longitude)
+        return if (distanceText.isBlank()) " - Calculating Distance..." else distanceText
+    }
+
+    /**
+     * Keeps only the first segment of a library address (text before the first comma).
+     */
+    fun sanitizeLibraryAddress(address: String): String {
+        return address.substringBefore(",").trim()
+    }
+
+    /**
+     * Maps raw printer fields to UI-ready fields for card rendering.
+     */
+    fun printerToCardUiState(printer: Printer): PrinterCardUiState = printer.toPrinterCardUiState()
 }
 
 /**
@@ -419,16 +471,40 @@ data class PrinterCardUiState(
     val alertMessage: String
 )
 
+//Hard-coded way to handle closed for construction message, change when backend is updated
+val PRINTER_CONSTRUCTION_ALERT = "CLOSED FOR CONSTRUCTION"
+val PRINTER_CONSTRUCTION_REGEX = Regex("""\bCLOSED\s+FOR\s+CONSTRUCTION\b""", RegexOption.IGNORE_CASE)
 private fun Printer.toPrinterCardUiState(): PrinterCardUiState {
-    val alertMessage = location.substringAfter("*", "").trim('*').trim()
+    val hasConstructionAlert = PRINTER_CONSTRUCTION_REGEX.containsMatchIn(location)
+
+    val rawTitle = location.substringBefore("*").trim()
+    val title = rawTitle
+        .replace(PRINTER_CONSTRUCTION_REGEX, "")
+        .replace(Regex("""\s{2,}"""), " ")
+        .trim(' ', '-', ',', ';', ':')
+
+    val starAlertMessage = location.substringAfter("*", "").trim('*').trim()
+    val alertMessage = if (hasConstructionAlert) PRINTER_CONSTRUCTION_ALERT else starAlertMessage
+
     return PrinterCardUiState(
-        title = location.substringBefore("*").trim(),
-        subtitle = description.substringAfter("-", description).trim(),
+        title = title,
+        subtitle = description.substringAfter("-", description).trim().toTitleCaseWords(),
         inColor = description.contains("Color", ignoreCase = true),
         hasCopy = description.contains("Copy", ignoreCase = true),
         hasScan = description.contains("Scan", ignoreCase = true),
         alertMessage = alertMessage
     )
+}
+
+private fun String.toTitleCaseWords(): String {
+    return split(Regex("""\s+"""))
+        .filter { it.isNotBlank() }
+        .joinToString(" ") { word ->
+            word.lowercase(Locale.getDefault())
+                .replaceFirstChar { char ->
+                    if (char.isLowerCase()) char.titlecase(Locale.getDefault()) else char.toString()
+                }
+        }
 }
 
 private fun Set<FavoritesFilterSheetState>.toAllowedPlaceTypes(): Set<PlaceType> = buildSet {
