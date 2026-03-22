@@ -4,7 +4,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.ToJson
-import java.text.ParseException
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -36,13 +35,16 @@ class DateTimeAdapter {
     }
 
     @FromJson
-    fun fromJson(dateTime: Long): LocalDateTime {
-        try {
-            val instant = Instant.ofEpochSecond(dateTime)
-            return LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
-        } catch (e: Exception) {
-            e.printStackTrace()
+    fun fromJson(dateTime: String): LocalDateTime {
+        return try {
+            val instant = Instant.parse(dateTime)
+            LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+        } catch (_: Exception) {
+            try {
+                LocalDateTime.parse(dateTime)
+            } catch (_: Exception) {
+                LocalDateTime.MIN
+            }
         }
-        return LocalDateTime.MIN
     }
 }

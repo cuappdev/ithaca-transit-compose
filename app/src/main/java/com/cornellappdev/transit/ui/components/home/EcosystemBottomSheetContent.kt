@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
@@ -83,6 +85,7 @@ fun EcosystemBottomSheetContent(
     onRemoveAppliedFilter: (FavoritesFilterSheetState) -> Unit,
     operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
     distanceStringToPlace: (Double?, Double?) -> String,
+    listState: LazyListState,
 ) {
     Column(modifier = modifier) {
         Row(
@@ -129,7 +132,8 @@ fun EcosystemBottomSheetContent(
             appliedFilters = appliedFilters,
             onRemoveAppliedFilter = onRemoveAppliedFilter,
             operatingHoursToString = operatingHoursToString,
-            distanceStringToPlace = distanceStringToPlace
+            distanceStringToPlace = distanceStringToPlace,
+            listState = listState
         )
     }
 
@@ -164,6 +168,7 @@ private fun BottomSheetFilteredContent(
     onRemoveAppliedFilter: (FavoritesFilterSheetState) -> Unit,
     operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
     distanceStringToPlace: (Double?, Double?) -> String,
+    listState: LazyListState,
 ) {
     Column {
         if (currentFilter == FilterState.FAVORITES) {
@@ -185,6 +190,7 @@ private fun BottomSheetFilteredContent(
         val isFilterBarHidden = currentFilter == FilterState.FAVORITES && appliedFilters.isEmpty()
         key(currentFilter, appliedFilters) {
             LazyColumn(
+                state = listState,
                 contentPadding = PaddingValues(
                     start = 12.dp,
                     end = 12.dp,
@@ -658,7 +664,8 @@ private fun PreviewEcosystemBottomSheet() {
         onFilterToggle = {},
         onRemoveAppliedFilter = {},
         operatingHoursToString = { _ -> AnnotatedString("") },
-        distanceStringToPlace = { _, _ -> "" }
+        distanceStringToPlace = { _, _ -> "" },
+        listState = rememberLazyListState()
     )
 }
 
@@ -667,17 +674,24 @@ private fun PreviewEcosystemBottomSheet() {
 private fun PreviewBottomSheetFilteredContentFavorites() {
     val mockEatery = Eatery(
         id = 1,
+        cornellId = 1,
+        announcements = emptyList(),
         name = "Trillium",
+        shortName = "Trillium",
+        about = "A central campus cafe with coffee, pastries, and sandwiches.",
+        shortAbout = null,
+        cornellDining = true,
         menuSummary = "Coffee, pastries, sandwiches",
         imageUrl = null,
         location = "Kennedy Hall",
         campusArea = "Central Campus",
         onlineOrderUrl = null,
+        contactPhone = null,
+        contactEmail = null,
         latitude = 42.4488,
         longitude = -76.4813,
-        paymentAcceptsMealSwipes = true,
-        paymentAcceptsBrbs = true,
-        paymentAcceptsCash = true,
+        paymentMethods = listOf("SWIPE", "BRB", "CASH"),
+        eateryTypes = listOf("CAFE"),
         events = null
     )
 
@@ -819,7 +833,8 @@ private fun PreviewBottomSheetFilteredContentFavorites() {
         ),
         onRemoveAppliedFilter = {},
         operatingHoursToString = { _ -> AnnotatedString("Open • 10am - 4pm") },
-        distanceStringToPlace = { _, _ -> "distance" }
+        distanceStringToPlace = { _, _ -> "distance" },
+        listState = rememberLazyListState()
     )
 }
 

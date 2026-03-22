@@ -579,6 +579,12 @@ private fun RouteList(
     onClick: (Route) -> Unit,
     onRefresh: () -> Unit,
 ) {
+    fun hasNoRoutes(options: RouteOptions): Boolean {
+        return options.fromStop.isNullOrEmpty() &&
+            options.boardingSoon.isNullOrEmpty() &&
+            options.walking.isNullOrEmpty()
+    }
+
     TransitPullToRefreshBox(
         isRefreshing = lastRouteResponse is ApiResponse.Pending,
         onRefresh = onRefresh
@@ -593,13 +599,22 @@ private fun RouteList(
                     item {
                         Spacer(modifier = Modifier.height(80.dp))
                         Text(
-                            text = "No Routes Found",
+                            text = "Unable to load routes",
                             fontFamily = robotoFamily,
                             fontWeight = FontWeight.Normal,
                             color = MetadataGray,
                             fontSize = 24.sp,
                             modifier = Modifier
                                 .padding(12.dp)
+                                .fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = "Check your connection and pull to refresh.",
+                            style = Style.heading4,
+                            color = MetadataGray,
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
                                 .fillMaxWidth(),
                             textAlign = TextAlign.Center
                         )
@@ -612,6 +627,31 @@ private fun RouteList(
                 }
 
                 is ApiResponse.Success -> {
+                    if (hasNoRoutes(lastRouteResponse.data)) {
+                        item {
+                            Spacer(modifier = Modifier.height(80.dp))
+                            Text(
+                                text = "No Routes Found",
+                                fontFamily = robotoFamily,
+                                fontWeight = FontWeight.Normal,
+                                color = MetadataGray,
+                                fontSize = 24.sp,
+                                modifier = Modifier
+                                    .padding(12.dp)
+                                    .fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "Try a nearby stop, different time, or switch Arrive By/Leave At.",
+                                style = Style.heading4,
+                                color = MetadataGray,
+                                modifier = Modifier
+                                    .padding(horizontal = 12.dp)
+                                    .fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
                     lastRouteResponse.data.fromStop?.let {
                         items(it) { item ->
                             PaddedRouteCell(item.toTransport()) {

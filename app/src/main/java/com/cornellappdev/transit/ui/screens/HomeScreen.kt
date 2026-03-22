@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
@@ -71,6 +73,7 @@ import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.viewmodels.EcosystemSheetState
 import com.cornellappdev.transit.ui.viewmodels.FavoritesViewModel
+import com.cornellappdev.transit.ui.viewmodels.FilterState
 import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.SearchBarUIState
 import com.cornellappdev.transit.util.BOTTOM_SHEET_MAX_HEIGHT_PERCENT
@@ -290,6 +293,20 @@ fun HomeScreen(
 
     // Favorites BottomSheet (Filters BottomSheet for ecosystem)
     if (ECOSYSTEM_FLAG) {
+        val favoritesListState = rememberLazyListState()
+        val gymsListState = rememberLazyListState()
+        val eateriesListState = rememberLazyListState()
+        val librariesListState = rememberLazyListState()
+        val printersListState = rememberLazyListState()
+
+        fun listStateFor(filter: FilterState): LazyListState = when (filter) {
+            FilterState.FAVORITES -> favoritesListState
+            FilterState.GYMS -> gymsListState
+            FilterState.EATERIES -> eateriesListState
+            FilterState.LIBRARIES -> librariesListState
+            FilterState.PRINTERS -> printersListState
+        }
+
         var ecosystemSheetState by remember {
             mutableStateOf<EcosystemSheetState>(
                 EcosystemSheetState.Tabs
@@ -333,7 +350,16 @@ fun HomeScreen(
                         EcosystemBottomSheetContent(
                             filters = homeViewModel.filterList,
                             activeFilter = filterStateValue,
-                            onFilterClick = homeViewModel::setCategoryFilter,
+                            onFilterClick = { selectedFilter ->
+                                if (selectedFilter == filterStateValue) {
+                                    return@EcosystemBottomSheetContent
+                                }
+
+                                homeViewModel.setCategoryFilter(selectedFilter)
+                                scope.launch {
+                                    listStateFor(selectedFilter).scrollToItem(0)
+                                }
+                            },
                             modifier = Modifier.onTapDisableSearch(),
                             staticPlaces = staticPlaces,
                             favorites = favorites,
@@ -359,7 +385,8 @@ fun HomeScreen(
                             onFilterToggle = homeViewModel::toggleFavoritesFilter,
                             onRemoveAppliedFilter = homeViewModel::removeAppliedFilter,
                             operatingHoursToString = ::isOpenAnnotatedStringFromOperatingHours,
-                            distanceStringToPlace = homeViewModel::distanceStringIfCurrentLocationExists
+                            distanceStringToPlace = homeViewModel::distanceStringIfCurrentLocationExists,
+                            listState = listStateFor(filterStateValue)
                         )
                     }
                 }
