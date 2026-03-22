@@ -32,8 +32,8 @@ data class Eatery(
     @Json(name = "contactEmail") var contactEmail: String? = null,
     @Json(name = "latitude") var latitude: Double? = null,
     @Json(name = "longitude") var longitude: Double? = null,
-    @Json(name = "paymentMethods") var paymentMethods: List<String>? = emptyList(),
-    @Json(name = "eateryTypes") var eateryTypes: List<String>? = emptyList(),
+    @Json(name = "paymentMethods") var paymentMethods: List<String> = emptyList(),
+    @Json(name = "eateryTypes") var eateryTypes: List<String> = emptyList(),
     @Json(name = "events") val events: List<Event>? = null
 ) : DetailedEcosystemPlace {
 
