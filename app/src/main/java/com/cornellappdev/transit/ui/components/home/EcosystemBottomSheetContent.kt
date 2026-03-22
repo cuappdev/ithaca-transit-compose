@@ -66,6 +66,7 @@ fun EcosystemBottomSheetContent(
     activeFilter: FilterState,
     onFilterClick: (FilterState) -> Unit,
     staticPlaces: StaticPlaces,
+    //TODO: Remove libraryCardsApiResponse once images are not hard-coded
     libraryCardsApiResponse: ApiResponse<List<LibraryCardUiState>>,
     favorites: Set<Place>,
     favoritesUiState: EcosystemFavoritesUiState,
@@ -574,7 +575,7 @@ private fun LazyListScope.eateryList(
 private fun LazyListScope.libraryList(
     libraryCardsApiResponse: ApiResponse<List<LibraryCardUiState>>,
     navigateToPlace: (Place) -> Unit,
-    navigateToDetails: (DetailedEcosystemPlace) -> Unit,
+    _navigateToDetails: (DetailedEcosystemPlace) -> Unit,
     favorites: Set<Place>,
     onFavoriteStarClick: (Place) -> Unit,
     distanceStringToPlace: (Double?, Double?) -> String,

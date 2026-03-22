@@ -53,11 +53,10 @@ class HomeViewModel @Inject constructor(
 
     val libraryCardsFlow: StateFlow<ApiResponse<List<LibraryCardUiState>>> =
         routeRepository.libraryFlow.map { response ->
-            when (response) {
+            when (val filteredResponse = response.withExcludedLibrariesRemoved()) {
                 is ApiResponse.Success -> {
                     ApiResponse.Success(
-                        response.data
-                            .filterNot { it.isExcludedLibrary() }
+                        filteredResponse.data
                             .map { it.toLibraryCardUiState() }
                     )
                 }
@@ -158,8 +157,17 @@ class HomeViewModel @Inject constructor(
     val appliedFavoritesFilters: StateFlow<Set<FavoritesFilterSheetState>> =
         _appliedFavoritesFilters.asStateFlow()
 
+    private val filteredFavoritesFlow: StateFlow<Set<Place>> =
+        userPreferenceRepository.favoritesFlow
+            .map { favorites -> favorites.filterNot { it.isExcludedLibraryPlace() }.toSet() }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = emptySet()
+            )
+
     val ecosystemFavoritesUiState: StateFlow<EcosystemFavoritesUiState> = combine(
-        userPreferenceRepository.favoritesFlow,
+        filteredFavoritesFlow,
         staticPlacesFlow,
         appliedFavoritesFilters
     ) { favorites, staticPlaces, appliedFilters ->
@@ -167,7 +175,6 @@ class HomeViewModel @Inject constructor(
 
         val filteredSortedFavorites = favorites.asSequence()
             .filter { allowedTypes.isEmpty() || it.type in allowedTypes }
-            .filterNot { it.isExcludedLibraryPlace() }
             .sortedWith(compareBy<Place>({ it.type.ordinal }, { it.name }))
             .toList()
 
@@ -227,7 +234,7 @@ class HomeViewModel @Inject constructor(
 
 
     init {
-        userPreferenceRepository.favoritesFlow.onEach {
+        filteredFavoritesFlow.onEach {
             if (_searchBarUiState.value is SearchBarUIState.RecentAndFavorites) {
                 _searchBarUiState.value =
                     (_searchBarUiState.value as SearchBarUIState.RecentAndFavorites).copy(
@@ -274,7 +281,7 @@ class HomeViewModel @Inject constructor(
     fun onQueryChange(query: String) {
         if (query == "") {
             _searchBarUiState.value = SearchBarUIState.RecentAndFavorites(
-                userPreferenceRepository.favoritesFlow.value,
+                filteredFavoritesFlow.value,
                 userPreferenceRepository.recentsFlow.value
             )
         } else {
