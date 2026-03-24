@@ -119,7 +119,7 @@ fun GymDetailsContent(
                 tint = Gray05
             )
             Text(
-                text = getGymLocationString(gym.name) ?: "",
+                text = getGymLocationString(gym.name),
                 style = Style.detailBody,
                 color = SecondaryText,
                 modifier = Modifier.padding(start = 15.dp)

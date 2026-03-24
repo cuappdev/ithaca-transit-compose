@@ -7,6 +7,7 @@ import com.cornellappdev.transit.networking.EcosystemNetworkApi
 import com.cornellappdev.transit.networking.RoutesNetworkApi
 import com.cornellappdev.transit.util.ECOSYSTEM_FLAG
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -165,7 +166,7 @@ class RouteRepository @Inject constructor(
      * @param arriveBy Whether the route must complete by a certain time
      * @param originName The name of the origin
      */
-    fun fetchRoute(
+    suspend fun fetchRoute(
         end: LatLng,
         time: Double,
         destinationName: String,
@@ -174,22 +175,23 @@ class RouteRepository @Inject constructor(
         originName: String
     ) {
         _lastRouteFlow.value = ApiResponse.Pending
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val routeResponse = getRoute(
-                    RouteRequest(
-                        end = "${end.latitude}, ${end.longitude}",
-                        time = time,
-                        destinationName = destinationName,
-                        start = "${start.latitude}, ${start.longitude}",
-                        arriveBy = arriveBy,
-                        originName = originName
-                    )
+        try {
+            val routeResponse = getRoute(
+                RouteRequest(
+                    end = "${end.latitude}, ${end.longitude}",
+                    time = time,
+                    destinationName = destinationName,
+                    start = "${start.latitude}, ${start.longitude}",
+                    arriveBy = arriveBy,
+                    originName = originName
                 )
-                _lastRouteFlow.value = ApiResponse.Success(routeResponse.unwrap())
-            } catch (e: Exception) {
-                _lastRouteFlow.value = ApiResponse.Error
-            }
+            )
+            _lastRouteFlow.value = ApiResponse.Success(routeResponse.unwrap())
+        } catch (e: CancellationException) {
+            // Latest-only callers cancel stale requests; do not publish error for cancellations.
+            throw e
+        } catch (e: Exception) {
+            _lastRouteFlow.value = ApiResponse.Error
         }
     }
 
