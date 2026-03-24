@@ -45,6 +45,7 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.EcosystemFavoritesUiState
 import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
 import com.cornellappdev.transit.ui.viewmodels.FilterState
+import com.cornellappdev.transit.ui.viewmodels.LibraryCardUiState
 import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
 import com.cornellappdev.transit.util.ecosystem.capacityPercentAnnotatedString
 import com.cornellappdev.transit.ui.viewmodels.PrinterCardUiState
@@ -67,6 +68,8 @@ fun EcosystemBottomSheetContent(
     activeFilter: FilterState,
     onFilterClick: (FilterState) -> Unit,
     staticPlaces: StaticPlaces,
+    //TODO: Remove libraryCardsApiResponse once images are not hard-coded
+    libraryCardsApiResponse: ApiResponse<List<LibraryCardUiState>>,
     favorites: Set<Place>,
     favoritesUiState: EcosystemFavoritesUiState,
     modifier: Modifier = Modifier,
@@ -122,6 +125,7 @@ fun EcosystemBottomSheetContent(
         BottomSheetFilteredContent(
             currentFilter = activeFilter,
             staticPlaces = staticPlaces,
+            libraryCardsApiResponse = libraryCardsApiResponse,
             favorites = favorites,
             favoritesUiState = favoritesUiState,
             navigateToPlace = navigateToPlace,
@@ -157,6 +161,7 @@ fun EcosystemBottomSheetContent(
 private fun BottomSheetFilteredContent(
     currentFilter: FilterState,
     staticPlaces: StaticPlaces,
+    libraryCardsApiResponse: ApiResponse<List<LibraryCardUiState>>,
     favorites: Set<Place>,
     favoritesUiState: EcosystemFavoritesUiState,
     navigateToPlace: (Place) -> Unit,
@@ -206,7 +211,7 @@ private fun BottomSheetFilteredContent(
                             favorites = favorites,
                             filteredFavorites = favoritesUiState.filteredSortedFavorites,
                             eateryByPlace = favoritesUiState.eateryByPlace,
-                            libraryByPlace = favoritesUiState.libraryByPlace,
+                            libraryCardByPlace = favoritesUiState.libraryCardByPlace,
                             gymByPlace = favoritesUiState.gymByPlace,
                             printerByPlace = favoritesUiState.printerByPlace,
                             navigateToPlace = navigateToPlace,
@@ -254,7 +259,7 @@ private fun BottomSheetFilteredContent(
 
                     FilterState.LIBRARIES -> {
                         libraryList(
-                            staticPlaces,
+                            libraryCardsApiResponse,
                             navigateToPlace,
                             onDetailsClick,
                             favorites,
@@ -275,7 +280,7 @@ private fun LazyListScope.favoriteList(
     favorites: Set<Place>,
     filteredFavorites: List<Place>,
     eateryByPlace: Map<Place, Eatery>,
-    libraryByPlace: Map<Place, Library>,
+    libraryCardByPlace: Map<Place, LibraryCardUiState>,
     gymByPlace: Map<Place, UpliftGym>,
     printerByPlace: Map<Place, PrinterCardUiState>,
     navigateToPlace: (Place) -> Unit,
@@ -325,8 +330,9 @@ private fun LazyListScope.favoriteList(
             }
 
             PlaceType.LIBRARY -> {
-                val matchingLibrary = libraryByPlace[place]
-                if (matchingLibrary != null) {
+                val matchingLibraryCard = libraryCardByPlace[place]
+                if (matchingLibraryCard != null) {
+                    val matchingLibrary = matchingLibraryCard.library
                     RoundedImagePlaceCard(
                         title = matchingLibrary.location,
                         subtitle = matchingLibrary.address + distanceStringToPlace(
@@ -334,9 +340,12 @@ private fun LazyListScope.favoriteList(
                             matchingLibrary.longitude
                         ),
                         isFavorite = true,
-                        onFavoriteClick = { onFavoriteStarClick(place) }
+                        onFavoriteClick = { onFavoriteStarClick(place) },
+                        placeholderRes = matchingLibraryCard.placeholderRes
                     ) {
-                        onDetailsClick(matchingLibrary)
+                        // Use detailed content sheet when backend is updated
+                        // onDetailsClick(matchingLibrary)
+                        navigateToPlace(matchingLibrary.toPlace())
                     }
                 } else {
                     StandardCard(
@@ -570,14 +579,14 @@ private fun LazyListScope.eateryList(
  * LazyList scoped enumeration of libraries for bottom sheet
  */
 private fun LazyListScope.libraryList(
-    staticPlaces: StaticPlaces,
+    libraryCardsApiResponse: ApiResponse<List<LibraryCardUiState>>,
     navigateToPlace: (Place) -> Unit,
-    navigateToDetails: (DetailedEcosystemPlace) -> Unit,
+    _navigateToDetails: (DetailedEcosystemPlace) -> Unit,
     favorites: Set<Place>,
     onFavoriteStarClick: (Place) -> Unit,
     distanceStringToPlace: (Double?, Double?) -> String,
 ) {
-    when (staticPlaces.libraries) {
+    when (libraryCardsApiResponse) {
         is ApiResponse.Error -> {
         }
 
@@ -585,17 +594,20 @@ private fun LazyListScope.libraryList(
         }
 
         is ApiResponse.Success -> {
-            items(staticPlaces.libraries.data) {
+            items(libraryCardsApiResponse.data) {
+                val library = it.library
                 RoundedImagePlaceCard(
-                    placeholderRes = R.drawable.olin_library,
-                    title = it.location,
-                    subtitle = it.address + distanceStringToPlace(it.latitude, it.longitude),
-                    isFavorite = it.toPlace() in favorites,
+                    placeholderRes = it.placeholderRes,
+                    title = library.location,
+                    subtitle = library.address + distanceStringToPlace(library.latitude, library.longitude),
+                    isFavorite = library.toPlace() in favorites,
                     onFavoriteClick = {
-                        onFavoriteStarClick(it.toPlace())
+                        onFavoriteStarClick(library.toPlace())
                     }
                 ) {
-                    navigateToDetails(it)
+                    // Use detailed content sheet when backend is updated
+                    // navigateToDetails(library)
+                    navigateToPlace(library.toPlace())
                 }
             }
         }
@@ -641,6 +653,7 @@ private fun PreviewEcosystemBottomSheet() {
             ApiResponse.Pending,
             ApiResponse.Pending
         ),
+        libraryCardsApiResponse = ApiResponse.Pending,
         favorites = emptySet(),
         favoritesUiState = EcosystemFavoritesUiState(),
         modifier = Modifier,
@@ -730,6 +743,14 @@ private fun PreviewBottomSheetFilteredContentFavorites() {
             eateries = ApiResponse.Success(listOf(mockEatery)),
             gyms = ApiResponse.Success(listOf(mockGym))
         ),
+        libraryCardsApiResponse = ApiResponse.Success(
+            listOf(
+                LibraryCardUiState(
+                    library = mockLibrary,
+                    placeholderRes = R.drawable.olin_library
+                )
+            )
+        ),
         favorites = setOf(
             Place(
                 latitude = 42.4488,
@@ -806,7 +827,12 @@ private fun PreviewBottomSheetFilteredContentFavorites() {
                 )
             ),
             eateryByPlace = listOf(mockEatery).associateBy { it.toPlace() },
-            libraryByPlace = listOf(mockLibrary).associateBy { it.toPlace() },
+            libraryCardByPlace = mapOf(
+                mockLibrary.toPlace() to LibraryCardUiState(
+                    library = mockLibrary,
+                    placeholderRes = R.drawable.olin_library
+                )
+            ),
             gymByPlace = listOf(mockGym).associateBy { it.toPlace() },
             printerByPlace = mapOf(
                 mockPrinter.toPlace() to PrinterCardUiState(

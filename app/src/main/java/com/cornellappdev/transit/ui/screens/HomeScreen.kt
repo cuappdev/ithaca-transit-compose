@@ -187,6 +187,7 @@ fun HomeScreen(
     val filterStateValue = homeViewModel.filterState.collectAsStateWithLifecycle().value
 
     val staticPlaces = homeViewModel.staticPlacesFlow.collectAsStateWithLifecycle().value
+    val libraryCardsApiResponse = homeViewModel.libraryCardsFlow.collectAsStateWithLifecycle().value
     val ecosystemFavoritesUiState =
         homeViewModel.ecosystemFavoritesUiState.collectAsStateWithLifecycle().value
 
@@ -362,6 +363,7 @@ fun HomeScreen(
                             },
                             modifier = Modifier.onTapDisableSearch(),
                             staticPlaces = staticPlaces,
+                            libraryCardsApiResponse = libraryCardsApiResponse,
                             favorites = favorites,
                             favoritesUiState = ecosystemFavoritesUiState,
                             navigateToPlace = {
