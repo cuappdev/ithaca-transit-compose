@@ -341,7 +341,6 @@ private fun LazyListScope.favoriteList(
                         ),
                         isFavorite = true,
                         onFavoriteClick = { onFavoriteStarClick(place) },
-                        placeholderRes = matchingLibraryCard.placeholderRes
                     ) {
                         // Use detailed content sheet when backend is updated
                         // onDetailsClick(matchingLibrary)
