@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,6 +40,8 @@ import com.cornellappdev.transit.models.ecosystem.UpliftCapacity
 import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.FavoritesDividerGray
+import com.cornellappdev.transit.ui.theme.PrimaryText
+import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.EcosystemFavoritesUiState
 import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
@@ -634,7 +637,12 @@ private fun LazyListScope.infoItem(message: String) {
                 .padding(vertical = 20.dp),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = message)
+            Text(text = message + "...",
+                color = PrimaryText,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = Style.heading3,
+                fontSize = 20.sp)
         }
     }
 }

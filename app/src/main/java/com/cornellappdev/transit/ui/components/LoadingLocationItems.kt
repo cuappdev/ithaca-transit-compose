@@ -41,7 +41,6 @@ fun LoadingLocationItems(searchResult: ApiResponse<List<Place>>, onClick: (Place
                             label = it.name,
                             sublabel = it.subLabel,
                             onClick = { onClick(it) },
-                            modifier = Modifier
                         )
                     }
                 }

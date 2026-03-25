@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.width
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.PlaceType
 import com.cornellappdev.transit.ui.theme.PrimaryText
@@ -53,7 +54,7 @@ fun MenuItem(
             modifier = Modifier
                 .size(24.dp),
         )
-        Spacer(modifier = Modifier.size(12.dp))
+        Spacer(modifier = Modifier.width(12.dp))
         Column() {
             Text(
                 text = label,
