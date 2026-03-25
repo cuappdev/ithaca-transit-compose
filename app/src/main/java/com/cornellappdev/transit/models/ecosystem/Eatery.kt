@@ -16,18 +16,25 @@ import java.time.format.DateTimeFormatter
 @JsonClass(generateAdapter = true)
 data class Eatery(
     @Json(name = "id") var id: Int,
+    @Json(name = "cornellId") var cornellId: Int? = null,
+    @Json(name = "announcements") var announcements: List<Any> = emptyList(),
     @Json(name = "name") var name: String,
-    @Json(name = "menu_summary") var menuSummary: String?,
-    @Json(name = "image_url") var imageUrl: String?,
-    @Json(name = "location") var location: String?,
-    @Json(name = "campus_area") var campusArea: String?,
-    @Json(name = "online_order_url") var onlineOrderUrl: String?,
-    @Json(name = "latitude") var latitude: Double?,
-    @Json(name = "longitude") var longitude: Double?,
-    @Json(name = "payment_accepts_meal_swipes") var paymentAcceptsMealSwipes: Boolean?,
-    @Json(name = "payment_accepts_brbs") var paymentAcceptsBrbs: Boolean?,
-    @Json(name = "payment_accepts_cash") var paymentAcceptsCash: Boolean?,
-    @Json(name = "events") val events: List<Event>?
+    @Json(name = "shortName") var shortName: String? = null,
+    @Json(name = "about") var about: String? = null,
+    @Json(name = "shortAbout") var shortAbout: String? = null,
+    @Json(name = "cornellDining") var cornellDining: Boolean? = null,
+    @Json(name = "menuSummary") var menuSummary: String? = null,
+    @Json(name = "imageUrl") var imageUrl: String? = null,
+    @Json(name = "location") var location: String? = null,
+    @Json(name = "campusArea") var campusArea: String? = null,
+    @Json(name = "onlineOrderUrl") var onlineOrderUrl: String? = null,
+    @Json(name = "contactPhone") var contactPhone: String? = null,
+    @Json(name = "contactEmail") var contactEmail: String? = null,
+    @Json(name = "latitude") var latitude: Double? = null,
+    @Json(name = "longitude") var longitude: Double? = null,
+    @Json(name = "paymentMethods") var paymentMethods: List<String> = emptyList(),
+    @Json(name = "eateryTypes") var eateryTypes: List<String> = emptyList(),
+    @Json(name = "events") val events: List<Event>? = null
 ) : DetailedEcosystemPlace {
 
     override fun operatingHours(): List<DayOperatingHours> {
@@ -58,6 +65,10 @@ data class Eatery(
             val openTime = event.startTime?.format(DateTimeFormatter.ofPattern("h:mm a"))
             val closeTime = event.endTime?.format(DateTimeFormatter.ofPattern("h:mm a"))
 
+            if (openTime == null || closeTime == null) {
+                return@forEach
+            }
+
             val timeString = "$openTime - $closeTime"
 
             if (dayOfWeek != null && dailyHours[dayOfWeek]?.none { it.contains(timeString) } != false) {
@@ -85,10 +96,7 @@ data class Eatery(
 @JsonClass(generateAdapter = true)
 data class Event(
     @Json(name = "id") val id: Int? = null,
-    /**
-     * Descriptions tend to be "Lunch", "Dinner", etc..
-     */
-    @Json(name = "event_description") val description: String? = null,
-    @Json(name = "start") val startTime: LocalDateTime? = null,
-    @Json(name = "end") val endTime: LocalDateTime? = null,
+    @Json(name = "type") val type: String? = null,
+    @Json(name = "startTimestamp") val startTime: LocalDateTime? = null,
+    @Json(name = "endTimestamp") val endTime: LocalDateTime? = null,
 )

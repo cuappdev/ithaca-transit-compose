@@ -45,8 +45,8 @@ object NetworkModule {
             .Builder()
             .connectionPool(ConnectionPool(0, 1, TimeUnit.NANOSECONDS))
             .protocols(listOf(Protocol.HTTP_1_1))
-            .readTimeout(60, TimeUnit.SECONDS)
-            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(logging)
             .build()
     }

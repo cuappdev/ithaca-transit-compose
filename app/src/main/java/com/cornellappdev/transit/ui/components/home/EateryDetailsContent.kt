@@ -52,7 +52,7 @@ fun EateryDetailsContent(
 
         DetailedPlaceHeaderSection(
             eatery.name,
-            eatery.campusArea + distanceString,
+            (eatery.location ?: "") + distanceString,
             leftAnnotatedString = isOpenAnnotatedStringFromOperatingHours(
                 eatery.operatingHours()
             ),
@@ -66,6 +66,11 @@ fun EateryDetailsContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        val aboutText = eatery.shortAbout
+            ?.takeIf { it.isNotBlank() }
+            ?: getAboutContent(eatery.name).takeIf { it.isNotBlank() }
+            ?: "This is one of Cornell's many eateries."
+
         Text(
             text = "About",
             style = Style.detailSubtitle,
@@ -74,10 +79,10 @@ fun EateryDetailsContent(
         )
 
         Text(
-            text = getAboutContent(eatery.name),
+            text = aboutText,
             style = Style.detailBody,
             color = SecondaryText,
-            modifier = Modifier.padding(bottom = 15.dp)
+            modifier = Modifier.padding(bottom = 12.dp)
         )
 
         val (annotatedString, inlineContent) =
@@ -110,11 +115,8 @@ fun EateryDetailsContent(
                 color = SecondaryText,
                 modifier = Modifier.padding(start = 15.dp)
             )
-
         }
-
         Spacer(modifier = Modifier.height(24.dp))
-
         HorizontalDivider(thickness = 1.dp, color = DividerGray)
 
         ExpandableOperatingHoursList(

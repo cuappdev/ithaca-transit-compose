@@ -1,43 +1,40 @@
 package com.cornellappdev.transit.util
 
+private val ABOUT_CONTENT = mapOf(
+    "Terrace Restaurant" to "The Terrace often features five to six made-to-order options, such as burritos, pho, gyros, and more throughout the day.",
+    "Mac's Café" to "Mac's features grab-and-go deli sandwiches, pizza, chopped salads and healthy smoothies for those looking for a quick bite.",
+    "Mac's Cafe" to "Mac's features grab-and-go deli sandwiches, pizza, chopped salads and healthy smoothies for those looking for a quick bite.",
+    "Temple of Zeus" to "Serving up fresh soups, salads, and sandwiches for students and faculty.",
+    "Gimme Coffee" to "Cappuccinos, hot coffee, and pastries are available here Monday-Friday from 8am-3pm!",
+    "Louie's Lunch" to "Louie's Lunch is a food truck featuring an extensive menu with subs, wraps, salads, milkshakes, cajun fries, and much more.",
+    "Anabel's Grocery" to "Anabel's Grocery is a student-run nonprofit grocery store that provides fresh, nutritious, and affordable food to Cornell students.",
+    "Free Food Fridge" to "The Free Food Fridge stocks excess food from campus cafes and leftover food from campus events to prevent it from being wasted.",
+    "Helen Newman" to "Helen Newman Hall features a Pool, two-full sized Courts for Basketball/Volleyball/Badminton, a classroom and a dance studio where many Group Fitness classes, Physical Education classes, and club practices are held, a 16-lane Bowling Center and a Fitness Center. Helen Newman is also the home to the majority of the Recreational Services Administration Offices.",
+    "Toni Morrison" to "The Toni Morrison Fitness Center is located in the basement of Toni Morrison Hall.",
+    "Noyes" to "The Noyes Fitness Center is located on the second floor of the Noyes Community Recreation Center, adjacent to Jansen's Market.",
+    "Teagle Down" to "The Teagle Downstairs Fitness Center is located on the ground floor of Teagle Hall. The entrance of this Fitness Center is adjacent from the entrance to Teagle Hall from the parking lot facing the Lynah Ice Rink.",
+    "Teagle Up" to "The Teagle Upstairs Fitness Center is located on the second floor of Teagle Hall. The staircase to the entrance of this Fitness Center is directly across from the entrance to Teagle Hall from the parking lot facing the Lynah Ice Rink.",
+)
+
+private val GYM_LOCATION_STRINGS = mapOf(
+    "Helen Newman" to "Helen Newman Hall",
+    "Toni Morrison" to "Toni Morrison Hall",
+    "Noyes" to "Noyes Recreation Center",
+    "Teagle Up" to "Teagle Hall",
+    "Teagle Down" to "Teagle Hall",
+)
+
 
 /**
  * Temporary mapping for about content
  */
 fun getAboutContent(key: String): String {
-    val aboutContent = buildMap {
-        put("104West!", "Cornell's kosher and multicultural dining room is STAR-K and STAR-D certified.")
-        put("Becker House Dining Room", "Dining room located in Carl Becker House on West Campus. Open only to residents from 6-7pm Wednesdays for House Dinners.")
-        put("Cook House Dining Room", "Dining room located in Alice Cook House on West Campus. Open only to residents from 6-7pm Wednesdays for House Dinners.")
-        put("Jansen's Dining Room at Bethe House", "Dining room located in Hans Bethe House on West Campus. Open only to residents from 6-7pm Wednesdays for House Dinners.")
-        put("Keeton House Dining Room", "Dining room located in William Keeton House on West Campus. Open only to residents from 6-7pm Wednesdays for House Dinners.")
-        put("Morrison Dining", "Choose your own culinary adventure at Cornell's newest dining room.")
-        put("North Star Dining Room", "Dining room located in Appel Commons on North Campus.")
-        put("Okenshields", "Dining room located in Willard Straight Hall on Central Campus.")
-        put("Risley Dining Room", "Risley is our gluten-free, tree nut free and peanut free dining room under the AllerCheck™\uFE0F approved by MenuTrinfo®\uFE0F program, in Risley Residential College on North Campus.")
-        put("Rose House Dining Room", "Dining room located in Flora Rose House on West Campus. Open only to residents from 6-7pm Wednesdays for House Dinners.")
-        put("Helen Newman", "Helen Newman Hall features a Pool, two-full sized Courts for Basketball/Volleyball/Badminton, a classroom and a dance studio where many Group Fitness classes, Physical Education classes, and club practices are held, a 16-lane Bowling Center and a Fitness Center. Helen Newman is also the home to the majority of the Recreational Services Administration Offices.")
-        put("Toni Morrison", "The Toni Morrison Fitness Center is located in the basement of Toni Morrison Hall.")
-        put("Noyes", "The Noyes Fitness Center is located on the second floor of the Noyes Community Recreation Center, adjacent to Jansen's Market.")
-        put("Teagle Down", "The Teagle Downstairs Fitness Center is located on the ground floor of Teagle Hall. The entrance of this Fitness Center is adjacent from the entrance to Teagle Hall from the parking lot facing the Lynah Ice Rink.")
-        put("Teagle Up", "The Teagle Upstairs Fitness Center is located on the second floor of Teagle Hall. The staircase to the entrance of this Fitness Center is directly across from the entrance to Teagle Hall from the parking lot facing the Lynah Ice Rink.")
-    }
-
-    return aboutContent.getOrDefault(key, "")
+    return ABOUT_CONTENT[key].orEmpty()
 }
 
 /**
  * Mapping gym names to location descriptions
  */
 fun getGymLocationString(key: String): String {
-    val locationStrings = buildMap {
-        put("Helen Newman", "Helen Newman Hall")
-        put("Toni Morrison", "Toni Morrison Hall")
-        put("Noyes", "Noyes Community Recreation Center")
-        put("Teagle Up", "Teagle Hall")
-        put("Teagle Down", "Teagle Hall")
-
-    }
-
-    return locationStrings.getOrDefault(key, "")
+    return GYM_LOCATION_STRINGS[key].orEmpty()
 }

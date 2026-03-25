@@ -205,17 +205,24 @@ private class ExamplePlaceProvider : PreviewParameterProvider<DetailedEcosystemP
     override val values = sequenceOf(
         Eatery(
             id = 1,
+            cornellId = 1,
+            announcements = emptyList(),
             name = "Okenshields",
+            shortName = "Okenshields",
+            about = "Dining room located in Willard Straight Hall on Central Campus.",
+            shortAbout = null,
+            cornellDining = true,
             menuSummary = null,
             imageUrl = null,
             location = "Willard Straight Hall",
             campusArea = "Central",
             onlineOrderUrl = null,
+            contactPhone = null,
+            contactEmail = null,
             latitude = null,
             longitude = null,
-            paymentAcceptsMealSwipes = null,
-            paymentAcceptsBrbs = null,
-            paymentAcceptsCash = null,
+            paymentMethods = listOf("SWIPE", "BRB"),
+            eateryTypes = listOf("DINING"),
             events = null
         ), Library(
             id = 1,

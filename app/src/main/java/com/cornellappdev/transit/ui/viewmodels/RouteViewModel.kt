@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -47,6 +48,8 @@ class RouteViewModel @Inject constructor(
     private val userPreferenceRepository: UserPreferenceRepository,
     private val selectedRouteRepository: SelectedRouteRepository
 ) : ViewModel() {
+
+    private var fetchRouteJob: Job? = null
 
     /**
      * Value of the current location. Can be null
@@ -287,7 +290,8 @@ class RouteViewModel @Inject constructor(
         arriveBy: Boolean,
         originName: String
     ) {
-        viewModelScope.launch {
+        fetchRouteJob?.cancel()
+        fetchRouteJob = viewModelScope.launch {
             routeRepository.fetchRoute(
                 end = end,
                 time = time,
