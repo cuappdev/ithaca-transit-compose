@@ -49,6 +49,7 @@ import com.cornellappdev.transit.ui.viewmodels.LibraryCardUiState
 import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
 import com.cornellappdev.transit.util.ecosystem.capacityPercentAnnotatedString
 import com.cornellappdev.transit.ui.viewmodels.PrinterCardUiState
+import com.cornellappdev.transit.util.TimeUtils
 import kotlin.collections.isNotEmpty
 import com.cornellappdev.transit.util.getGymLocationString
 
