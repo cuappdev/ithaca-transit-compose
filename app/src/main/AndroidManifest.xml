@@ -37,4 +37,8 @@
             android:value="${BACKEND_URL}" />
     </application>
 
+    <queries>
+        <package android:name="com.cornellappdev.android.eatery" />
+    </queries>
+
 </manifest>

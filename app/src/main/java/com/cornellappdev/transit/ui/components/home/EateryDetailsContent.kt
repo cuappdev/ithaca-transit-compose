@@ -1,5 +1,8 @@
 package com.cornellappdev.transit.ui.components.home
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,9 +16,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.ui.theme.DividerGray
@@ -28,6 +33,7 @@ import com.cornellappdev.transit.util.StringUtils.createDeepLink
 import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
 import com.cornellappdev.transit.util.TimeUtils.rotateOperatingHours
 import com.cornellappdev.transit.util.getAboutContent
+import androidx.core.net.toUri
 
 @Composable
 fun EateryDetailsContent(
@@ -88,11 +94,32 @@ fun EateryDetailsContent(
         val (annotatedString, inlineContent) =
             stringResource(R.string.view_menu).createDeepLink(R.drawable.eaterylink)
 
+        val context = LocalContext.current
+
         Text(
             text = annotatedString,
             inlineContent = inlineContent,
             style = Style.heading2,
-            color = TransitBlue
+            color = TransitBlue,
+            modifier = Modifier.clickable(
+                onClick = {
+                    val eateryPackage = "com.cornellappdev.eatery"
+                    val eateryUri = "eatery://open-eatery?id=${eatery.id}".toUri()
+                    val deepLinkIntent = Intent(Intent.ACTION_VIEW,eateryUri)
+
+                    try {
+                        context.startActivity(deepLinkIntent)
+                    } catch (e1: ActivityNotFoundException) {
+                        val playStoreIntent = Intent(Intent.ACTION_VIEW, "market://details?id=$eateryPackage".toUri())
+
+                        try {
+                            context.startActivity(playStoreIntent)
+                        } catch (e2: ActivityNotFoundException) {
+
+                        }
+                    }
+                }
+            )
         )
 
         Spacer(modifier = Modifier.height(24.dp))

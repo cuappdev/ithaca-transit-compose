@@ -128,10 +128,10 @@ class HomeViewModel @Inject constructor(
                     getLongitude = { it.longitude }
                 ),
                 libraries = sortApiResponse(
-                    response = libraries,
+                    response = libraries.withExcludedLibrariesRemoved(),
                     getLatitude = { it.latitude },
                     getLongitude = { it.longitude }
-                ).withExcludedLibrariesRemoved(),
+                ),
                 eateries = sortApiResponse(
                     response = eateries,
                     getLatitude = { it.latitude },
