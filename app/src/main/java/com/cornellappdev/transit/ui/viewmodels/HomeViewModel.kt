@@ -53,11 +53,18 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     val libraryCardsFlow: StateFlow<ApiResponse<List<LibraryCardUiState>>> =
-        routeRepository.libraryFlow.map { response ->
+        combine(
+            routeRepository.libraryFlow,
+            locationRepository.currentLocation
+        ) { response, location ->
+            val usersLocation = location?.let { LatLng(it.latitude, it.longitude) }
             when (val filteredResponse = response.withExcludedLibrariesRemoved()) {
                 is ApiResponse.Success -> {
+                    val sortedLibraries = filteredResponse.data.sortedBy {
+                        numericalDistanceToPlace(it.latitude, it.longitude, usersLocation)
+                    }
                     ApiResponse.Success(
-                        filteredResponse.data
+                        sortedLibraries
                             .map { it.toLibraryCardUiState() }
                     )
                 }
@@ -117,6 +124,9 @@ class HomeViewModel @Inject constructor(
             gymRepository.gymFlow,
             locationRepository.currentLocation
         ) { printers, libraries, eateries, gyms, location ->
+            val userLocation = location?.let { LatLng(it.latitude, it.longitude) }
+
+
             StaticPlaces(
                 printers = sortApiResponse(
                     response = if (printers is ApiResponse.Success) {
@@ -125,23 +135,27 @@ class HomeViewModel @Inject constructor(
                         printers
                     },
                     getLatitude = { it.latitude },
-                    getLongitude = { it.longitude }
+                    getLongitude = { it.longitude },
+                    userLocation = userLocation
                 ),
                 libraries = sortApiResponse(
                     response = libraries.withExcludedLibrariesRemoved(),
                     getLatitude = { it.latitude },
-                    getLongitude = { it.longitude }
+                    getLongitude = { it.longitude },
+                    userLocation = userLocation
                 ),
                 eateries = sortApiResponse(
                     response = eateries,
                     getLatitude = { it.latitude },
                     getLongitude = { it.longitude },
+                    userLocation = userLocation,
                     getIsOpen = { TimeUtils.getOpenStatus(it.operatingHours()).isOpen }
                 ),
                 gyms = sortApiResponse(
                     response = gyms,
                     getLatitude = { it.latitude },
                     getLongitude = { it.longitude },
+                    userLocation = userLocation,
                     getIsOpen = { TimeUtils.getOpenStatus(it.operatingHours()).isOpen }
                 )
             )
@@ -453,14 +467,14 @@ class HomeViewModel @Inject constructor(
     /**
      * Returns a numerical distance from a location to the current location if both exist, otherwise returns Double.MAX_VALUE
      */
-    fun numericalDistanceToPlace(latitude: Double?, longitude: Double?): Double {
-        val currentLocationSnapshot = currentLocation.value
-        return if (currentLocationSnapshot != null && latitude != null && longitude != null) {
+    fun numericalDistanceToPlace(
+        latitude: Double?,
+        longitude: Double?,
+        userLocation: LatLng?
+    ): Double {
+        return if (userLocation != null && latitude != null && longitude != null) {
             calculateDistance(
-                LatLng(
-                    currentLocationSnapshot.latitude,
-                    currentLocationSnapshot.longitude
-                ), LatLng(latitude, longitude)
+                userLocation, LatLng(latitude, longitude)
             )
         } else {
             Double.MAX_VALUE
@@ -474,15 +488,16 @@ class HomeViewModel @Inject constructor(
         response: ApiResponse<List<T>>,
         getLatitude: (T) -> Double?,
         getLongitude: (T) -> Double?,
+        userLocation: LatLng?,
         getIsOpen: ((T) -> Boolean)? = null
     ): ApiResponse<List<T>> {
         if (response is ApiResponse.Success) {
             val sortedData = response.data.sortedWith(
                 if (getIsOpen != null) {
                     compareByDescending<T> { getIsOpen(it) }
-                        .thenBy { numericalDistanceToPlace(getLatitude(it),getLongitude(it)) }
+                        .thenBy { numericalDistanceToPlace(getLatitude(it),getLongitude(it), userLocation) }
                 } else {
-                    compareBy { numericalDistanceToPlace(getLatitude(it),getLongitude(it)) }
+                    compareBy { numericalDistanceToPlace(getLatitude(it),getLongitude(it), userLocation) }
                 }
             )
             return ApiResponse.Success(sortedData)
