@@ -20,8 +20,8 @@ import com.cornellappdev.transit.models.ecosystem.Library
 import com.cornellappdev.transit.models.ecosystem.Printer
 import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
-import com.cornellappdev.transit.util.StringUtils.fromMetersToFeet
 import com.cornellappdev.transit.util.StringUtils.fromMetersToMiles
+import com.cornellappdev.transit.util.METERS_TO_FEET
 import com.cornellappdev.transit.util.TimeUtils
 import com.cornellappdev.transit.util.calculateDistance
 import com.google.android.gms.maps.model.LatLng
@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import java.util.Locale
+import kotlin.math.roundToInt
 
 /**
  * ViewModel handling home screen UI state and search functionality
@@ -477,10 +478,22 @@ class HomeViewModel @Inject constructor(
                     currentLocationSnapshot.latitude,
                     currentLocationSnapshot.longitude
                 ), LatLng(latitude, longitude)
-            ).toString()
-            return " - ${distanceInMeters.fromMetersToFeet()}"
+            )
+            return " - ${formatDistance(distanceInMeters)}"
         }
         return ""
+    }
+
+    /**
+     * Home cards show short distances in feet rounded to nearest 10 for readability.
+     */
+    private fun formatDistance(distanceInMeters: Double): String {
+        return if (distanceInMeters > 160) {
+            "${distanceInMeters.toString().fromMetersToMiles()} mi"
+        } else {
+            val feetRoundedToTens = ((distanceInMeters * METERS_TO_FEET) / 10.0).roundToInt() * 10
+            "$feetRoundedToTens ft"
+        }
     }
 
     /**
