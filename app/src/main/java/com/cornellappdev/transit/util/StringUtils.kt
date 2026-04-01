@@ -17,6 +17,7 @@ import com.cornellappdev.transit.R
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import kotlin.math.roundToInt
 
 /**
  * Extra utility functions for strings
@@ -41,12 +42,13 @@ object StringUtils {
         return "%.1f".format(this.toDouble() / 1609.34)
     }
 
-    fun String.fromMetersToFeet(): String {
+    fun String.fromMetersToImperial(): String {
         val meters = this.toDoubleOrNull() ?: return this
         return if (meters > 160) {
             "${this.fromMetersToMiles()} mi"
         } else {
-            "${(meters * METERS_TO_FEET).toInt()} ft"
+            val feetRoundedToTens = ((meters * METERS_TO_FEET) / 10.0).roundToInt() * 10
+            "$feetRoundedToTens ft"
         }
     }
 

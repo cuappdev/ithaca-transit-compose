@@ -40,6 +40,11 @@ fun mergeAndRankSearchResults(
         return ApiResponse.Success(emptyList())
     }
 
+    // Keep search UI in loading state until backend search settles.
+    if (routeSearchResults is ApiResponse.Pending) {
+        return ApiResponse.Pending
+    }
+
     val routePlaces = (routeSearchResults as? ApiResponse.Success)?.data.orEmpty()
     val backendRanked = routePlaces.map { place ->
         val score = relevanceScore(place, normalizedQuery)
@@ -72,10 +77,10 @@ fun mergeAndRankSearchResults(
         return ApiResponse.Success(merged)
     }
 
-    return when (routeSearchResults) {
-        is ApiResponse.Pending -> ApiResponse.Pending
-        is ApiResponse.Error -> ApiResponse.Error
-        is ApiResponse.Success -> ApiResponse.Success(emptyList())
+    return if (routeSearchResults is ApiResponse.Error) {
+        ApiResponse.Error
+    } else {
+        ApiResponse.Success(emptyList())
     }
 }
 
