@@ -60,6 +60,7 @@ import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.DirectionDetails
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
+import com.cornellappdev.transit.util.rememberSafeBackAction
 import com.cornellappdev.transit.util.orZeroIfUnspecified
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -99,6 +100,7 @@ private enum class DetailsSheetValue { Collapsed, PartiallyExpanded, Expanded }
 fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewModel) {
 
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+    val onBackClick = rememberSafeBackAction(navController)
 
 
     //Map state
@@ -154,7 +156,7 @@ fun DetailsScreen(navController: NavHostController, routeViewModel: RouteViewMod
                 sheetState,
                 cameraPositionState,
                 permissionState.status.isGranted,
-                onBackClick = { navController.popBackStack() },
+                onBackClick = onBackClick,
             )
         }
     )
