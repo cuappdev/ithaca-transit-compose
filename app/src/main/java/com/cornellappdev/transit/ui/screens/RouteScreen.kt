@@ -68,6 +68,9 @@ import com.cornellappdev.transit.ui.components.SearchTextField
 import com.cornellappdev.transit.ui.components.TernarySelector
 import com.cornellappdev.transit.ui.components.TimePicker
 import com.cornellappdev.transit.ui.components.TransitPullToRefreshBox
+import com.cornellappdev.transit.util.navigateSingleTop
+import com.cornellappdev.transit.util.rememberSafeBackAction
+import com.cornellappdev.transit.util.rememberSafeNavigationAction
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.MetadataGray
@@ -98,6 +101,10 @@ fun RouteScreen(
 ) {
 
     val selectedRoute = routeViewModel.selectedRoute.collectAsState().value
+    val onBackClick = rememberSafeBackAction(navController)
+    val onRouteClick = rememberSafeNavigationAction(navController) {
+        navController.navigateSingleTop("details")
+    }
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -168,20 +175,21 @@ fun RouteScreen(
         ) {
             RouteOptionsMainMenu(
                 routeViewModel = routeViewModel,
-                navController = navController,
                 coroutineScope = coroutineScope,
                 startLocation = selectedRoute.startPlace,
                 endLocation = selectedRoute.endPlace,
                 lastRoute = lastRoute,
                 startSheetState = startSheetState,
-                destSheetState = destSheetState
+                destSheetState = destSheetState,
+                onBackClick = onBackClick
             ) { route ->
                 routeViewModel.setMapState(
                     MapState(
                         true,
                         route
                     )
-                );navController.navigate("details")
+                )
+                onRouteClick()
             }
         }
     }
@@ -310,13 +318,13 @@ private fun ArriveByBottomSheet(
 @Composable
 private fun RouteOptionsMainMenu(
     routeViewModel: RouteViewModel,
-    navController: NavController,
     coroutineScope: CoroutineScope,
     startLocation: LocationUIState,
     endLocation: LocationUIState,
     lastRoute: ApiResponse<RouteOptions>,
     startSheetState: ModalBottomSheetState,
     destSheetState: ModalBottomSheetState,
+    onBackClick: () -> Unit,
     onClick: (Route) -> Unit
 ) {
 
@@ -357,7 +365,7 @@ private fun RouteOptionsMainMenu(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
                             contentDescription = ""

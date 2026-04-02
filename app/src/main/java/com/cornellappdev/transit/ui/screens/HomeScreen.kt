@@ -67,6 +67,7 @@ import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.components.home.DetailedPlaceSheetContent
 import com.cornellappdev.transit.ui.components.home.EcosystemBottomSheetContent
 import com.cornellappdev.transit.ui.components.home.HomeScreenMarkers
+import com.cornellappdev.transit.util.navigateSingleTop
 import com.cornellappdev.transit.ui.theme.DetailsHeaderGray
 import com.cornellappdev.transit.ui.theme.DividerGray
 import com.cornellappdev.transit.ui.theme.IconGray
@@ -268,7 +269,7 @@ fun HomeScreen(
                 onExpandedChange = { isExpanded -> searchActive = isExpanded },
                 onInfoClick = {
                     homeViewModel.onQueryChange("")
-                    navController.navigate("settings")
+                    navController.navigateSingleTop("settings")
                 },
                 onFavoriteAdd = {
                     homeViewModel.toggleAddFavoritesSheet(true)
@@ -278,7 +279,7 @@ fun HomeScreen(
                 },
                 onItemClick = {
                     homeViewModel.beginRouteOptions(it)
-                    navController.navigate("route")
+                    navController.navigateSingleTop("route")
                 }
             )
         }
@@ -340,7 +341,7 @@ fun HomeScreen(
                             },
                             navigateToPlace = {
                                 homeViewModel.beginRouteOptions(it)
-                                navController.navigate("route")
+                                navController.navigateSingleTop("route")
                             },
                             modifier = Modifier.onTapDisableSearch(),
                             distanceStringToPlace = homeViewModel::distanceStringIfCurrentLocationExists
@@ -368,7 +369,7 @@ fun HomeScreen(
                             favoritesUiState = ecosystemFavoritesUiState,
                             navigateToPlace = {
                                 homeViewModel.beginRouteOptions(it)
-                                navController.navigate("route")
+                                navController.navigateSingleTop("route")
                             },
                             onDetailsClick = {
                                 ecosystemSheetState = EcosystemSheetState.Details(it)
@@ -429,7 +430,7 @@ fun HomeScreen(
                     },
                     itemOnClick = {
                         homeViewModel.beginRouteOptions(it)
-                        navController.navigate("route")
+                        navController.navigateSingleTop("route")
                     }
                 )
             },

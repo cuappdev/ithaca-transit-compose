@@ -176,7 +176,7 @@ class HomeViewModel @Inject constructor(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = ApiResponse.Success(emptyList())
+                initialValue = ApiResponse.Pending
             )
 
     private val _showAddFavoritesSheet = MutableStateFlow(false)
@@ -187,7 +187,7 @@ class HomeViewModel @Inject constructor(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = ApiResponse.Success(emptyList())
+                initialValue = ApiResponse.Pending
             )
 
     fun toggleAddFavoritesSheet(show: Boolean) {
