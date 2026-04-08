@@ -19,14 +19,14 @@ hilt {
 
 android {
     namespace = "com.cornellappdev.transit"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.cornellappdev.transit"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 9
-        versionName = "1.0"
+        targetSdk = 36
+        versionCode = 10
+        versionName = "2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -42,7 +42,7 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
         debug {
-            buildConfigField("boolean", "ECOSYSTEM_FLAG", "false")
+            buildConfigField("boolean", "ECOSYSTEM_FLAG", "true")
         }
         release {
             isMinifyEnabled = false
@@ -50,7 +50,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("boolean", "ECOSYSTEM_FLAG", "false")
+            buildConfigField("boolean", "ECOSYSTEM_FLAG", "true")
             signingConfig = signingConfigs.getByName("debug")
         }
     }
