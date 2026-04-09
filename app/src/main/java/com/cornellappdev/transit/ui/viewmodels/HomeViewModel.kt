@@ -494,7 +494,7 @@ class HomeViewModel @Inject constructor(
      */
     fun distanceTextOrPlaceholder(latitude: Double?, longitude: Double?): String {
         val distanceText = distanceStringIfCurrentLocationExists(latitude, longitude)
-        return if (distanceText.isBlank()) " - Calculating Distance..." else distanceText
+        return if (distanceText.isBlank()) " -  · · ·" else distanceText
     }
 
     /**

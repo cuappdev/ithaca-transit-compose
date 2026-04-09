@@ -112,6 +112,13 @@ class RouteRepository @Inject constructor(
     val libraryFlow = _libraryFlow.asStateFlow()
 
     /**
+     * Clears the currently displayed route result.
+     */
+    fun clearLastRoute() {
+        _lastRouteFlow.value = ApiResponse.Pending
+    }
+
+    /**
      * Makes a new call to backend for all stops.
      */
     private fun fetchAllStops() {
