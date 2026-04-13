@@ -103,13 +103,11 @@ fun EateryDetailsContent(
             modifier = Modifier.clickable(
                 onClick = {
                     val eateryPackage = "com.cornellappdev.android.eatery"
+                    val eateryIntent = context.packageManager.getLaunchIntentForPackage(eateryPackage)
 
-                    try {
-                        val intent = context.packageManager.getLaunchIntentForPackage(eateryPackage)
-                        if (intent != null) {
-                            context.startActivity(intent)
-                        }
-                    } catch (e: ActivityNotFoundException) {
+                    if (eateryIntent != null) {
+                        context.startActivity(eateryIntent)
+                    } else {
                         try {
                             val playStoreIntent = Intent(Intent.ACTION_VIEW, "market://details?id=$eateryPackage".toUri())
                             playStoreIntent.setPackage("com.android.vending")

@@ -1,5 +1,8 @@
 package com.cornellappdev.transit.ui.components.home
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,9 +16,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.ui.theme.DividerGray
@@ -97,11 +102,32 @@ fun GymDetailsContent(
         val (annotatedString, inlineContent) =
             stringResource(R.string.view_gym).createDeepLink(R.drawable.upliftlink)
 
+        val context = LocalContext.current
+
         Text(
             text = annotatedString,
             inlineContent = inlineContent,
             style = Style.heading2,
-            color = TransitBlue
+            color = TransitBlue,
+            modifier = Modifier.clickable(
+                onClick = {
+                    val upliftPackage = "com.cornellappdev.uplift"
+                    val upliftIntent = context.packageManager.getLaunchIntentForPackage(upliftPackage)
+
+                    if (upliftIntent != null ) {
+                        context.startActivity(upliftIntent)
+                    } else {
+                        try {
+                            val playStoreIntent = Intent(Intent.ACTION_VIEW, "market://details?id=$upliftPackage".toUri())
+                            playStoreIntent.setPackage("com.android.vending")
+                            context.startActivity(playStoreIntent)
+                        } catch (e: ActivityNotFoundException) {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$upliftPackage}".toUri()))
+
+                        }
+                    }
+                }
+            )
         )
 
         Spacer(modifier = Modifier.height(24.dp))

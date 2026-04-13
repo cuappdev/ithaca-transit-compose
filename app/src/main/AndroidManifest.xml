@@ -8,6 +8,7 @@
 
     <queries>
         <package android:name="com.cornellappdev.android.eatery" />
+        <package android:name="com.cornellappdev.uplift" />
     </queries>
 
     <application
