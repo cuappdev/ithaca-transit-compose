@@ -20,7 +20,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.startActivity
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.models.ecosystem.Eatery
 import com.cornellappdev.transit.ui.theme.DividerGray
@@ -103,18 +102,20 @@ fun EateryDetailsContent(
             color = TransitBlue,
             modifier = Modifier.clickable(
                 onClick = {
-                    val eateryPackage = "com.cornellappdev.eatery"
-                    val eateryUri = "eatery://open-eatery?id=${eatery.id}".toUri()
-                    val deepLinkIntent = Intent(Intent.ACTION_VIEW,eateryUri)
+                    val eateryPackage = "com.cornellappdev.android.eatery"
 
                     try {
-                        context.startActivity(deepLinkIntent)
-                    } catch (e1: ActivityNotFoundException) {
-                        val playStoreIntent = Intent(Intent.ACTION_VIEW, "market://details?id=$eateryPackage".toUri())
-
+                        val intent = context.packageManager.getLaunchIntentForPackage(eateryPackage)
+                        if (intent != null) {
+                            context.startActivity(intent)
+                        }
+                    } catch (e: ActivityNotFoundException) {
                         try {
+                            val playStoreIntent = Intent(Intent.ACTION_VIEW, "market://details?id=$eateryPackage".toUri())
+                            playStoreIntent.setPackage("com.android.vending")
                             context.startActivity(playStoreIntent)
                         } catch (e2: ActivityNotFoundException) {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$eateryPackage}".toUri()))
 
                         }
                     }

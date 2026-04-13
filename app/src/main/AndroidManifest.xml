@@ -6,6 +6,10 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    <queries>
+        <package android:name="com.cornellappdev.android.eatery" />
+    </queries>
+
     <application
         android:name=".TransitApplication"
         android:allowBackup="true"
@@ -23,7 +27,6 @@
             android:theme="@style/Theme.Transit">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
@@ -36,9 +39,5 @@
             android:name="BACKEND_URL"
             android:value="${BACKEND_URL}" />
     </application>
-
-    <queries>
-        <package android:name="com.cornellappdev.android.eatery" />
-    </queries>
 
 </manifest>
