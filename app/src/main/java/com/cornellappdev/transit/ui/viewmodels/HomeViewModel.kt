@@ -64,6 +64,7 @@ class HomeViewModel @Inject constructor(
                             .map { it.toLibraryCardUiState() }
                     )
                 }
+                is ApiResponse.Idle -> ApiResponse.Idle
                 is ApiResponse.Pending -> ApiResponse.Pending
                 is ApiResponse.Error -> ApiResponse.Error
             }
@@ -494,7 +495,7 @@ class HomeViewModel @Inject constructor(
      */
     fun distanceTextOrPlaceholder(latitude: Double?, longitude: Double?): String {
         val distanceText = distanceStringIfCurrentLocationExists(latitude, longitude)
-        return if (distanceText.isBlank()) " - Calculating Distance..." else distanceText
+        return if (distanceText.isBlank()) " -  · · ·" else distanceText
     }
 
     /**
@@ -648,6 +649,7 @@ private val excludedLibraryLocations: Set<String> = setOf(
 private fun ApiResponse<List<Library>>.withExcludedLibrariesRemoved(): ApiResponse<List<Library>> {
     return when (this) {
         is ApiResponse.Success -> ApiResponse.Success(data.filterNot { it.isExcludedLibrary() })
+        is ApiResponse.Idle -> ApiResponse.Idle
         is ApiResponse.Pending -> ApiResponse.Pending
         is ApiResponse.Error -> ApiResponse.Error
     }
