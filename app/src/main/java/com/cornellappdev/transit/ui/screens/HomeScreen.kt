@@ -242,7 +242,15 @@ fun HomeScreen(
                 bottom = filterSheetState.sheetVisibleHeightDp.orZeroIfUnspecified()
             )
         ) {
-            HomeScreenMarkers(filterStateValue, favorites, staticPlaces)
+            HomeScreenMarkers(
+                filterState = filterStateValue,
+                favorites = favorites,
+                staticPlaces = staticPlaces,
+                onPlaceClick = {
+                    homeViewModel.beginRouteOptions(it)
+                    navController.navigateSingleTop("route")
+                }
+            )
         }
 
         // Overlay transparent box to intercept clicks to disable search
@@ -263,6 +271,8 @@ fun HomeScreen(
         ) {
             HomeScreenSearchBar(
                 searchBarValue,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp),
                 onQueryChange = { s -> homeViewModel.onQueryChange(s) },
                 onSearch = {}, // Search occurs automatically when typing
                 expanded = searchActive,
@@ -528,6 +538,7 @@ private fun LocationPermissionDialog(onDismissRequest: () -> Unit, onClickNext: 
 @Composable
 private fun HomeScreenSearchBar(
     searchBarValue: SearchBarUIState,
+    modifier: Modifier = Modifier,
     onQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit,
     expanded: Boolean,
@@ -540,6 +551,7 @@ private fun HomeScreenSearchBar(
 
     //If query is blank, display recents and favorites
     DockedSearchBar(
+        modifier = modifier,
         inputField = {
             SearchBarDefaults.InputField(
                 query = (searchBarValue as? SearchBarUIState.Query)?.queryText ?: "",
@@ -604,3 +616,4 @@ private fun HomeScreenSearchBar(
 
     }
 }
+

@@ -114,6 +114,7 @@ fun AddFavoritesSearchSheet(
             }
 
             DockedSearchBar(
+                modifier = Modifier.padding(horizontal = 16.dp),
                 inputField = {
                     SearchBarDefaults.InputField(
                         query = addSearchBarValue,
