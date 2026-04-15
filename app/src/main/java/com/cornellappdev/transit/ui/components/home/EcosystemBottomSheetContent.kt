@@ -282,10 +282,18 @@ private fun BottomSheetFilteredContent(
                             sanitizeLibraryAddress,
                         )
                     }
+
+                    FilterState.HOTSPOTS -> {
+                        hotspotList()
+                    }
                 }
             }
         }
     }
+}
+
+private fun LazyListScope.hotspotList() {
+    infoItem("Hotspots coming soon")
 }
 
 /**
@@ -699,6 +707,7 @@ private fun PreviewEcosystemBottomSheet() {
     EcosystemBottomSheetContent(
         filters = listOf(
             FilterState.FAVORITES,
+            FilterState.HOTSPOTS,
             FilterState.GYMS,
             FilterState.EATERIES,
             FilterState.LIBRARIES,

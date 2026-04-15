@@ -12,4 +12,5 @@ enum class FilterState(@DrawableRes val iconId: Int, val label: String) {
     GYMS(iconId = R.drawable.gym_icon, label = "Gyms"),
     EATERIES(iconId = R.drawable.eatery_icon, label = "Eateries"),
     LIBRARIES(iconId = R.drawable.library_icon, label = "Libraries"),
+    HOTSPOTS(iconId = R.drawable.hotspot_icon, label = "Hotspots"),
 }

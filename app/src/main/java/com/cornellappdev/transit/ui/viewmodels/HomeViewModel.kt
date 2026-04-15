@@ -93,6 +93,7 @@ class HomeViewModel @Inject constructor(
 
     val filterList = listOf(
         FilterState.FAVORITES,
+        FilterState.HOTSPOTS,
         FilterState.GYMS,
         FilterState.EATERIES,
         FilterState.LIBRARIES,

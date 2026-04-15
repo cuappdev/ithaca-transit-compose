@@ -299,6 +299,7 @@ fun HomeScreen(
         val gymsListState = rememberLazyListState()
         val eateriesListState = rememberLazyListState()
         val librariesListState = rememberLazyListState()
+        val hotspotsListState = rememberLazyListState()
         val printersListState = rememberLazyListState()
 
         fun listStateFor(filter: FilterState): LazyListState = when (filter) {
@@ -306,6 +307,7 @@ fun HomeScreen(
             FilterState.GYMS -> gymsListState
             FilterState.EATERIES -> eateriesListState
             FilterState.LIBRARIES -> librariesListState
+            FilterState.HOTSPOTS -> hotspotsListState
             FilterState.PRINTERS -> printersListState
         }
 

@@ -64,6 +64,10 @@ fun HomeScreenMarkers(filterState: FilterState, favorites: Set<Place>, staticPla
                 }
             }
         }
+
+        FilterState.HOTSPOTS -> {
+            // Placeholder: hotspot markers are not wired yet.
+        }
     }
 }
 
