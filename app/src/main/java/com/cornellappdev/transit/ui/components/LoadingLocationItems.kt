@@ -17,6 +17,10 @@ import com.cornellappdev.transit.networking.ApiResponse
 @Composable
 fun LoadingLocationItems(searchResult: ApiResponse<List<Place>>, onClick: (Place) -> Unit) {
     when (searchResult) {
+        is ApiResponse.Idle -> {
+            LocationNotFound()
+        }
+
         is ApiResponse.Error -> {
             LocationNotFound()
         }

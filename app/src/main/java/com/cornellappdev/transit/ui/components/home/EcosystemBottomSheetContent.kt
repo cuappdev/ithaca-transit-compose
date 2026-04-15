@@ -468,6 +468,10 @@ private fun LazyListScope.gymList(
     distanceStringToPlace: (Double?, Double?) -> String,
 ) {
     when (gymsApiResponse) {
+        is ApiResponse.Idle -> {
+            infoItem("No gyms available")
+        }
+
         is ApiResponse.Error -> {
             infoItem("Unable to load gyms")
         }
@@ -524,6 +528,10 @@ private fun LazyListScope.printerList(
     printerToCardUiState: (Printer) -> PrinterCardUiState,
 ) {
     when (staticPlaces.printers) {
+        is ApiResponse.Idle -> {
+            infoItem("No printers available")
+        }
+
         is ApiResponse.Error -> {
             infoItem("Unable to load printers")
         }
@@ -577,6 +585,10 @@ private fun LazyListScope.eateryList(
     distanceStringToPlace: (Double?, Double?) -> String,
 ) {
     when (eateriesApiResponse) {
+        is ApiResponse.Idle -> {
+            infoItem("No eateries available")
+        }
+
         is ApiResponse.Error -> {
             infoItem("Unable to load eateries")
         }
@@ -628,6 +640,10 @@ private fun LazyListScope.libraryList(
     sanitizeLibraryAddress: (String) -> String,
 ) {
     when (libraryCardsApiResponse) {
+        is ApiResponse.Idle -> {
+            infoItem("No libraries available")
+        }
+
         is ApiResponse.Error -> {
             infoItem("Unable to load libraries")
         }

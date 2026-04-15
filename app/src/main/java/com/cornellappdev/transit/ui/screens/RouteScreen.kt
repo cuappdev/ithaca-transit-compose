@@ -609,6 +609,10 @@ private fun RouteList(
                 .fillMaxSize()
         ) {
             when (lastRouteResponse) {
+                is ApiResponse.Idle -> {
+                    // Cleared state: keep list empty without showing refresh spinner.
+                }
+
                 is ApiResponse.Error -> {
                     item {
                         Spacer(modifier = Modifier.height(80.dp))

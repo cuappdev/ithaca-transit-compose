@@ -20,19 +20,32 @@ import com.google.maps.android.compose.rememberMarkerState
  */
 @Composable
 @GoogleMapComposable
-fun HomeScreenMarkers(filterState: FilterState, favorites: Set<Place>, staticPlaces: StaticPlaces) {
+fun HomeScreenMarkers(
+    filterState: FilterState,
+    favorites: Set<Place>,
+    staticPlaces: StaticPlaces,
+    onPlaceClick: (Place) -> Unit
+) {
 
     when (filterState) {
         FilterState.FAVORITES -> {
             favorites.forEach {
-                LocationMarker(LatLng(it.latitude, it.longitude), R.drawable.favorite_pin)
+                LocationMarker(
+                    position = LatLng(it.latitude, it.longitude),
+                    iconRes = R.drawable.favorite_pin,
+                    onClick = { onPlaceClick(it) }
+                )
             }
         }
 
         FilterState.PRINTERS -> {
             if (staticPlaces.printers is ApiResponse.Success) {
                 staticPlaces.printers.data.forEach {
-                    LocationMarker(LatLng(it.latitude, it.longitude), R.drawable.printer_pin)
+                    LocationMarker(
+                        position = LatLng(it.latitude, it.longitude),
+                        iconRes = R.drawable.printer_pin,
+                        onClick = { onPlaceClick(it.toPlace()) }
+                    )
                 }
             }
         }
@@ -40,7 +53,11 @@ fun HomeScreenMarkers(filterState: FilterState, favorites: Set<Place>, staticPla
         FilterState.GYMS -> {
             if (staticPlaces.gyms is ApiResponse.Success) {
                 staticPlaces.gyms.data.forEach {
-                    LocationMarker(LatLng(it.latitude, it.longitude), R.drawable.gym_pin)
+                    LocationMarker(
+                        position = LatLng(it.latitude, it.longitude),
+                        iconRes = R.drawable.gym_pin,
+                        onClick = { onPlaceClick(it.toPlace()) }
+                    )
                 }
             }
         }
@@ -50,7 +67,11 @@ fun HomeScreenMarkers(filterState: FilterState, favorites: Set<Place>, staticPla
                 staticPlaces.eateries.data.forEach { eatery ->
                     eatery.latitude?.let { latitude ->
                         eatery.longitude?.let { longitude ->
-                            LocationMarker(LatLng(latitude, longitude), R.drawable.eatery_pin)
+                            LocationMarker(
+                                position = LatLng(latitude, longitude),
+                                iconRes = R.drawable.eatery_pin,
+                                onClick = { onPlaceClick(eatery.toPlace()) }
+                            )
                         }
                     }
                 }
@@ -60,7 +81,11 @@ fun HomeScreenMarkers(filterState: FilterState, favorites: Set<Place>, staticPla
         FilterState.LIBRARIES -> {
             if (staticPlaces.libraries is ApiResponse.Success) {
                 staticPlaces.libraries.data.forEach {
-                    LocationMarker(LatLng(it.latitude, it.longitude), R.drawable.library_pin)
+                    LocationMarker(
+                        position = LatLng(it.latitude, it.longitude),
+                        iconRes = R.drawable.library_pin,
+                        onClick = { onPlaceClick(it.toPlace()) }
+                    )
                 }
             }
         }
@@ -74,12 +99,17 @@ fun HomeScreenMarkers(filterState: FilterState, favorites: Set<Place>, staticPla
 @Composable
 private fun LocationMarker(
     position: LatLng,
-    @DrawableRes iconRes: Int
+    @DrawableRes iconRes: Int,
+    onClick: () -> Unit
 ) {
     MarkerComposable(
         state = rememberMarkerState(
             position = position
-        )
+        ),
+        onClick = {
+            onClick()
+            true
+        }
     ) {
         Icon(
             painter = painterResource(iconRes),

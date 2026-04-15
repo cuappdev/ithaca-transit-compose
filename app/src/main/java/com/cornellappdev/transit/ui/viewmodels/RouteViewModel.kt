@@ -370,18 +370,24 @@ class RouteViewModel @Inject constructor(
         endState: LocationUIState,
         arriveByState: ArriveByUIState
     ) {
-        getCoordinates(endState)?.let { end ->
-            getCoordinates(startState)?.let { start ->
-                getRoute(
-                    end = end,
-                    start = start,
-                    arriveBy = arriveByState is ArriveByUIState.ArriveBy,
-                    destinationName = if (endState is LocationUIState.Place) endState.name else "Current Location",
-                    originName = if (startState is LocationUIState.Place) startState.name else "Current Location",
-                    time = (arriveByState.date.time / 1000).toDouble()
-                )
-            }
+        val end = getCoordinates(endState)
+        val start = getCoordinates(startState)
+
+        if (start == null || end == null) {
+            // A new route attempt was made, but coordinates are unavailable; hide stale route data.
+            fetchRouteJob?.cancel()
+            routeRepository.clearLastRoute()
+            return
         }
+
+        getRoute(
+            end = end,
+            start = start,
+            arriveBy = arriveByState is ArriveByUIState.ArriveBy,
+            destinationName = if (endState is LocationUIState.Place) endState.name else "Current Location",
+            originName = if (startState is LocationUIState.Place) startState.name else "Current Location",
+            time = (arriveByState.date.time / 1000).toDouble()
+        )
     }
 
     /**
