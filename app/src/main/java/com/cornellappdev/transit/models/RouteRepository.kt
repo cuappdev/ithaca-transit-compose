@@ -115,7 +115,7 @@ class RouteRepository @Inject constructor(
      * Clears the currently displayed route result.
      */
     fun clearLastRoute() {
-        _lastRouteFlow.value = ApiResponse.Pending
+        _lastRouteFlow.value = ApiResponse.Idle
     }
 
     /**

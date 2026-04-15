@@ -64,6 +64,7 @@ class HomeViewModel @Inject constructor(
                             .map { it.toLibraryCardUiState() }
                     )
                 }
+                is ApiResponse.Idle -> ApiResponse.Idle
                 is ApiResponse.Pending -> ApiResponse.Pending
                 is ApiResponse.Error -> ApiResponse.Error
             }
@@ -648,6 +649,7 @@ private val excludedLibraryLocations: Set<String> = setOf(
 private fun ApiResponse<List<Library>>.withExcludedLibrariesRemoved(): ApiResponse<List<Library>> {
     return when (this) {
         is ApiResponse.Success -> ApiResponse.Success(data.filterNot { it.isExcludedLibrary() })
+        is ApiResponse.Idle -> ApiResponse.Idle
         is ApiResponse.Pending -> ApiResponse.Pending
         is ApiResponse.Error -> ApiResponse.Error
     }

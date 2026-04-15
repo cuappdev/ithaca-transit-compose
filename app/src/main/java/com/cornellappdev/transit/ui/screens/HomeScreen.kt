@@ -271,8 +271,7 @@ fun HomeScreen(
         ) {
             HomeScreenSearchBar(
                 searchBarValue,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp),
+                modifier = Modifier.padding(horizontal = 16.dp),
                 onQueryChange = { s -> homeViewModel.onQueryChange(s) },
                 onSearch = {}, // Search occurs automatically when typing
                 expanded = searchActive,
@@ -538,7 +537,6 @@ private fun LocationPermissionDialog(onDismissRequest: () -> Unit, onClickNext: 
 @Composable
 private fun HomeScreenSearchBar(
     searchBarValue: SearchBarUIState,
-    modifier: Modifier = Modifier,
     onQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit,
     expanded: Boolean,
@@ -546,7 +544,8 @@ private fun HomeScreenSearchBar(
     onInfoClick: () -> Unit,
     onFavoriteAdd: () -> Unit,
     onRecentClear: () -> Unit,
-    onItemClick: (Place) -> Unit
+    onItemClick: (Place) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
 
     //If query is blank, display recents and favorites
