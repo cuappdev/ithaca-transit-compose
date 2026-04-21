@@ -68,6 +68,7 @@ import com.cornellappdev.transit.ui.components.home.DetailedPlaceSheetContent
 import com.cornellappdev.transit.ui.components.home.EcosystemBottomSheetContent
 import com.cornellappdev.transit.ui.components.home.HomeScreenMarkers
 import com.cornellappdev.transit.ui.components.home.RequestHotspotSheet
+import com.cornellappdev.transit.ui.theme.CardBackground
 import com.cornellappdev.transit.util.navigateSingleTop
 import com.cornellappdev.transit.ui.theme.DetailsHeaderGray
 import com.cornellappdev.transit.ui.theme.DividerGray
@@ -505,7 +506,8 @@ fun HomeScreen(
             onDismissRequest = { homeViewModel.toggleRequestHotspotSheet(false) },
             sheetState = requestHotspotSheetState,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-            containerColor = Color(0xFFFDFDFD)
+            containerColor = CardBackground,
+            modifier = Modifier.fillMaxSize()
         ) {
             RequestHotspotSheet(
                 onDismiss = { homeViewModel.toggleRequestHotspotSheet(false) },
@@ -517,7 +519,8 @@ fun HomeScreen(
                         "Hotspot request submitted",
                         Toast.LENGTH_SHORT
                     ).show()
-                }
+                },
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
@@ -647,4 +650,3 @@ private fun HomeScreenSearchBar(
 
     }
 }
-

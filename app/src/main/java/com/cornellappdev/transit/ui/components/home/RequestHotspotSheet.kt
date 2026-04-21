@@ -15,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -37,14 +38,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cornellappdev.transit.ui.theme.DividerGray
+import com.cornellappdev.transit.ui.theme.HotspotBorderGray
 import com.cornellappdev.transit.ui.theme.FavoritesYellow
+import com.cornellappdev.transit.ui.theme.HotspotInputGray
 import com.cornellappdev.transit.ui.theme.MetadataGray
 import com.cornellappdev.transit.ui.theme.PrimaryText
 import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.robotoFamily
-
-private val HotspotInputBackground = Color(0xFFF5F5F5)
-private val HotspotBorder = Color(0xFFEAEFF4)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,7 +91,7 @@ fun RequestHotspotSheet(
             IconButton(
                 onClick = onDismiss,
                 modifier = Modifier
-                    .background(color = HotspotInputBackground, shape = CircleShape)
+                    .background(color = HotspotInputGray, shape = CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
@@ -102,7 +103,7 @@ fun RequestHotspotSheet(
 
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             LabeledInputField(
                 label = "Name",
@@ -194,8 +195,8 @@ fun RequestHotspotSheet(
             PillButton(
                 onClick = {},
                 text = "Add Photos",
-                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFEEEEEE),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = DividerGray,
                     contentColor = SecondaryText
                 ),
                 textColor = SecondaryText,
@@ -207,7 +208,7 @@ fun RequestHotspotSheet(
             onClick = onSubmit,
             text = "Submit",
             iconResId = null,
-            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+            colors = ButtonDefaults.buttonColors(
                 containerColor = FavoritesYellow,
                 contentColor = SecondaryText
             ),
@@ -257,10 +258,10 @@ private fun LabeledInputField(
 private fun hotspotTextFieldColors() = OutlinedTextFieldDefaults.colors(
     focusedTextColor = PrimaryText,
     unfocusedTextColor = PrimaryText,
-    focusedContainerColor = HotspotInputBackground,
-    unfocusedContainerColor = HotspotInputBackground,
-    focusedBorderColor = HotspotBorder,
-    unfocusedBorderColor = HotspotBorder,
+    focusedContainerColor = HotspotInputGray,
+    unfocusedContainerColor = HotspotInputGray,
+    focusedBorderColor = HotspotBorderGray,
+    unfocusedBorderColor = HotspotBorderGray,
     focusedPlaceholderColor = MetadataGray,
     unfocusedPlaceholderColor = MetadataGray,
     cursorColor = PrimaryText,
