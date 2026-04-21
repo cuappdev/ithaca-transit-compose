@@ -45,13 +45,15 @@ fun NavigationController(
 
         composable("settings") {
             SettingsScreen (
-                onAboutClick = {navController.navigateSingleTop("about")},
-                onSupportClick = {navController.navigateSingleTop("support")},
-                onNotificationsAndPrivacyClick = {navController.navigateSingleTop("notifs_privacy")})
+                onAboutClick = { navController.navigateSingleTop("about") },
+                onSupportClick = { navController.navigateSingleTop("support") },
+                onNotificationsAndPrivacyClick = { navController.navigateSingleTop("notifs_privacy") },
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable("about") {
-            AboutScreen()
+            AboutScreen(onBackClick = { navController.popBackStack() })
         }
 
         composable("notifs_privacy") {
@@ -69,7 +71,7 @@ fun NavigationController(
         }
 
         composable("support") {
-            SupportScreen()
+            SupportScreen(onBackClick = { navController.popBackStack() })
         }
     }
 }

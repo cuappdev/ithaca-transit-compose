@@ -2,6 +2,7 @@ package com.cornellappdev.transit.ui.screens.settings
 
 import android.content.Intent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,9 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,11 +35,14 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.components.MemberList
+import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
 private val names = mapOf(
     "iOS" to listOf(
+        "Gabriel Castillo",
+        "Isha Nagireddy",
         "Angelina Chen",
         "Asen Ou",
         "Jayson Hahn",
@@ -53,6 +60,8 @@ private val names = mapOf(
         "Monica Ong"
     ),
     "Android" to listOf(
+        "Ryan Cheung",
+        "Abigail Labanok",
         "Mihili Herath",
         "Jonathan Chen",
         "Veronica Starchenko",
@@ -70,6 +79,7 @@ private val names = mapOf(
         "Abdullah Islam"
     ),
     "Design" to listOf(
+        "Seojin Park",
         "Gillian Fang",
         "Leah Kim",
         "Amy Ge",
@@ -81,6 +91,8 @@ private val names = mapOf(
         "Mind Apivessa"
     ),
     "Marketing" to listOf(
+        "Maya Levine",
+        "Nina Zambrano",
         "Anvi Savant",
         "Christine Tao",
         "Luke Stewart",
@@ -92,6 +104,7 @@ private val names = mapOf(
         "Catherine Wei"
     ),
     "Backend" to listOf(
+        "Wyatt Cox",
         "Nicole Qiu",
         "Daisy Chang",
         "Lauren Ah-Hot",
@@ -110,9 +123,9 @@ private val names = mapOf(
  * Composable for the About Screen of the app, which displays information about team behind it.
  */
 @Composable
-fun AboutScreen() {
+fun AboutScreen(onBackClick: () -> Unit) {
     val context = LocalContext.current
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -120,6 +133,15 @@ fun AboutScreen() {
     )
 
     {
+        IconButton(onClick = onBackClick) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
+                contentDescription = "Go back",
+                tint = IconGray,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
         Text(
             text = stringResource(R.string.about_text),
             fontSize = 32.sp,
@@ -180,6 +202,7 @@ fun AboutScreen() {
             )
             MemberList(
                 listOf(
+                    "Nina Zambrano",
                     "Anvi Savant",
                     "Cindy Liang",
                     "Maxwell Pang",
@@ -233,5 +256,5 @@ fun AboutScreen() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewAboutScreen() {
-    AboutScreen()
+    AboutScreen {}
 }
