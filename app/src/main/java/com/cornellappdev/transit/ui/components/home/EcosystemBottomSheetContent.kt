@@ -85,6 +85,7 @@ fun EcosystemBottomSheetContent(
     showFilterSheet: Boolean,
     onFilterSheetShow: () -> Unit,
     onAddFavoritesClick: () -> Unit,
+    onRequestHotspotClick: () -> Unit = {},
     selectedFilters: Set<FavoritesFilterSheetState>,
     appliedFilters: Set<FavoritesFilterSheetState>,
     favoritesFilterList: List<FavoritesFilterSheetState>,
@@ -141,6 +142,7 @@ fun EcosystemBottomSheetContent(
             onFavoriteStarClick = onFavoriteStarClick,
             onFilterButtonClick = onFilterSheetShow,
             onAddFavoritesClick = onAddFavoritesClick,
+            onRequestHotspotClick = onRequestHotspotClick,
             appliedFilters = appliedFilters,
             onRemoveAppliedFilter = onRemoveAppliedFilter,
             operatingHoursToString = operatingHoursToString,
@@ -178,6 +180,7 @@ private fun BottomSheetFilteredContent(
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     onFavoriteStarClick: (Place) -> Unit,
     onAddFavoritesClick: () -> Unit,
+    onRequestHotspotClick: () -> Unit,
     onFilterButtonClick: () -> Unit,
     appliedFilters: Set<FavoritesFilterSheetState>,
     onRemoveAppliedFilter: (FavoritesFilterSheetState) -> Unit,
@@ -284,7 +287,9 @@ private fun BottomSheetFilteredContent(
                     }
 
                     FilterState.HOTSPOTS -> {
-                        hotspotList()
+                        hotspotList(
+                            onRequestHotspotClick = onRequestHotspotClick
+                        )
                     }
                 }
             }
@@ -292,8 +297,16 @@ private fun BottomSheetFilteredContent(
     }
 }
 
-private fun LazyListScope.hotspotList() {
-    infoItem("Hotspots coming soon")
+private fun LazyListScope.hotspotList(
+    onRequestHotspotClick: () -> Unit,
+) {
+    item {
+        Spacer(modifier = Modifier.height(8.dp))
+        PillButton(
+            onClick = onRequestHotspotClick,
+            text = "Request Hotspot"
+        )
+    }
 }
 
 /**
@@ -317,7 +330,10 @@ private fun LazyListScope.favoriteList(
 ) {
     item {
         Spacer(modifier = Modifier.height(8.dp))
-        AddFavoritesButton(onAddFavoritesClick = onAddFavoritesClick)
+        PillButton(
+            onClick = onAddFavoritesClick,
+            text = "Add Favorites",
+        )
     }
 
     items(
@@ -944,6 +960,7 @@ private fun PreviewBottomSheetFilteredContentFavorites() {
         onDetailsClick = {},
         onFavoriteStarClick = {},
         onAddFavoritesClick = {},
+        onRequestHotspotClick = {},
         onFilterButtonClick = {},
         appliedFilters = setOf(
             FavoritesFilterSheetState.EATERIES,

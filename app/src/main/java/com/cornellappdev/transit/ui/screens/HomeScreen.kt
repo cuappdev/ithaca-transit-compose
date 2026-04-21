@@ -67,6 +67,7 @@ import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.components.home.DetailedPlaceSheetContent
 import com.cornellappdev.transit.ui.components.home.EcosystemBottomSheetContent
 import com.cornellappdev.transit.ui.components.home.HomeScreenMarkers
+import com.cornellappdev.transit.ui.components.home.RequestHotspotSheet
 import com.cornellappdev.transit.util.navigateSingleTop
 import com.cornellappdev.transit.ui.theme.DetailsHeaderGray
 import com.cornellappdev.transit.ui.theme.DividerGray
@@ -135,8 +136,12 @@ fun HomeScreen(
     }
 
     val showAddFavoritesSheet by homeViewModel.showAddFavoritesSheet.collectAsStateWithLifecycle()
+    val showRequestHotspotSheet by homeViewModel.showRequestHotspotSheet.collectAsStateWithLifecycle()
 
     val addFavoritesSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+    val requestHotspotSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
 
@@ -389,6 +394,9 @@ fun HomeScreen(
                             onAddFavoritesClick = {
                                 homeViewModel.toggleAddFavoritesSheet(true)
                             },
+                            onRequestHotspotClick = {
+                                homeViewModel.toggleRequestHotspotSheet(true)
+                            },
                             showFilterSheet = showFilterSheet,
                             onFilterSheetShow = homeViewModel::openFilterSheet,
                             selectedFilters = selectedFilters,
@@ -488,6 +496,28 @@ fun HomeScreen(
                 },
                 onQueryChange = homeViewModel::onAddQueryChange,
                 onClearChange = homeViewModel::clearAddQuery
+            )
+        }
+    }
+
+    if (showRequestHotspotSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { homeViewModel.toggleRequestHotspotSheet(false) },
+            sheetState = requestHotspotSheetState,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            containerColor = Color(0xFFFDFDFD)
+        ) {
+            RequestHotspotSheet(
+                onDismiss = { homeViewModel.toggleRequestHotspotSheet(false) },
+                onSubmit = {
+                    homeViewModel.toggleRequestHotspotSheet(false)
+                    // TODO: Connect to backend
+                    Toast.makeText(
+                        context,
+                        "Hotspot request submitted",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             )
         }
     }
