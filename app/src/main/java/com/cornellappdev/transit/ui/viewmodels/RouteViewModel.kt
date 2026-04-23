@@ -16,7 +16,10 @@ import com.cornellappdev.transit.models.SelectedRouteRepository
 import com.cornellappdev.transit.models.UserPreferenceRepository
 import com.cornellappdev.transit.models.search.UnifiedSearchRepository
 import com.cornellappdev.transit.networking.ApiResponse
+import com.cornellappdev.transit.util.LEAVE_AT_MAX_DISPLAYED_ROUTES
 import com.cornellappdev.transit.util.TimeUtils
+import com.cornellappdev.transit.util.filterAndSortForArriveBy
+import com.cornellappdev.transit.util.filterAndSortForLeaveCutoff
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -96,6 +99,33 @@ class RouteViewModel @Inject constructor(
 
 
     val lastRouteFlow: StateFlow<ApiResponse<RouteOptions>> = routeRepository.lastRouteFlow
+
+    val displayedRouteFlow: StateFlow<ApiResponse<RouteOptions>> =
+        combine(lastRouteFlow, arriveByFlow) { routeResponse, arriveByState ->
+            if (routeResponse is ApiResponse.Success) {
+                val processed = when (arriveByState) {
+                    is ArriveByUIState.ArriveBy -> routeResponse.data.filterAndSortForArriveBy(
+                        arriveByState.date.toInstant()
+                    )
+
+                    is ArriveByUIState.LeaveAt -> routeResponse.data.filterAndSortForLeaveCutoff(
+                        cutoff = arriveByState.date.toInstant(),
+                        maxRoutes = LEAVE_AT_MAX_DISPLAYED_ROUTES
+                    )
+
+                    is ArriveByUIState.LeaveNow -> routeResponse.data.filterAndSortForLeaveCutoff(
+                        cutoff = Instant.now()
+                    )
+                }
+                ApiResponse.Success(processed)
+            } else {
+                routeResponse
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ApiResponse.Pending
+        )
 
     /**
      * Default map location

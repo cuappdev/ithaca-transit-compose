@@ -108,7 +108,7 @@ fun RouteScreen(
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    val lastRoute = routeViewModel.lastRouteFlow.collectAsState().value
+    val lastRoute = routeViewModel.displayedRouteFlow.collectAsState().value
 
     val startSheetState =
         rememberModalBottomSheetState(
