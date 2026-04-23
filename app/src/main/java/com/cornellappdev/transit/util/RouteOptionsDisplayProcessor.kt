@@ -80,9 +80,9 @@ private fun Route.walkingDurationBeforeFirstBoardingOrNull(): Duration? {
 private fun Route.isLegalForLeaveCutoff(cutoff: Instant): Boolean {
     val firstBoardingDeparture = firstBoardingDepartureInstantOrNull()
 
-    // Walking-only routes can always start at the chosen leave cutoff.
+    // Only walking-only routes can treat missing boarding departure as legal.
     if (firstBoardingDeparture == null) {
-        return true
+        return !isTransitRoute()
     }
 
     val initialWalkingDuration = walkingDurationBeforeFirstBoardingOrNull() ?: return false
@@ -293,7 +293,19 @@ fun RouteOptions.filterAndSortForLeaveCutoff(
     val ranked = (if (fallbackTransit != null) preferred + fallbackTransit else preferred)
         .sortedWith { left, right -> compareByEffectiveLeaveTime(left, right, cutoff) }
 
-    return (if (maxRoutes != null) ranked.take(maxRoutes) else ranked).toRouteOptions()
+    val finalRoutes = if (maxRoutes != null) {
+        val initialSlice = ranked.take(maxRoutes)
+        if (fallbackTransit != null && maxRoutes > 0 && fallbackTransit !in initialSlice) {
+            (initialSlice.dropLast(1) + fallbackTransit)
+                .sortedWith { left, right -> compareByEffectiveLeaveTime(left, right, cutoff) }
+        } else {
+            initialSlice
+        }
+    } else {
+        ranked
+    }
+
+    return finalRoutes.toRouteOptions()
 }
 
 
