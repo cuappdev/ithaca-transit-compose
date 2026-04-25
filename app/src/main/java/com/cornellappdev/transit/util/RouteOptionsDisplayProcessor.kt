@@ -1,23 +1,77 @@
 package com.cornellappdev.transit.util
 
+import android.util.Log
 import com.cornellappdev.transit.models.DirectionType
 import com.cornellappdev.transit.models.Route
 import com.cornellappdev.transit.models.RouteOptions
 import java.time.Duration
 import java.time.Instant
 
-/** Parse an ISO-8601 instant string and return null when parsing fails. */
-private fun String.toInstantOrNull(): Instant? = runCatching { Instant.parse(this) }.getOrNull()
+/** Log tag for aggregated route-processing diagnostics emitted by this file. */
+private const val ROUTE_OPTIONS_DISPLAY_TAG = "RouteOptionsDisplay"
 
+/**
+ * Normalized reasons a route can be treated as invalid/malformed during display processing.
+ *
+ * Keys are stable for log aggregation and quick telemetry filtering.
+ */
+private sealed class RouteProcessingFailure(val key: String) {
+    object InvalidDirectionStartTime : RouteProcessingFailure("invalid_direction_start_time")
+    object InvalidDirectionEndTime : RouteProcessingFailure("invalid_direction_end_time")
+    object InvalidRouteDepartureTime : RouteProcessingFailure("invalid_route_departure_time")
+    object InvalidRouteArrivalTime : RouteProcessingFailure("invalid_route_arrival_time")
+    object InvalidDirectionDuration : RouteProcessingFailure("invalid_direction_duration")
+    object InvalidTripDuration : RouteProcessingFailure("invalid_trip_duration")
+    object MissingDirectionsForArrivalFallback : RouteProcessingFailure("missing_directions_for_arrival_fallback")
+    object UnresolvedArrivalTime : RouteProcessingFailure("unresolved_arrival_time")
+}
+
+/**
+ * Aggregates parsing/validation failures during a single processing pass and logs once at the end.
+ */
+private class RouteProcessingDiagnostics(private val mode: String) {
+    private val failureCounts = linkedMapOf<String, Int>()
+
+    fun record(failure: RouteProcessingFailure) {
+        failureCounts[failure.key] = (failureCounts[failure.key] ?: 0) + 1
+    }
+
+    fun logIfAny() {
+        if (failureCounts.isEmpty()) return
+        val details = failureCounts.entries.joinToString { (key, count) -> "$key=$count" }
+        Log.w(ROUTE_OPTIONS_DISPLAY_TAG, "mode=$mode dropped routes due to malformed timing data: $details")
+    }
+}
+
+/** Parse an ISO-8601 instant string and report parse failures while preserving null-on-failure behavior. */
+private fun String.toInstantOrNull(
+    diagnostics: RouteProcessingDiagnostics? = null,
+    failure: RouteProcessingFailure,
+): Instant? {
+    return runCatching { Instant.parse(this) }
+        .getOrElse {
+            diagnostics?.record(failure)
+            null
+        }
+}
+
+/** Logical source section used to flatten and later reconstruct [RouteOptions]. */
 private enum class RouteSection {
     FROM_STOP,
     BOARDING_SOON,
     WALKING,
 }
 
+/** Route paired with its originating display section while processing pipelines run. */
 private data class SectionedRoute(
     val section: RouteSection,
     val route: Route,
+)
+
+/** Time-and-distance effort tuple used for walking-vs-transit preference comparisons. */
+private data class RouteEffort(
+    val duration: Duration,
+    val distance: Double,
 )
 
 /** Flatten sectioned route options into a single list while preserving section labels. */
@@ -46,9 +100,14 @@ private fun List<SectionedRoute>.toRouteOptions(): RouteOptions {
  * Effective first bus departure for a route, including positive delay on the first DEPART segment.
  * Returns null for walking-only routes or malformed timestamps.
  */
-private fun Route.firstBoardingDepartureInstantOrNull(): Instant? {
+private fun Route.firstBoardingDepartureInstantOrNull(
+    diagnostics: RouteProcessingDiagnostics? = null,
+): Instant? {
     val firstDepartDirection = directions.firstOrNull { it.type == DirectionType.DEPART } ?: return null
-    val scheduledStart = firstDepartDirection.startTime.toInstantOrNull() ?: return null
+    val scheduledStart = firstDepartDirection.startTime.toInstantOrNull(
+        diagnostics = diagnostics,
+        failure = RouteProcessingFailure.InvalidDirectionStartTime,
+    ) ?: return null
     val delaySeconds = (firstDepartDirection.delay ?: 0).coerceAtLeast(0)
     return scheduledStart.plusSeconds(delaySeconds.toLong())
 }
@@ -57,16 +116,27 @@ private fun Route.firstBoardingDepartureInstantOrNull(): Instant? {
  * Total duration of directions before the first DEPART segment.
  * Returns [Duration.ZERO] when route starts with transit or has no DEPART segment.
  */
-private fun Route.walkingDurationBeforeFirstBoardingOrNull(): Duration? {
+private fun Route.walkingDurationBeforeFirstBoardingOrNull(
+    diagnostics: RouteProcessingDiagnostics? = null,
+): Duration? {
     val firstDepartIndex = directions.indexOfFirst { it.type == DirectionType.DEPART }
     if (firstDepartIndex <= 0) return Duration.ZERO
 
     var total = Duration.ZERO
     for (direction in directions.take(firstDepartIndex)) {
-        val start = direction.startTime.toInstantOrNull() ?: return null
-        val end = direction.endTime.toInstantOrNull() ?: return null
+        val start = direction.startTime.toInstantOrNull(
+            diagnostics = diagnostics,
+            failure = RouteProcessingFailure.InvalidDirectionStartTime,
+        ) ?: return null
+        val end = direction.endTime.toInstantOrNull(
+            diagnostics = diagnostics,
+            failure = RouteProcessingFailure.InvalidDirectionEndTime,
+        ) ?: return null
         val segmentDuration = Duration.between(start, end)
-        if (segmentDuration.isNegative) return null
+        if (segmentDuration.isNegative) {
+            diagnostics?.record(RouteProcessingFailure.InvalidDirectionDuration)
+            return null
+        }
         total = total.plus(segmentDuration)
     }
     return total
@@ -77,15 +147,18 @@ private fun Route.walkingDurationBeforeFirstBoardingOrNull(): Duration? {
  * - walking-only routes are always legal to start at cutoff,
  * - transit routes are legal only if user can complete initial walking before first boarding.
  */
-private fun Route.isLegalForLeaveCutoff(cutoff: Instant): Boolean {
-    val firstBoardingDeparture = firstBoardingDepartureInstantOrNull()
+private fun Route.isLegalForLeaveCutoff(
+    cutoff: Instant,
+    diagnostics: RouteProcessingDiagnostics? = null,
+): Boolean {
+    val firstBoardingDeparture = firstBoardingDepartureInstantOrNull(diagnostics)
 
     // Only walking-only routes can treat missing boarding departure as legal.
     if (firstBoardingDeparture == null) {
         return !isTransitRoute()
     }
 
-    val initialWalkingDuration = walkingDurationBeforeFirstBoardingOrNull() ?: return false
+    val initialWalkingDuration = walkingDurationBeforeFirstBoardingOrNull(diagnostics) ?: return false
     val readyToBoardAt = cutoff.plus(initialWalkingDuration)
 
     // Strictly before departure to avoid showing routes where the bus leaves as walking completes.
@@ -93,39 +166,59 @@ private fun Route.isLegalForLeaveCutoff(cutoff: Instant): Boolean {
 }
 
 /** Departure instant used to rank leave-mode routes. */
-private fun Route.leaveRankingDepartureInstantOrNull(): Instant? {
-    return firstBoardingDepartureInstantOrNull() ?: departureTime.toInstantOrNull()
+private fun Route.leaveRankingDepartureInstantOrNull(
+    diagnostics: RouteProcessingDiagnostics? = null,
+): Instant? {
+    return firstBoardingDepartureInstantOrNull(diagnostics) ?: departureTime.toInstantOrNull(
+        diagnostics = diagnostics,
+        failure = RouteProcessingFailure.InvalidRouteDepartureTime,
+    )
 }
 
 /** Effective leave instant from user perspective; falls back to cutoff for walking-only routes. */
-private fun Route.effectiveLeaveInstantOrNull(cutoff: Instant): Instant? {
-    return firstBoardingDepartureInstantOrNull() ?: cutoff
+private fun Route.effectiveLeaveInstantOrNull(
+    cutoff: Instant,
+    diagnostics: RouteProcessingDiagnostics? = null,
+): Instant? {
+    return firstBoardingDepartureInstantOrNull(diagnostics) ?: cutoff
 }
 
 /**
  * Instant used for leave-mode horizon bounds.
  * For transit, prefer route start time; for walking-only routes, use the user cutoff.
  */
-private fun Route.horizonReferenceInstantOrNull(cutoff: Instant): Instant? {
+private fun Route.horizonReferenceInstantOrNull(
+    cutoff: Instant,
+    diagnostics: RouteProcessingDiagnostics? = null,
+): Instant? {
     // Use route start time for horizon checks so initial walking/waiting doesn't over-prune options.
     return if (isTransitRoute()) {
-        departureTime.toInstantOrNull() ?: effectiveLeaveInstantOrNull(cutoff)
+        departureTime.toInstantOrNull(
+            diagnostics = diagnostics,
+            failure = RouteProcessingFailure.InvalidRouteDepartureTime,
+        ) ?: effectiveLeaveInstantOrNull(cutoff, diagnostics)
     } else {
         cutoff
     }
 }
 
-private data class RouteEffort(
-    val duration: Duration,
-    val distance: Double,
-)
-
 /** Compute effort tuple used for walking-vs-transit preference decisions. */
-private fun Route.effortOrNull(): RouteEffort? {
-    val departureInstant = departureTime.toInstantOrNull() ?: return null
-    val arrivalInstant = arrivalTime.toInstantOrNull() ?: return null
+private fun Route.effortOrNull(
+    diagnostics: RouteProcessingDiagnostics? = null,
+): RouteEffort? {
+    val departureInstant = departureTime.toInstantOrNull(
+        diagnostics = diagnostics,
+        failure = RouteProcessingFailure.InvalidRouteDepartureTime,
+    ) ?: return null
+    val arrivalInstant = arrivalTime.toInstantOrNull(
+        diagnostics = diagnostics,
+        failure = RouteProcessingFailure.InvalidRouteArrivalTime,
+    ) ?: return null
     val tripDuration = Duration.between(departureInstant, arrivalInstant)
-    if (tripDuration.isNegative) return null
+    if (tripDuration.isNegative) {
+        diagnostics?.record(RouteProcessingFailure.InvalidTripDuration)
+        return null
+    }
     return RouteEffort(duration = tripDuration, distance = travelDistance)
 }
 
@@ -136,26 +229,48 @@ private fun Route.isTransitRoute(): Boolean = directions.any { it.type == Direct
  * Best-effort arrival instant for Arrive By checks.
  * Uses top-level route arrival first, then falls back to last direction endTime (+delay).
  */
-private fun Route.effectiveArrivalInstantOrNull(): Instant? {
-    val routeArrival = arrivalTime.toInstantOrNull()
+private fun Route.effectiveArrivalInstantOrNull(
+    diagnostics: RouteProcessingDiagnostics? = null,
+): Instant? {
+    val routeArrival = arrivalTime.toInstantOrNull(
+        diagnostics = diagnostics,
+        failure = RouteProcessingFailure.InvalidRouteArrivalTime,
+    )
     if (routeArrival != null) return routeArrival
 
-    val lastDirection = directions.lastOrNull() ?: return null
-    val endInstant = lastDirection.endTime.toInstantOrNull() ?: return null
+    val lastDirection = directions.lastOrNull()
+    if (lastDirection == null) {
+        diagnostics?.record(RouteProcessingFailure.MissingDirectionsForArrivalFallback)
+        diagnostics?.record(RouteProcessingFailure.UnresolvedArrivalTime)
+        return null
+    }
+
+    val endInstant = lastDirection.endTime.toInstantOrNull(
+        diagnostics = diagnostics,
+        failure = RouteProcessingFailure.InvalidDirectionEndTime,
+    )
+    if (endInstant == null) {
+        diagnostics?.record(RouteProcessingFailure.UnresolvedArrivalTime)
+        return null
+    }
+
     val delaySeconds = (lastDirection.delay ?: 0).coerceAtLeast(0)
     return endInstant.plusSeconds(delaySeconds.toLong())
 }
 
 /** True when route arrives on or before provided cutoff (including grace already applied by caller). */
-private fun Route.arrivesBy(cutoffWithGrace: Instant): Boolean {
-    val arrivalInstant = effectiveArrivalInstantOrNull() ?: return false
+private fun Route.arrivesBy(
+    cutoffWithGrace: Instant,
+    diagnostics: RouteProcessingDiagnostics? = null,
+): Boolean {
+    val arrivalInstant = effectiveArrivalInstantOrNull(diagnostics) ?: return false
     return !arrivalInstant.isAfter(cutoffWithGrace)
 }
 
 /** Comparator for Arrive By ordering: latest departure first, then shorter distance. */
 private fun compareArriveByRoutes(left: Route, right: Route): Int {
-    val leftDeparture = left.departureTime.toInstantOrNull()
-    val rightDeparture = right.departureTime.toInstantOrNull()
+    val leftDeparture = left.departureTime.toInstantOrNull(failure = RouteProcessingFailure.InvalidRouteDepartureTime)
+    val rightDeparture = right.departureTime.toInstantOrNull(failure = RouteProcessingFailure.InvalidRouteDepartureTime)
 
     return when {
         leftDeparture == null && rightDeparture == null -> 0
@@ -173,8 +288,9 @@ private fun Route.isWithinLeaveHorizon(
     cutoff: Instant,
     earliestAllowed: Instant,
     horizonEnd: Instant,
+    diagnostics: RouteProcessingDiagnostics? = null,
 ): Boolean {
-    val routeDeparture = horizonReferenceInstantOrNull(cutoff) ?: return false
+    val routeDeparture = horizonReferenceInstantOrNull(cutoff, diagnostics) ?: return false
     return !routeDeparture.isBefore(earliestAllowed) && !routeDeparture.isAfter(horizonEnd)
 }
 
@@ -185,8 +301,9 @@ private fun Route.isWithinLeaveHorizon(
 private fun Route.isPreferredTransitAgainstWalking(
     walkingEffort: RouteEffort,
     tieBuffer: Duration,
+    diagnostics: RouteProcessingDiagnostics? = null,
 ): Boolean {
-    val transitEffort = effortOrNull() ?: return false
+    val transitEffort = effortOrNull(diagnostics) ?: return false
 
     val transitSignificantlyFaster =
         transitEffort.duration.plus(tieBuffer).compareTo(walkingEffort.duration) < 0
@@ -218,13 +335,16 @@ private fun compareByEffectiveLeaveTime(
  * Section-level Arrive By filtering and ordering.
  * Keeps routes that arrive by cutoff (with grace), then sorts by latest departure first.
  */
-private fun List<Route>?.filterAndSortRoutesForArriveBy(cutoff: Instant): List<Route>? {
+private fun List<Route>?.filterAndSortRoutesForArriveBy(
+    cutoff: Instant,
+    diagnostics: RouteProcessingDiagnostics? = null,
+): List<Route>? {
     if (this == null) return null
 
     val cutoffWithGrace = cutoff.plus(Duration.ofMinutes(ARRIVE_BY_CUTOFF_GRACE_MINUTES))
 
     return this
-        .filter { route -> route.arrivesBy(cutoffWithGrace) }
+        .filter { route -> route.arrivesBy(cutoffWithGrace, diagnostics) }
         .sortedWith(::compareArriveByRoutes)
 }
 
@@ -233,11 +353,16 @@ private fun List<Route>?.filterAndSortRoutesForArriveBy(cutoff: Instant): List<R
  * Routes are filtered by arrival cutoff and sorted within each section.
  */
 fun RouteOptions.filterAndSortForArriveBy(cutoff: Instant): RouteOptions {
-    return RouteOptions(
-        fromStop = fromStop.filterAndSortRoutesForArriveBy(cutoff),
-        boardingSoon = boardingSoon.filterAndSortRoutesForArriveBy(cutoff),
-        walking = walking.filterAndSortRoutesForArriveBy(cutoff)
+    val diagnostics = RouteProcessingDiagnostics(mode = "arrive_by")
+
+    val processed = RouteOptions(
+        fromStop = fromStop.filterAndSortRoutesForArriveBy(cutoff, diagnostics),
+        boardingSoon = boardingSoon.filterAndSortRoutesForArriveBy(cutoff, diagnostics),
+        walking = walking.filterAndSortRoutesForArriveBy(cutoff, diagnostics)
     )
+    diagnostics.logIfAny()
+
+    return processed
 }
 
 /**
@@ -258,46 +383,62 @@ fun RouteOptions.filterAndSortForLeaveCutoff(
     horizonMinutes: Long = LEAVE_CUTOFF_HORIZON_MINUTES,
     walkingTransitTieMinutes: Long = WALKING_TRANSIT_TIE_MINUTES,
 ): RouteOptions {
+    val diagnostics = RouteProcessingDiagnostics(mode = "leave_cutoff")
     val horizonEnd = cutoff.plus(Duration.ofMinutes(horizonMinutes))
     val earliestAllowed = cutoff.minus(Duration.ofMinutes(LEAVE_CUTOFF_GRACE_MINUTES))
 
-    val eligibleRoutes = flattenBySection()
-        .filter { (_, route) -> route.isLegalForLeaveCutoff(cutoff) }
-        .filter { (_, route) -> route.isWithinLeaveHorizon(cutoff, earliestAllowed, horizonEnd) }
+    // Cache per-route transit status so we do not rescan directions in downstream filters.
+    data class LeaveCandidate(
+        val sectionedRoute: SectionedRoute,
+        val isTransit: Boolean,
+    )
 
-    val bestWalkingEffort = eligibleRoutes
-        .map { it.route }
-        .filter { !it.isTransitRoute() }
-        .mapNotNull { it.effortOrNull() }
+    val eligibleCandidates = flattenBySection()
+        .filter { (_, route) -> route.isLegalForLeaveCutoff(cutoff, diagnostics) }
+        .filter { (_, route) -> route.isWithinLeaveHorizon(cutoff, earliestAllowed, horizonEnd, diagnostics) }
+        .map { sectionedRoute ->
+            LeaveCandidate(
+                sectionedRoute = sectionedRoute,
+                isTransit = sectionedRoute.route.isTransitRoute(),
+            )
+        }
+
+    val bestWalkingEffort = eligibleCandidates
+        .filter { !it.isTransit }
+        .mapNotNull { it.sectionedRoute.route.effortOrNull(diagnostics) }
         .minWithOrNull(compareBy<RouteEffort> { it.duration }.thenBy { it.distance })
 
     val tieBuffer = Duration.ofMinutes(walkingTransitTieMinutes)
 
-    val preferred = eligibleRoutes
-        .filter { (_, route) ->
-            if (!route.isTransitRoute()) return@filter true
+    val preferred = eligibleCandidates
+        .filter { candidate ->
+            if (!candidate.isTransit) return@filter true
 
             val walkingEffort = bestWalkingEffort ?: return@filter true
-            route.isPreferredTransitAgainstWalking(walkingEffort, tieBuffer)
+            candidate.sectionedRoute.route.isPreferredTransitAgainstWalking(walkingEffort, tieBuffer, diagnostics)
         }
 
-    val fallbackTransit = if (preferred.any { it.route.isTransitRoute() }) {
+    val fallbackTransit = if (preferred.any { it.isTransit }) {
         null
     } else {
-        eligibleRoutes
+        eligibleCandidates
             .asSequence()
-            .filter { it.route.isTransitRoute() }
-            .minByOrNull { it.route.effectiveLeaveInstantOrNull(cutoff) ?: Instant.MAX }
+            .filter { it.isTransit }
+            .minByOrNull { it.sectionedRoute.route.effectiveLeaveInstantOrNull(cutoff, diagnostics) ?: Instant.MAX }
     }
 
     val ranked = (if (fallbackTransit != null) preferred + fallbackTransit else preferred)
-        .sortedWith { left, right -> compareByEffectiveLeaveTime(left, right, cutoff) }
+        .sortedWith { left, right ->
+            compareByEffectiveLeaveTime(left.sectionedRoute, right.sectionedRoute, cutoff)
+        }
 
     val finalRoutes = if (maxRoutes != null) {
         val initialSlice = ranked.take(maxRoutes)
         if (fallbackTransit != null && maxRoutes > 0 && fallbackTransit !in initialSlice) {
             (initialSlice.dropLast(1) + fallbackTransit)
-                .sortedWith { left, right -> compareByEffectiveLeaveTime(left, right, cutoff) }
+                .sortedWith { left, right ->
+                    compareByEffectiveLeaveTime(left.sectionedRoute, right.sectionedRoute, cutoff)
+                }
         } else {
             initialSlice
         }
@@ -305,11 +446,7 @@ fun RouteOptions.filterAndSortForLeaveCutoff(
         ranked
     }
 
-    return finalRoutes.toRouteOptions()
+    diagnostics.logIfAny()
+
+    return finalRoutes.map { it.sectionedRoute }.toRouteOptions()
 }
-
-
-
-
-
-
