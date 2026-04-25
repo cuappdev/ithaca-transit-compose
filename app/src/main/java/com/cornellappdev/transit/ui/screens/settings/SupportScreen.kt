@@ -8,9 +8,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.cornellappdev.transit.R
+import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
 
@@ -33,7 +37,7 @@ import com.cornellappdev.transit.ui.theme.robotoFamily
  * report issues.
  */
 @Composable
-fun SupportScreen() {
+fun SupportScreen(onBackClick: () -> Unit) {
     val context = LocalContext.current
     Column(
         modifier = Modifier
@@ -42,6 +46,15 @@ fun SupportScreen() {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     )
     {
+        IconButton(onClick = onBackClick) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
+                contentDescription = "Go back",
+                tint = IconGray,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
         Text(
             text = "Support",
             fontSize = 32.sp,
@@ -112,5 +125,5 @@ fun SupportScreen() {
 @Preview(showBackground = true)
 @Composable
 fun SupportScreenPreview() {
-    SupportScreen()
+    SupportScreen {}
 }

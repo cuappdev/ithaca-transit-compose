@@ -237,7 +237,11 @@ fun HomeScreen(
             properties = MapProperties(
                 isMyLocationEnabled = permissionState.status.isGranted
             ),
-            uiSettings = MapUiSettings(zoomControlsEnabled = false, mapToolbarEnabled = false),
+            uiSettings = MapUiSettings(
+                zoomControlsEnabled = false,
+                mapToolbarEnabled = false,
+                myLocationButtonEnabled = false
+            ),
             contentPadding = PaddingValues(
                 bottom = filterSheetState.sheetVisibleHeightDp.orZeroIfUnspecified()
             )
@@ -615,4 +619,3 @@ private fun HomeScreenSearchBar(
 
     }
 }
-

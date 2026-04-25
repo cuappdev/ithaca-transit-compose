@@ -1,5 +1,99 @@
 package com.cornellappdev.transit.util
 
+val ABOUT_POD_LEADS = listOf(
+    "Nina Zambrano",
+    "Anvi Savant",
+    "Cindy Liang",
+    "Maxwell Pang",
+    "Amanda He",
+    "Connor Reinhold",
+    "Omar Rasheed",
+    "Maya Frai",
+    "Matt Barker"
+)
+
+val ABOUT_TEAM_MEMBERS_BY_TEAM = mapOf(
+    "iOS" to listOf(
+        "Gabriel Castillo",
+        "Isha Nagireddy",
+        "Angelina Chen",
+        "Asen Ou",
+        "Jayson Hahn",
+        "Daniel Chuang",
+        "William Ma",
+        "Sergio Diaz",
+        "Kevin Chan",
+        "Omar Rasheed",
+        "Lucy Xu",
+        "Haiying Weng",
+        "Daniel Vebman",
+        "Yana Sang",
+        "Matt Barker",
+        "Austin Astorga",
+        "Monica Ong"
+    ),
+    "Android" to listOf(
+        "Ryan Cheung",
+        "Abigail Labanok",
+        "Mihili Herath",
+        "Jonathan Chen",
+        "Veronica Starchenko",
+        "Adam Kadhim",
+        "Lesley Huang",
+        "Kevin Sun",
+        "Chris Desir",
+        "Connor Reinhold",
+        "Aastha Shah",
+        "Justin Jiang",
+        "Haichen Wang",
+        "Jonvi Rollins",
+        "Preston Rozwood",
+        "Ziwei Gu",
+        "Abdullah Islam"
+    ),
+    "Design" to listOf(
+        "Seojin Park",
+        "Gillian Fang",
+        "Leah Kim",
+        "Amy Ge",
+        "Lauren Jun",
+        "Zain Khoja",
+        "Maggie Ying",
+        "Femi Badero",
+        "Maya Frai",
+        "Mind Apivessa"
+    ),
+    "Marketing" to listOf(
+        "Maya Levine",
+        "Nina Zambrano",
+        "Anvi Savant",
+        "Christine Tao",
+        "Luke Stewart",
+        "Melika Khoshneviszadeh",
+        "Eddie Chi",
+        "Neha Malepati",
+        "Emily Shiang",
+        "Lucy Zhang",
+        "Catherine Wei"
+    ),
+    "Backend" to listOf(
+        "Wyatt Cox",
+        "Nicole Qiu",
+        "Daisy Chang",
+        "Lauren Ah-Hot",
+        "Maxwell Pang",
+        "Mateo Weiner",
+        "Cindy Liang",
+        "Raahi Menon",
+        "Kate Liang",
+        "Alanna Zhou",
+        "Kevin Chan",
+        "Nate Schickler"
+    )
+)
+
+val ABOUT_TEAM_MEMBERS_BY_TEAM_SHUFFLED = ABOUT_TEAM_MEMBERS_BY_TEAM.entries.shuffled().associate { it.toPair() }
+
 private val ABOUT_CONTENT = mapOf(
     "Terrace Restaurant" to "The Terrace often features five to six made-to-order options, such as burritos, pho, gyros, and more throughout the day.",
     "Mac's Café" to "Mac's features grab-and-go deli sandwiches, pizza, chopped salads and healthy smoothies for those looking for a quick bite.",

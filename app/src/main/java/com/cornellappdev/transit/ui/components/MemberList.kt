@@ -8,17 +8,14 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.isActive
+import kotlin.math.abs
 
 /**
  * Compose function to display a list of member items in a horizontal scrolling row.
@@ -26,24 +23,31 @@ import kotlinx.coroutines.launch
  * **/
 @Composable
 fun MemberList(names: List<String>) {
-    var scrolled by remember { mutableStateOf(false) }
-
     val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
+    val isPreview = LocalInspectionMode.current
+    val scrollStep = remember(names) {
+        val seed = names.joinToString(separator = "|").hashCode()
+        80f + (abs(seed) % 120).toFloat()
+    }
+    val repeatCount = if (isPreview) 1 else 80
+    val displayNames = if (names.isEmpty()) emptyList() else List(repeatCount) { names }.flatten()
+    val startIndex = if (isPreview || displayNames.isEmpty()) 0 else displayNames.size / 2
 
-    // Get the screen density and calculate the scroll distance
-    val configuration = LocalConfiguration.current
-    val screenDensity = configuration.densityDpi / 160f
-    val screenWidth = configuration.screenWidthDp.toFloat() * screenDensity
-    val scrollDist = ((screenWidth / 2 + (Math.random() * screenWidth)) * .65).toFloat() * 50000
+    LaunchedEffect(displayNames, isPreview) {
+        if (isPreview || displayNames.size <= 1) return@LaunchedEffect
 
-    // Calculate the total number of items to be displayed to simulate infinite scrolling
-    val nameRepeatCount = 1000
-    val totalItems = nameRepeatCount * names.size
+        listState.scrollToItem(startIndex)
 
-    // Scroll to the middle of the list on first composition
-    LaunchedEffect(Unit) {
-        listState.scrollToItem(totalItems / 2)
+        while (isActive) {
+            listState.animateScrollBy(
+                value = scrollStep,
+                animationSpec = tween(durationMillis = 1600, easing = LinearEasing)
+            )
+
+            if (listState.firstVisibleItemIndex > displayNames.size - 30) {
+                listState.scrollToItem(startIndex)
+            }
+        }
     }
 
     LazyRow(
@@ -51,26 +55,15 @@ fun MemberList(names: List<String>) {
         verticalAlignment = Alignment.CenterVertically,
         state = listState,
     ) {
-        // Trigger animated scroll only once
-        if (!scrolled) {
-            coroutineScope.launch {
-                scrolled = true
-                listState.animateScrollBy(
-                    scrollDist,
-                    tween(250000000, 0, LinearEasing)
-                )
-            }
-        }
-        items(totalItems) { index ->
-            val memberIndex = index % names.size
-            MemberItem(name = names[memberIndex])
+        items(displayNames.size) { index ->
+            MemberItem(name = displayNames[index])
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewMemberList() {
+private fun MemberListPreview() {
     MemberList(
         names = listOf("Alice", "Bob", "Charlie", "David", "Eve")
     )
