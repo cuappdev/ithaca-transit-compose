@@ -2,7 +2,6 @@ package com.cornellappdev.transit.ui.screens.settings
 
 import android.content.Intent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,86 +37,8 @@ import com.cornellappdev.transit.ui.components.MemberList
 import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
-
-private val names = mapOf(
-    "iOS" to listOf(
-        "Gabriel Castillo",
-        "Isha Nagireddy",
-        "Angelina Chen",
-        "Asen Ou",
-        "Jayson Hahn",
-        "Daniel Chuang",
-        "William Ma",
-        "Sergio Diaz",
-        "Kevin Chan",
-        "Omar Rasheed",
-        "Lucy Xu",
-        "Haiying Weng",
-        "Daniel Vebman",
-        "Yana Sang",
-        "Matt Barker",
-        "Austin Astorga",
-        "Monica Ong"
-    ),
-    "Android" to listOf(
-        "Ryan Cheung",
-        "Abigail Labanok",
-        "Mihili Herath",
-        "Jonathan Chen",
-        "Veronica Starchenko",
-        "Adam Kadhim",
-        "Lesley Huang",
-        "Kevin Sun",
-        "Chris Desir",
-        "Connor Reinhold",
-        "Aastha Shah",
-        "Justin Jiang",
-        "Haichen Wang",
-        "Jonvi Rollins",
-        "Preston Rozwood",
-        "Ziwei Gu",
-        "Abdullah Islam"
-    ),
-    "Design" to listOf(
-        "Seojin Park",
-        "Gillian Fang",
-        "Leah Kim",
-        "Amy Ge",
-        "Lauren Jun",
-        "Zain Khoja",
-        "Maggie Ying",
-        "Femi Badero",
-        "Maya Frai",
-        "Mind Apivessa"
-    ),
-    "Marketing" to listOf(
-        "Maya Levine",
-        "Nina Zambrano",
-        "Anvi Savant",
-        "Christine Tao",
-        "Luke Stewart",
-        "Melika Khoshneviszadeh",
-        "Eddie Chi",
-        "Neha Malepati",
-        "Emily Shiang",
-        "Lucy Zhang",
-        "Catherine Wei"
-    ),
-    "Backend" to listOf(
-        "Wyatt Cox",
-        "Nicole Qiu",
-        "Daisy Chang",
-        "Lauren Ah-Hot",
-        "Maxwell Pang",
-        "Mateo Weiner",
-        "Cindy Liang",
-        "Raahi Menon",
-        "Kate Liang",
-        "Alanna Zhou",
-        "Kevin Chan",
-        "Nate Schickler"
-    )
-).entries.shuffled().associate { it.toPair() }
+import com.cornellappdev.transit.util.ABOUT_POD_LEADS
+import com.cornellappdev.transit.util.ABOUT_TEAM_MEMBERS_BY_TEAM_SHUFFLED
 
 /**
  * Composable for the About Screen of the app, which displays information about team behind it.
@@ -201,21 +122,11 @@ fun AboutScreen(onBackClick: () -> Unit) {
                     .width(80.dp)
             )
             MemberList(
-                listOf(
-                    "Nina Zambrano",
-                    "Anvi Savant",
-                    "Cindy Liang",
-                    "Maxwell Pang",
-                    "Amanda He",
-                    "Connor Reinhold",
-                    "Omar Rasheed",
-                    "Maya Frai",
-                    "Matt Barker"
-                )
+                ABOUT_POD_LEADS
             )
         }
 
-        for ((team, members) in names) {
+        for ((team, members) in ABOUT_TEAM_MEMBERS_BY_TEAM_SHUFFLED) {
             Row {
                 Text(
                     text = team,
@@ -255,6 +166,6 @@ fun AboutScreen(onBackClick: () -> Unit) {
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewAboutScreen() {
+private fun AboutScreenPreview() {
     AboutScreen {}
 }
