@@ -22,7 +22,6 @@ const val LEAVE_CUTOFF_HORIZON_MINUTES = 45L
 
 const val LEAVE_CUTOFF_GRACE_MINUTES = 2L
 
-const val ARRIVE_BY_CUTOFF_GRACE_MINUTES = 2L
 
 // Hide transit options when walking arrives at the same time or sooner (+ tie buffer).
 const val WALKING_TRANSIT_TIE_MINUTES = 1L

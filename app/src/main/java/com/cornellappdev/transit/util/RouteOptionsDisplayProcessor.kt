@@ -258,13 +258,13 @@ private fun Route.effectiveArrivalInstantOrNull(
     return endInstant.plusSeconds(delaySeconds.toLong())
 }
 
-/** True when route arrives on or before provided cutoff (including grace already applied by caller). */
+/** True when route arrives on or before provided cutoff (strict, no grace period). */
 private fun Route.arrivesBy(
-    cutoffWithGrace: Instant,
+    cutoff: Instant,
     diagnostics: RouteProcessingDiagnostics? = null,
 ): Boolean {
     val arrivalInstant = effectiveArrivalInstantOrNull(diagnostics) ?: return false
-    return !arrivalInstant.isAfter(cutoffWithGrace)
+    return !arrivalInstant.isAfter(cutoff)
 }
 
 /** Comparator for Arrive By ordering: latest departure first, then shorter distance. */
@@ -333,7 +333,7 @@ private fun compareByEffectiveLeaveTime(
 
 /**
  * Section-level Arrive By filtering and ordering.
- * Keeps routes that arrive by cutoff (with grace), then sorts by latest departure first.
+ * Keeps routes that arrive by cutoff, then sorts by latest departure first.
  */
 private fun List<Route>?.filterAndSortRoutesForArriveBy(
     cutoff: Instant,
@@ -341,10 +341,8 @@ private fun List<Route>?.filterAndSortRoutesForArriveBy(
 ): List<Route>? {
     if (this == null) return null
 
-    val cutoffWithGrace = cutoff.plus(Duration.ofMinutes(ARRIVE_BY_CUTOFF_GRACE_MINUTES))
-
     return this
-        .filter { route -> route.arrivesBy(cutoffWithGrace, diagnostics) }
+        .filter { route -> route.arrivesBy(cutoff, diagnostics) }
         .sortedWith(::compareArriveByRoutes)
 }
 
