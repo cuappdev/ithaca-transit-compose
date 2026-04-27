@@ -39,6 +39,7 @@ fun EateryDetailsContent(
     eatery: Eatery,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
+    onDeepLinkClick: () -> Unit,
     distanceString: String,
 ) {
     Column(
@@ -93,31 +94,13 @@ fun EateryDetailsContent(
         val (annotatedString, inlineContent) =
             stringResource(R.string.view_menu).createDeepLink(R.drawable.eaterylink)
 
-        val context = LocalContext.current
-
         Text(
             text = annotatedString,
             inlineContent = inlineContent,
             style = Style.heading2,
             color = TransitBlue,
             modifier = Modifier.clickable(
-                onClick = {
-                    val eateryPackage = "com.cornellappdev.android.eatery"
-                    val eateryIntent = context.packageManager.getLaunchIntentForPackage(eateryPackage)
-
-                    if (eateryIntent != null) {
-                        context.startActivity(eateryIntent)
-                    } else {
-                        try {
-                            val playStoreIntent = Intent(Intent.ACTION_VIEW, "market://details?id=$eateryPackage".toUri())
-                            playStoreIntent.setPackage("com.android.vending")
-                            context.startActivity(playStoreIntent)
-                        } catch (e2: ActivityNotFoundException) {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$eateryPackage}".toUri()))
-
-                        }
-                    }
-                }
+                onClick = onDeepLinkClick
             )
         )
 

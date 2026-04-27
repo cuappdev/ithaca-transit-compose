@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -40,6 +41,7 @@ import com.cornellappdev.transit.ui.theme.SecondaryText
 import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.util.BOTTOM_SHEET_MAX_HEIGHT_PERCENT
+import com.cornellappdev.transit.util.IntentUtils.openDeepLink
 
 @Composable
 fun DetailedPlaceSheetContent(
@@ -51,6 +53,8 @@ fun DetailedPlaceSheetContent(
     modifier: Modifier = Modifier,
     distanceStringToPlace: (Double?, Double?) -> String
 ) {
+    val context = LocalContext.current
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -98,6 +102,9 @@ fun DetailedPlaceSheetContent(
                         onFavoriteClick = {
                             onFavoriteStarClick(ecosystemPlace.toPlace())
                         },
+                        onDeepLinkClick = {
+                            context.openDeepLink("com.cornellappdev.android.eatery")
+                        },
                         distanceString = distanceStringToPlace(
                             ecosystemPlace.latitude,
                             ecosystemPlace.longitude
@@ -121,6 +128,9 @@ fun DetailedPlaceSheetContent(
                         isFavorite = ecosystemPlace.toPlace() in favorites,
                         onFavoriteClick = {
                             onFavoriteStarClick(ecosystemPlace.toPlace())
+                        },
+                        onDeepLinkClick = {
+                            context.openDeepLink("com.cornellappdev.uplift")
                         },
                         distanceString = distanceStringToPlace(
                             ecosystemPlace.latitude,

@@ -44,6 +44,7 @@ fun GymDetailsContent(
     gym: UpliftGym,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
+    onDeepLinkClick: () -> Unit,
     distanceString: String
 ) {
     val isOpen = getOpenStatus(gym.operatingHours()).isOpen
@@ -102,31 +103,13 @@ fun GymDetailsContent(
         val (annotatedString, inlineContent) =
             stringResource(R.string.view_gym).createDeepLink(R.drawable.upliftlink)
 
-        val context = LocalContext.current
-
         Text(
             text = annotatedString,
             inlineContent = inlineContent,
             style = Style.heading2,
             color = TransitBlue,
             modifier = Modifier.clickable(
-                onClick = {
-                    val upliftPackage = "com.cornellappdev.uplift"
-                    val upliftIntent = context.packageManager.getLaunchIntentForPackage(upliftPackage)
-
-                    if (upliftIntent != null ) {
-                        context.startActivity(upliftIntent)
-                    } else {
-                        try {
-                            val playStoreIntent = Intent(Intent.ACTION_VIEW, "market://details?id=$upliftPackage".toUri())
-                            playStoreIntent.setPackage("com.android.vending")
-                            context.startActivity(playStoreIntent)
-                        } catch (e: ActivityNotFoundException) {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$upliftPackage}".toUri()))
-
-                        }
-                    }
-                }
+                onClick = onDeepLinkClick
             )
         )
 
