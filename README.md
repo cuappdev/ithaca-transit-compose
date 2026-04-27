@@ -1,8 +1,8 @@
-# Ithaca Transit
+# Navi
 
-<p align="center"><img src="https://github.com/cuappdev/assets/blob/master/app-icons/Transit-83.5x83.5%402x.png" width=210 /></p>
+<p align="center"><img src="https://github.com/cuappdev/assets/blob/master/app-icons/Navi-83.5x83.5%402x.png" width=210 /></p>
 
-Introducing Ithaca Transit, a new end-to-end navigation service for built for the TCAT bus service. A free and open-source app, Ithaca Transit offers a diverse range of features in a beautiful, clean interface to help get you where you need to go.
+Introducing Navi (formerly Ithaca Transit), a new end-to-end navigation service for built for the TCAT bus service. A free and open-source app, Navi offers a diverse range of features in a beautiful, clean interface to help get you where you need to go.
 
 ## Getting Started
 

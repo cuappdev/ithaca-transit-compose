@@ -2,7 +2,11 @@ package com.cornellappdev.transit.ui.components
 
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.cornellappdev.transit.models.Place
 import com.cornellappdev.transit.networking.ApiResponse
 
@@ -13,6 +17,10 @@ import com.cornellappdev.transit.networking.ApiResponse
 @Composable
 fun LoadingLocationItems(searchResult: ApiResponse<List<Place>>, onClick: (Place) -> Unit) {
     when (searchResult) {
+        is ApiResponse.Idle -> {
+            LocationNotFound()
+        }
+
         is ApiResponse.Error -> {
             LocationNotFound()
         }
@@ -25,7 +33,10 @@ fun LoadingLocationItems(searchResult: ApiResponse<List<Place>>, onClick: (Place
             if (searchResult.data.isEmpty()) {
                 LocationNotFound()
             } else {
-                LazyColumn {
+                LazyColumn(
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                     items(
                         searchResult.data
                     ) {
@@ -33,7 +44,7 @@ fun LoadingLocationItems(searchResult: ApiResponse<List<Place>>, onClick: (Place
                             type = it.type,
                             label = it.name,
                             sublabel = it.subLabel,
-                            onClick = { onClick(it) }
+                            onClick = { onClick(it) },
                         )
                     }
                 }

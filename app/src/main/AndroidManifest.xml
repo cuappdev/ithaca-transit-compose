@@ -25,7 +25,8 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Transit">
+            android:theme="@style/Theme.Transit"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -39,6 +40,9 @@
         <meta-data
             android:name="BACKEND_URL"
             android:value="${BACKEND_URL}" />
+
+        <property android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
+            android:value="true" />
     </application>
 
 </manifest>

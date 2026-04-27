@@ -14,8 +14,8 @@ import com.cornellappdev.transit.ui.screens.settings.FavoritesScreen
 import com.cornellappdev.transit.ui.screens.settings.NotifsAndPrivacyScreen
 import com.cornellappdev.transit.ui.screens.settings.PrivacySettingsScreen
 import com.cornellappdev.transit.ui.screens.settings.SupportScreen
-import com.cornellappdev.transit.ui.viewmodels.HomeViewModel
 import com.cornellappdev.transit.ui.viewmodels.RouteViewModel
+import com.cornellappdev.transit.util.navigateSingleTop
 
 /**
  * The navigation controller for the app (parent of all screens)
@@ -45,18 +45,20 @@ fun NavigationController(
 
         composable("settings") {
             SettingsScreen (
-                onAboutClick = {navController.navigate("about")},
-                onSupportClick = {navController.navigate("support")},
-                onNotificationsAndPrivacyClick = {navController.navigate("notifs_privacy")})
+                onAboutClick = { navController.navigateSingleTop("about") },
+                onSupportClick = { navController.navigateSingleTop("support") },
+                onNotificationsAndPrivacyClick = { navController.navigateSingleTop("notifs_privacy") },
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable("about") {
-            AboutScreen()
+            AboutScreen(onBackClick = { navController.popBackStack() })
         }
 
         composable("notifs_privacy") {
             NotifsAndPrivacyScreen (
-                onPrivacyClick = {navController.navigate("privacy_settings")}
+                onPrivacyClick = {navController.navigateSingleTop("privacy_settings")}
             )
         }
 
@@ -69,7 +71,7 @@ fun NavigationController(
         }
 
         composable("support") {
-            SupportScreen()
+            SupportScreen(onBackClick = { navController.popBackStack() })
         }
     }
 }

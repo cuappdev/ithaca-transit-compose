@@ -1,5 +1,6 @@
 package com.cornellappdev.transit.ui.components.home
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,11 +43,14 @@ import com.cornellappdev.transit.models.ecosystem.UpliftCapacity
 import com.cornellappdev.transit.models.ecosystem.UpliftGym
 import com.cornellappdev.transit.networking.ApiResponse
 import com.cornellappdev.transit.ui.theme.FavoritesDividerGray
+import com.cornellappdev.transit.ui.theme.PrimaryText
+import com.cornellappdev.transit.ui.theme.Style
 import com.cornellappdev.transit.ui.theme.robotoFamily
 import com.cornellappdev.transit.ui.viewmodels.EcosystemFavoritesUiState
 import com.cornellappdev.transit.ui.viewmodels.FavoritesFilterSheetState
 import com.cornellappdev.transit.ui.viewmodels.FilterState
 import com.cornellappdev.transit.ui.viewmodels.LibraryCardUiState
+import com.cornellappdev.transit.util.TimeUtils.getOpenStatus
 import com.cornellappdev.transit.util.TimeUtils.isOpenAnnotatedStringFromOperatingHours
 import com.cornellappdev.transit.util.ecosystem.capacityPercentAnnotatedString
 import com.cornellappdev.transit.ui.viewmodels.PrinterCardUiState
@@ -89,6 +94,8 @@ fun EcosystemBottomSheetContent(
     onRemoveAppliedFilter: (FavoritesFilterSheetState) -> Unit,
     operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
     distanceStringToPlace: (Double?, Double?) -> String,
+    sanitizeLibraryAddress: (String) -> String,
+    printerToCardUiState: (Printer) -> PrinterCardUiState,
     listState: LazyListState,
 ) {
     Column(modifier = modifier) {
@@ -138,7 +145,9 @@ fun EcosystemBottomSheetContent(
             onRemoveAppliedFilter = onRemoveAppliedFilter,
             operatingHoursToString = operatingHoursToString,
             distanceStringToPlace = distanceStringToPlace,
-            listState = listState
+            sanitizeLibraryAddress = sanitizeLibraryAddress,
+            printerToCardUiState = printerToCardUiState,
+            listState = listState,
         )
     }
 
@@ -174,6 +183,8 @@ private fun BottomSheetFilteredContent(
     onRemoveAppliedFilter: (FavoritesFilterSheetState) -> Unit,
     operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
     distanceStringToPlace: (Double?, Double?) -> String,
+    sanitizeLibraryAddress: (String) -> String,
+    printerToCardUiState: (Printer) -> PrinterCardUiState,
     listState: LazyListState,
 ) {
     Column {
@@ -221,7 +232,8 @@ private fun BottomSheetFilteredContent(
                             onDetailsClick = onDetailsClick,
                             operatingHoursToString = operatingHoursToString,
                             capacityToString = ::capacityPercentAnnotatedString,
-                            distanceStringToPlace = distanceStringToPlace
+                            distanceStringToPlace = distanceStringToPlace,
+                            sanitizeLibraryAddress = sanitizeLibraryAddress,
                         )
                     }
 
@@ -231,7 +243,8 @@ private fun BottomSheetFilteredContent(
                             navigateToPlace = navigateToPlace,
                             favorites = favorites,
                             onFavoriteStarClick = onFavoriteStarClick,
-                            distanceStringToPlace = distanceStringToPlace
+                            distanceStringToPlace = distanceStringToPlace,
+                            printerToCardUiState = printerToCardUiState,
                         )
                     }
 
@@ -266,6 +279,7 @@ private fun BottomSheetFilteredContent(
                             favorites,
                             onFavoriteStarClick,
                             distanceStringToPlace,
+                            sanitizeLibraryAddress,
                         )
                     }
                 }
@@ -290,7 +304,8 @@ private fun LazyListScope.favoriteList(
     onDetailsClick: (DetailedEcosystemPlace) -> Unit,
     operatingHoursToString: (List<DayOperatingHours>) -> AnnotatedString,
     capacityToString: (UpliftCapacity?) -> AnnotatedString,
-    distanceStringToPlace: (Double?, Double?) -> String
+    distanceStringToPlace: (Double?, Double?) -> String,
+    sanitizeLibraryAddress: (String) -> String,
 ) {
     item {
         Spacer(modifier = Modifier.height(8.dp))
@@ -301,131 +316,132 @@ private fun LazyListScope.favoriteList(
         items = filteredFavorites,
         key = { place -> "${place.type}:${place.name}:${place.latitude}:${place.longitude}" }
     ) { place ->
-        when (place.type) {
-            PlaceType.EATERY -> {
-                val matchingEatery = eateryByPlace[place]
-                if (matchingEatery != null) {
-                    RoundedImagePlaceCard(
-                        title = matchingEatery.name,
-                        subtitle = (matchingEatery.location
-                            ?: "") + distanceStringToPlace(
-                            matchingEatery.latitude,
-                            matchingEatery.longitude
-                        ),
-                        isFavorite = true,
-                        onFavoriteClick = { onFavoriteStarClick(place) },
-                        leftAnnotatedString = operatingHoursToString(
-                            matchingEatery.operatingHours()
-                        )
-                    ) {
-                        onDetailsClick(matchingEatery)
-                    }
-                } else {
-                    StandardCard(
-                        place = place,
-                        onFavoriteStarClick = onFavoriteStarClick,
-                        navigateToPlace = navigateToPlace,
-                        distanceStringToPlace = distanceStringToPlace
-                    )
-                }
-            }
-
-            PlaceType.LIBRARY -> {
-                val matchingLibraryCard = libraryCardByPlace[place]
-                if (matchingLibraryCard != null) {
-                    val matchingLibrary = matchingLibraryCard.library
-                    RoundedImagePlaceCard(
-                        title = matchingLibrary.location,
-                        subtitle = matchingLibrary.address + distanceStringToPlace(
-                            matchingLibrary.latitude,
-                            matchingLibrary.longitude
-                        ),
-                        isFavorite = true,
-                        onFavoriteClick = { onFavoriteStarClick(place) },
-                    ) {
-                        // Use detailed content sheet when backend is updated
-                        // onDetailsClick(matchingLibrary)
-                        navigateToPlace(matchingLibrary.toPlace())
-                    }
-                } else {
-                    StandardCard(
-                        place = place,
-                        onFavoriteStarClick = onFavoriteStarClick,
-                        navigateToPlace = navigateToPlace,
-                        distanceStringToPlace = distanceStringToPlace
-                    )
-                }
-            }
-
-            PlaceType.GYM -> {
-                val matchingGym = gymByPlace[place]
-                if (matchingGym != null) {
-                    RoundedImagePlaceCard(
-                        title = matchingGym.name,
-                        subtitle = getGymLocationString(matchingGym.name) + distanceStringToPlace(
-                            matchingGym.latitude,
-                            matchingGym.longitude
-                        ),
-                        isFavorite = true,
-                        onFavoriteClick = {
-                            onFavoriteStarClick(place)
-                        },
-                        leftAnnotatedString = operatingHoursToString(
-                            matchingGym.operatingHours()
-                        ),
-                        rightAnnotatedString = capacityToString(
-                            matchingGym.upliftCapacity
-                        ),
-                    ) {
-                        onDetailsClick(matchingGym)
-                    }
-                } else {
-                    StandardCard(
-                        place = place,
-                        onFavoriteStarClick = onFavoriteStarClick,
-                        navigateToPlace = navigateToPlace,
-                        distanceStringToPlace = distanceStringToPlace
-                    )
-                }
-            }
-
-            PlaceType.PRINTER -> {
-                val matchingPrinter = printerByPlace[place]
-                if (matchingPrinter != null) {
-                    PrinterCard(
-                        title = matchingPrinter.title,
-                        subtitle = matchingPrinter.subtitle + distanceStringToPlace(
-                            place.latitude,
-                            place.longitude
-                        ),
-                        inColor = matchingPrinter.inColor,
-                        hasCopy = matchingPrinter.hasCopy,
-                        hasScan = matchingPrinter.hasScan,
-                        alertMessage = matchingPrinter.alertMessage,
-                        isFavorite = place in favorites,
-                        onFavoriteClick = {
-                            onFavoriteStarClick(place)
-                        }
-                    ) {
-                        navigateToPlace(place)
-                    }
-                } else {
-                    StandardCard(
-                        place = place,
-                        onFavoriteStarClick = onFavoriteStarClick,
-                        navigateToPlace = navigateToPlace,
-                        distanceStringToPlace = distanceStringToPlace
-                    )
-                }
-            }
-
-            PlaceType.BUS_STOP, PlaceType.APPLE_PLACE -> {
-                StandardCard(
-                    place = place,
-                    onFavoriteStarClick = onFavoriteStarClick,
-                    navigateToPlace = navigateToPlace,
-                    distanceStringToPlace = distanceStringToPlace
+        Column(
+            modifier = Modifier
+                .animateItem(
+                    placementSpec = tween(durationMillis = 320)
                 )
+        ) {
+            when (place.type) {
+                PlaceType.EATERY -> {
+                    val matchingEatery = eateryByPlace[place]
+                    if (matchingEatery != null) {
+                        RoundedImagePlaceCard(
+                            title = matchingEatery.name,
+                            subtitle = (matchingEatery.location
+                                ?: "") + distanceStringToPlace(matchingEatery.latitude, matchingEatery.longitude),
+                            isFavorite = true,
+                            onFavoriteClick = { onFavoriteStarClick(place) },
+                            leftAnnotatedString = operatingHoursToString(
+                                matchingEatery.operatingHours()
+                            )
+                        ) {
+                            onDetailsClick(matchingEatery)
+                        }
+                    } else {
+                        StandardCard(
+                            place = place,
+                            onFavoriteStarClick = onFavoriteStarClick,
+                            navigateToPlace = navigateToPlace,
+                            distanceStringToPlace = distanceStringToPlace
+                        )
+                    }
+                }
+
+                PlaceType.LIBRARY -> {
+                    val matchingLibraryCard = libraryCardByPlace[place]
+                    if (matchingLibraryCard != null) {
+                        val matchingLibrary = matchingLibraryCard.library
+                        RoundedImagePlaceCard(
+                            title = matchingLibrary.location,
+                            subtitle = sanitizeLibraryAddress(matchingLibrary.address) +
+                                distanceStringToPlace(matchingLibrary.latitude, matchingLibrary.longitude),
+                            isFavorite = true,
+                            onFavoriteClick = { onFavoriteStarClick(place) },
+                        ) {
+                            // Use detailed content sheet when backend is updated
+                            // onDetailsClick(matchingLibrary)
+                            navigateToPlace(matchingLibrary.toPlace())
+                        }
+                    } else {
+                        StandardCard(
+                            place = place,
+                            onFavoriteStarClick = onFavoriteStarClick,
+                            navigateToPlace = navigateToPlace,
+                            distanceStringToPlace = distanceStringToPlace
+                        )
+                    }
+                }
+
+                PlaceType.GYM -> {
+                    val matchingGym = gymByPlace[place]
+                    if (matchingGym != null) {
+                        val isGymOpen = getOpenStatus(matchingGym.operatingHours()).isOpen
+                        RoundedImagePlaceCard(
+                            title = matchingGym.name,
+                            subtitle = getGymLocationString(matchingGym.name) +
+                                distanceStringToPlace(matchingGym.latitude, matchingGym.longitude),
+                            isFavorite = true,
+                            onFavoriteClick = {
+                                onFavoriteStarClick(place)
+                            },
+                            leftAnnotatedString = operatingHoursToString(
+                                matchingGym.operatingHours()
+                            ),
+                            rightAnnotatedString = if (isGymOpen) {
+                                capacityToString(matchingGym.upliftCapacity)
+                            } else {
+                                null
+                            },
+                        ) {
+                            onDetailsClick(matchingGym)
+                        }
+                    } else {
+                        StandardCard(
+                            place = place,
+                            onFavoriteStarClick = onFavoriteStarClick,
+                            navigateToPlace = navigateToPlace,
+                            distanceStringToPlace = distanceStringToPlace
+                        )
+                    }
+                }
+
+                PlaceType.PRINTER -> {
+                    val matchingPrinter = printerByPlace[place]
+                    if (matchingPrinter != null) {
+                        PrinterCard(
+                            title = matchingPrinter.title,
+                            subtitle = matchingPrinter.subtitle +
+                                distanceStringToPlace(place.latitude, place.longitude),
+                            inColor = matchingPrinter.inColor,
+                            hasCopy = matchingPrinter.hasCopy,
+                            hasScan = matchingPrinter.hasScan,
+                            alertMessage = matchingPrinter.alertMessage,
+                            isFavorite = place in favorites,
+                            onFavoriteClick = {
+                                onFavoriteStarClick(place)
+                            }
+                        ) {
+                            navigateToPlace(place)
+                        }
+                    } else {
+                        StandardCard(
+                            place = place,
+                            onFavoriteStarClick = onFavoriteStarClick,
+                            navigateToPlace = navigateToPlace,
+                            distanceStringToPlace = distanceStringToPlace
+                        )
+                    }
+                }
+
+                PlaceType.BUS_STOP, PlaceType.APPLE_PLACE -> {
+                    StandardCard(
+                        place = place,
+                        onFavoriteStarClick = onFavoriteStarClick,
+                        navigateToPlace = navigateToPlace,
+                        distanceStringToPlace = distanceStringToPlace
+                    )
+                }
             }
         }
     }
@@ -444,7 +460,12 @@ private fun LazyListScope.gymList(
     distanceStringToPlace: (Double?, Double?) -> String,
 ) {
     when (gymsApiResponse) {
+        is ApiResponse.Idle -> {
+            infoItem("No gyms available")
+        }
+
         is ApiResponse.Error -> {
+            infoItem("Unable to load gyms")
         }
 
         is ApiResponse.Pending -> {
@@ -454,14 +475,18 @@ private fun LazyListScope.gymList(
         }
 
         is ApiResponse.Success -> {
+            if (gymsApiResponse.data.isEmpty()) {
+                infoItem("No gyms available")
+                return
+            }
+
             items(gymsApiResponse.data) {
+                val isGymOpen = getOpenStatus(it.operatingHours()).isOpen
                 RoundedImagePlaceCard(
                     imageUrl = it.imageUrl,
                     title = it.name,
-                    subtitle = getGymLocationString(it.name) + distanceStringToPlace(
-                        it.latitude,
-                        it.longitude
-                    ),
+                    subtitle = getGymLocationString(it.name) +
+                        distanceStringToPlace(it.latitude, it.longitude),
                     isFavorite = it.toPlace() in favorites,
                     onFavoriteClick = {
                         onFavoriteStarClick(it.toPlace())
@@ -469,9 +494,11 @@ private fun LazyListScope.gymList(
                     leftAnnotatedString = operatingHoursToString(
                         it.operatingHours()
                     ),
-                    rightAnnotatedString = capacityToString(
-                        it.upliftCapacity
-                    ),
+                    rightAnnotatedString = if (isGymOpen) {
+                        capacityToString(it.upliftCapacity)
+                    } else {
+                        null
+                    },
                     placeholderRes = R.drawable.olin_library,
                 ) {
                     onDetailsClick(it)
@@ -490,33 +517,40 @@ private fun LazyListScope.printerList(
     favorites: Set<Place>,
     onFavoriteStarClick: (Place) -> Unit,
     distanceStringToPlace: (Double?, Double?) -> String,
+    printerToCardUiState: (Printer) -> PrinterCardUiState,
 ) {
     when (staticPlaces.printers) {
+        is ApiResponse.Idle -> {
+            infoItem("No printers available")
+        }
+
         is ApiResponse.Error -> {
+            infoItem("Unable to load printers")
         }
 
         is ApiResponse.Pending -> {
+            item {
+                CenteredSpinningIndicator()
+            }
         }
 
         is ApiResponse.Success -> {
+            if (staticPlaces.printers.data.isEmpty()) {
+                infoItem("No printers available")
+                return
+            }
+
             items(staticPlaces.printers.data) {
                 val place = it.toPlace()
-                val alert = if (it.location.contains("*")) {
-                    it.location.substringAfter("*").trim('*').trim()
-                } else {
-                    ""
-                }
+                val printerUi = printerToCardUiState(it)
 
                 PrinterCard(
-                    title = it.location.substringBefore("*").trim(),
-                    subtitle = it.description.substringAfter("-").trim() + distanceStringToPlace(
-                        it.latitude,
-                        it.longitude
-                    ),
-                    inColor = it.description.contains("Color", ignoreCase = true),
-                    hasCopy = it.description.contains("Copy", ignoreCase = true),
-                    hasScan = it.description.contains("Scan", ignoreCase = true),
-                    alertMessage = alert,
+                    title = printerUi.title,
+                    subtitle = printerUi.subtitle + distanceStringToPlace(it.latitude, it.longitude),
+                    inColor = printerUi.inColor,
+                    hasCopy = printerUi.hasCopy,
+                    hasScan = printerUi.hasScan,
+                    alertMessage = printerUi.alertMessage,
                     isFavorite = place in favorites,
                     onFavoriteClick = {
                         onFavoriteStarClick(place)
@@ -543,7 +577,12 @@ private fun LazyListScope.eateryList(
     distanceStringToPlace: (Double?, Double?) -> String,
 ) {
     when (eateriesApiResponse) {
+        is ApiResponse.Idle -> {
+            infoItem("No eateries available")
+        }
+
         is ApiResponse.Error -> {
+            infoItem("Unable to load eateries")
         }
 
         is ApiResponse.Pending -> {
@@ -553,6 +592,11 @@ private fun LazyListScope.eateryList(
         }
 
         is ApiResponse.Success -> {
+            if (eateriesApiResponse.data.isEmpty()) {
+                infoItem("No eateries available")
+                return
+            }
+
             items(eateriesApiResponse.data) {
                 RoundedImagePlaceCard(
                     imageUrl = it.imageUrl,
@@ -585,21 +629,35 @@ private fun LazyListScope.libraryList(
     favorites: Set<Place>,
     onFavoriteStarClick: (Place) -> Unit,
     distanceStringToPlace: (Double?, Double?) -> String,
+    sanitizeLibraryAddress: (String) -> String,
 ) {
     when (libraryCardsApiResponse) {
+        is ApiResponse.Idle -> {
+            infoItem("No libraries available")
+        }
+
         is ApiResponse.Error -> {
+            infoItem("Unable to load libraries")
         }
 
         is ApiResponse.Pending -> {
+            item {
+                CenteredSpinningIndicator()
+            }
         }
 
         is ApiResponse.Success -> {
+            if (libraryCardsApiResponse.data.isEmpty()) {
+                infoItem("No libraries available")
+                return
+            }
+
             items(libraryCardsApiResponse.data) {
                 val library = it.library
                 RoundedImagePlaceCard(
                     placeholderRes = it.placeholderRes,
                     title = library.location,
-                    subtitle = library.address + distanceStringToPlace(library.latitude, library.longitude),
+                    subtitle = sanitizeLibraryAddress(library.address) + distanceStringToPlace(library.latitude, library.longitude),
                     isFavorite = library.toPlace() in favorites,
                     onFavoriteClick = {
                         onFavoriteStarClick(library.toPlace())
@@ -614,6 +672,24 @@ private fun LazyListScope.libraryList(
     }
 }
 
+private fun LazyListScope.infoItem(message: String) {
+    item {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(text = message + "...",
+                color = PrimaryText,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = Style.heading3,
+                fontSize = 20.sp)
+        }
+    }
+}
+
 @Composable
 private fun StandardCard(
     place: Place,
@@ -621,8 +697,7 @@ private fun StandardCard(
     navigateToPlace: (Place) -> Unit,
     distanceStringToPlace: (Double?, Double?) -> String,
 ) {
-    val distance = distanceStringToPlace(place.latitude, place.longitude)
-    val subtitle = if (distance.isBlank()) place.subLabel else "${place.subLabel}$distance"
+    val subtitle = place.subLabel + distanceStringToPlace(place.latitude, place.longitude)
 
     BottomSheetLocationCard(
         title = place.name,
@@ -678,7 +753,18 @@ private fun PreviewEcosystemBottomSheet() {
         onRemoveAppliedFilter = {},
         operatingHoursToString = { _ -> AnnotatedString("") },
         distanceStringToPlace = { _, _ -> "" },
-        listState = rememberLazyListState()
+        listState = rememberLazyListState(),
+        sanitizeLibraryAddress = { it },
+        printerToCardUiState = { _ ->
+            PrinterCardUiState(
+                title = "",
+                subtitle = "",
+                inColor = false,
+                hasCopy = false,
+                hasScan = false,
+                alertMessage = ""
+            )
+        }
     )
 }
 
@@ -860,6 +946,17 @@ private fun PreviewBottomSheetFilteredContentFavorites() {
         onRemoveAppliedFilter = {},
         operatingHoursToString = { _ -> AnnotatedString("Open • 10am - 4pm") },
         distanceStringToPlace = { _, _ -> "distance" },
+        sanitizeLibraryAddress = { it },
+        printerToCardUiState = { _ ->
+            PrinterCardUiState(
+                title = "",
+                subtitle = "",
+                inColor = false,
+                hasCopy = false,
+                hasScan = false,
+                alertMessage = ""
+            )
+        },
         listState = rememberLazyListState()
     )
 }

@@ -9,7 +9,7 @@ buildscript {
 }
 
 plugins {
-    id("com.android.application") version "8.1.4" apply false
+    id("com.android.application") version "8.13.2" apply false
     id("org.jetbrains.kotlin.android") version "2.0.21" apply false
     id("com.google.dagger.hilt.android") version "2.50" apply false
     id("org.jetbrains.kotlin.plugin.serialization") version "1.6.21"

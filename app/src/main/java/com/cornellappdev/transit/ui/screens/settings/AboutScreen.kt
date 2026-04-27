@@ -10,9 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,88 +34,19 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.cornellappdev.transit.R
 import com.cornellappdev.transit.ui.components.MemberList
+import com.cornellappdev.transit.ui.theme.IconGray
 import com.cornellappdev.transit.ui.theme.TransitBlue
 import com.cornellappdev.transit.ui.theme.robotoFamily
-
-private val names = mapOf(
-    "iOS" to listOf(
-        "Angelina Chen",
-        "Asen Ou",
-        "Jayson Hahn",
-        "Daniel Chuang",
-        "William Ma",
-        "Sergio Diaz",
-        "Kevin Chan",
-        "Omar Rasheed",
-        "Lucy Xu",
-        "Haiying Weng",
-        "Daniel Vebman",
-        "Yana Sang",
-        "Matt Barker",
-        "Austin Astorga",
-        "Monica Ong"
-    ),
-    "Android" to listOf(
-        "Mihili Herath",
-        "Jonathan Chen",
-        "Veronica Starchenko",
-        "Adam Kadhim",
-        "Lesley Huang",
-        "Kevin Sun",
-        "Chris Desir",
-        "Connor Reinhold",
-        "Aastha Shah",
-        "Justin Jiang",
-        "Haichen Wang",
-        "Jonvi Rollins",
-        "Preston Rozwood",
-        "Ziwei Gu",
-        "Abdullah Islam"
-    ),
-    "Design" to listOf(
-        "Gillian Fang",
-        "Leah Kim",
-        "Amy Ge",
-        "Lauren Jun",
-        "Zain Khoja",
-        "Maggie Ying",
-        "Femi Badero",
-        "Maya Frai",
-        "Mind Apivessa"
-    ),
-    "Marketing" to listOf(
-        "Anvi Savant",
-        "Christine Tao",
-        "Luke Stewart",
-        "Melika Khoshneviszadeh",
-        "Eddie Chi",
-        "Neha Malepati",
-        "Emily Shiang",
-        "Lucy Zhang",
-        "Catherine Wei"
-    ),
-    "Backend" to listOf(
-        "Nicole Qiu",
-        "Daisy Chang",
-        "Lauren Ah-Hot",
-        "Maxwell Pang",
-        "Mateo Weiner",
-        "Cindy Liang",
-        "Raahi Menon",
-        "Kate Liang",
-        "Alanna Zhou",
-        "Kevin Chan",
-        "Nate Schickler"
-    )
-).entries.shuffled().associate { it.toPair() }
+import com.cornellappdev.transit.util.ABOUT_POD_LEADS
+import com.cornellappdev.transit.util.ABOUT_TEAM_MEMBERS_BY_TEAM_SHUFFLED
 
 /**
  * Composable for the About Screen of the app, which displays information about team behind it.
  */
 @Composable
-fun AboutScreen() {
+fun AboutScreen(onBackClick: () -> Unit) {
     val context = LocalContext.current
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -120,6 +54,15 @@ fun AboutScreen() {
     )
 
     {
+        IconButton(onClick = onBackClick) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
+                contentDescription = "Go back",
+                tint = IconGray,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
         Text(
             text = stringResource(R.string.about_text),
             fontSize = 32.sp,
@@ -179,20 +122,11 @@ fun AboutScreen() {
                     .width(80.dp)
             )
             MemberList(
-                listOf(
-                    "Anvi Savant",
-                    "Cindy Liang",
-                    "Maxwell Pang",
-                    "Amanda He",
-                    "Connor Reinhold",
-                    "Omar Rasheed",
-                    "Maya Frai",
-                    "Matt Barker"
-                )
+                ABOUT_POD_LEADS
             )
         }
 
-        for ((team, members) in names) {
+        for ((team, members) in ABOUT_TEAM_MEMBERS_BY_TEAM_SHUFFLED) {
             Row {
                 Text(
                     text = team,
@@ -232,6 +166,6 @@ fun AboutScreen() {
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewAboutScreen() {
-    AboutScreen()
+private fun AboutScreenPreview() {
+    AboutScreen {}
 }
