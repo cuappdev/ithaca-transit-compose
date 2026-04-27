@@ -6,6 +6,11 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    <queries>
+        <package android:name="com.cornellappdev.android.eatery" />
+        <package android:name="com.cornellappdev.uplift" />
+    </queries>
+
     <application
         android:name=".TransitApplication"
         android:allowBackup="true"
@@ -24,7 +29,6 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
