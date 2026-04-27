@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,15 +95,16 @@ fun EateryDetailsContent(
         val (annotatedString, inlineContent) =
             stringResource(R.string.view_menu).createDeepLink(R.drawable.eaterylink)
 
-        Text(
-            text = annotatedString,
-            inlineContent = inlineContent,
-            style = Style.heading2,
-            color = TransitBlue,
-            modifier = Modifier.clickable(
-                onClick = onDeepLinkClick
+        TextButton(
+            onClick = onDeepLinkClick
+        ) {
+            Text(
+                text = annotatedString,
+                inlineContent = inlineContent,
+                style = Style.heading2,
+                color = TransitBlue,
             )
-        )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
