@@ -40,6 +40,9 @@
         <meta-data
             android:name="BACKEND_URL"
             android:value="${BACKEND_URL}" />
+        <meta-data
+            android:name="androidx.profileinstaller.enabled"
+            android:value="false" />
 
         <property android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
             android:value="true" />
