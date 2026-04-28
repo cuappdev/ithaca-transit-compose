@@ -26,6 +26,10 @@ fun HomeScreenMarkers(
     staticPlaces: StaticPlaces,
     onPlaceClick: (Place) -> Unit
 ) {
+    val placeholderHotspotMarkers = listOf(
+        LatLng(42.4441, -76.4837) to R.drawable.hotspot_event_pin,
+        LatLng(42.4475, -76.4852) to R.drawable.hotspot_fun_spot_pin
+    )
 
     when (filterState) {
         FilterState.FAVORITES -> {
@@ -87,6 +91,16 @@ fun HomeScreenMarkers(
                         onClick = { onPlaceClick(it.toPlace()) }
                     )
                 }
+            }
+        }
+
+        FilterState.HOTSPOTS -> {
+            placeholderHotspotMarkers.forEach { (position, iconRes) ->
+                LocationMarker(
+                    position = position,
+                    iconRes = iconRes,
+                    onClick = {}
+                )
             }
         }
     }

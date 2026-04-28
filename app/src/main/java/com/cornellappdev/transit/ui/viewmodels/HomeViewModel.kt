@@ -101,6 +101,7 @@ class HomeViewModel @Inject constructor(
 
     val filterList = listOf(
         FilterState.FAVORITES,
+        FilterState.HOTSPOTS,
         FilterState.GYMS,
         FilterState.EATERIES,
         FilterState.LIBRARIES,
@@ -196,6 +197,8 @@ class HomeViewModel @Inject constructor(
 
     private val _showAddFavoritesSheet = MutableStateFlow(false)
     val showAddFavoritesSheet: StateFlow<Boolean> = _showAddFavoritesSheet.asStateFlow()
+    private val _showRequestHotspotSheet = MutableStateFlow(false)
+    val showRequestHotspotSheet: StateFlow<Boolean> = _showRequestHotspotSheet.asStateFlow()
 
     val addSearchResultsFlow: StateFlow<ApiResponse<List<Place>>> =
         unifiedSearchRepository.mergedSearchResults(_addSearchQuery)
@@ -207,6 +210,10 @@ class HomeViewModel @Inject constructor(
 
     fun toggleAddFavoritesSheet(show: Boolean) {
         _showAddFavoritesSheet.value = show
+    }
+
+    fun toggleRequestHotspotSheet(show: Boolean) {
+        _showRequestHotspotSheet.value = show
     }
 
     val favoritesFilterList = listOf(

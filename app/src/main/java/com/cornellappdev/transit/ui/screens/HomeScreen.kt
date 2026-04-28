@@ -67,6 +67,8 @@ import com.cornellappdev.transit.ui.components.SearchSuggestions
 import com.cornellappdev.transit.ui.components.home.DetailedPlaceSheetContent
 import com.cornellappdev.transit.ui.components.home.EcosystemBottomSheetContent
 import com.cornellappdev.transit.ui.components.home.HomeScreenMarkers
+import com.cornellappdev.transit.ui.components.home.RequestHotspotSheet
+import com.cornellappdev.transit.ui.theme.CardBackground
 import com.cornellappdev.transit.util.navigateSingleTop
 import com.cornellappdev.transit.ui.theme.DetailsHeaderGray
 import com.cornellappdev.transit.ui.theme.DividerGray
@@ -135,8 +137,12 @@ fun HomeScreen(
     }
 
     val showAddFavoritesSheet by homeViewModel.showAddFavoritesSheet.collectAsStateWithLifecycle()
+    val showRequestHotspotSheet by homeViewModel.showRequestHotspotSheet.collectAsStateWithLifecycle()
 
     val addFavoritesSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+    val requestHotspotSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
 
@@ -312,6 +318,7 @@ fun HomeScreen(
         val gymsListState = rememberLazyListState()
         val eateriesListState = rememberLazyListState()
         val librariesListState = rememberLazyListState()
+        val hotspotsListState = rememberLazyListState()
         val printersListState = rememberLazyListState()
 
         fun listStateFor(filter: FilterState): LazyListState = when (filter) {
@@ -319,6 +326,7 @@ fun HomeScreen(
             FilterState.GYMS -> gymsListState
             FilterState.EATERIES -> eateriesListState
             FilterState.LIBRARIES -> librariesListState
+            FilterState.HOTSPOTS -> hotspotsListState
             FilterState.PRINTERS -> printersListState
         }
 
@@ -390,6 +398,9 @@ fun HomeScreen(
                             onFavoriteStarClick = favoritesViewModel::toggleFavorite,
                             onAddFavoritesClick = {
                                 homeViewModel.toggleAddFavoritesSheet(true)
+                            },
+                            onRequestHotspotClick = {
+                                homeViewModel.toggleRequestHotspotSheet(true)
                             },
                             showFilterSheet = showFilterSheet,
                             onFilterSheetShow = homeViewModel::openFilterSheet,
@@ -490,6 +501,30 @@ fun HomeScreen(
                 },
                 onQueryChange = homeViewModel::onAddQueryChange,
                 onClearChange = homeViewModel::clearAddQuery
+            )
+        }
+    }
+
+    if (showRequestHotspotSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { homeViewModel.toggleRequestHotspotSheet(false) },
+            sheetState = requestHotspotSheetState,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            containerColor = CardBackground,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            RequestHotspotSheet(
+                onDismiss = { homeViewModel.toggleRequestHotspotSheet(false) },
+                onSubmit = {
+                    homeViewModel.toggleRequestHotspotSheet(false)
+                    // TODO: Connect to backend
+                    Toast.makeText(
+                        context,
+                        "Hotspot request submitted",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
