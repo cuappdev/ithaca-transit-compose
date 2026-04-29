@@ -49,8 +49,8 @@ android {
         applicationId = "com.cornellappdev.transit"
         minSdk = 26
         targetSdk = 36
-        versionCode = 11
-        versionName = "2.1"
+        versionCode = 12
+        versionName = "2.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
