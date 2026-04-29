@@ -190,6 +190,27 @@ object TimeUtils {
         return OpenStatus(false, "Closed today")
     }
 
+    private data class DateTimeInterval(
+        val start: LocalDateTime,
+        val end: LocalDateTime,
+    )
+
+    private fun buildIntervalsForDate(
+        date: LocalDate,
+        hours: List<String>,
+        overnightOnly: Boolean = false,
+    ): List<DateTimeInterval> {
+        return hours.mapNotNull { timeString ->
+            val (startTime, endTime) = parseTimeRange(timeString) ?: return@mapNotNull null
+            val isOvernight = !endTime.isAfter(startTime) // includes end == start
+            if (overnightOnly && !isOvernight) return@mapNotNull null
+
+            val start = date.atTime(startTime)
+            val end = if (isOvernight) date.plusDays(1).atTime(endTime) else date.atTime(endTime)
+            DateTimeInterval(start = start, end = end)
+        }
+    }
+
     /**
      * Given operating hours, return whether it is open and when it is open until
      * or when it will next open
@@ -205,31 +226,44 @@ object TimeUtils {
             return OpenStatus(false, "Closed today")
         }
 
-        val rotatedOperatingHours = rotateOperatingHours(operatingHours)
+        val rotatedOperatingHours =
+            rotateOperatingHours(operatingHours, currentDateTime.toLocalDate())
 
-        val currentTime = currentDateTime.toLocalTime()
         val todaySchedule =
             rotatedOperatingHours[0].hours // First day should be today after rotation
 
-        // Check if closed today
+        val todayDate = currentDateTime.toLocalDate()
+        val yesterdayDate = todayDate.minusDays(1)
+
+        val todayIntervals = buildIntervalsForDate(todayDate, todaySchedule)
+        val yesterdayOvernightIntervals = buildIntervalsForDate(
+            date = yesterdayDate,
+            hours = rotatedOperatingHours.last().hours,
+            overnightOnly = true
+        )
+
+        // Check if currently within an open interval (including yesterday's overnight intervals)
+        val currentInterval = (yesterdayOvernightIntervals + todayIntervals)
+            .firstOrNull { interval ->
+                currentDateTime >= interval.start && currentDateTime < interval.end
+            }
+
+        if (currentInterval != null) {
+            return OpenStatus(true, "until ${formatTime(currentInterval.end.toLocalTime())}")
+        }
+
+        // Check if closed today but not within an overnight interval
         if (todaySchedule.any { it.equals("Closed", ignoreCase = true) }) {
             return findOpenNextDay(rotatedOperatingHours)
         }
 
-        val timeRanges = todaySchedule.mapNotNull { parseTimeRange(it) }
-
-        // Check if currently open
-        for (range in timeRanges) {
-            if (currentTime >= range.first && currentTime < range.second) {
-                return OpenStatus(true, "until ${formatTime(range.second)}")
-            }
-        }
-
         // Check if opens later today
-        for (range in timeRanges) {
-            if (currentTime < range.first) {
-                return OpenStatus(false, "until ${formatTime(range.first)}")
-            }
+        val nextStartToday = todayIntervals
+            .map { it.start }
+            .filter { it > currentDateTime }
+            .minOrNull()
+        if (nextStartToday != null) {
+            return OpenStatus(false, "until ${formatTime(nextStartToday.toLocalTime())}")
         }
 
         // Closed for today, find next open day
