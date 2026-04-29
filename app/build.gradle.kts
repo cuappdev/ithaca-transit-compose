@@ -1,4 +1,5 @@
 import java.util.Properties
+import org.gradle.api.GradleException
 
 plugins {
     id("com.android.application")
@@ -12,6 +13,11 @@ plugins {
 
 val secretsPropertiesFile = rootProject.file("secrets.properties")
 val secretsProperties = Properties().apply {
+    if (!secretsPropertiesFile.exists()) {
+        throw GradleException("secrets.properties not found at ${secretsPropertiesFile.absolutePath}. " +
+            "Please create this file with the required API keys and configuration values. " +
+            "Refer to the project README or CI configuration for required properties.")
+    }
     secretsPropertiesFile.inputStream().use(::load)
 }
 
@@ -41,6 +47,31 @@ fun asBuildConfigString(value: String): String {
 fun asManifestPlaceholder(value: String): String =
     value.unquoteIfWrapped()
 
+fun configureUrlsForVariant(
+    prefix: String,
+    block: Any
+) {
+    val buildTypeBlock = block as com.android.build.gradle.internal.dsl.BuildType
+    buildTypeBlock.buildConfigField(
+        "String",
+        "BACKEND_URL",
+        asBuildConfigString(secretsProperties.requireString("${prefix}_BACKEND_URL")),
+    )
+    buildTypeBlock.manifestPlaceholders["BACKEND_URL"] = asManifestPlaceholder(
+        secretsProperties.requireString("${prefix}_BACKEND_URL")
+    )
+    buildTypeBlock.buildConfigField(
+        "String",
+        "EATERY_URL",
+        asBuildConfigString(secretsProperties.requireString("${prefix}_EATERY_URL")),
+    )
+    buildTypeBlock.buildConfigField(
+        "String",
+        "UPLIFT_URL",
+        asBuildConfigString(secretsProperties.requireString("${prefix}_UPLIFT_URL")),
+    )
+}
+
 android {
     namespace = "com.cornellappdev.transit"
     compileSdk = 36
@@ -68,53 +99,23 @@ android {
     signingConfigs {
         create("release") {
             if (signingProperties.isNotEmpty()) {
-                storeFile = rootProject.file(signingProperties["KEYSTORE_PATH"].toString())
-                storePassword = signingProperties["KEYSTORE_PASSWORD"].toString()
-                keyAlias = signingProperties["KEY_ALIAS"].toString()
-                keyPassword = signingProperties["KEY_PASSWORD"].toString()
+                storeFile = rootProject.file(signingProperties.requireString("KEYSTORE_PATH"))
+                storePassword = signingProperties.requireString("KEYSTORE_PASSWORD")
+                keyAlias = signingProperties.requireString("KEY_ALIAS")
+                keyPassword = signingProperties.requireString("KEY_PASSWORD")
             }
         }
     }
 
     buildTypes {
         debug {
-            buildConfigField(
-                "String",
-                "BACKEND_URL",
-                asBuildConfigString(secretsProperties.requireString("DEBUG_BACKEND_URL")),
-            )
-            manifestPlaceholders["BACKEND_URL"] = asManifestPlaceholder(secretsProperties.requireString("DEBUG_BACKEND_URL"))
-            buildConfigField(
-                "String",
-                "EATERY_URL",
-                asBuildConfigString(secretsProperties.requireString("DEBUG_EATERY_URL")),
-            )
-            buildConfigField(
-                "String",
-                "UPLIFT_URL",
-                asBuildConfigString(secretsProperties.requireString("DEBUG_UPLIFT_URL")),
-            )
+            configureUrlsForVariant("DEBUG", this)
             buildConfigField("boolean", "ECOSYSTEM_FLAG", "true")
         }
         create("ecosystem") {
             initWith(getByName("debug"))
             isDebuggable = true
-            buildConfigField(
-                "String",
-                "BACKEND_URL",
-                asBuildConfigString(secretsProperties.requireString("DEBUG_BACKEND_URL")),
-            )
-            manifestPlaceholders["BACKEND_URL"] = asManifestPlaceholder(secretsProperties.requireString("DEBUG_BACKEND_URL"))
-            buildConfigField(
-                "String",
-                "EATERY_URL",
-                asBuildConfigString(secretsProperties.requireString("DEBUG_EATERY_URL")),
-            )
-            buildConfigField(
-                "String",
-                "UPLIFT_URL",
-                asBuildConfigString(secretsProperties.requireString("DEBUG_UPLIFT_URL")),
-            )
+            configureUrlsForVariant("DEBUG", this)
             buildConfigField("boolean", "ECOSYSTEM_FLAG", "true")
             signingConfig = signingConfigs.getByName("debug")
         }
@@ -129,22 +130,7 @@ android {
                     ignoreFromAllExternalDependencies = true
                 }
             }
-            buildConfigField(
-                "String",
-                "BACKEND_URL",
-                asBuildConfigString(secretsProperties.requireString("PROD_BACKEND_URL")),
-            )
-            manifestPlaceholders["BACKEND_URL"] = asManifestPlaceholder(secretsProperties.requireString("PROD_BACKEND_URL"))
-            buildConfigField(
-                "String",
-                "EATERY_URL",
-                asBuildConfigString(secretsProperties.requireString("PROD_EATERY_URL")),
-            )
-            buildConfigField(
-                "String",
-                "UPLIFT_URL",
-                asBuildConfigString(secretsProperties.requireString("PROD_UPLIFT_URL")),
-            )
+            configureUrlsForVariant("PROD", this)
             buildConfigField("boolean", "ECOSYSTEM_FLAG", "true")
             if (signingProperties.isNotEmpty()) {
                 signingConfig = signingConfigs.getByName("release")
